@@ -20,7 +20,7 @@ fn golden_path(name: &str) -> PathBuf {
 fn check_golden(name: &str, actual: &str) {
     let path = golden_path(name);
     if std::env::var("ROLLCALL_BLESS").as_deref() == Ok("1") {
-        std::fs::write(&path, actual).unwrap();
+        common::bless(&path, actual);
         return;
     }
     let expected = std::fs::read_to_string(&path).unwrap_or_else(|e| {

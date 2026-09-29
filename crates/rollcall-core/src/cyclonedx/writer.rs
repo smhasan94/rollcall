@@ -185,27 +185,33 @@ impl<'a> Facts<'a> {
             .filter(|e| e.field == EvidenceField::Licence)
             .map(|e| e.value.as_str())
             .collect();
-        let licenses = if licences.len() == 1 {
-            licences
-                .into_iter()
-                .map(|v| LicenseChoice::Expression {
-                    expression: v.to_owned(),
-                })
-                .collect()
-        } else {
-            licences
-                .into_iter()
-                .map(|v| LicenseChoice::License {
-                    license: NamedLicense { name: v.to_owned() },
-                })
-                .collect()
-        };
+        let licenses = licence_evidence(licences);
 
         Evidence {
             identity,
             occurrences,
             licenses,
         }
+    }
+}
+
+/// `evidence.licenses` for the distinct licence values observed, in sorted order.
+///
+/// An evidence value is free text, so it is written as `{"expression": …}` only when it is
+/// the single value and is a syntactically valid SPDX expression ([`License::new`] accepts
+/// it); anything else is a `{"license": {"name": …}}`. Several values are always written as
+/// names: CycloneDX's licence choice allows either a list of licences or exactly one
+/// expression, so there is no slot for several expressions.
+fn licence_evidence(values: BTreeSet<&str>) -> Vec<LicenseChoice> {
+    let named = |v: &str| LicenseChoice::License {
+        license: NamedLicense { name: v.to_owned() },
+    };
+    let mut iter = values.iter();
+    match (iter.next(), iter.next()) {
+        (Some(&only), None) if License::new(only).is_ok() => vec![LicenseChoice::Expression {
+            expression: only.to_owned(),
+        }],
+        _ => values.into_iter().map(named).collect(),
     }
 }
 

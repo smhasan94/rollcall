@@ -35,6 +35,23 @@ pub fn load_fixture(name: &str) -> Product {
     Product::from_json(&text).unwrap_or_else(|e| panic!("{}: {e}", path.display()))
 }
 
+/// Writes a golden file for `ROLLCALL_BLESS=1`: to a temporary file in the same directory,
+/// then renamed into place, so a test reading golden files concurrently never sees a
+/// half-written one and no temporary file is left behind. Uses `tempfile`'s named temporary
+/// file and `persist`.
+pub fn bless(path: &std::path::Path, contents: &str) {
+    use std::io::Write;
+    let dir = path.parent().unwrap();
+    let mut builder = tempfile::Builder::new();
+    // Keep an existing golden file's permissions (a new temporary file would be 0600).
+    if let Ok(metadata) = std::fs::metadata(path) {
+        builder.permissions(metadata.permissions());
+    }
+    let mut file = builder.tempfile_in(dir).unwrap();
+    file.write_all(contents.as_bytes()).unwrap();
+    file.persist(path).unwrap();
+}
+
 /// The names of every `tests/data/*.model.json` fixture (without the suffix), sorted.
 pub fn fixture_names() -> Vec<String> {
     let dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"))

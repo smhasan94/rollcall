@@ -275,3 +275,88 @@ fn generate_output_unwritable_exit_74() {
     );
     assert!(!stderr.contains("panicked"), "{stderr}");
 }
+
+/// Names of the entries in `dir`, sorted.
+fn listing(dir: &std::path::Path) -> Vec<String> {
+    let mut names: Vec<String> = std::fs::read_dir(dir)
+        .unwrap()
+        .map(|e| e.unwrap().file_name().to_string_lossy().into_owned())
+        .collect();
+    names.sort();
+    names
+}
+
+/// A failure part-way through writing cannot be injected portably, so this covers the
+/// observable guarantees of the write-to-temp-then-rename approach instead:
+/// - a generate that fails before writing (malformed model) leaves an existing `-o` file
+///   byte-for-byte untouched;
+/// - a failure in the write step itself (the final rename onto a directory fails) exits 74,
+///   leaves the target as it was, and leaves no temporary file behind;
+/// - a successful generate replaces the file completely, keeps its permissions on Unix, and
+///   leaves no temporary file behind.
+#[test]
+fn generate_failed_write_keeps_existing_output() {
+    let dir = tempfile::tempdir().unwrap();
+    let out = dir.path().join("out.cdx.json");
+    let previous = b"previous contents that must survive\n".repeat(1000);
+    std::fs::write(&out, &previous).unwrap();
+    let bad_model = dir.path().join("bad.model.json");
+    std::fs::write(&bad_model, b"{not json").unwrap();
+
+    rollcall()
+        .arg("generate")
+        .arg("--model")
+        .arg(&bad_model)
+        .arg("-o")
+        .arg(&out)
+        .assert()
+        .code(65);
+    assert_eq!(std::fs::read(&out).unwrap(), previous);
+    assert_eq!(listing(dir.path()), ["bad.model.json", "out.cdx.json"]);
+
+    // The rename itself fails: the target is a non-empty directory.
+    let target_dir = dir.path().join("occupied");
+    std::fs::create_dir(&target_dir).unwrap();
+    std::fs::write(target_dir.join("keep"), b"keep").unwrap();
+    let result = rollcall()
+        .arg("generate")
+        .arg("--model")
+        .arg(model("minimal"))
+        .arg("-o")
+        .arg(&target_dir)
+        .output()
+        .unwrap();
+    assert_eq!(result.status.code(), Some(74));
+    assert!(!String::from_utf8_lossy(&result.stderr).contains("panicked"));
+    assert_eq!(listing(&target_dir), ["keep"]);
+    assert_eq!(
+        listing(dir.path()),
+        ["bad.model.json", "occupied", "out.cdx.json"]
+    );
+
+    // Success replaces the whole file and keeps its permissions.
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::PermissionsExt;
+        std::fs::set_permissions(&out, std::fs::Permissions::from_mode(0o640)).unwrap();
+    }
+    rollcall()
+        .arg("generate")
+        .arg("--model")
+        .arg(model("minimal"))
+        .args(["--timestamp", GOLDEN_TIMESTAMP, "-o"])
+        .arg(&out)
+        .assert()
+        .code(0);
+    assert_eq!(std::fs::read_to_string(&out).unwrap(), golden("minimal"));
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::PermissionsExt;
+        let mode = std::fs::metadata(&out).unwrap().permissions().mode() & 0o777;
+        assert_eq!(mode, 0o640);
+    }
+    assert_eq!(
+        listing(dir.path()),
+        ["bad.model.json", "occupied", "out.cdx.json"]
+    );
+}

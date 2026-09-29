@@ -151,10 +151,18 @@ find_tool() {
 GRYPE="$(find_tool grype)"
 OSV_SCANNER="$(find_tool osv-scanner)"
 
-grype_reported="$("$GRYPE" version 2>/dev/null | awk '$1 == "Version:" {print $2}')"
+# The version commands run in `if`, so a tool that fails to run is refused with a message
+# instead of `set -e` exiting silently.
+if ! grype_out="$("$GRYPE" version 2>&1)"; then
+    die "refusing $GRYPE: 'grype version' failed: $(head -c 200 <<<"$grype_out")"
+fi
+grype_reported="$(awk '$1 == "Version:" {print $2}' <<<"$grype_out")"
 [[ "$grype_reported" == "$GRYPE_VERSION" ]] ||
     die "refusing $GRYPE: version '${grype_reported:-unknown}', pinned $GRYPE_VERSION"
-osv_reported="$("$OSV_SCANNER" --version 2>/dev/null | awk '/^osv-scanner version:/ {print $3}')"
+if ! osv_out="$("$OSV_SCANNER" --version 2>&1)"; then
+    die "refusing $OSV_SCANNER: 'osv-scanner --version' failed: $(head -c 200 <<<"$osv_out")"
+fi
+osv_reported="$(awk '/^osv-scanner version:/ {print $3}' <<<"$osv_out")"
 [[ "$osv_reported" == "$OSV_SCANNER_VERSION" ]] ||
     die "refusing $OSV_SCANNER: version '${osv_reported:-unknown}', pinned $OSV_SCANNER_VERSION"
 
@@ -221,6 +229,12 @@ for f in "${FIXTURES[@]}"; do
     nodes="$(jq '[.metadata.component, (.components // [] | .. | objects | select(has("bom-ref")))] | length' "$sbom")"
     os_nodes="$(jq '[.metadata.component, (.components // [] | .. | objects | select(has("bom-ref")))] | map(select(.type == "operating-system")) | length' "$sbom")"
     non_os_nodes=$((nodes - os_nodes))
+    # What osv-scanner 2.6.0 lists, verified by editing copies of the minimal document: every
+    # component under the top-level `components` tree that has a purl or a cpe (a CPE-only
+    # component is still listed; one with neither is dropped), and never `metadata.component`
+    # (the product, i.e. the thing being described), even when it has a purl. grype, by
+    # contrast, catalogues `metadata.component` as a package too, which is why the grype count
+    # above includes it and this one does not.
     identified="$(jq '[.components // [] | .. | objects | select(has("bom-ref")) | select(has("purl") or has("cpe"))] | length' "$sbom")"
 
     # 2. grype.

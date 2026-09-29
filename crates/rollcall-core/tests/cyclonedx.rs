@@ -32,11 +32,7 @@ fn golden_path(name: &str) -> PathBuf {
 fn check_golden(name: &str, actual: &str) {
     let path = golden_path(name);
     if std::env::var("ROLLCALL_BLESS").as_deref() == Ok("1") {
-        // Write then rename, so a test reading the golden files concurrently never sees a
-        // half-written one.
-        let tmp = path.with_extension("json.tmp");
-        std::fs::write(&tmp, actual).unwrap();
-        std::fs::rename(&tmp, &path).unwrap();
+        common::bless(&path, actual);
         return;
     }
     let expected = std::fs::read_to_string(&path).unwrap_or_else(|e| {
@@ -895,4 +891,53 @@ fn supplier_urls_accepted_by_model_are_schema_valid() {
             panic!("model accepts {url:?} but the schema rejects it:\n{violations:#?}");
         }
     }
+}
+
+#[test]
+fn licence_evidence_that_is_not_spdx_uses_license_name() {
+    let licence_only = |name: &str, values: &[&str]| {
+        let mut c = Component::new(ComponentKind::Library, name).unwrap();
+        for (i, value) in values.iter().enumerate() {
+            c.evidence.insert(ev(
+                EvidenceField::Licence,
+                Technique::SourceCodeAnalysis,
+                &format!("source-{i}"),
+                value,
+                5000,
+            ));
+        }
+        c
+    };
+    let mut product = Product::new("lic").unwrap();
+    let mut image = Image::new(ImageKind::Application, "app").unwrap();
+    for c in [
+        licence_only("free-text", &["GPL v2 (see COPYING)"]),
+        licence_only("spdx", &["Apache-2.0 OR MIT"]),
+        licence_only("mixed", &["MIT", "GPL v2 (see COPYING)"]),
+    ] {
+        image.add_component(c).unwrap();
+    }
+    product.add_image(image).unwrap();
+    let text = render(&product);
+    let doc: Value = serde_json::from_str(&text).unwrap();
+
+    // One value that is not an SPDX expression: a named licence, never an expression.
+    assert_eq!(
+        find(&doc, "free-text")["evidence"]["licenses"],
+        json!([{"license": {"name": "GPL v2 (see COPYING)"}}])
+    );
+    // One valid SPDX expression: stays an expression.
+    assert_eq!(
+        find(&doc, "spdx")["evidence"]["licenses"],
+        json!([{"expression": "Apache-2.0 OR MIT"}])
+    );
+    // Several values: always named licences, sorted, even when one is valid SPDX.
+    assert_eq!(
+        find(&doc, "mixed")["evidence"]["licenses"],
+        json!([
+            {"license": {"name": "GPL v2 (see COPYING)"}},
+            {"license": {"name": "MIT"}}
+        ])
+    );
+    assert_schema_valid("lic", &text);
 }

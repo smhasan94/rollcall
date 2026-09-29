@@ -217,3 +217,64 @@ fn validate_output_is_deterministic() {
     assert_eq!(paths, sorted, "{stderr}");
     assert!(paths.len() >= 8, "{stderr}");
 }
+
+/// A pipe whose read end is already closed, so every write to it fails with EPIPE.
+fn closed_pipe() -> std::process::Stdio {
+    let (reader, writer) = std::io::pipe().unwrap();
+    drop(reader);
+    writer.into()
+}
+
+#[test]
+fn validate_closed_output_pipe_exits_without_panic() {
+    let golden = core_dir().join("golden/minimal.cdx.json");
+
+    // Like `rollcall validate --schema f | head -0`, with the reader gone before the write,
+    // so the failure is deterministic: exit 74 (EX_IOERR), no panic, not killed by a signal.
+    let out = std::process::Command::new(env!("CARGO_BIN_EXE_rollcall"))
+        .args(["validate", "--schema"])
+        .arg(&golden)
+        .stdout(closed_pipe())
+        .stderr(std::process::Stdio::piped())
+        .output()
+        .unwrap();
+    let stderr = String::from_utf8_lossy(&out.stderr);
+    assert_eq!(
+        out.status.code(),
+        Some(74),
+        "status {:?}: {stderr}",
+        out.status
+    );
+    assert!(!stderr.contains("panicked"), "{stderr}");
+
+    // A closed stderr while reporting violations: the exit code still says invalid (1); a
+    // panic would exit 101.
+    let dir = tempfile::tempdir().unwrap();
+    let bad = write_file(
+        dir.path(),
+        "bad.cdx.json",
+        br#"{"bomFormat":"CycloneDX","specVersion":"1.6","serialNumber":"urn:uuid:NOPE"}"#,
+    );
+    let status = std::process::Command::new(env!("CARGO_BIN_EXE_rollcall"))
+        .args(["validate", "--schema"])
+        .arg(&bad)
+        .stdout(std::process::Stdio::null())
+        .stderr(closed_pipe())
+        .status()
+        .unwrap();
+    assert_eq!(status.code(), Some(1), "{status:?}");
+
+    // The same for a missing file and for malformed JSON.
+    for (path, code) in [
+        (dir.path().join("absent.json"), 66),
+        (write_file(dir.path(), "x.json", b"{"), 65),
+    ] {
+        let status = std::process::Command::new(env!("CARGO_BIN_EXE_rollcall"))
+            .args(["validate", "--schema"])
+            .arg(&path)
+            .stderr(closed_pipe())
+            .status()
+            .unwrap();
+        assert_eq!(status.code(), Some(code), "{}: {status:?}", path.display());
+    }
+}

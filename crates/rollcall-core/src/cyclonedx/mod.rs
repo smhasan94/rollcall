@@ -46,7 +46,7 @@
 //! | [`Product::dependencies`] | `dependencies[]`: one entry per node in walk order (product, each image, its components depth-first); `dependsOn` is that node's edges, sorted, or `[]` when it has none. Containment is not turned into edges. |
 //! | `name`/`version`/`purl`/`cpe`/`hash` evidence | `evidence.identity[]`, one entry per field present, in that order: `confidence` = the highest for the field; `concludedValue` = the node's stored value (omitted for `hash` and when the node has none); `methods[]` = one `{technique, confidence, value}` per [`Evidence`](crate::model::Evidence), in set order |
 //! | evidence `occurrence` | `evidence.occurrences[]` of `{location, line}` for the node (not per identity entry), de-duplicated and sorted |
-//! | `licence` evidence | `evidence.licenses`: `[{expression}]` when there is one distinct value, else `[{license: {name}}…]` sorted |
+//! | `licence` evidence | `evidence.licenses`: `[{expression}]` when there is one distinct value and it is a valid SPDX expression, else `[{license: {name}}…]` sorted (CycloneDX has no slot for several expressions) |
 //! | evidence `source` | property `rollcall:evidence-source`, one per distinct source |
 //! | [`Confidence`](crate::model::Confidence) | a number from [`Confidence::as_f64`](crate::model::Confidence::as_f64), e.g. 9500 bp → `0.95` |
 //!
