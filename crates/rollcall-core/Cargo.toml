@@ -1,6 +1,6 @@
 [package]
 name = "rollcall-core"
-description = "Component-graph model and ingestion for rollcall (placeholder 0.0.1)"
+description = "Component-graph model and ingestion for rollcall"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
@@ -11,6 +11,16 @@ authors.workspace = true
 keywords.workspace = true
 # Categories are permanent once published; library crates are not command-line utilities.
 categories = ["development-tools"]
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
+sha2.workspace = true
+packageurl.workspace = true
+thiserror.workspace = true
+
+[dev-dependencies]
+proptest.workspace = true
 
 [lints]
 workspace = true
