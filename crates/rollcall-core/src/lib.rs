@@ -1,7 +1,8 @@
 //! Component-graph model and ingestion for rollcall.
 //!
 //! See [`model`] for the product → image → component model, evidence, confidence and
-//! deterministic `bom-ref` derivation.
+//! deterministic `bom-ref` derivation, and [`cyclonedx`] for CycloneDX 1.6 output and schema
+//! validation.
 
 #![deny(missing_docs)]
 #![deny(
@@ -20,7 +21,12 @@
     )
 )]
 
+pub mod cyclonedx;
 pub mod model;
+
+pub use cyclonedx::{
+    SchemaViolation, SerialNumber, Timestamp, WriteError, WriteOptions, validate_cyclonedx_1_6,
+};
 
 pub use model::{
     BomRef, Component, ComponentKind, Confidence, Cpe, Evidence, EvidenceField, EvidenceSet, Hash,

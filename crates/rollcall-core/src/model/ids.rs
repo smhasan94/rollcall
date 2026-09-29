@@ -81,6 +81,14 @@ pub enum IdError {
         /// Why it was rejected.
         reason: &'static str,
     },
+    /// A supplier URL cannot be written as an IRI reference.
+    #[error("invalid supplier URL {input:?}: {reason}")]
+    SupplierUrl {
+        /// The rejected input.
+        input: String,
+        /// Why it was rejected.
+        reason: &'static str,
+    },
     /// A string is not a valid `bom-ref` (`<level>:<32 lowercase hex>`).
     #[error("invalid bom-ref {input:?}")]
     BomRef {
@@ -523,13 +531,19 @@ impl Supplier {
     }
 
     /// Adds a URL (kept sorted and deduplicated) and returns the supplier. The URL must be
-    /// non-empty.
+    /// non-empty and usable as an IRI reference (the CycloneDX `supplier.url` format): no
+    /// whitespace, no control characters, none of `<`, `>`, `"`, `{`, `}`, `|`, `\`, `^` or
+    /// `` ` ``, and every `%` followed by two hex digits.
     pub fn with_url(mut self, url: &str) -> Result<Self, IdError> {
         if url.is_empty() {
             return Err(IdError::Empty {
                 what: "supplier URL",
             });
         }
+        check_iri_reference_chars(url).map_err(|reason| IdError::SupplierUrl {
+            input: url.to_owned(),
+            reason,
+        })?;
         self.urls.insert(url.to_owned());
         Ok(self)
     }
@@ -543,6 +557,27 @@ impl Supplier {
     pub fn urls(&self) -> &BTreeSet<String> {
         &self.urls
     }
+}
+
+/// Rejects the characters an IRI reference can never contain, and malformed `%` escapes.
+fn check_iri_reference_chars(url: &str) -> Result<(), &'static str> {
+    if url.chars().any(|c| c.is_whitespace() || c.is_control()) {
+        return Err("contains whitespace or a control character");
+    }
+    if url
+        .chars()
+        .any(|c| matches!(c, '<' | '>' | '"' | '{' | '}' | '|' | '\\' | '^' | '`'))
+    {
+        return Err("contains one of < > \" { } | \\ ^ `");
+    }
+    let bytes = url.as_bytes();
+    for (i, _) in url.match_indices('%') {
+        let hex = |at: usize| bytes.get(at).is_some_and(u8::is_ascii_hexdigit);
+        if !(hex(i + 1) && hex(i + 2)) {
+            return Err("'%' must be followed by two hex digits");
+        }
+    }
+    Ok(())
 }
 
 impl TryFrom<RawSupplier> for Supplier {
@@ -751,6 +786,75 @@ mod tests {
         assert!(
             serde_json::from_str::<Supplier>(r#"{"name":"ACME","urls":["https://a",""]}"#).is_err()
         );
+    }
+
+    #[test]
+    fn supplier_rejects_url_with_whitespace_or_control_characters() {
+        for bad in [
+            "https://acme.example/a b",
+            " https://acme.example",
+            "https://acme.example\t",
+            "https://acme.example\n",
+            "https://acme\u{0}.example",
+            "https://acme\u{7f}.example",
+            "https://acme\u{a0}.example",
+            "https://acme\u{2028}.example",
+        ] {
+            let err = Supplier::new("ACME").unwrap().with_url(bad).unwrap_err();
+            assert!(
+                matches!(err, IdError::SupplierUrl { .. }),
+                "{bad:?}: {err:?}"
+            );
+            let json = serde_json::json!({"name": "ACME", "urls": [bad]}).to_string();
+            assert!(serde_json::from_str::<Supplier>(&json).is_err(), "{bad:?}");
+        }
+        // Non-ASCII letters are fine in an IRI.
+        for good in [
+            "https://acme.example/path?q=1#f",
+            "https://bücher.example/ä",
+        ] {
+            assert!(
+                Supplier::new("ACME").unwrap().with_url(good).is_ok(),
+                "{good:?}"
+            );
+        }
+    }
+
+    #[test]
+    fn supplier_rejects_url_invalid_for_iri_reference() {
+        for bad in [
+            "https://a.example/<x",
+            "https://a.example/x>",
+            "https://a.example/\"q\"",
+            "https://a.example/{x",
+            "https://a.example/x}",
+            "https://a.example/a|b",
+            "https://a.example/a\\b",
+            "https://a.example/a^b",
+            "https://a.example/`x`",
+            "https://a.example/%zz",
+            "https://a.example/%2",
+            "https://a.example/%",
+            "https://a.example/%%20",
+        ] {
+            let err = Supplier::new("ACME").unwrap().with_url(bad).unwrap_err();
+            assert!(
+                matches!(err, IdError::SupplierUrl { .. }),
+                "{bad:?}: {err:?}"
+            );
+            let json = serde_json::json!({"name": "ACME", "urls": [bad]}).to_string();
+            assert!(serde_json::from_str::<Supplier>(&json).is_err(), "{bad:?}");
+        }
+        for good in [
+            "https://acme.example/path?q=1#f",
+            "https://bücher.example/ä",
+            "relative/path",
+            "https://acme.example/a%20b",
+            "https://acme.example/%C3%A4%2f",
+        ] {
+            let s = Supplier::new("ACME").unwrap().with_url(good).unwrap();
+            assert!(s.urls().contains(good), "{good:?}");
+        }
     }
 
     #[test]

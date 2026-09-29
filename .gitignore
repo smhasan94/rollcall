@@ -4,3 +4,5 @@ python/build/
 *.egg-info/
 .venv/
 .DS_Store
+# Downloaded tools, scanner databases and smoke-test output (scripts/smoke-scan.sh).
+/.cache/

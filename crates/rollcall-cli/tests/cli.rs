@@ -98,13 +98,33 @@ fn assert_not_implemented(sub: &str) {
 }
 
 #[test]
-fn generate_exits_64_not_implemented() {
-    assert_not_implemented("generate");
+fn generate_without_model_is_usage_error_exit_64() {
+    rollcall()
+        .arg("generate")
+        .assert()
+        .code(64)
+        .stdout(predicate::str::is_empty())
+        .stderr(predicate::str::contains("--model <FILE>"));
 }
 
 #[test]
-fn validate_exits_64_not_implemented() {
-    assert_not_implemented("validate");
+fn validate_without_schema_flag_is_usage_error_exit_64() {
+    rollcall()
+        .args(["validate", "sbom.cdx.json"])
+        .assert()
+        .code(64)
+        .stdout(predicate::str::is_empty())
+        .stderr(predicate::str::contains("--schema"));
+}
+
+#[test]
+fn validate_without_file_is_usage_error_exit_64() {
+    rollcall()
+        .args(["validate", "--schema"])
+        .assert()
+        .code(64)
+        .stdout(predicate::str::is_empty())
+        .stderr(predicate::str::contains("<FILE>"));
 }
 
 #[test]

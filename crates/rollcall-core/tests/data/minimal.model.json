@@ -1,0 +1,65 @@
+{
+  "schema": "rollcall-model/1",
+  "name": "sensor-node",
+  "version": "1.0.0",
+  "supplier": {
+    "name": "Example Devices Ltd",
+    "urls": [
+      "https://devices.example"
+    ]
+  },
+  "images": [
+    {
+      "kind": "application",
+      "name": "sensor-app",
+      "version": "1.0.0",
+      "purl": "pkg:generic/sensor-app@1.0.0",
+      "hashes": [
+        {
+          "algorithm": "SHA-256",
+          "digest": "5e4c0a9f3b1d2e6f708192a3b4c5d6e7f8091a2b3c4d5e6f708192a3b4c5d6e7"
+        }
+      ],
+      "components": [
+        {
+          "kind": "library",
+          "name": "littlefs",
+          "version": "2.9.0",
+          "purl": "pkg:generic/littlefs@2.9.0",
+          "cpe": "cpe:2.3:a:littlefs-project:littlefs:2.9.0:*:*:*:*:*:*:*",
+          "licence": "BSD-3-Clause",
+          "evidence": [
+            {
+              "field": "version",
+              "technique": "manifest-analysis",
+              "source": "west-spdx",
+              "occurrence": {
+                "location": "build/spdx/app.spdx",
+                "line": 12
+              },
+              "value": "2.9.0",
+              "confidence": 9500
+            }
+          ]
+        },
+        {
+          "kind": "library",
+          "name": "tinycrypt",
+          "version": "0.2.8",
+          "purl": "pkg:generic/tinycrypt@0.2.8",
+          "cpe": "cpe:2.3:a:intel:tinycrypt:0.2.8:*:*:*:*:*:*:*",
+          "licence": "BSD-3-Clause"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "image:613cff03dcdbf6304ca51767e2ff80b3": [
+      "component:4f45e8f3d5c1e31602f21fa076d1fdab",
+      "component:929a445c0e3c76a5f601071900b671b9"
+    ],
+    "product:ee193673a5716110c2e95bc112363dcb": [
+      "image:613cff03dcdbf6304ca51767e2ff80b3"
+    ]
+  }
+}

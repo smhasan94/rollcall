@@ -29,6 +29,9 @@ sha2 = "0.11"
 packageurl = "0.7"
 thiserror = "2.0"
 proptest = { version = "1.11", default-features = false, features = ["std"] }
+jsonschema = { version = "0.58.2", default-features = false }
+time = { version = "0.3.55", default-features = false, features = ["std", "formatting", "parsing"] }
+tempfile = "3"
 rollcall-core = { path = "crates/rollcall-core", version = "0.0.1" }
 rollcall-assay = { path = "crates/rollcall-assay", version = "0.0.1" }
 

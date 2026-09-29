@@ -1,0 +1,279 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.6",
+  "serialNumber": "urn:uuid:2f6c63b9-341a-8970-a793-80bdc2db1b1e",
+  "version": 1,
+  "metadata": {
+    "timestamp": "2026-01-02T03:04:05Z",
+    "tools": {
+      "components": [
+        {
+          "type": "application",
+          "name": "rollcall",
+          "version": "0.0.1"
+        }
+      ]
+    },
+    "component": {
+      "type": "firmware",
+      "bom-ref": "product:6cfdd60d1daa8e80f7b0de40692994d8",
+      "name": "widget",
+      "version": "1.0.0",
+      "supplier": {
+        "name": "Example Devices Ltd",
+        "url": [
+          "https://devices.example"
+        ]
+      }
+    }
+  },
+  "components": [
+    {
+      "type": "firmware",
+      "bom-ref": "image:b8776e245a7f15f11cf9ffc3f8f602bf",
+      "name": "mcuboot",
+      "version": "2.1.0",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0"
+        }
+      ],
+      "properties": [
+        {
+          "name": "rollcall:image-kind",
+          "value": "bootloader"
+        }
+      ],
+      "components": [
+        {
+          "type": "library",
+          "bom-ref": "component:dd18dd4a9f4ab4aeb58a6c82cebf6ab1",
+          "name": "mbedtls",
+          "version": "3.6.0",
+          "evidence": {
+            "identity": [
+              {
+                "field": "version",
+                "confidence": 0.8,
+                "concludedValue": "3.6.0",
+                "methods": [
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.8,
+                    "value": "3.6.0"
+                  }
+                ]
+              }
+            ]
+          },
+          "properties": [
+            {
+              "name": "rollcall:evidence-source",
+              "value": "mcuboot-sysbuild"
+            }
+          ]
+        },
+        {
+          "type": "library",
+          "bom-ref": "component:25706fcaadcf23c5671d9d5b3e124c27",
+          "name": "tinycrypt",
+          "version": "0.2.8"
+        }
+      ]
+    },
+    {
+      "type": "firmware",
+      "bom-ref": "image:456b08338a0f209d33a168a78f5d2015",
+      "name": "widget-app",
+      "version": "1.0.0",
+      "licenses": [
+        {
+          "expression": "LicenseRef-proprietary"
+        }
+      ],
+      "properties": [
+        {
+          "name": "rollcall:image-kind",
+          "value": "application"
+        }
+      ],
+      "components": [
+        {
+          "type": "library",
+          "bom-ref": "component:9154fb82857bfc3f163e0cc5b3514ad1",
+          "name": "cmsis",
+          "version": "5.9.0",
+          "purl": "pkg:github/zephyrproject-rtos/cmsis@5.9.0"
+        },
+        {
+          "type": "library",
+          "bom-ref": "component:4b11f481a9290905cace14c4f0907370",
+          "name": "mbedtls",
+          "version": "3.6.0",
+          "purl": "pkg:github/mbed-tls/mbedtls@v3.6.0",
+          "licenses": [
+            {
+              "expression": "Apache-2.0 OR GPL-2.0-or-later"
+            }
+          ],
+          "evidence": {
+            "identity": [
+              {
+                "field": "purl",
+                "confidence": 0.9,
+                "concludedValue": "pkg:github/mbed-tls/mbedtls@v3.6.0",
+                "methods": [
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.9,
+                    "value": "pkg:github/Mbed-TLS/mbedtls@v3.6.0"
+                  }
+                ]
+              }
+            ],
+            "occurrences": [
+              {
+                "location": "build/spdx/app.spdx",
+                "line": 120
+              }
+            ],
+            "licenses": [
+              {
+                "expression": "Apache-2.0 OR GPL-2.0-or-later"
+              }
+            ]
+          },
+          "properties": [
+            {
+              "name": "rollcall:evidence-source",
+              "value": "west-list"
+            },
+            {
+              "name": "rollcall:evidence-source",
+              "value": "west-spdx"
+            }
+          ]
+        },
+        {
+          "type": "operating-system",
+          "bom-ref": "component:95f75631d6287570b2a1eb29121c91b7",
+          "name": "zephyr",
+          "version": "3.7.0",
+          "purl": "pkg:github/zephyrproject-rtos/zephyr@v3.7.0",
+          "cpe": "cpe:2.3:o:zephyrproject:zephyr:3.7.0:*:*:*:*:*:*:*",
+          "licenses": [
+            {
+              "expression": "Apache-2.0"
+            }
+          ],
+          "components": [
+            {
+              "type": "library",
+              "bom-ref": "component:5505984b642c750bf51f326acde65dd5",
+              "name": "kernel",
+              "evidence": {
+                "identity": [
+                  {
+                    "field": "name",
+                    "confidence": 0.9,
+                    "concludedValue": "kernel",
+                    "methods": [
+                      {
+                        "technique": "manifest-analysis",
+                        "confidence": 0.9,
+                        "value": "kernel"
+                      }
+                    ]
+                  }
+                ]
+              },
+              "properties": [
+                {
+                  "name": "rollcall:evidence-source",
+                  "value": "west-spdx"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "firmware",
+      "bom-ref": "image:0c77a76af7fb5997cdb6386a2aa07b0f",
+      "name": "radio-fw",
+      "properties": [
+        {
+          "name": "rollcall:image-kind",
+          "value": "blob"
+        }
+      ],
+      "components": [
+        {
+          "type": "firmware",
+          "bom-ref": "component:56cec290f8ae1e42efe4a1980da8e05d",
+          "name": "sdc",
+          "hashes": [
+            {
+              "alg": "SHA-1",
+              "content": "5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "dependencies": [
+    {
+      "ref": "product:6cfdd60d1daa8e80f7b0de40692994d8",
+      "dependsOn": [
+        "image:456b08338a0f209d33a168a78f5d2015"
+      ]
+    },
+    {
+      "ref": "image:b8776e245a7f15f11cf9ffc3f8f602bf",
+      "dependsOn": []
+    },
+    {
+      "ref": "component:dd18dd4a9f4ab4aeb58a6c82cebf6ab1",
+      "dependsOn": []
+    },
+    {
+      "ref": "component:25706fcaadcf23c5671d9d5b3e124c27",
+      "dependsOn": []
+    },
+    {
+      "ref": "image:456b08338a0f209d33a168a78f5d2015",
+      "dependsOn": [
+        "component:95f75631d6287570b2a1eb29121c91b7"
+      ]
+    },
+    {
+      "ref": "component:9154fb82857bfc3f163e0cc5b3514ad1",
+      "dependsOn": []
+    },
+    {
+      "ref": "component:4b11f481a9290905cace14c4f0907370",
+      "dependsOn": []
+    },
+    {
+      "ref": "component:95f75631d6287570b2a1eb29121c91b7",
+      "dependsOn": [
+        "component:4b11f481a9290905cace14c4f0907370"
+      ]
+    },
+    {
+      "ref": "component:5505984b642c750bf51f326acde65dd5",
+      "dependsOn": []
+    },
+    {
+      "ref": "image:0c77a76af7fb5997cdb6386a2aa07b0f",
+      "dependsOn": []
+    },
+    {
+      "ref": "component:56cec290f8ae1e42efe4a1980da8e05d",
+      "dependsOn": []
+    }
+  ]
+}
