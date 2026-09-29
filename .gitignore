@@ -1,0 +1,6 @@
+/target
+python/dist/
+python/build/
+*.egg-info/
+.venv/
+.DS_Store

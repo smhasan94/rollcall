@@ -1,0 +1,5 @@
+[toolchain]
+# Keep in sync with the toolchain pinned in .github/workflows/ci.yml.
+channel = "1.91.1"
+components = ["rustfmt", "clippy"]
+profile = "minimal"
