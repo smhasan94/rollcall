@@ -1,0 +1,30 @@
+[workspace]
+resolver = "3"
+members = [
+    "crates/rollcall-core",
+    "crates/rollcall-cli",
+    "crates/rollcall-assay",
+    "crates/rollcall",
+]
+
+[workspace.package]
+version = "0.0.1"
+edition = "2024"
+rust-version = "1.91"
+license = "Apache-2.0"
+repository = "https://github.com/smhasan94/rollcall"
+readme = "README.md"
+authors = ["Sharukh Hasan"]
+keywords = ["sbom", "cyclonedx", "firmware", "zephyr", "cra"]
+categories = ["command-line-utilities", "development-tools"]
+
+[workspace.dependencies]
+clap = { version = "4.6", features = ["derive"] }
+assert_cmd = "2.2"
+predicates = "3.1"
+toml = "1.1"
+rollcall-core = { path = "crates/rollcall-core", version = "0.0.1" }
+rollcall-assay = { path = "crates/rollcall-assay", version = "0.0.1" }
+
+[workspace.lints.rust]
+unsafe_code = "forbid"

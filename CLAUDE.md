@@ -25,6 +25,7 @@ One Cargo workspace:
 - `rollcall-core` — component-graph model and ingestion.
 - `rollcall-cli` — the binary `rollcall` (`generate | validate | merge | vex | scan | assay`).
 - `rollcall-assay` — crypto inventory (CBOM), invoked as `rollcall assay`.
+- `rollcall` — name-reservation placeholder crate, no code.
 
 Ecosystems, in order: Zephyr first (`west spdx`, `west list`, Kconfig `.config`, MCUboot via
 sysbuild), then Cargo, ESP-IDF, PlatformIO.

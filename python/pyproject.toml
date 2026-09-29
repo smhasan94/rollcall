@@ -1,0 +1,17 @@
+[build-system]
+requires = ["uv_build>=0.8,<0.9"]
+build-backend = "uv_build"
+
+[project]
+name = "rollcall"
+version = "0.0.1"
+description = "Placeholder for the rollcall SBOM CLI wrapper (pip install rollcall). See https://github.com/smhasan94/rollcall"
+readme = "README.md"
+license = "Apache-2.0"
+authors = [{ name = "Sharukh Hasan" }]
+requires-python = ">=3.9"
+classifiers = ["Development Status :: 1 - Planning"]
+
+[project.urls]
+Homepage = "https://github.com/smhasan94/rollcall"
+Repository = "https://github.com/smhasan94/rollcall"
