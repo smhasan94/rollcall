@@ -54,6 +54,25 @@ fn help_lists_every_subcommand_with_description() {
             "help line for `{name}` lacks description {about:?}: {line:?}"
         );
     }
+
+    // The "Commands:" section lists exactly our six subcommands plus clap's own `help`.
+    let listed: Vec<&str> = stdout
+        .lines()
+        .skip_while(|l| l.trim_end() != "Commands:")
+        .skip(1)
+        .take_while(|l| !l.trim().is_empty())
+        .filter_map(|l| l.split_whitespace().next())
+        .collect();
+    let mut expected: Vec<&str> = SUBCOMMANDS.iter().map(|(name, _)| *name).collect();
+    expected.push("help");
+    assert_eq!(listed, expected, "unexpected subcommand list in:\n{stdout}");
+}
+
+#[test]
+fn subcommand_help_exits_zero() {
+    for (name, _) in SUBCOMMANDS {
+        rollcall().args([name, "--help"]).assert().code(0);
+    }
 }
 
 #[test]
