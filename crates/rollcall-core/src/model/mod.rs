@@ -51,9 +51,12 @@
 //! the higher confidence.
 //!
 //! Mapping to CycloneDX 1.6 evidence: `name`, `version`, `purl`, `cpe` and `hash` evidence
-//! map to `evidence.identity[].field` (with `technique`, `confidence` and `occurrence` as that
-//! identity entry's methods and occurrences); `licence` evidence maps to `evidence.licenses`;
-//! `supplier` evidence has no CycloneDX evidence field and is kept internal to rollcall.
+//! map to the `evidence.identity[]` entry whose `field` is that fact, and each [`Evidence`]
+//! becomes one `methods[]` entry (`technique`, `confidence`, `value`) under it. An
+//! evidence's `occurrence`, if present, goes into the component-level `evidence.occurrences[]`
+//! (not tied to any identity entry), de-duplicated by (location, line). `licence` evidence
+//! maps to `evidence.licenses`; `supplier` evidence has no CycloneDX evidence field and is
+//! kept internal to rollcall.
 //!
 //! # Confidence
 //!
