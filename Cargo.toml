@@ -23,6 +23,12 @@ clap = { version = "4.6", features = ["derive"] }
 assert_cmd = "2.2"
 predicates = "3.1"
 toml = "1.1"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+sha2 = "0.11"
+packageurl = "0.7"
+thiserror = "2.0"
+proptest = { version = "1.11", default-features = false, features = ["std"] }
 rollcall-core = { path = "crates/rollcall-core", version = "0.0.1" }
 rollcall-assay = { path = "crates/rollcall-assay", version = "0.0.1" }
 
