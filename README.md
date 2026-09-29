@@ -46,6 +46,18 @@ releases of `rollcall`, `rollcall-core`, `rollcall-cli` and `rollcall-assay` on 
 cargo build && cargo test
 ```
 
+## Publishing the placeholders
+
+Crates must be published dependencies first: `rollcall-core` and `rollcall-assay`, then
+`rollcall-cli`, then `rollcall` (or simply `cargo publish --workspace`, which orders them).
+Then the PyPI placeholder:
+
+```sh
+cd python && uv build && uv publish
+```
+
+Check the reservations with `ROLLCALL_CRATES_OWNER=<crates.io login> ./scripts/check-names.sh`.
+
 ## Licence
 
 Apache-2.0. See [LICENSE](LICENSE).

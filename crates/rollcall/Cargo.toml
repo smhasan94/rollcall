@@ -9,7 +9,8 @@ repository.workspace = true
 readme.workspace = true
 authors.workspace = true
 keywords.workspace = true
-categories.workspace = true
+# Categories are permanent once published; library crates are not command-line utilities.
+categories = ["development-tools"]
 
 [lints]
 workspace = true
