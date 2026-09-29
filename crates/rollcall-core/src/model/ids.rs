@@ -237,6 +237,9 @@ impl fmt::Display for Cpe {
 }
 
 /// A hash algorithm, named as in CycloneDX 1.6.
+///
+/// The derived `Ord` follows declaration order and decides how a node's hashes sort, so new
+/// variants must be appended at the end; inserting one elsewhere reorders golden output.
 #[derive(
     Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, std::hash::Hash, Serialize, Deserialize,
 )]
@@ -492,7 +495,7 @@ impl fmt::Display for License {
 pub struct Supplier {
     /// The supplier's name; never empty.
     name: String,
-    /// The supplier's URLs, sorted and deduplicated.
+    /// The supplier's URLs, sorted and deduplicated; never empty strings.
     #[serde(default, skip_serializing_if = "BTreeSet::is_empty")]
     urls: BTreeSet<String>,
 }
@@ -519,10 +522,16 @@ impl Supplier {
         })
     }
 
-    /// Adds a URL (kept sorted and deduplicated) and returns the supplier.
-    pub fn with_url(mut self, url: &str) -> Self {
+    /// Adds a URL (kept sorted and deduplicated) and returns the supplier. The URL must be
+    /// non-empty.
+    pub fn with_url(mut self, url: &str) -> Result<Self, IdError> {
+        if url.is_empty() {
+            return Err(IdError::Empty {
+                what: "supplier URL",
+            });
+        }
         self.urls.insert(url.to_owned());
-        self
+        Ok(self)
     }
 
     /// The supplier's name.
@@ -539,9 +548,11 @@ impl Supplier {
 impl TryFrom<RawSupplier> for Supplier {
     type Error = IdError;
     fn try_from(raw: RawSupplier) -> Result<Self, Self::Error> {
-        let mut supplier = Self::new(&raw.name)?;
-        supplier.urls = raw.urls;
-        Ok(supplier)
+        raw.urls
+            .iter()
+            .try_fold(Self::new(&raw.name)?, |supplier, url| {
+                supplier.with_url(url)
+            })
     }
 }
 
@@ -588,6 +599,9 @@ impl fmt::Display for ImageKind {
 }
 
 /// The type of a component, as the CycloneDX 1.6 component `type`.
+///
+/// The derived `Ord` follows declaration order and decides how sibling components sort, so
+/// new variants must be appended at the end; inserting one elsewhere reorders golden output.
 #[derive(
     Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, std::hash::Hash, Serialize, Deserialize,
 )]
@@ -617,6 +631,8 @@ pub enum ComponentKind {
     Data,
     /// A machine-learning model.
     MachineLearningModel,
+    /// A cryptographic asset (CycloneDX 1.6 CBOM).
+    CryptographicAsset,
 }
 
 impl ComponentKind {
@@ -635,6 +651,7 @@ impl ComponentKind {
             Self::File => "file",
             Self::Data => "data",
             Self::MachineLearningModel => "machine-learning-model",
+            Self::CryptographicAsset => "cryptographic-asset",
         }
     }
 }
@@ -718,7 +735,32 @@ mod tests {
         let s = Supplier::new("ACME")
             .unwrap()
             .with_url("https://b")
-            .with_url("https://a");
+            .unwrap()
+            .with_url("https://a")
+            .unwrap();
         assert_eq!(s.to_string(), "ACME (https://a, https://b)");
+    }
+
+    #[test]
+    fn supplier_rejects_empty_url() {
+        assert!(Supplier::new("ACME").unwrap().with_url("").is_err());
+        let ok: Supplier =
+            serde_json::from_str(r#"{"name":"ACME","urls":["https://acme.example"]}"#).unwrap();
+        assert_eq!(ok.urls().len(), 1);
+        assert!(serde_json::from_str::<Supplier>(r#"{"name":"ACME","urls":[""]}"#).is_err());
+        assert!(
+            serde_json::from_str::<Supplier>(r#"{"name":"ACME","urls":["https://a",""]}"#).is_err()
+        );
+    }
+
+    #[test]
+    fn component_kind_cryptographic_asset_sorts_last() {
+        let json = serde_json::to_string(&ComponentKind::CryptographicAsset).unwrap();
+        assert_eq!(json, "\"cryptographic-asset\"");
+        assert_eq!(
+            ComponentKind::CryptographicAsset.as_str(),
+            "cryptographic-asset"
+        );
+        assert!(ComponentKind::MachineLearningModel < ComponentKind::CryptographicAsset);
     }
 }

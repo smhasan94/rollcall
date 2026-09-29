@@ -50,6 +50,11 @@
 //! ([`Evidence::key`]: every field except confidence); re-reporting the same observation keeps
 //! the higher confidence.
 //!
+//! Mapping to CycloneDX 1.6 evidence: `name`, `version`, `purl`, `cpe` and `hash` evidence
+//! map to `evidence.identity[].field` (with `technique`, `confidence` and `occurrence` as that
+//! identity entry's methods and occurrences); `licence` evidence maps to `evidence.licenses`;
+//! `supplier` evidence has no CycloneDX evidence field and is kept internal to rollcall.
+//!
 //! # Confidence
 //!
 //! [`Confidence`] is stored in basis points, `0..=10000` (`Confidence::NONE` to

@@ -135,7 +135,11 @@ fn arb_leaf() -> impl Strategy<Value = Component> {
         .prop_flat_map(|(kind, name, version)| arb_facts(kind, name, version))
 }
 
-fn arb_component() -> impl Strategy<Value = Component> {
+/// A component and the subcomponents to add to it (not yet added, so that tests can vary the
+/// order they are added in).
+type Entry = (usize, Component, Vec<Component>);
+
+fn arb_component() -> impl Strategy<Value = (Component, Vec<Component>)> {
     (
         select(KINDS.to_vec()),
         select(NAMES.to_vec()),
@@ -147,33 +151,42 @@ fn arb_component() -> impl Strategy<Value = Component> {
                 proptest::collection::vec(arb_leaf(), 0..=3),
             )
         })
-        .prop_map(|(mut c, subs)| {
-            for sub in subs {
-                c.add_component(sub).unwrap();
-            }
-            c
-        })
 }
 
-/// (image index, component) entries: up to 3 images and up to 12 components per image.
-fn arb_entries() -> impl Strategy<Value = Vec<(usize, Component)>> {
+/// (image index, component, subcomponents) entries: up to 3 images, up to 12 components per
+/// image and up to 3 subcomponents per component.
+fn arb_entries() -> impl Strategy<Value = Vec<Entry>> {
     proptest::collection::vec(proptest::collection::vec(arb_component(), 0..=12), 1..=3).prop_map(
         |images| {
             images
                 .into_iter()
                 .enumerate()
-                .flat_map(|(i, cs)| cs.into_iter().map(move |c| (i, c)))
+                .flat_map(|(i, cs)| cs.into_iter().map(move |(c, subs)| (i, c, subs)))
                 .collect()
         },
     )
 }
 
-fn build(entries: &[(usize, Component)]) -> Product {
+/// The same entries with both the component order and each component's subcomponent order
+/// shuffled.
+fn shuffled(entries: Vec<Entry>) -> impl Strategy<Value = Vec<Entry>> {
+    entries
+        .into_iter()
+        .map(|(image, component, subs)| (Just(image), Just(component), Just(subs).prop_shuffle()))
+        .collect::<Vec<_>>()
+        .prop_shuffle()
+}
+
+fn build(entries: &[Entry]) -> Product {
     let mut product = Product::new("prop").unwrap();
-    for (image, component) in entries {
+    for (image, component, subs) in entries {
         let (kind, name) = IMAGES[*image];
+        let mut component = component.clone();
+        for sub in subs {
+            component.add_component(sub.clone()).unwrap();
+        }
         let mut img = Image::new(kind, name).unwrap();
-        img.add_component(component.clone()).unwrap();
+        img.add_component(component).unwrap();
         product.add_image(img).unwrap();
     }
     product
@@ -184,11 +197,11 @@ proptest! {
 
     #[test]
     fn serialisation_is_independent_of_insertion_order(
-        (entries, shuffled) in arb_entries()
-            .prop_flat_map(|e| (Just(e.clone()), Just(e).prop_shuffle()))
+        (entries, reordered) in arb_entries()
+            .prop_flat_map(|e| (Just(e.clone()), shuffled(e)))
     ) {
         let a = build(&entries);
-        let b = build(&shuffled);
+        let b = build(&reordered);
         prop_assert_eq!(&a, &b);
         prop_assert_eq!(a.to_json().unwrap(), b.to_json().unwrap());
         prop_assert!(a.validate().is_ok());
@@ -227,7 +240,11 @@ proptest! {
         let mut product = build(&entries);
         let refs: Vec<_> = product.walk().map(|(_, r, _)| r).collect();
         for (from, to) in edges {
-            product.add_dependency(refs[from % refs.len()].clone(), refs[to % refs.len()].clone());
+            let (from, to) = (&refs[from % refs.len()], &refs[to % refs.len()]);
+            // Self-edges are invalid by design; cycles between distinct nodes are allowed.
+            if from != to {
+                product.add_dependency(from.clone(), to.clone());
+            }
         }
         let json = product.to_json().unwrap();
         let back = Product::from_json(&json).unwrap();

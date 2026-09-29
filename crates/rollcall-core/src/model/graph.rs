@@ -53,6 +53,18 @@ pub enum ValidationError {
         /// The node.
         path: NodePath,
     },
+    /// A node's name is whitespace-only or contains a control character.
+    #[error("invalid name at {path} (whitespace-only or contains a control character)")]
+    InvalidName {
+        /// The node.
+        path: NodePath,
+    },
+    /// A node's version is whitespace-only or contains a control character.
+    #[error("invalid version at {path} (whitespace-only or contains a control character)")]
+    InvalidVersion {
+        /// The node.
+        path: NodePath,
+    },
     /// A node has a version that is present but empty.
     #[error("empty version at {path} (omit the version instead)")]
     EmptyVersion {
@@ -77,6 +89,13 @@ pub enum ValidationError {
     #[error("dependency refers to unknown bom-ref {bom_ref}")]
     DanglingDependency {
         /// The unresolved ref.
+        bom_ref: BomRef,
+    },
+    /// A dependency edge goes from a node to itself. Cycles between distinct nodes are
+    /// allowed.
+    #[error("{bom_ref} depends on itself")]
+    SelfDependency {
+        /// The node's ref.
         bom_ref: BomRef,
     },
     /// Two distinct paths derive the same `bom-ref`.
@@ -601,9 +620,10 @@ impl Product {
             .map(|(_, _, node)| node)
     }
 
-    /// Checks the invariants the type system does not: the schema tag, non-empty names and
-    /// versions, no two siblings with the same identity, at most one digest per hash
-    /// algorithm per node, every dependency ref resolves, and no two distinct paths derive
+    /// Checks the invariants the type system does not: the schema tag; names and versions
+    /// that are non-empty, not whitespace-only and free of control characters; no two
+    /// siblings with the same identity; at most one digest per hash algorithm per node; every
+    /// dependency ref resolves; no node depends on itself; and no two distinct paths derive
     /// the same `bom-ref`.
     pub fn validate(&self) -> Result<(), ValidationError> {
         match self.schema {
@@ -614,8 +634,15 @@ impl Product {
             if node.name().is_empty() {
                 return Err(ValidationError::EmptyName { path });
             }
-            if node.version() == Some("") {
-                return Err(ValidationError::EmptyVersion { path });
+            if !is_clean_text(node.name()) {
+                return Err(ValidationError::InvalidName { path });
+            }
+            match node.version() {
+                Some("") => return Err(ValidationError::EmptyVersion { path }),
+                Some(version) if !is_clean_text(version) => {
+                    return Err(ValidationError::InvalidVersion { path });
+                }
+                _ => {}
             }
             let mut previous: Option<HashAlgorithm> = None;
             for hash in node.hashes() {
@@ -655,6 +682,11 @@ impl Product {
             }
         }
         for (from, targets) in &self.dependencies {
+            if targets.contains(from) {
+                return Err(ValidationError::SelfDependency {
+                    bom_ref: from.clone(),
+                });
+            }
             for bom_ref in std::iter::once(from).chain(targets) {
                 if !refs.contains_key(bom_ref) {
                     return Err(ValidationError::DanglingDependency {
@@ -665,6 +697,12 @@ impl Product {
         }
         Ok(())
     }
+}
+
+/// Whether a name or version is usable text: not whitespace-only and free of control
+/// characters.
+fn is_clean_text(text: &str) -> bool {
+    !text.trim().is_empty() && !text.chars().any(char::is_control)
 }
 
 /// The first element whose identity equals the previous one's. Siblings are sorted by
@@ -996,6 +1034,210 @@ mod tests {
         assert!(matches!(
             product.validate(),
             Err(ValidationError::DanglingDependency { .. })
+        ));
+    }
+
+    fn blob() -> Image {
+        Image::new(ImageKind::Blob, "radio").unwrap()
+    }
+
+    fn boot() -> Image {
+        Image::new(ImageKind::Bootloader, "mcuboot").unwrap()
+    }
+
+    fn zephyr() -> Component {
+        Component::new(ComponentKind::OperatingSystem, "zephyr")
+            .unwrap()
+            .with_version("3.7.0")
+    }
+
+    #[test]
+    fn product_merge_unions_images_and_dependencies() {
+        let mut left = Product::new("widget").unwrap().with_version("1.0.0");
+        let mut left_app = app();
+        left_app.add_component(lib("cmsis", "5.9.0")).unwrap();
+        left_app.add_component(lib("mbedtls", "3.6.0")).unwrap();
+        left.add_image(left_app).unwrap();
+        left.add_image(boot()).unwrap();
+
+        let mut right = Product::new("widget").unwrap().with_version("1.0.0");
+        let mut right_app = app();
+        let mut mbedtls = lib("mbedtls", "3.6.0");
+        mbedtls.licence = Some(License::new("Apache-2.0").unwrap());
+        right_app.add_component(mbedtls).unwrap();
+        right_app.add_component(zephyr()).unwrap();
+        right.add_image(right_app).unwrap();
+        right.add_image(blob()).unwrap();
+
+        let root = left.path();
+        let app_path = root.child(PathSegment::of_image(&app()));
+        let root_ref = BomRef::derive(&root);
+        let app_ref = BomRef::derive(&app_path);
+        let boot_ref = BomRef::derive(&root.child(PathSegment::of_image(&boot())));
+        let blob_ref = BomRef::derive(&root.child(PathSegment::of_image(&blob())));
+        let zephyr_ref = BomRef::derive(&app_path.child(PathSegment::of_component(&zephyr())));
+        left.add_dependency(root_ref.clone(), app_ref.clone());
+        left.add_dependency(root_ref.clone(), boot_ref.clone());
+        right.add_dependency(root_ref.clone(), app_ref.clone());
+        right.add_dependency(root_ref.clone(), blob_ref.clone());
+        right.add_dependency(app_ref.clone(), zephyr_ref.clone());
+
+        left.merge(right).unwrap();
+        left.validate().unwrap();
+
+        let images: Vec<(ImageKind, &str, Option<&str>)> =
+            left.images.iter().map(Image::key).collect();
+        assert_eq!(
+            images,
+            vec![
+                (ImageKind::Bootloader, "mcuboot", None),
+                (ImageKind::Application, "app", None),
+                (ImageKind::Blob, "radio", None),
+            ]
+        );
+        let merged_app = left
+            .images
+            .iter()
+            .find(|i| i.kind == ImageKind::Application)
+            .unwrap();
+        let components: Vec<&str> = merged_app
+            .components
+            .iter()
+            .map(|c| c.name.as_str())
+            .collect();
+        assert_eq!(components, vec!["cmsis", "mbedtls", "zephyr"]);
+        let merged_mbedtls = merged_app
+            .components
+            .iter()
+            .find(|c| c.name == "mbedtls")
+            .unwrap();
+        assert_eq!(
+            merged_mbedtls.licence.as_ref().map(License::as_str),
+            Some("Apache-2.0")
+        );
+
+        let expected: BTreeMap<BomRef, BTreeSet<BomRef>> = BTreeMap::from([
+            (
+                root_ref,
+                BTreeSet::from([app_ref.clone(), boot_ref, blob_ref]),
+            ),
+            (app_ref, BTreeSet::from([zephyr_ref])),
+        ]);
+        assert_eq!(left.dependencies, expected);
+    }
+
+    #[test]
+    fn product_merge_conflict_deep_in_image_leaves_target_unchanged() {
+        let mut target = Product::new("widget").unwrap();
+        let mut target_app = app();
+        let mut mbedtls = lib("mbedtls", "3.6.0");
+        mbedtls.licence = Some(License::new("Apache-2.0").unwrap());
+        target_app.add_component(mbedtls).unwrap();
+        target.add_image(target_app).unwrap();
+        let before = target.clone();
+
+        let mut incoming = Product::new("widget").unwrap();
+        // Changes that would apply cleanly before the conflict is reached.
+        incoming.supplier = Some(Supplier::new("Example").unwrap());
+        incoming.add_image(boot()).unwrap();
+        let root = incoming.path();
+        incoming.add_dependency(
+            BomRef::derive(&root),
+            BomRef::derive(&root.child(PathSegment::of_image(&boot()))),
+        );
+        let mut incoming_app = app();
+        incoming_app.add_component(zephyr()).unwrap();
+        let mut conflicting = lib("mbedtls", "3.6.0");
+        conflicting.licence = Some(License::new("MIT").unwrap());
+        incoming_app.add_component(conflicting).unwrap();
+        incoming.add_image(incoming_app).unwrap();
+
+        let err = target.merge(incoming).unwrap_err();
+        let MergeError::Conflict { path, field, .. } = err;
+        assert_eq!(field, "licence");
+        assert_eq!(
+            path.to_string(),
+            "product:widget / application:app / library:mbedtls@3.6.0"
+        );
+        assert_eq!(target, before);
+    }
+
+    #[test]
+    fn image_merge_conflict_leaves_target_unchanged() {
+        let mut target = app();
+        target.add_component(lib("cmsis", "5.9.0")).unwrap();
+        target
+            .hashes
+            .insert(Hash::new(HashAlgorithm::Sha256, &"aa".repeat(32)).unwrap());
+        let before = target.clone();
+
+        let mut incoming = app();
+        incoming.licence = Some(License::new("Apache-2.0").unwrap());
+        incoming.add_component(zephyr()).unwrap();
+        incoming
+            .hashes
+            .insert(Hash::new(HashAlgorithm::Sha256, &"bb".repeat(32)).unwrap());
+
+        let err = target.merge(incoming).unwrap_err();
+        let MergeError::Conflict { path, field, .. } = err;
+        assert_eq!(field, "hashes[SHA-256]");
+        assert_eq!(path.to_string(), "application:app");
+        assert_eq!(target, before);
+
+        // A non-conflicting image merge applies every change.
+        let mut other = app();
+        other.licence = Some(License::new("Apache-2.0").unwrap());
+        other.add_component(zephyr()).unwrap();
+        target.merge(other).unwrap();
+        assert_eq!(target.components.len(), 2);
+        assert!(target.licence.is_some());
+    }
+
+    #[test]
+    fn whitespace_only_name_is_error() {
+        for name in [" ", "\t", "  \n "] {
+            let mut product = Product::new("widget").unwrap();
+            let mut image = app();
+            image.components.insert(lib(name, "1.0"));
+            product.images.insert(image);
+            assert!(
+                matches!(product.validate(), Err(ValidationError::InvalidName { .. })),
+                "{name:?}"
+            );
+        }
+        let product = Product::new(" ").unwrap();
+        assert!(matches!(
+            product.validate(),
+            Err(ValidationError::InvalidName { .. })
+        ));
+    }
+
+    #[test]
+    fn control_char_in_version_is_error() {
+        for version in ["1.0\n", "\u{7}1.0", "1.\u{0}0", " "] {
+            let mut product = Product::new("widget").unwrap();
+            let mut image = app();
+            image.components.insert(lib("mbedtls", version));
+            product.images.insert(image);
+            assert!(
+                matches!(
+                    product.validate(),
+                    Err(ValidationError::InvalidVersion { .. })
+                ),
+                "{version:?}"
+            );
+        }
+        let mut product = Product::new("widget").unwrap();
+        product.images.insert(app().with_version("1.0\r"));
+        assert!(matches!(
+            product.validate(),
+            Err(ValidationError::InvalidVersion { .. })
+        ));
+        // A control character in a name is rejected too.
+        let product = Product::new("wid\u{1b}get").unwrap();
+        assert!(matches!(
+            product.validate(),
+            Err(ValidationError::InvalidName { .. })
         ));
     }
 }

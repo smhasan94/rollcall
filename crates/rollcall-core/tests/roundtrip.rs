@@ -294,6 +294,41 @@ fn dangling_dependency_ref_is_error() {
 }
 
 #[test]
+fn self_dependency_is_error() {
+    // Via JSON: a node listed among its own dependencies.
+    let text = edited(|v| {
+        let deps = v["dependencies"].as_object_mut().unwrap();
+        let (from, targets) = deps.iter_mut().next().unwrap();
+        let from = from.clone();
+        targets.as_array_mut().unwrap().push(json!(from));
+    });
+    assert!(matches!(
+        assert_validation_error(&text),
+        ValidationError::SelfDependency { .. }
+    ));
+
+    // Via the API.
+    let mut product = base_product();
+    let (_, root, _) = product.walk().next().unwrap();
+    product.add_dependency(root.clone(), root);
+    assert!(matches!(
+        product.validate(),
+        Err(ValidationError::SelfDependency { .. })
+    ));
+
+    // A cycle between distinct nodes is allowed: reverse an existing edge.
+    let mut product = base_product();
+    let (from, to) = {
+        let (from, targets) = product.dependencies.iter().next().unwrap();
+        (from.clone(), targets.iter().next().unwrap().clone())
+    };
+    product.add_dependency(to, from);
+    product.validate().unwrap();
+    let json = product.to_json().unwrap();
+    assert_eq!(Product::from_json(&json).unwrap(), product);
+}
+
+#[test]
 fn empty_name_is_error() {
     let edits: Vec<Edit> = vec![
         Box::new(|v| v["name"] = json!("")),

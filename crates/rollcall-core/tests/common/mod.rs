@@ -38,7 +38,8 @@ pub fn base_product() -> Product {
     product.supplier = Some(
         Supplier::new("Example Devices Ltd")
             .unwrap()
-            .with_url("https://devices.example"),
+            .with_url("https://devices.example")
+            .unwrap(),
     );
 
     // Bootloader: MCUboot with its own copy of mbedtls.

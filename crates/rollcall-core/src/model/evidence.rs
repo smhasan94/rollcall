@@ -75,7 +75,8 @@ struct RawOccurrence {
 }
 
 impl Occurrence {
-    /// Builds an occurrence. `location` must be a non-empty, forward-slash, relative path.
+    /// Builds an occurrence. `location` must be a non-empty, forward-slash, relative path
+    /// without control characters; `line`, if given, is 1-based and so must not be 0.
     pub fn new(location: &str, line: Option<u32>) -> Result<Self, IdError> {
         let err = |reason| IdError::Location {
             input: location.to_owned(),
@@ -92,6 +93,9 @@ impl Occurrence {
         }
         if location.chars().any(char::is_control) {
             return Err(err("control character"));
+        }
+        if line == Some(0) {
+            return Err(err("line numbers are 1-based; 0 is not a line"));
         }
         let bytes = location.as_bytes();
         if bytes.len() >= 2
@@ -387,6 +391,7 @@ mod tests {
         assert!(Occurrence::new("/abs/path", None).is_err());
         assert!(Occurrence::new("a\\b", None).is_err());
         assert!(Occurrence::new("C:/x", None).is_err());
+        assert!(Occurrence::new("zephyr/CMakeLists.txt", Some(1)).is_ok());
         assert!(
             Evidence::new(
                 EvidenceField::Name,
@@ -397,6 +402,24 @@ mod tests {
             )
             .is_err()
         );
+    }
+
+    #[test]
+    fn occurrence_line_zero_is_error() {
+        assert!(Occurrence::new("zephyr/CMakeLists.txt", Some(0)).is_err());
+        let json = r#"{"location":"zephyr/CMakeLists.txt","line":0}"#;
+        assert!(serde_json::from_str::<Occurrence>(json).is_err());
+        let json = r#"{"location":"zephyr/CMakeLists.txt","line":1}"#;
+        assert!(serde_json::from_str::<Occurrence>(json).is_ok());
+    }
+
+    #[test]
+    fn occurrence_control_char_in_location_is_error() {
+        for location in ["a\nb", "a\tb", "a\u{0}b", "\u{7f}", "a\u{1b}[0mb"] {
+            assert!(Occurrence::new(location, None).is_err(), "{location:?}");
+        }
+        let json = r#"{"location":"a\u0000b"}"#;
+        assert!(serde_json::from_str::<Occurrence>(json).is_err());
     }
 
     #[test]
