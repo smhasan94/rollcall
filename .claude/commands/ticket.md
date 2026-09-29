@@ -14,13 +14,15 @@ Run the per-ticket loop for Linear ticket **$ARGUMENTS** (team Shakooky). Follow
 
 ## 2. Plan
 
-Write a plan with:
+Delegate planning to the `planner` subagent (Claude Fable 5.1), passing the ticket and epic text
+verbatim. The plan must contain:
 
 - Files and functions to create or change.
 - A table mapping **every** Acceptance-criteria and Test-plan checkbox (verbatim) to the named
   test, script or command that proves it.
 - Risks and open questions.
 
+Check the table covers every checkbox before posting; send it back to the planner if not.
 Post the plan as a Linear comment on $ARGUMENTS, then stop and wait for the user's "go".
 If the user said "autopilot" earlier in this session, proceed without waiting.
 

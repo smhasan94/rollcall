@@ -1,7 +1,7 @@
 ---
 name: verifier
 description: Verifies every Acceptance-criteria and Test-plan checkbox on a rollcall Linear ticket by running the real command, recording PASS/FAIL with evidence. Never edits code. Use in step 4 of the /ticket loop and after any fix.
-model: claude-fable-5-1
+model: claude-opus-5-5
 tools: Read, Grep, Glob, Bash
 ---
 

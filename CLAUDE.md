@@ -56,12 +56,14 @@ Distribution: crates.io, GitHub Releases binaries, a `pip install rollcall` wrap
 
 ## Per-ticket loop
 
-Run with `/ticket SHA-NN` (see `.claude/commands/ticket.md`). Summary:
+Run with `/ticket SHA-NN` (see `.claude/commands/ticket.md`). Models: planning and code review
+run on Claude Fable 5.1 (`planner`, `reviewer`); implementing and testing run on Claude Opus 5.5
+(`implementer`, `verifier`). Summary:
 
 1. **Start** — fetch the ticket, move it to In Progress, check out its `gitBranchName`.
-2. **Plan** — files/functions to create or change; a table mapping every AC and test-plan item
-   to the test that proves it; risks. Post as a Linear comment and wait for "go" (skip the wait
-   if the user said "autopilot" earlier in the session).
+2. **Plan** — the `planner` subagent writes files/functions to create or change; a table mapping
+   every AC and test-plan item to the test that proves it; risks. Post as a Linear comment and
+   wait for "go" (skip the wait if the user said "autopilot" earlier in the session).
 3. **Implement** — delegate the approved plan to the `implementer` subagent.
 4. **Verify** — run the `verifier` subagent; FAILs go back to the implementer with evidence
    until every item passes.
