@@ -3,7 +3,7 @@
 use std::path::PathBuf;
 use std::str::FromStr;
 
-use clap::{Args, Parser, Subcommand, ValueEnum};
+use clap::{ArgGroup, Args, Parser, Subcommand, ValueEnum};
 use rollcall_core::cyclonedx::{SerialNumber, Timestamp};
 
 /// Exit code when a document fails validation.
@@ -72,10 +72,26 @@ pub enum Format {
 
 /// Arguments of `rollcall generate`.
 #[derive(Debug, Args)]
+#[command(group = ArgGroup::new("input").required(true).multiple(false))]
 pub struct GenerateArgs {
     /// The rollcall model (`rollcall-model/1` JSON) to render
-    #[arg(long, value_name = "FILE")]
-    pub model: PathBuf,
+    #[arg(long, value_name = "FILE", group = "input")]
+    pub model: Option<PathBuf>,
+    /// Zephyr image build directory (the one holding build_info.yml and spdx/)
+    #[arg(long, value_name = "DIR", group = "input")]
+    pub zephyr: Option<PathBuf>,
+    /// Output of `west list -f "{name} {path} {revision} {url}"`, for module revisions and
+    /// URLs (with --zephyr)
+    #[arg(
+        long,
+        value_name = "FILE",
+        requires = "zephyr",
+        conflicts_with = "model"
+    )]
+    pub west_list: Option<PathBuf>,
+    /// Add the SDK/toolchain as a component (with --zephyr)
+    #[arg(long, requires = "zephyr", conflicts_with = "model")]
+    pub include_sdk: bool,
     /// Output format
     #[arg(long, value_enum, default_value_t = Format::Cyclonedx)]
     pub format: Format,

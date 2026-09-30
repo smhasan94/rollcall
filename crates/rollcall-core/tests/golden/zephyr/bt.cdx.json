@@ -1,0 +1,945 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.6",
+  "serialNumber": "urn:uuid:29b73537-f94f-8778-86c0-9ea2f71fc955",
+  "version": 1,
+  "metadata": {
+    "timestamp": "2026-01-02T03:04:05Z",
+    "tools": {
+      "components": [
+        {
+          "type": "application",
+          "name": "rollcall",
+          "version": "0.0.1"
+        }
+      ]
+    },
+    "component": {
+      "type": "firmware",
+      "bom-ref": "product:67eabb8dbc93be76cca8d4b370739ef6",
+      "name": "beacon",
+      "evidence": {
+        "identity": [
+          {
+            "field": "name",
+            "confidence": 0.8,
+            "concludedValue": "beacon",
+            "methods": [
+              {
+                "technique": "manifest-analysis",
+                "confidence": 0.8,
+                "value": "beacon"
+              }
+            ]
+          }
+        ],
+        "occurrences": [
+          {
+            "location": "build_info.yml"
+          }
+        ]
+      },
+      "properties": [
+        {
+          "name": "rollcall:evidence-source",
+          "value": "build-info"
+        }
+      ]
+    }
+  },
+  "components": [
+    {
+      "type": "firmware",
+      "bom-ref": "image:241f01b7d562c8b7ae09bfb157af89b4",
+      "name": "beacon",
+      "licenses": [
+        {
+          "expression": "Apache-2.0"
+        }
+      ],
+      "evidence": {
+        "identity": [
+          {
+            "field": "name",
+            "confidence": 0.8,
+            "concludedValue": "beacon",
+            "methods": [
+              {
+                "technique": "manifest-analysis",
+                "confidence": 0.8,
+                "value": "beacon"
+              }
+            ]
+          }
+        ],
+        "occurrences": [
+          {
+            "location": "build_info.yml"
+          },
+          {
+            "location": "spdx/app.spdx",
+            "line": 15
+          }
+        ],
+        "licenses": [
+          {
+            "expression": "Apache-2.0"
+          }
+        ]
+      },
+      "properties": [
+        {
+          "name": "rollcall:evidence-source",
+          "value": "build-info"
+        },
+        {
+          "name": "rollcall:evidence-source",
+          "value": "west-spdx"
+        },
+        {
+          "name": "rollcall:image-kind",
+          "value": "application"
+        }
+      ],
+      "components": [
+        {
+          "type": "library",
+          "bom-ref": "component:f57fdab356ff262fa74b8cf0ac4daad8",
+          "name": "cmsis",
+          "version": "512cc7e895e8491696b61f7ba8066b4a182569b8",
+          "purl": "pkg:github/zephyrproject-rtos/cmsis@512cc7e895e8491696b61f7ba8066b4a182569b8",
+          "evidence": {
+            "identity": [
+              {
+                "field": "name",
+                "confidence": 0.95,
+                "concludedValue": "cmsis",
+                "methods": [
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.6,
+                    "value": "CONFIG_ZEPHYR_CMSIS_MODULE"
+                  },
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.95,
+                    "value": "cmsis"
+                  },
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.9,
+                    "value": "cmsis-sources"
+                  }
+                ]
+              },
+              {
+                "field": "version",
+                "confidence": 0.95,
+                "concludedValue": "512cc7e895e8491696b61f7ba8066b4a182569b8",
+                "methods": [
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.95,
+                    "value": "512cc7e895e8491696b61f7ba8066b4a182569b8"
+                  },
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.9,
+                    "value": "512cc7e895e8491696b61f7ba8066b4a182569b8"
+                  }
+                ]
+              },
+              {
+                "field": "purl",
+                "confidence": 0.7,
+                "concludedValue": "pkg:github/zephyrproject-rtos/cmsis@512cc7e895e8491696b61f7ba8066b4a182569b8",
+                "methods": [
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.7,
+                    "value": "pkg:github/zephyrproject-rtos/cmsis@512cc7e895e8491696b61f7ba8066b4a182569b8"
+                  }
+                ]
+              }
+            ],
+            "occurrences": [
+              {
+                "location": "spdx/zephyr.spdx",
+                "line": 1694
+              },
+              {
+                "location": "spdx/zephyr.spdx",
+                "line": 1701
+              },
+              {
+                "location": "west-list.txt",
+                "line": 2
+              },
+              {
+                "location": "zephyr/.config",
+                "line": 178
+              }
+            ]
+          },
+          "properties": [
+            {
+              "name": "rollcall:evidence-source",
+              "value": "kconfig"
+            },
+            {
+              "name": "rollcall:evidence-source",
+              "value": "west-list"
+            },
+            {
+              "name": "rollcall:evidence-source",
+              "value": "west-spdx"
+            }
+          ]
+        },
+        {
+          "type": "library",
+          "bom-ref": "component:b4829966d0cd7073dd2f9f6a8b941bfa",
+          "name": "cmsis_6",
+          "version": "30a859f44ef8ab4dc8f84b03ed586fd16ccf9d74",
+          "purl": "pkg:github/zephyrproject-rtos/cmsis_6@30a859f44ef8ab4dc8f84b03ed586fd16ccf9d74",
+          "evidence": {
+            "identity": [
+              {
+                "field": "name",
+                "confidence": 0.95,
+                "concludedValue": "cmsis_6",
+                "methods": [
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.6,
+                    "value": "CONFIG_ZEPHYR_CMSIS_6_MODULE"
+                  },
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.95,
+                    "value": "cmsis_6"
+                  },
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.9,
+                    "value": "cmsis_6-sources"
+                  }
+                ]
+              },
+              {
+                "field": "version",
+                "confidence": 0.95,
+                "concludedValue": "30a859f44ef8ab4dc8f84b03ed586fd16ccf9d74",
+                "methods": [
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.95,
+                    "value": "30a859f44ef8ab4dc8f84b03ed586fd16ccf9d74"
+                  },
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.9,
+                    "value": "30a859f44ef8ab4dc8f84b03ed586fd16ccf9d74"
+                  }
+                ]
+              },
+              {
+                "field": "purl",
+                "confidence": 0.7,
+                "concludedValue": "pkg:github/zephyrproject-rtos/cmsis_6@30a859f44ef8ab4dc8f84b03ed586fd16ccf9d74",
+                "methods": [
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.7,
+                    "value": "pkg:github/zephyrproject-rtos/cmsis_6@30a859f44ef8ab4dc8f84b03ed586fd16ccf9d74"
+                  }
+                ]
+              }
+            ],
+            "occurrences": [
+              {
+                "location": "spdx/zephyr.spdx",
+                "line": 1707
+              },
+              {
+                "location": "spdx/zephyr.spdx",
+                "line": 1714
+              },
+              {
+                "location": "west-list.txt",
+                "line": 3
+              },
+              {
+                "location": "zephyr/.config",
+                "line": 185
+              }
+            ]
+          },
+          "properties": [
+            {
+              "name": "rollcall:evidence-source",
+              "value": "kconfig"
+            },
+            {
+              "name": "rollcall:evidence-source",
+              "value": "west-list"
+            },
+            {
+              "name": "rollcall:evidence-source",
+              "value": "west-spdx"
+            }
+          ]
+        },
+        {
+          "type": "library",
+          "bom-ref": "component:161737196150f613325b799a3dbb481b",
+          "name": "hal_nordic",
+          "version": "44fd3d44b15cb75f80a25b4679f91d2787e28664",
+          "purl": "pkg:github/zephyrproject-rtos/hal_nordic@44fd3d44b15cb75f80a25b4679f91d2787e28664",
+          "licenses": [
+            {
+              "expression": "BSD-3-Clause"
+            }
+          ],
+          "evidence": {
+            "identity": [
+              {
+                "field": "name",
+                "confidence": 0.95,
+                "concludedValue": "hal_nordic",
+                "methods": [
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.6,
+                    "value": "CONFIG_ZEPHYR_HAL_NORDIC_MODULE"
+                  },
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.95,
+                    "value": "hal_nordic"
+                  },
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.9,
+                    "value": "hal_nordic-sources"
+                  }
+                ]
+              },
+              {
+                "field": "version",
+                "confidence": 0.95,
+                "concludedValue": "44fd3d44b15cb75f80a25b4679f91d2787e28664",
+                "methods": [
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.95,
+                    "value": "44fd3d44b15cb75f80a25b4679f91d2787e28664"
+                  },
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.9,
+                    "value": "44fd3d44b15cb75f80a25b4679f91d2787e28664"
+                  }
+                ]
+              },
+              {
+                "field": "purl",
+                "confidence": 0.7,
+                "concludedValue": "pkg:github/zephyrproject-rtos/hal_nordic@44fd3d44b15cb75f80a25b4679f91d2787e28664",
+                "methods": [
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.7,
+                    "value": "pkg:github/zephyrproject-rtos/hal_nordic@44fd3d44b15cb75f80a25b4679f91d2787e28664"
+                  }
+                ]
+              }
+            ],
+            "occurrences": [
+              {
+                "location": "spdx/zephyr.spdx",
+                "line": 1720
+              },
+              {
+                "location": "spdx/zephyr.spdx",
+                "line": 1722
+              },
+              {
+                "location": "spdx/zephyr.spdx",
+                "line": 1727
+              },
+              {
+                "location": "west-list.txt",
+                "line": 4
+              },
+              {
+                "location": "zephyr/.config",
+                "line": 193
+              }
+            ],
+            "licenses": [
+              {
+                "expression": "BSD-3-Clause"
+              }
+            ]
+          },
+          "properties": [
+            {
+              "name": "rollcall:evidence-source",
+              "value": "kconfig"
+            },
+            {
+              "name": "rollcall:evidence-source",
+              "value": "west-list"
+            },
+            {
+              "name": "rollcall:evidence-source",
+              "value": "west-spdx"
+            }
+          ]
+        },
+        {
+          "type": "library",
+          "bom-ref": "component:62a61d6c7e00dd1376c05259e4b3767b",
+          "name": "mbedtls",
+          "version": "a3e190fe44c78d1ba67f55979e1257328cc7d0d8",
+          "supplier": {
+            "name": "arm"
+          },
+          "purl": "pkg:github/mbed-tls/mbedtls@v4.1.0",
+          "cpe": "cpe:2.3:a:arm:mbed_tls:4.1.0:*:*:*:*:*:*:*",
+          "evidence": {
+            "identity": [
+              {
+                "field": "name",
+                "confidence": 0.95,
+                "concludedValue": "mbedtls",
+                "methods": [
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.6,
+                    "value": "CONFIG_ZEPHYR_MBEDTLS_MODULE"
+                  },
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.95,
+                    "value": "mbedtls"
+                  },
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.9,
+                    "value": "mbedtls-sources"
+                  }
+                ]
+              },
+              {
+                "field": "version",
+                "confidence": 0.95,
+                "concludedValue": "a3e190fe44c78d1ba67f55979e1257328cc7d0d8",
+                "methods": [
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.95,
+                    "value": "a3e190fe44c78d1ba67f55979e1257328cc7d0d8"
+                  },
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.9,
+                    "value": "4.1.0"
+                  },
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.9,
+                    "value": "a3e190fe44c78d1ba67f55979e1257328cc7d0d8"
+                  }
+                ]
+              },
+              {
+                "field": "purl",
+                "confidence": 0.9,
+                "concludedValue": "pkg:github/mbed-tls/mbedtls@v4.1.0",
+                "methods": [
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.7,
+                    "value": "pkg:github/zephyrproject-rtos/mbedtls@a3e190fe44c78d1ba67f55979e1257328cc7d0d8"
+                  },
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.9,
+                    "value": "pkg:github/Mbed-TLS/mbedtls@v4.1.0"
+                  }
+                ]
+              },
+              {
+                "field": "cpe",
+                "confidence": 0.9,
+                "concludedValue": "cpe:2.3:a:arm:mbed_tls:4.1.0:*:*:*:*:*:*:*",
+                "methods": [
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.9,
+                    "value": "cpe:2.3:a:arm:mbed_tls:4.1.0:*:*:*:*:*:*:*"
+                  }
+                ]
+              }
+            ],
+            "occurrences": [
+              {
+                "location": "spdx/modules-deps.spdx",
+                "line": 73
+              },
+              {
+                "location": "spdx/modules-deps.spdx",
+                "line": 74
+              },
+              {
+                "location": "spdx/modules-deps.spdx",
+                "line": 75
+              },
+              {
+                "location": "spdx/modules-deps.spdx",
+                "line": 76
+              },
+              {
+                "location": "spdx/zephyr.spdx",
+                "line": 1854
+              },
+              {
+                "location": "spdx/zephyr.spdx",
+                "line": 1861
+              },
+              {
+                "location": "west-list.txt",
+                "line": 5
+              },
+              {
+                "location": "zephyr/.config",
+                "line": 284
+              }
+            ]
+          },
+          "properties": [
+            {
+              "name": "rollcall:evidence-source",
+              "value": "kconfig"
+            },
+            {
+              "name": "rollcall:evidence-source",
+              "value": "west-list"
+            },
+            {
+              "name": "rollcall:evidence-source",
+              "value": "west-spdx"
+            }
+          ]
+        },
+        {
+          "type": "library",
+          "bom-ref": "component:178dad0f028d1ae4ec5dab0cd7c48bdb",
+          "name": "mcuboot",
+          "version": "6d3b3d2c38ab20c242e5b9abb04d050086383eb2",
+          "purl": "pkg:github/zephyrproject-rtos/mcuboot@6d3b3d2c38ab20c242e5b9abb04d050086383eb2",
+          "evidence": {
+            "identity": [
+              {
+                "field": "name",
+                "confidence": 0.95,
+                "concludedValue": "mcuboot",
+                "methods": [
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.6,
+                    "value": "CONFIG_ZEPHYR_MCUBOOT_MODULE"
+                  },
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.95,
+                    "value": "mcuboot"
+                  },
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.9,
+                    "value": "mcuboot-sources"
+                  }
+                ]
+              },
+              {
+                "field": "version",
+                "confidence": 0.95,
+                "concludedValue": "6d3b3d2c38ab20c242e5b9abb04d050086383eb2",
+                "methods": [
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.95,
+                    "value": "6d3b3d2c38ab20c242e5b9abb04d050086383eb2"
+                  },
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.9,
+                    "value": "6d3b3d2c38ab20c242e5b9abb04d050086383eb2"
+                  }
+                ]
+              },
+              {
+                "field": "purl",
+                "confidence": 0.7,
+                "concludedValue": "pkg:github/zephyrproject-rtos/mcuboot@6d3b3d2c38ab20c242e5b9abb04d050086383eb2",
+                "methods": [
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.7,
+                    "value": "pkg:github/zephyrproject-rtos/mcuboot@6d3b3d2c38ab20c242e5b9abb04d050086383eb2"
+                  }
+                ]
+              }
+            ],
+            "occurrences": [
+              {
+                "location": "spdx/zephyr.spdx",
+                "line": 1867
+              },
+              {
+                "location": "spdx/zephyr.spdx",
+                "line": 1874
+              },
+              {
+                "location": "west-list.txt",
+                "line": 6
+              },
+              {
+                "location": "zephyr/.config",
+                "line": 290
+              }
+            ]
+          },
+          "properties": [
+            {
+              "name": "rollcall:evidence-source",
+              "value": "kconfig"
+            },
+            {
+              "name": "rollcall:evidence-source",
+              "value": "west-list"
+            },
+            {
+              "name": "rollcall:evidence-source",
+              "value": "west-spdx"
+            }
+          ]
+        },
+        {
+          "type": "library",
+          "bom-ref": "component:8c9f887e7e4b97bd1112fb4894bdd55f",
+          "name": "tf-psa-crypto",
+          "version": "dc575a2ddcc8cb16275d24c42a52eaf79ebe2231",
+          "supplier": {
+            "name": "arm"
+          },
+          "purl": "pkg:github/mbed-tls/tf-psa-crypto@v1.1.0",
+          "cpe": "cpe:2.3:a:arm:tf-psa-crypto:1.1.0:*:*:*:*:*:*:*",
+          "evidence": {
+            "identity": [
+              {
+                "field": "name",
+                "confidence": 0.95,
+                "concludedValue": "tf-psa-crypto",
+                "methods": [
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.6,
+                    "value": "CONFIG_ZEPHYR_TF_PSA_CRYPTO_MODULE"
+                  },
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.95,
+                    "value": "tf-psa-crypto"
+                  },
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.9,
+                    "value": "tf-psa-crypto-sources"
+                  }
+                ]
+              },
+              {
+                "field": "version",
+                "confidence": 0.95,
+                "concludedValue": "dc575a2ddcc8cb16275d24c42a52eaf79ebe2231",
+                "methods": [
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.95,
+                    "value": "dc575a2ddcc8cb16275d24c42a52eaf79ebe2231"
+                  },
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.9,
+                    "value": "1.1.0"
+                  },
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.9,
+                    "value": "dc575a2ddcc8cb16275d24c42a52eaf79ebe2231"
+                  }
+                ]
+              },
+              {
+                "field": "purl",
+                "confidence": 0.9,
+                "concludedValue": "pkg:github/mbed-tls/tf-psa-crypto@v1.1.0",
+                "methods": [
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.7,
+                    "value": "pkg:github/zephyrproject-rtos/tf-psa-crypto@dc575a2ddcc8cb16275d24c42a52eaf79ebe2231"
+                  },
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.9,
+                    "value": "pkg:github/Mbed-TLS/TF-PSA-Crypto@v1.1.0"
+                  }
+                ]
+              },
+              {
+                "field": "cpe",
+                "confidence": 0.9,
+                "concludedValue": "cpe:2.3:a:arm:tf-psa-crypto:1.1.0:*:*:*:*:*:*:*",
+                "methods": [
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.9,
+                    "value": "cpe:2.3:a:arm:tf-psa-crypto:1.1.0:*:*:*:*:*:*:*"
+                  }
+                ]
+              }
+            ],
+            "occurrences": [
+              {
+                "location": "spdx/modules-deps.spdx",
+                "line": 99
+              },
+              {
+                "location": "spdx/modules-deps.spdx",
+                "line": 100
+              },
+              {
+                "location": "spdx/modules-deps.spdx",
+                "line": 101
+              },
+              {
+                "location": "spdx/modules-deps.spdx",
+                "line": 102
+              },
+              {
+                "location": "spdx/zephyr.spdx",
+                "line": 1880
+              },
+              {
+                "location": "spdx/zephyr.spdx",
+                "line": 1887
+              },
+              {
+                "location": "west-list.txt",
+                "line": 7
+              },
+              {
+                "location": "zephyr/.config",
+                "line": 291
+              }
+            ]
+          },
+          "properties": [
+            {
+              "name": "rollcall:evidence-source",
+              "value": "kconfig"
+            },
+            {
+              "name": "rollcall:evidence-source",
+              "value": "west-list"
+            },
+            {
+              "name": "rollcall:evidence-source",
+              "value": "west-spdx"
+            }
+          ]
+        },
+        {
+          "type": "operating-system",
+          "bom-ref": "component:13ff81e8abff85ff33972f0733c24740",
+          "name": "zephyr",
+          "version": "4.4.2",
+          "supplier": {
+            "name": "zephyrproject"
+          },
+          "purl": "pkg:github/zephyrproject-rtos/zephyr@v4.4.2",
+          "cpe": "cpe:2.3:o:zephyrproject:zephyr:4.4.2:-:*:*:*:*:*:*",
+          "licenses": [
+            {
+              "expression": "Apache-2.0 AND BSD-3-Clause"
+            }
+          ],
+          "evidence": {
+            "identity": [
+              {
+                "field": "name",
+                "confidence": 0.9,
+                "concludedValue": "zephyr",
+                "methods": [
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.9,
+                    "value": "zephyr"
+                  }
+                ]
+              },
+              {
+                "field": "version",
+                "confidence": 0.9,
+                "concludedValue": "4.4.2",
+                "methods": [
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.8,
+                    "value": "4.4.2"
+                  },
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.9,
+                    "value": "4.4.2"
+                  }
+                ]
+              },
+              {
+                "field": "purl",
+                "confidence": 0.9,
+                "concludedValue": "pkg:github/zephyrproject-rtos/zephyr@v4.4.2",
+                "methods": [
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.7,
+                    "value": "pkg:github/zephyrproject-rtos/zephyr@dccb09599635bdff17633fa7e9dab014b91dce90"
+                  },
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.9,
+                    "value": "pkg:github/zephyrproject-rtos/zephyr@v4.4.2"
+                  }
+                ]
+              },
+              {
+                "field": "cpe",
+                "confidence": 0.9,
+                "concludedValue": "cpe:2.3:o:zephyrproject:zephyr:4.4.2:-:*:*:*:*:*:*",
+                "methods": [
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.9,
+                    "value": "cpe:2.3:o:zephyrproject:zephyr:4.4.2:-:*:*:*:*:*:*"
+                  }
+                ]
+              }
+            ],
+            "occurrences": [
+              {
+                "location": "build_info.yml"
+              },
+              {
+                "location": "spdx/zephyr.spdx",
+                "line": 19
+              },
+              {
+                "location": "spdx/zephyr.spdx",
+                "line": 21
+              },
+              {
+                "location": "spdx/zephyr.spdx",
+                "line": 24
+              },
+              {
+                "location": "spdx/zephyr.spdx",
+                "line": 25
+              },
+              {
+                "location": "spdx/zephyr.spdx",
+                "line": 26
+              },
+              {
+                "location": "spdx/zephyr.spdx",
+                "line": 27
+              },
+              {
+                "location": "spdx/zephyr.spdx",
+                "line": 28
+              }
+            ],
+            "licenses": [
+              {
+                "expression": "Apache-2.0 AND BSD-3-Clause"
+              }
+            ]
+          },
+          "properties": [
+            {
+              "name": "rollcall:evidence-source",
+              "value": "build-info"
+            },
+            {
+              "name": "rollcall:evidence-source",
+              "value": "west-spdx"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "dependencies": [
+    {
+      "ref": "product:67eabb8dbc93be76cca8d4b370739ef6",
+      "dependsOn": [
+        "image:241f01b7d562c8b7ae09bfb157af89b4"
+      ]
+    },
+    {
+      "ref": "image:241f01b7d562c8b7ae09bfb157af89b4",
+      "dependsOn": [
+        "component:13ff81e8abff85ff33972f0733c24740"
+      ]
+    },
+    {
+      "ref": "component:f57fdab356ff262fa74b8cf0ac4daad8",
+      "dependsOn": []
+    },
+    {
+      "ref": "component:b4829966d0cd7073dd2f9f6a8b941bfa",
+      "dependsOn": []
+    },
+    {
+      "ref": "component:161737196150f613325b799a3dbb481b",
+      "dependsOn": []
+    },
+    {
+      "ref": "component:62a61d6c7e00dd1376c05259e4b3767b",
+      "dependsOn": []
+    },
+    {
+      "ref": "component:178dad0f028d1ae4ec5dab0cd7c48bdb",
+      "dependsOn": []
+    },
+    {
+      "ref": "component:8c9f887e7e4b97bd1112fb4894bdd55f",
+      "dependsOn": []
+    },
+    {
+      "ref": "component:13ff81e8abff85ff33972f0733c24740",
+      "dependsOn": [
+        "component:161737196150f613325b799a3dbb481b",
+        "component:178dad0f028d1ae4ec5dab0cd7c48bdb",
+        "component:62a61d6c7e00dd1376c05259e4b3767b",
+        "component:8c9f887e7e4b97bd1112fb4894bdd55f",
+        "component:b4829966d0cd7073dd2f9f6a8b941bfa",
+        "component:f57fdab356ff262fa74b8cf0ac4daad8"
+      ]
+    }
+  ]
+}
