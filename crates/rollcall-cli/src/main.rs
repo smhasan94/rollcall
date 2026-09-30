@@ -1,12 +1,13 @@
 //! The `rollcall` binary.
 
 mod cli;
+mod commands;
 
 use std::process::ExitCode;
 
 use clap::Parser;
 
-use crate::cli::{Cli, EXIT_USAGE};
+use crate::cli::{Cli, Command, EXIT_USAGE};
 
 fn main() -> ExitCode {
     let cli = match Cli::try_parse() {
@@ -23,6 +24,13 @@ fn main() -> ExitCode {
             };
         }
     };
-    eprintln!("rollcall {}: not implemented", cli.command.name());
-    ExitCode::from(EXIT_USAGE)
+    let code = match cli.command {
+        Command::Generate(args) => commands::generate::run(args),
+        Command::Validate(args) => commands::validate::run(args),
+        other @ (Command::Merge | Command::Vex | Command::Scan | Command::Assay) => {
+            eprintln!("rollcall {}: not implemented", other.name());
+            EXIT_USAGE
+        }
+    };
+    ExitCode::from(code)
 }

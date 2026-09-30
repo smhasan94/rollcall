@@ -63,3 +63,32 @@ jobs:
         with:
           command: check
           arguments: --all-features --locked
+
+  # grype and osv-scanner (pinned, SHA-256-verified) must load the generated CycloneDX
+  # documents without warnings, and find nothing in the minimal fixture. Needs the network.
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # Keep in sync with rust-toolchain.toml.
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: "1.91.1"
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo build -p rollcall-cli --locked
+      # One retry: the tool downloads, grype's database and osv.dev are all network calls.
+      # Each attempt writes to its own directory, so the first attempt's logs survive.
+      - name: Smoke scan (grype, osv-scanner)
+        run: |
+          ROLLCALL_SMOKE_OUT=.cache/smoke-attempt-1 scripts/smoke-scan.sh --install || {
+            echo "smoke-scan failed; retrying once"
+            ROLLCALL_SMOKE_OUT=.cache/smoke-attempt-2 scripts/smoke-scan.sh --install
+          }
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: smoke-scan
+          path: |
+            .cache/smoke-attempt-1
+            .cache/smoke-attempt-2
+          if-no-files-found: warn

@@ -1,0 +1,4 @@
+//! Implementations of the subcommands. Each `run` returns the process exit code.
+
+pub mod generate;
+pub mod validate;
