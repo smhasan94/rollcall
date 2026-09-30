@@ -1,0 +1,28 @@
+cmake:
+  application:
+    source-dir: '/zephyrproject/zephyr/share/sysbuild'
+  board:
+    name: 'nrf52840dk'
+    path:
+     - '/zephyrproject/zephyr/boards/nordic/nrf52840dk'
+    qualifiers: 'nrf52840'
+    revision: ''
+  images:
+   - name: 'with_mcuboot'
+     source-dir: '/zephyrproject/zephyr/samples/sysbuild/with_mcuboot'
+     type: 'MAIN'
+   - name: 'mcuboot'
+     source-dir: '/zephyrproject/bootloader/mcuboot/boot/zephyr'
+     type: 'BOOTLOADER'
+  kconfig:
+    files:
+     - '/zephyrproject/build/baseline/_sysbuild/empty.conf'
+     - '/zephyrproject/zephyr/samples/sysbuild/with_mcuboot/sysbuild.conf'
+    user-files:
+     - '/zephyrproject/zephyr/samples/sysbuild/with_mcuboot/sysbuild.conf'
+  sysbuild: 'true'
+version: '0.1.0'
+west:
+  command: '/zephyrproject/.venv/bin/west build -b nrf52840dk/nrf52840 --sysbuild -d build/baseline zephyr/samples/sysbuild/with_mcuboot -- -DCONFIG_BUILD_OUTPUT_META=y -Dmcuboot_CONFIG_BUILD_OUTPUT_META=y'
+  topdir: '/zephyrproject'
+  version: '1.5.0'

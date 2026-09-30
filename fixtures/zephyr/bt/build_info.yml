@@ -1,0 +1,29 @@
+cmake:
+  application:
+    source-dir: '/zephyrproject/zephyr/share/sysbuild'
+  board:
+    name: 'nrf52840dk'
+    path:
+     - '/zephyrproject/zephyr/boards/nordic/nrf52840dk'
+    qualifiers: 'nrf52840'
+    revision: ''
+  images:
+   - name: 'beacon'
+     source-dir: '/zephyrproject/zephyr/samples/bluetooth/beacon'
+     type: 'MAIN'
+   - name: 'mcuboot'
+     source-dir: '/zephyrproject/bootloader/mcuboot/boot/zephyr'
+     type: 'BOOTLOADER'
+  kconfig:
+    files:
+     - '/zephyrproject/build/bt/_sysbuild/empty.conf'
+     - '/zephyrproject/build/bt/_sysbuild/empty.conf'
+     - '/zephyrproject/build/bt/zephyr/misc/generated/extra_kconfig_options.conf'
+    user-files:
+     - '/zephyrproject/build/bt/_sysbuild/empty.conf'
+  sysbuild: 'true'
+version: '0.1.0'
+west:
+  command: '/zephyrproject/.venv/bin/west build -b nrf52840dk/nrf52840 --sysbuild -d build/bt zephyr/samples/bluetooth/beacon -- -DSB_CONFIG_BOOTLOADER_MCUBOOT=y -DCONFIG_BUILD_OUTPUT_META=y -Dmcuboot_CONFIG_BUILD_OUTPUT_META=y'
+  topdir: '/zephyrproject'
+  version: '1.5.0'

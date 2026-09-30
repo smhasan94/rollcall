@@ -1,0 +1,10 @@
+default: with_mcuboot
+build_dir: /zephyrproject/build/baseline
+domains:
+  - name: with_mcuboot
+    build_dir: /zephyrproject/build/baseline/with_mcuboot
+  - name: mcuboot
+    build_dir: /zephyrproject/build/baseline/mcuboot
+flash_order:
+  - mcuboot
+  - with_mcuboot

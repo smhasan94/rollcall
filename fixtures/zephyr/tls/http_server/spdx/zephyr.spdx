@@ -1,0 +1,4732 @@
+SPDXVersion: SPDX-2.3
+DataLicense: CC0-1.0
+SPDXID: SPDXRef-DOCUMENT
+DocumentName: zephyr-sources
+DocumentNamespace: http://spdx.org/spdxdocs/rollcall-tls-http_server/zephyr
+Creator: Tool: Zephyr SPDX builder
+Created: 2026-09-30T04:30:58Z
+
+Relationship: SPDXRef-DOCUMENT DESCRIBES SPDXRef-zephyr-sources
+Relationship: SPDXRef-DOCUMENT DESCRIBES SPDXRef-cmsis-sources
+Relationship: SPDXRef-DOCUMENT DESCRIBES SPDXRef-cmsis-6-sources
+Relationship: SPDXRef-DOCUMENT DESCRIBES SPDXRef-hal-nordic-sources
+Relationship: SPDXRef-DOCUMENT DESCRIBES SPDXRef-mbedtls-sources
+Relationship: SPDXRef-DOCUMENT DESCRIBES SPDXRef-mcuboot-sources
+Relationship: SPDXRef-DOCUMENT DESCRIBES SPDXRef-tf-psa-crypto-sources
+
+##### Package: zephyr
+
+PackageName: zephyr
+SPDXID: SPDXRef-zephyr-sources
+PackageLicenseConcluded: Apache-2.0 AND BSD-3-Clause AND MIT
+PackageLicenseDeclared: NOASSERTION
+PackageCopyrightText: NOASSERTION
+PackageDownloadLocation: git+https://github.com/zephyrproject-rtos/zephyr@dccb09599635bdff17633fa7e9dab014b91dce90
+PackageVersion: 4.4.2
+PackageSupplier: Organization: zephyrproject
+ExternalRef: PACKAGE-MANAGER purl pkg:github/zephyrproject-rtos/zephyr@v4.4.2
+ExternalRef: SECURITY cpe23Type cpe:2.3:o:zephyrproject:zephyr:4.4.2:-:*:*:*:*:*:*
+PackageLicenseInfoFromFiles: Apache-2.0
+PackageLicenseInfoFromFiles: BSD-3-Clause
+PackageLicenseInfoFromFiles: MIT
+FilesAnalyzed: true
+PackageVerificationCode: 96ba2f07af18d332851573b2b766394f1d84b0c9
+
+FileName: ./zephyr/arch/arm/core/cortex_m/__aeabi_read_tp.S
+SPDXID: SPDXRef-File---aeabi-read-tp.S
+FileChecksum: SHA1: 30a27a1250f071006e4a9252eca37de2d47d6854
+FileChecksum: SHA256: acb12fa8e365173c12d6a227bde7604d042ba1ab6423f59888d45ea7384619d4
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2020 Intel Corporation
+</text>
+
+FileName: ./zephyr/arch/arm/core/cortex_m/cpu_idle.c
+SPDXID: SPDXRef-File-cpu-idle.c
+FileChecksum: SHA1: b8ca96e10ea16898043863354064b864297d915a
+FileChecksum: SHA256: 1c578ba319af2a7d14221297644f31eb079bdd7e11541ac73470c4ddd3966c15
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2023 Arm Limited
+ * Copyright (c) 2013-2014 Wind River Systems, Inc.
+</text>
+
+FileName: ./zephyr/arch/arm/core/cortex_m/exc_exit.c
+SPDXID: SPDXRef-File-exc-exit.c
+FileChecksum: SHA1: 6aad2636e9f8606877f59f8fed4a73be3d8b8a59
+FileChecksum: SHA256: 48cf48662b76320596ecbc79bd790c30f40adbd445d7c0c345723cfafea75736
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2023 Arm Limited
+ * Copyright (c) 2013-2014 Wind River Systems, Inc.
+</text>
+
+FileName: ./zephyr/arch/arm/core/cortex_m/fault.c
+SPDXID: SPDXRef-File-fault.c
+FileChecksum: SHA1: d746f463833e4b0770810d521d104c5907caff4b
+FileChecksum: SHA256: eb664070ffbab11b281835763198346b32d48988d2a569e24f8b05bb57929548
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2020 Nordic Semiconductor ASA.
+ * Copyright (c) 2014 Wind River Systems, Inc.
+</text>
+
+FileName: ./zephyr/arch/arm/core/cortex_m/fault_s.S
+SPDXID: SPDXRef-File-fault-s.S
+FileChecksum: SHA1: 10542014dd4112a7d910b4d311213118b473cbdb
+FileChecksum: SHA256: 9d6b3f6455faa52b8320200d00cc9418aec8cecffcee08a37f3a3d750b764f24
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2017-2019 Nordic Semiconductor ASA.
+ * Copyright (c) 2013-2014 Wind River Systems, Inc.
+</text>
+
+FileName: ./zephyr/arch/arm/core/cortex_m/fpu.c
+SPDXID: SPDXRef-File-fpu.c
+FileChecksum: SHA1: fc7b355cc92922919c3202ca1e53e4dbd37867cd
+FileChecksum: SHA256: f99d1b636cf51c65208d4c5bc237d6169322740368c82c41a59a99d42d29a93b
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2021 Nordic Semiconductor ASA
+ * Copyright (c) 2019,2020 Linaro Limited
+</text>
+
+FileName: ./zephyr/arch/arm/core/cortex_m/irq_init.c
+SPDXID: SPDXRef-File-irq-init.c
+FileChecksum: SHA1: ec277f6e7f8ee433bc5f312334f9c70c7706f7e4
+FileChecksum: SHA256: feb7840f9e141f967a40c7772819442101ff58b96e286a293893b4989bf2329f
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2014 Wind River Systems, Inc.
+</text>
+
+FileName: ./zephyr/arch/arm/core/cortex_m/irq_manage.c
+SPDXID: SPDXRef-File-irq-manage.c
+FileChecksum: SHA1: 7016f2afc86d2db1e9827929831449681c576bfb
+FileChecksum: SHA256: 608b69006b96850fe9ee83207c951a3bd8cd8526e06f7667d82fea37039331ea
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2013-2014 Wind River Systems, Inc.
+</text>
+
+FileName: ./zephyr/arch/arm/core/cortex_m/isr_wrapper.c
+SPDXID: SPDXRef-File-isr-wrapper.c
+FileChecksum: SHA1: 5d170c920dd327e30b3348787d9180ae40ed7cef
+FileChecksum: SHA256: 30ec1214e2a4ba5371e61bdadebd0d9427c7e19380f8a976b2636ca6877196bf
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2023 Arm Limited
+ * Copyright (c) 2020 Stephanos Ioannidis <root@stephanos.io>
+ * Copyright (c) 2013-2014 Wind River Systems, Inc.
+</text>
+
+FileName: ./zephyr/arch/arm/core/cortex_m/prep_c.c
+SPDXID: SPDXRef-File-prep-c.c
+FileChecksum: SHA1: 30f700d5b9dc902fb59f58b56eb21525ef78fe48
+FileChecksum: SHA256: 12a858aacff355befa7ea40fdebbc36129406bc24b8b41d465642213b26295e6
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2013-2014 Wind River Systems, Inc.
+</text>
+
+FileName: ./zephyr/arch/arm/core/cortex_m/reset.S
+SPDXID: SPDXRef-File-reset.S
+FileChecksum: SHA1: 1f4ff92118f34e081e3cc8fb97131fa95ab35ad5
+FileChecksum: SHA256: 47938e87db6c4bb3e1d32b2361bbd34794ed44a8cfc113c687353599fc23faac
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright 2025 Arm Limited and/or its affiliates <open-source-office@arm.com>
+ * Copyright (c) 2013-2014 Wind River Systems, Inc.
+</text>
+
+FileName: ./zephyr/arch/arm/core/cortex_m/scb.c
+SPDXID: SPDXRef-File-scb.c
+FileChecksum: SHA1: fc1cd5769d2d8fdf71e1c63b9ec695bb2f4c9767
+FileChecksum: SHA256: 1eaba4d27835e89e62f030f91f6a3eb923c23dce8c29767edd9250d69b7aec7d
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2025 STMicroelectronics
+ * Copyright (c) 2013-2014 Wind River Systems, Inc.
+</text>
+
+FileName: ./zephyr/arch/arm/core/cortex_m/svc.S
+SPDXID: SPDXRef-File-svc.S
+FileChecksum: SHA1: 96003ba69ad4e5d2ecdfe5b3ebb4a2b3bf6aba59
+FileChecksum: SHA256: db515816457d6cbc1a52aba8c24b85463870a122ba5abed75cdfa632d0246ae2
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2017-2019 Nordic Semiconductor ASA.
+ * Copyright (c) 2020 Stephanos Ioannidis <root@stephanos.io>
+ * Copyright (c) 2013-2014 Wind River Systems, Inc.
+ * Copyright 2026 Arm Limited and/or its affiliates <open-source-office@arm.com>
+</text>
+
+FileName: ./zephyr/arch/arm/core/cortex_m/swap_helper.S
+SPDXID: SPDXRef-File-swap-helper.S
+FileChecksum: SHA1: d7048533794bfd7b5fa876449d41c1948e22cfd9
+FileChecksum: SHA256: e6a044adaa6e5a778eb3d5c8e26fa7b2ace6431ab539ff5d1d860fc62912e3f2
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2017-2019 Nordic Semiconductor ASA.
+ * Copyright (c) 2020 Stephanos Ioannidis <root@stephanos.io>
+ * Copyright 2025 Arm Limited and/or its affiliates <open-source-office@arm.com>
+ * Copyright (c) 2013-2014 Wind River Systems, Inc.
+</text>
+
+FileName: ./zephyr/arch/arm/core/cortex_m/thread.c
+SPDXID: SPDXRef-File-thread.c
+FileChecksum: SHA1: a0847f02c819828156e4fa2e2d500a99f6d47b67
+FileChecksum: SHA256: 0c72945ea3f09ff5a294b3c5494c916ec18942c3869f80f636e59ab5a9001789
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2023, 2025 Arm Limited and/or its affiliates <open-source-office@arm.com>
+ * Copyright (c) 2013-2014 Wind River Systems, Inc.
+ * Copyright (c) 2021 Lexmark International, Inc.
+</text>
+
+FileName: ./zephyr/arch/arm/core/cortex_m/thread_abort.c
+SPDXID: SPDXRef-File-thread-abort.c
+FileChecksum: SHA1: 6a80d08cb1618a9dfb8fd5268b0cba307b38f163
+FileChecksum: SHA256: 09da0fce1729d57f3d576eea1ff1927df4d220350e4662e99e832f1d0ed95b8d
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2016 Wind River Systems, Inc.
+</text>
+
+FileName: ./zephyr/arch/arm/core/cortex_m/vector_table.S
+SPDXID: SPDXRef-File-vector-table.S
+FileChecksum: SHA1: 40df4a4922539e29db8e6ce969e8597b1c2c10be
+FileChecksum: SHA256: b32bbc29ec965efa978920b293fa264ae7a3ac78bbf73f2d10568db60f3c060f
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2020 Nordic Semiconductor ASA.
+ * Copyright (c) 2013-2015 Wind River Systems, Inc.
+</text>
+
+FileName: ./zephyr/arch/arm/core/fatal.c
+SPDXID: SPDXRef-File-fatal.c
+FileChecksum: SHA1: 9584d9f8aec57a7035a828216d077249c3915f6b
+FileChecksum: SHA256: cc692332d869c6f69ed281cd68cbd0eb5eea24f55f5d9b16a414bd3a8e12a56b
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2014 Wind River Systems, Inc.
+</text>
+
+FileName: ./zephyr/arch/arm/core/mpu/arm_core_mpu.c
+SPDXID: SPDXRef-File-arm-core-mpu.c
+FileChecksum: SHA1: 232db6e34316636858cc5d3e91d8efd2128e01fd
+FileChecksum: SHA256: 7b4e5c8f88fd2d30e08c09e3296c460f67089086ce89c8812ed7774558ce3b7d
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2017 Linaro Limited.
+ * Copyright 2025 Arm Limited and/or its affiliates <open-source-office@arm.com>
+</text>
+
+FileName: ./zephyr/arch/arm/core/mpu/arm_mpu.c
+SPDXID: SPDXRef-File-arm-mpu.c
+FileChecksum: SHA1: b54fdc112093079b62d1c254b07502cecaae004e
+FileChecksum: SHA256: 543ed1a6e03b4c4a49bcadd9a242e148bd30add8a6d27a894ab4c8c864211da8
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2017 Linaro Limited.
+ * Copyright 2025 Arm Limited and/or its affiliates <open-source-office@arm.com>
+</text>
+
+FileName: ./zephyr/arch/arm/core/mpu/arm_mpu_regions.c
+SPDXID: SPDXRef-File-arm-mpu-regions.c
+FileChecksum: SHA1: 961415ae344ec966c209a3c58b5c4a8bf1902dee
+FileChecksum: SHA256: d7a85f204dce3f4da9dd6df053299ba8969be141c342bda068c66533d49e53c8
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2017 Linaro Limited.
+</text>
+
+FileName: ./zephyr/arch/arm/core/nmi.c
+SPDXID: SPDXRef-File-nmi.c
+FileChecksum: SHA1: 9a7a6069ad8b670b5ffaf2b8ad78fcff3c0cb154
+FileChecksum: SHA256: 1040c563d990239fabbff96e9052c665c5ec109759e3e78690620ce030211440
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2013-2014 Wind River Systems, Inc.
+</text>
+
+FileName: ./zephyr/arch/arm/core/nmi_on_reset.S
+SPDXID: SPDXRef-File-nmi-on-reset.S
+FileChecksum: SHA1: 6dd289a9b98faf2d49ba22feac3245543ad2dc69
+FileChecksum: SHA256: 8634e18bb3d11a8ad8721fe891191a7e9abaef738ba5a1126fca462affd7cc7c
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2013-2014 Wind River Systems, Inc.
+</text>
+
+FileName: ./zephyr/arch/arm/core/offsets/offsets.c
+SPDXID: SPDXRef-File-offsets.c
+FileChecksum: SHA1: 177f696ca0e4a0ea3493d513a04f4980ebfc00fe
+FileChecksum: SHA256: 187ae52b0c651f4030463161d50b55af702112c9199c4f1c901384dfe5f115d9
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2019 Carlo Caione <ccaione@baylibre.com>
+</text>
+
+FileName: ./zephyr/arch/arm/core/tls.c
+SPDXID: SPDXRef-File-tls.c
+FileChecksum: SHA1: ee8bf1b36f0cabdc96499f9bbd5a8ada1efe067f
+FileChecksum: SHA256: d893b89922a45e3c8f79c817c25faddf4a9fe87f1c9af086bb3c26ac1029137a
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2020 Intel Corporation
+</text>
+
+FileName: ./zephyr/arch/common/init.c
+SPDXID: SPDXRef-File-init.c
+FileChecksum: SHA1: dfe55eea35d1e94bde9861ea11550e872b1edc0d
+FileChecksum: SHA256: 6fb2603e7dda134debf05d0d46fc160c77ebd9a5000b2af6ef9c7a223840f4ae
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright The Zephyr Project Contributors
+</text>
+
+FileName: ./zephyr/arch/common/isr_tables.c
+SPDXID: SPDXRef-File-isr-tables.c
+FileChecksum: SHA1: ced11853e0ac966579b49b460e92b69ccf75c2c6
+FileChecksum: SHA256: 8c92f91f6b0c252f2a57020b39262a4b958faa355b25de42a22049ee31296f58
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2017 Intel Corporation.
+</text>
+
+FileName: ./zephyr/arch/common/sw_isr_common.c
+SPDXID: SPDXRef-File-sw-isr-common.c
+FileChecksum: SHA1: 9239293083d32f4c5ded3a453d0512872c355f6a
+FileChecksum: SHA256: e19826a72f066b8f6a5523fd74630b73df7108544b88cdd60fe6d1758b5fa2e1
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2018 Intel Corporation.
+</text>
+
+FileName: ./zephyr/arch/common/xip.c
+SPDXID: SPDXRef-File-xip.c
+FileChecksum: SHA1: 06f1e7a0584bf0965c0f8854ed32221941495f65
+FileChecksum: SHA256: 687868ecec68464bff7ef44044cbfb94dfeff31b92ee852e6d62c8b1d159b1b0
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2010-2014 Wind River Systems, Inc.
+ * Copyright (c) 2020 Intel Corporation
+</text>
+
+FileName: ./zephyr/drivers/clock_control/clock_control_nrf.c
+SPDXID: SPDXRef-File-clock-control-nrf.c
+FileChecksum: SHA1: bfd971a850bd9910b136a3ad877655460ea665fa
+FileChecksum: SHA256: 66f8af8ae5622a020e310eec96fce8ca07388342081629becf746416d423c540
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2016-2020 Nordic Semiconductor ASA
+ * Copyright (c) 2016 Vinayak Kariappa Chettimada
+</text>
+
+FileName: ./zephyr/drivers/console/uart_console.c
+SPDXID: SPDXRef-File-uart-console.c
+FileChecksum: SHA1: d5b99093c6257af0f142d8689773f246df51a27c
+FileChecksum: SHA256: 31699b75ab3f7873e929b75c49bbbb1381e150a966232dcb701d300cdfbdab8e
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2011-2012, 2014-2015 Wind River Systems, Inc.
+</text>
+
+FileName: ./zephyr/drivers/entropy/entropy_nrf5.c
+SPDXID: SPDXRef-File-entropy-nrf5.c
+FileChecksum: SHA1: d13f5afdd1fd22bd77d2c0d2b0c5c8da13b346b2
+FileChecksum: SHA256: 51f09f58ed0055a64941a4b6a3332f01f7206d728a5670041ce6a09c2a448808
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2017 Exati Tecnologia Ltda.
+ * Copyright (c) 2018 Nordic Semiconductor ASA
+</text>
+
+FileName: ./zephyr/drivers/gpio/gpio_nrfx.c
+SPDXID: SPDXRef-File-gpio-nrfx.c
+FileChecksum: SHA1: d5dc79de83a2d3f0256f3680ba35c913665963f3
+FileChecksum: SHA256: e1c8055bb918f53ab456e059e33e96915febac51cbaab962264cabbe0f63a197
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2021, Nordic Semiconductor ASA
+</text>
+
+FileName: ./zephyr/drivers/hwinfo/hwinfo_nrf.c
+SPDXID: SPDXRef-File-hwinfo-nrf.c
+FileChecksum: SHA1: f81bf08c5314e233f4f08c0e1082b6735e7735c0
+FileChecksum: SHA256: 3d35e26b7ae302ef9dbb47e6862714cfdeb250d236d2e56f04113972ddfe3c69
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2018 Alexander Wachter
+</text>
+
+FileName: ./zephyr/drivers/hwinfo/hwinfo_weak_impl.c
+SPDXID: SPDXRef-File-hwinfo-weak-impl.c
+FileChecksum: SHA1: dd395cf3ff8b916962f5de3349f05cd0309b047b
+FileChecksum: SHA256: 48b10a943feed3906f1d73f57c964fe436b6468929deb432609f7e277c7e7f10
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2018 Alexander Wachter
+</text>
+
+FileName: ./zephyr/drivers/led/led_gpio.c
+SPDXID: SPDXRef-File-led-gpio.c
+FileChecksum: SHA1: b197210039793e5bf6e1c7d327f0ddf8b4ead67e
+FileChecksum: SHA256: 579564b363369b2a7d11080549756c2f4a89c8eac6f3ecf7ba6da5cdaa0b60f0
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2021 Nordic Semiconductor ASA
+</text>
+
+FileName: ./zephyr/drivers/led/led_pwm.c
+SPDXID: SPDXRef-File-led-pwm.c
+FileChecksum: SHA1: 95eb694bbc8fcf4885dc2977f15d3db48976e52d
+FileChecksum: SHA256: 5b48702860b542ada3b55b219cc85ebf8b1bf25ca421fc7e251012ac47d58083
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2020 Seagate Technology LLC
+</text>
+
+FileName: ./zephyr/drivers/pinctrl/common.c
+SPDXID: SPDXRef-File-common.c
+FileChecksum: SHA1: bc62c004ab58655c910483a84b3f8c1b0650334a
+FileChecksum: SHA256: 8a3ba727dcac3f5ca7b6a103473f29b3b46479bf6f4f78fea95560487c194326
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2021 Nordic Semiconductor ASA
+</text>
+
+FileName: ./zephyr/drivers/pinctrl/pinctrl_nrf.c
+SPDXID: SPDXRef-File-pinctrl-nrf.c
+FileChecksum: SHA1: b94fe0f62e7f37e70dc58403d9a7041fd52528ae
+FileChecksum: SHA256: e0e786026ba48b67d600902bf4a9ed1aa1fdfb5603ec8ff939e3ec5352faa13f
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2021 Nordic Semiconductor ASA
+</text>
+
+FileName: ./zephyr/drivers/pwm/pwm_nrfx.c
+SPDXID: SPDXRef-File-pwm-nrfx.c
+FileChecksum: SHA1: 63beb765ca73db8ecc076bc2ee0385fdbba203a2
+FileChecksum: SHA256: 5990d67f91f376bfdd686ed982fe4481d5b43ece2269f2835db235ab221ef11e
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2018, Cue Health Inc
+</text>
+
+FileName: ./zephyr/drivers/serial/uart_nrfx_uarte.c
+SPDXID: SPDXRef-File-uart-nrfx-uarte.c
+FileChecksum: SHA1: 8d844e50168130946a9e87eb5b9485d834fae53d
+FileChecksum: SHA256: 8b423382a4cf064eb5e0003fdbad9f4b941169de003d2b10d35526b0bb6f3b0f
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2018-2021 Nordic Semiconductor ASA
+</text>
+
+FileName: ./zephyr/drivers/timer/nrf_rtc_timer.c
+SPDXID: SPDXRef-File-nrf-rtc-timer.c
+FileChecksum: SHA1: f3fa3cc4e08999825927f048ae6c8acafa4828cb
+FileChecksum: SHA256: c4a98137fb8d7e1592a10a7aa616526d99db59a7f36f9761eda148df5115f2f7
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2018 Intel Corporation
+ * Copyright (c) 2016-2021 Nordic Semiconductor ASA
+</text>
+
+FileName: ./zephyr/drivers/timer/sys_clock_init.c
+SPDXID: SPDXRef-File-sys-clock-init.c
+FileChecksum: SHA1: 8555c132c4b3041445b86be053184cbb5cade22a
+FileChecksum: SHA256: 426a9d15a2a26d8f250dbd44057f5a56a73efddf9184d2664faec796d578354c
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2015 Wind River Systems, Inc.
+</text>
+
+FileName: ./zephyr/drivers/usb/common/buf/usb_buf.c
+SPDXID: SPDXRef-File-usb-buf.c
+FileChecksum: SHA1: 3c17f9b3e6381ca5bffd28b47e03f56a6d9ffb50
+FileChecksum: SHA256: 8bf2905df587d3d44cdce8d57da0ba8cf102d71434d0c9a65db95f98c37f44f8
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright 2025 Nordic Semiconductor ASA
+</text>
+
+FileName: ./zephyr/drivers/usb/common/nrf_usbd_common/nrf_usbd_common.c
+SPDXID: SPDXRef-File-nrf-usbd-common.c
+FileChecksum: SHA1: a0391d22c652fffca2073cbdf37c18491374346b
+FileChecksum: SHA256: 127ca705bede53d673339992f9062067a946ccec5720d597f35d2de939c6e305
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2016 - 2023, Nordic Semiconductor ASA
+</text>
+
+FileName: ./zephyr/drivers/usb/udc/udc_common.c
+SPDXID: SPDXRef-File-udc-common.c
+FileChecksum: SHA1: 460d4ad7261109379c9ef7d4e36d50df356eaf03
+FileChecksum: SHA256: c1a00e7dbaecef31974765ba69c50653144b32416228d86dc1dac100baf84318
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2021-2022 Nordic Semiconductor ASA
+</text>
+
+FileName: ./zephyr/drivers/usb/udc/udc_nrf.c
+SPDXID: SPDXRef-File-udc-nrf.c
+FileChecksum: SHA1: 35150b764767e297c963454724e08ca63ec4f056
+FileChecksum: SHA256: 880692ff464666e9a0ab5ce7b3ec8f24f17ee930c2a762aa9ea18a07e320ea82
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2021 Nordic Semiconductor ASA
+</text>
+
+FileName: ./zephyr/kernel/banner.c
+SPDXID: SPDXRef-File-banner.c
+FileChecksum: SHA1: a112e978eb3b897b7b730311c54b0eb009e331ff
+FileChecksum: SHA256: 2319b404a9dce5e3d26d692aab552f24a84429e3d2e6ae45365e5d391c9ab19a
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2020 Intel Corporation
+</text>
+
+FileName: ./zephyr/kernel/busy_wait.c
+SPDXID: SPDXRef-File-busy-wait.c
+FileChecksum: SHA1: 65753d08e09d1c75ac30e05a4f3517d4cbc74380
+FileChecksum: SHA256: a9108a9265f7a6e6af6f81feddcca66c59df327d8f31b54e5d960a81cfc347a5
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2018 Intel Corporation
+</text>
+
+FileName: ./zephyr/kernel/condvar.c
+SPDXID: SPDXRef-File-condvar.c
+FileChecksum: SHA1: a2ffde73706709037c3e36cd8e5e840b8c269d92
+FileChecksum: SHA256: a2821164552bcc8bd2dd7b89c018cb223647c74570ff0b857bdc221e19bc18f2
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2020 Intel Corporation.
+</text>
+
+FileName: ./zephyr/kernel/device.c
+SPDXID: SPDXRef-File-device.c
+FileChecksum: SHA1: e74a2226f5371a26a616639a267dcd9986bec541
+FileChecksum: SHA256: 3bfb8a7855e03bd33cc11eea2220b93977fe5df639fcedc8d076412f95788b4e
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2015-2016 Intel Corporation.
+</text>
+
+FileName: ./zephyr/kernel/dynamic_disabled.c
+SPDXID: SPDXRef-File-dynamic-disabled.c
+FileChecksum: SHA1: ef497839cbed688b1a281b81ef439aaa6c20480b
+FileChecksum: SHA256: 7d2627bcb64f6eef6536d14f7458bca1db35ace85134782ef921d6bc989aa31a
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2022, Meta
+</text>
+
+FileName: ./zephyr/kernel/errno.c
+SPDXID: SPDXRef-File-errno.c
+FileChecksum: SHA1: 43f96f87071d1be282defc98ce67f2ac28bbc607
+FileChecksum: SHA256: 79083970578e3c46fa4eb83c35858dccc9048db3a3df82d87e7fbbbd92bcff55
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2015 Wind River Systems, Inc.
+</text>
+
+FileName: ./zephyr/kernel/events.c
+SPDXID: SPDXRef-File-events.c
+FileChecksum: SHA1: b6321b153af3c8393f54c40fd646eaf7b88b3aea
+FileChecksum: SHA256: 85e77a43d2eaebd64dec676bbb87538fb498ef58097ea8b80eeadb6679a1ed94
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2021 Intel Corporation
+</text>
+
+FileName: ./zephyr/kernel/fatal.c
+SPDXID: SPDXRef-File-fatal.c-2
+FileChecksum: SHA1: 4980cf15bc7a13c72c1b36a37df6e267f8ae4436
+FileChecksum: SHA256: 63a403ccdf73d0961e7a8d3b586e8a06908b1352ce226073434cdef5298fc30f
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2019 Intel Corporation.
+</text>
+
+FileName: ./zephyr/kernel/float.c
+SPDXID: SPDXRef-File-float.c
+FileChecksum: SHA1: e879f53dbe0b5bc9e1412e5d0078c85110e1e8d9
+FileChecksum: SHA256: 81d352f3d5b6231ee66301375cb8ac38b77cb4638f0592212151ede00f58b51a
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2024 Intel Corporation
+ * Copyright (c) 2010-2014 Wind River Systems, Inc.
+</text>
+
+FileName: ./zephyr/kernel/idle.c
+SPDXID: SPDXRef-File-idle.c
+FileChecksum: SHA1: db84335fb541756113c198b6a0c3ec88c6090adf
+FileChecksum: SHA256: 5825a70175c55694c36810442eea20fe4a00cb6d0a3cb3a35a98baeb948ef21a
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2016 Wind River Systems, Inc.
+</text>
+
+FileName: ./zephyr/kernel/init.c
+SPDXID: SPDXRef-File-init.c-2
+FileChecksum: SHA1: 243767b2ff84c22d607e327144643fb151b0ea12
+FileChecksum: SHA256: 3bac71d1819fd8479848964cc7950edc59dd025135d8f445bbf2fd4fd19ca439
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2010-2014 Wind River Systems, Inc.
+</text>
+
+FileName: ./zephyr/kernel/kheap.c
+SPDXID: SPDXRef-File-kheap.c
+FileChecksum: SHA1: 711760968b2e53f06d34753b06c888159f8ee0fe
+FileChecksum: SHA256: 5261708bdc7ff4b836b62ca0b2a9920f860e2455b897f271dd96a8b37af4bb1a
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2020 Intel Corporation
+</text>
+
+FileName: ./zephyr/kernel/mailbox.c
+SPDXID: SPDXRef-File-mailbox.c
+FileChecksum: SHA1: 5aeb927a9a57db87539232d72148686c7c694735
+FileChecksum: SHA256: 65b144ac37f81ea52808407cd5379f86747d93b85c427f972b60fd809d289242
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2016 Wind River Systems, Inc.
+</text>
+
+FileName: ./zephyr/kernel/main_weak.c
+SPDXID: SPDXRef-File-main-weak.c
+FileChecksum: SHA1: be7604e0fd0a8168af9a8e89b7e29a666d00e9f7
+FileChecksum: SHA256: 42fbf6062eaaf4e3787134f71327eb48ca5b263dda8e32e3e264d625595e91ae
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2010-2014 Wind River Systems, Inc.
+ * Copyright (c) 2021 Nordic Semiconductor ASA
+</text>
+
+FileName: ./zephyr/kernel/mem_slab.c
+SPDXID: SPDXRef-File-mem-slab.c
+FileChecksum: SHA1: ad9d465ce4e9ed79b1ec09ea307e19c3d88ed7f4
+FileChecksum: SHA256: 54052288bb8889e6e3dc4f1dcd33364d6db31d2f5af1c324b5d0ec76fe501911
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2016 Wind River Systems, Inc.
+</text>
+
+FileName: ./zephyr/kernel/mempool.c
+SPDXID: SPDXRef-File-mempool.c
+FileChecksum: SHA1: 4cb5df06515028ad592bd3d4dd60141f349fa806
+FileChecksum: SHA256: 30ddaec9aa51ffddedc7a08ab3aab728d8a23de29bcd42e37bb423e246dbb98e
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2017 Intel Corporation
+</text>
+
+FileName: ./zephyr/kernel/msg_q.c
+SPDXID: SPDXRef-File-msg-q.c
+FileChecksum: SHA1: 9a26e58bb8d38de562b7e70ebe2702fb299c549d
+FileChecksum: SHA256: c3b476966d9cd41ef41c0ac8626c4d4936dd41aef13e8e3b22c32bf008550393
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2016 Wind River Systems, Inc.
+</text>
+
+FileName: ./zephyr/kernel/mutex.c
+SPDXID: SPDXRef-File-mutex.c
+FileChecksum: SHA1: e5fe7854e4d7fa21d983e2b5a9b561f040aa197e
+FileChecksum: SHA256: 4ae6ed3099b536c54186d8358ec17e04ba63ef16eb751af2663c832d6424de74
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2016 Wind River Systems, Inc.
+</text>
+
+FileName: ./zephyr/kernel/pipe.c
+SPDXID: SPDXRef-File-pipe.c
+FileChecksum: SHA1: edfcf2d2f17fc7b119c5c98cca1c8ce2594b748d
+FileChecksum: SHA256: 407f14fd398799837d0bf7e8e83a1d526b0346e9032e443fb7acd4b88e118de6
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2024 Måns Ansgariusson <mansgariusson@gmail.com>
+</text>
+
+FileName: ./zephyr/kernel/poll.c
+SPDXID: SPDXRef-File-poll.c
+FileChecksum: SHA1: 02adb4746e554edb4bf4004ea629b9edbb1b1020
+FileChecksum: SHA256: 90c7fdff3b745c25e3b22737b0df5060d2c386a6dd0ea7dccd74fee5b7fd3890
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2017 Wind River Systems, Inc.
+ * Copyright (c) 2023 Arm Limited (or its affiliates). All rights reserved.
+</text>
+
+FileName: ./zephyr/kernel/queue.c
+SPDXID: SPDXRef-File-queue.c
+FileChecksum: SHA1: c9ff6280e3680f5277bff68a9122c07d83db96a5
+FileChecksum: SHA256: cdeb0b86c62dca4d12b6c2e2fb192c3d569c449a7d778157caf87669153c7975
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2010-2016 Wind River Systems, Inc.
+</text>
+
+FileName: ./zephyr/kernel/sched.c
+SPDXID: SPDXRef-File-sched.c
+FileChecksum: SHA1: eb671411fb958d8017a14cb78094f5534d0afd69
+FileChecksum: SHA256: ef58ee2a2b5ae64050ddf941ad74ebc3272cec9c4617815fca463d100dcd15e5
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2018 Intel Corporation
+</text>
+
+FileName: ./zephyr/kernel/sem.c
+SPDXID: SPDXRef-File-sem.c
+FileChecksum: SHA1: 64d76e03a9ba57068b4fa8b7dd0d30583da1feb7
+FileChecksum: SHA256: 7731c241d90e49a93afaeeb35714ac3489a9ae165fb98b25d3b0e1cccf35c878
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2010-2016 Wind River Systems, Inc.
+</text>
+
+FileName: ./zephyr/kernel/stack.c
+SPDXID: SPDXRef-File-stack.c
+FileChecksum: SHA1: 7a1340c76a8748822a40d73c0ab22e9fd0358c36
+FileChecksum: SHA256: b5668d4be4f9f2d0e8a46de6d67a2c544a7ae265e47dc97dbdfe77ebd1e54a17
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2010-2016 Wind River Systems, Inc.
+</text>
+
+FileName: ./zephyr/kernel/system_work_q.c
+SPDXID: SPDXRef-File-system-work-q.c
+FileChecksum: SHA1: 9177a7003ebdc362fd133e66c509efce3123b7c1
+FileChecksum: SHA256: 8291501c534a56fe1e1a6df3eadb53407c38396fc7f6581ad7dcee9b8e55cc63
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2016 Wind River Systems, Inc.
+ * Copyright (c) 2016 Intel Corporation
+</text>
+
+FileName: ./zephyr/kernel/thread.c
+SPDXID: SPDXRef-File-thread.c-2
+FileChecksum: SHA1: 0c52cb35de040ff736892e6a7df4a3debac7ef84
+FileChecksum: SHA256: d578649d6118f905f26dbe05886c2e7eee81a19a4ce8e988743153bcc380b9d0
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2010-2014 Wind River Systems, Inc.
+</text>
+
+FileName: ./zephyr/kernel/thread_monitor.c
+SPDXID: SPDXRef-File-thread-monitor.c
+FileChecksum: SHA1: c420cb7514629d8d10f5e4419b92b5bee4307525
+FileChecksum: SHA256: e1ccca4fc568cc4a790306c6919cc31341fcde04c70c889f092667e1ff7f7f8b
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2024 Intel Corporation
+ * Copyright (c) 2010-2014 Wind River Systems, Inc.
+</text>
+
+FileName: ./zephyr/kernel/timeout.c
+SPDXID: SPDXRef-File-timeout.c
+FileChecksum: SHA1: 69e7fedebb29612547a881fa45c8d418d0860bf1
+FileChecksum: SHA256: 62e4ea74bbf5d3c89266c661fb42537ce7d4f320bdd0d2c0d2d4d373c8a23d6e
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2018 Intel Corporation
+</text>
+
+FileName: ./zephyr/kernel/timer.c
+SPDXID: SPDXRef-File-timer.c
+FileChecksum: SHA1: 6c4c23f69930580fd6114fd0c5f1add7562c8507
+FileChecksum: SHA256: 6fd08a0b25786c9a220a93d340c23e397676b97fd492090efb56111ed125defd
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 1997-2016 Wind River Systems, Inc.
+</text>
+
+FileName: ./zephyr/kernel/timeslicing.c
+SPDXID: SPDXRef-File-timeslicing.c
+FileChecksum: SHA1: 9bf9001ed289fc08c9769f7effc808e62a957b49
+FileChecksum: SHA256: 187a3efd48ef4d3df81aa8677631c4e8bf27a068761bbff4e004df8705be7017
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2018, 2024 Intel Corporation
+</text>
+
+FileName: ./zephyr/kernel/usage.c
+SPDXID: SPDXRef-File-usage.c
+FileChecksum: SHA1: e9701ed8353610346add3569c38719004732f1d7
+FileChecksum: SHA256: 75f56934195bb903c6d94bdd1e90641416b2d557d4cbd803ecefe0d0b5893720
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2018 Intel Corporation
+</text>
+
+FileName: ./zephyr/kernel/version.c
+SPDXID: SPDXRef-File-version.c
+FileChecksum: SHA1: 480e7aba3070de62c5681192a2a31e385074d12c
+FileChecksum: SHA256: c03c0e0b32c550cd044490a6efa1ef0fc6b5b550cbdb191fc024a7a2c3cb0314
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 1997-2010, 2012-2014 Wind River Systems, Inc.
+</text>
+
+FileName: ./zephyr/kernel/work.c
+SPDXID: SPDXRef-File-work.c
+FileChecksum: SHA1: 178a569b9be68a391036a6cb9a2a9407a9b1e987
+FileChecksum: SHA256: 5d6af6bc882d76222f9ac41d427da0395a919210337e2f7479238627ed0e5385
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2020 Nordic Semiconductor ASA
+</text>
+
+FileName: ./zephyr/lib/hash/hash_func32_djb2.c
+SPDXID: SPDXRef-File-hash-func32-djb2.c
+FileChecksum: SHA1: 8f0e292921e9700e34f94ced969d3b795e66411e
+FileChecksum: SHA256: f858d8bd4a98a990f23a14c1d67c036ac57e8a6e09aa23fd7f17381e902cf8a4
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 1991, Daniel J. Bernstein
+</text>
+
+FileName: ./zephyr/lib/hash/hash_func32_murmur3.c
+SPDXID: SPDXRef-File-hash-func32-murmur3.c
+FileChecksum: SHA1: 18d0f209c1259bf88c0b9e1f4c63ef5de463a902
+FileChecksum: SHA256: 4604525b87142ed94f77277b050ac1de0af1d0414b79b804c8cfe0f315d2f2e6
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2022, Meta
+</text>
+
+FileName: ./zephyr/lib/heap/heap.c
+SPDXID: SPDXRef-File-heap.c
+FileChecksum: SHA1: 7c16241982180c307262bbdad96bf271de5444d5
+FileChecksum: SHA256: 55db5bce2fa1fc4f30f6489adc8981ee53cb382ea3a24f059d74afd4c57222a7
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2019 Intel Corporation
+</text>
+
+FileName: ./zephyr/lib/heap/heap_constants.c
+SPDXID: SPDXRef-File-heap-constants.c
+FileChecksum: SHA1: 81ad35b3ff8546a47e3dfc2e41dd816839cee132
+FileChecksum: SHA256: 8e5e203ee568eff470f71a1050c98b1f7bd66c5436eff0a98272a16fbf77cb93
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2026 BayLibre SAS
+</text>
+
+FileName: ./zephyr/lib/libc/common/source/stdio/remove.c
+SPDXID: SPDXRef-File-remove.c
+FileChecksum: SHA1: ace17c84dd527a771ae24a2ba431e326337737b4
+FileChecksum: SHA256: 7a555b9c31d3ad2500468494db7d65f2c41655351915273841bea6a124b6b5c3
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2024 Linumiz.
+</text>
+
+FileName: ./zephyr/lib/libc/common/source/stdlib/abort.c
+SPDXID: SPDXRef-File-abort.c
+FileChecksum: SHA1: f0f1e835a9bef08b3093115887951d49ae154083
+FileChecksum: SHA256: 1bdf701115a6779f79ad94284c2e4aed4d3949164d3bdff07fd30e65da5745f2
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2020 Linaro Limited
+</text>
+
+FileName: ./zephyr/lib/libc/common/source/stdlib/malloc.c
+SPDXID: SPDXRef-File-malloc.c
+FileChecksum: SHA1: cb27adcf3c88df23714ed75a2d394b0e756b519a
+FileChecksum: SHA256: 94b97e72fb4caf092edbc0910c29d262762085ae126e4877544035700243e041
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2018 Intel Corporation
+</text>
+
+FileName: ./zephyr/lib/libc/common/source/time/time.c
+SPDXID: SPDXRef-File-time.c
+FileChecksum: SHA1: 4a6c1370cce7804479f69d0230f9572c1ff9e0a1
+FileChecksum: SHA256: 87b97a2f0aa0c29cd2d083241f957ef51522750f7b38386b8d551498098e6866
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2021 Golioth, Inc.
+ * Copyright (c) 2025 Tenstorrent AI ULC
+</text>
+
+FileName: ./zephyr/lib/libc/picolibc/assert.c
+SPDXID: SPDXRef-File-assert.c
+FileChecksum: SHA1: 4fb31eb36704b072f6d1b9dfb2008a291d932d8d
+FileChecksum: SHA256: d1fd4cbd6cac5c9a8fadf6791d7ccf7d98329ef393b7561a6575a65535e2c8ed
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright © 2021, Keith Packard <keithp@keithp.com>
+</text>
+
+FileName: ./zephyr/lib/libc/picolibc/cbprintf.c
+SPDXID: SPDXRef-File-cbprintf.c
+FileChecksum: SHA1: 67ee235120a4e7c675ac29c9a04e245701c86ea0
+FileChecksum: SHA256: 9ccd095d5159b94585f7b70fe9ff07218a561920587f96ef86decb8180ebd8c1
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright © 2021, Keith Packard <keithp@keithp.com>
+</text>
+
+FileName: ./zephyr/lib/libc/picolibc/chk_fail.c
+SPDXID: SPDXRef-File-chk-fail.c
+FileChecksum: SHA1: 41535f3b76dcf1cbaf4b3390e9480a6fec5ded94
+FileChecksum: SHA256: 705fc796458995926f9eb208f4a92a3084da8377ec8307dc5a69dd9e40303c58
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright © 2021, Keith Packard <keithp@keithp.com>
+</text>
+
+FileName: ./zephyr/lib/libc/picolibc/errno_wrap.c
+SPDXID: SPDXRef-File-errno-wrap.c
+FileChecksum: SHA1: 9af2660b105b2b9ca01c64d00b78add5791e6bf1
+FileChecksum: SHA256: 3ab1673e88c424788fcd093527058d727b776a12677e9996b434083d553f5940
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright © 2021, Keith Packard <keithp@keithp.com>
+</text>
+
+FileName: ./zephyr/lib/libc/picolibc/exit.c
+SPDXID: SPDXRef-File-exit.c
+FileChecksum: SHA1: 8292d0478f30bc09cdd1afb24f4b87eb62bbbfbb
+FileChecksum: SHA256: d6c02e06cace94d70c9ea241dba2e9d46dc5d446ec8f8aa745d9ce1064c6d074
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright © 2021, Keith Packard <keithp@keithp.com>
+</text>
+
+FileName: ./zephyr/lib/libc/picolibc/locks.c
+SPDXID: SPDXRef-File-locks.c
+FileChecksum: SHA1: 6a00b4b9ff6e01abb041fd4122d47561efcc39e7
+FileChecksum: SHA256: 134dff8e0cdf6a159cf4d7db1e920245a48c63f283da6e2835a0218796038d48
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright © 2021, Keith Packard <keithp@keithp.com>
+</text>
+
+FileName: ./zephyr/lib/libc/picolibc/stdio.c
+SPDXID: SPDXRef-File-stdio.c
+FileChecksum: SHA1: 2a76934620512fede49531326bf9e6734fe5c197
+FileChecksum: SHA256: 164e7af711517c219af88560d5a7c9d3517c6364339182be50bb1150f7eb55db
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright © 2021, Keith Packard <keithp@keithp.com>
+</text>
+
+FileName: ./zephyr/lib/libc/validate_libc.c
+SPDXID: SPDXRef-File-validate-libc.c
+FileChecksum: SHA1: ccb2103191ed5ae8dfea21ab107936c48a4534a2
+FileChecksum: SHA256: 6bc651f7181d4906d48531af5904dd305fe69fc13d1bf021bb6a6f068224e2b9
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright © 2025 Keith Packard <keithp@keithp.com>
+</text>
+
+FileName: ./zephyr/lib/net_buf/buf.c
+SPDXID: SPDXRef-File-buf.c
+FileChecksum: SHA1: 9269804326bf1cbafc4b879574f9495e8429df5e
+FileChecksum: SHA256: 4dfca3329c1472a0f6f121b3e83aa1759470c4c8b01f0556c35e93bcebce7a4d
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2015-2019 Intel Corporation
+</text>
+
+FileName: ./zephyr/lib/net_buf/buf_simple.c
+SPDXID: SPDXRef-File-buf-simple.c
+FileChecksum: SHA1: 4597ccc24193a797929db8c4b107654197449d6e
+FileChecksum: SHA256: 2721c30ab86db12202a72fe51955099040900e21ba14321ec45539c543891331
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2015-2019 Intel Corporation
+</text>
+
+FileName: ./zephyr/lib/os/assert.c
+SPDXID: SPDXRef-File-assert.c-2
+FileChecksum: SHA1: 724d7bd67a61612845e360d316c8c3f3119df2f2
+FileChecksum: SHA256: 6a5ed7e790b9860c1fd29089c67437e272822eb830a30835ddce1835c8072bf1
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2019 Nordic Semiconductor ASA
+</text>
+
+FileName: ./zephyr/lib/os/cbprintf_complete.c
+SPDXID: SPDXRef-File-cbprintf-complete.c
+FileChecksum: SHA1: 7431255c9ea156c65931faaa91b2895f8f2bbaa0
+FileChecksum: SHA256: fec901818471d5db5b067d554734e5b7bb4412c1d4e99f594d9c916206163be3
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2020 Nordic Semiconductor ASA
+ * Copyright (c) 1997-2010, 2012-2015 Wind River Systems, Inc.
+</text>
+
+FileName: ./zephyr/lib/os/cbprintf_packaged.c
+SPDXID: SPDXRef-File-cbprintf-packaged.c
+FileChecksum: SHA1: 22d397b28a89d1d26357c6b9d00a9e7d99dca006
+FileChecksum: SHA256: 44cd5100ee7419d9dba3174742eaca222de86f06c2cf2b8d2277e209383942fb
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2021 BayLibre, SAS
+</text>
+
+FileName: ./zephyr/lib/os/clock.c
+SPDXID: SPDXRef-File-clock.c-2
+FileChecksum: SHA1: e4f2933144ddcc74563938d468188cecff813ffb
+FileChecksum: SHA256: 7d04d0e77b6576a65efa1c8b32468805c83e3716efaeb28cd0156d445a895d66
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2018 Friedt Professional Engineering Services, Inc
+ * Copyright (c) 2018 Intel Corporation
+ * Copyright (c) 2025 Tenstorrent AI ULC
+</text>
+
+FileName: ./zephyr/lib/os/mpsc_pbuf.c
+SPDXID: SPDXRef-File-mpsc-pbuf.c
+FileChecksum: SHA1: 4087363bd8f1606939e48e64c2a75670f591e0c8
+FileChecksum: SHA256: 2619174366df61de945c9c29d5989b036affce791fed7d39e2cbfedda1c47ae4
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2021 Nordic Semiconductor
+</text>
+
+FileName: ./zephyr/lib/os/printk.c
+SPDXID: SPDXRef-File-printk.c
+FileChecksum: SHA1: e2aedc03961b10a7b93defcc816f430022a22e28
+FileChecksum: SHA256: 9af2794fdb26230f9cc35d044ebd21fcd851f200c52e05cfd81b51387f3d7d48
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2010, 2013-2014 Wind River Systems, Inc.
+</text>
+
+FileName: ./zephyr/lib/os/sem.c
+SPDXID: SPDXRef-File-sem.c-2
+FileChecksum: SHA1: e456d36a24bade411536ee49936a579998c38999
+FileChecksum: SHA256: ebf54b1f8ce07c21ffc7120dac844062228d850c68d4c4f0bb98976d9f9d2493
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2019 Intel Corporation
+</text>
+
+FileName: ./zephyr/lib/os/thread_entry.c
+SPDXID: SPDXRef-File-thread-entry.c
+FileChecksum: SHA1: 6d133fcdb4ec94b9018f874d2f676970b2111ef0
+FileChecksum: SHA256: 804bac4ee4318aefd5e1b57b677383366108cd24c2625688fc43309385b4fff2
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2018 Intel Corporation
+</text>
+
+FileName: ./zephyr/lib/os/zvfs/zvfs_eventfd.c
+SPDXID: SPDXRef-File-zvfs-eventfd.c
+FileChecksum: SHA1: 0ff6cb76d1f582a359bbbf154a5116252fe2838c
+FileChecksum: SHA256: 39d8867ffa8f113a66db8aaf3a794e694e66b398f91bc51da1a2540b873cab2a
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2023, Meta
+ * Copyright (c) 2024, Tenstorrent AI ULC
+ * Copyright (c) 2020 Tobias Svehagen
+</text>
+
+FileName: ./zephyr/lib/os/zvfs/zvfs_fdtable.c
+SPDXID: SPDXRef-File-zvfs-fdtable.c
+FileChecksum: SHA1: 8ae0002498a620c8a78eb2c10b8bd8a0ca93ccf6
+FileChecksum: SHA256: e8a3445e563162faf304d4fccbd179b1d917e14fd524d59f731561ab83225896
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2024 Tenstorrent AI ULC
+ * Copyright (c) 2025 Antmicro
+ * Copyright (c) 2018 Linaro Limited
+</text>
+
+FileName: ./zephyr/lib/os/zvfs/zvfs_file_vmethods.c
+SPDXID: SPDXRef-File-zvfs-file-vmethods.c
+FileChecksum: SHA1: 286c364c5d48899130a1b1c3c6ae795a380da4f3
+FileChecksum: SHA256: 73be8a60b0e8bccb31f2d3807e3d1eda8dee70cb6113de312207a0e4b9f80632
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2025 Antmicro
+</text>
+
+FileName: ./zephyr/lib/os/zvfs/zvfs_poll.c
+SPDXID: SPDXRef-File-zvfs-poll.c
+FileChecksum: SHA1: 881d9ea835b4482d87307f7fff194c6fe4451b7b
+FileChecksum: SHA256: c0f5b9cd784c4ecef0c6e177a156e64af2f605d9f8df4bcd2ef71fad5e903dee
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2017-2018 Linaro Limited
+ * Copyright (c) 2024 Tenstorrent AI ULC
+ * Copyright (c) 2021 Nordic Semiconductor
+ * Copyright (c) 2023 Arm Limited (or its affiliates). All rights reserved.
+</text>
+
+FileName: ./zephyr/lib/os/zvfs/zvfs_select.c
+SPDXID: SPDXRef-File-zvfs-select.c
+FileChecksum: SHA1: 20d854fe23f05ed1924f2f1fd261cb663b10221d
+FileChecksum: SHA256: ad23b533e893af7622c6826dc0dc01e7f9e9729e51fe60132936a08c136d0a50
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2024 Tenstorrent AI ULC
+ * Copyright (c) 2018 Linaro Limited
+</text>
+
+FileName: ./zephyr/lib/posix/c_lib_ext/fnmatch.c
+SPDXID: SPDXRef-File-fnmatch.c
+FileChecksum: SHA1: 7674b0099211dc170c40d56afc9eb07c36ea02c0
+FileChecksum: SHA256: 6eb71389917dc01bb5b4cd8a7931e13fb19938f7da7418a176c2408e63316771
+LicenseConcluded: BSD-3-Clause
+LicenseInfoInFile: BSD-3-Clause
+FileCopyrightText: <text>
+ * Copyright (c) 2011 The FreeBSD Foundation
+ * Copyright (c) 1989, 1993, 1994
+</text>
+
+FileName: ./zephyr/lib/posix/c_lib_ext/getentropy.c
+SPDXID: SPDXRef-File-getentropy.c
+FileChecksum: SHA1: 15852315e734e55e220d1742d846f75f3bee53d7
+FileChecksum: SHA256: bcb824c2fbf67db6c4fa6557eef8366961fc3ae22981360fbb1689b17b0541a4
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2024 Google LLC
+</text>
+
+FileName: ./zephyr/lib/posix/c_lib_ext/getopt_shim.c
+SPDXID: SPDXRef-File-getopt-shim.c
+FileChecksum: SHA1: 4bc3c62675858e1005a218065d4bf261611d4217
+FileChecksum: SHA256: 1d93002bb25482de006a88af3e52f2343dba260501a741293b86d878cc081dd5
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2025 Nordic Semiconductor ASA
+</text>
+
+FileName: ./zephyr/lib/posix/eventfd/eventfd.c
+SPDXID: SPDXRef-File-eventfd.c
+FileChecksum: SHA1: 8ca24f4cfa6236155fdc8e9112ffdd06b0b5b3c0
+FileChecksum: SHA256: 54967513b8b5213ba03330663194b058d7e08be3b26305f819f1cd2e7098e00b
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2024, Tenstorrent AI ULC
+</text>
+
+FileName: ./zephyr/lib/posix/options/aio.c
+SPDXID: SPDXRef-File-aio.c
+FileChecksum: SHA1: 870e7a2de4f4d8c3f06c68849f8026762ee560e1
+FileChecksum: SHA256: aeff853ae4b2e7811a51589daa945fe22788123988ca0531b38ce9eb9437c2a4
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright 2024 Tenstorrent AI ULC
+</text>
+
+FileName: ./zephyr/lib/posix/options/barrier.c
+SPDXID: SPDXRef-File-barrier.c
+FileChecksum: SHA1: 0be61d77112627ed4d0bfb3793a49680cd83afb7
+FileChecksum: SHA256: fc178ef7bc4f8726e5a22c1d267a5dd9699fece9f4c8b5c673012af2c077de81
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2017 Intel Corporation
+ * Copyright (c) 2023 Meta
+</text>
+
+FileName: ./zephyr/lib/posix/options/clock.c
+SPDXID: SPDXRef-File-clock.c
+FileChecksum: SHA1: a7ac71813221e8018df0388d3b8c105d810c03a4
+FileChecksum: SHA256: f492cd02aeae8683b991770b996758fd91b7757dcfb89c8f4092da0e149e836d
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2018 Friedt Professional Engineering Services, Inc
+ * Copyright (c) 2018 Intel Corporation
+</text>
+
+FileName: ./zephyr/lib/posix/options/clock_selection.c
+SPDXID: SPDXRef-File-clock-selection.c
+FileChecksum: SHA1: f3ab123141d47426a561cb5276ab8ad4b5bf74bc
+FileChecksum: SHA256: 6df95eee7aa5e39fcf91f0a076ba86ae482e391b3fd8d753012314fd54b6ff2f
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2023 Meta
+ * Copyright (c) 2025 Tenstorrent AI ULC
+</text>
+
+FileName: ./zephyr/lib/posix/options/cond.c
+SPDXID: SPDXRef-File-cond.c
+FileChecksum: SHA1: 73654e56aa7352a4c3eb031b87fad815118ac373
+FileChecksum: SHA256: ac417f6bd9fde1b84b3e41235032d9faa03e201d843db1417ba400bd8f408217
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2017 Intel Corporation
+ * Copyright (c) 2023 Meta
+</text>
+
+FileName: ./zephyr/lib/posix/options/confstr.c
+SPDXID: SPDXRef-File-confstr.c
+FileChecksum: SHA1: 524494781619553b686960e316c965a531c3a438
+FileChecksum: SHA256: 85d7729ad4f86be791c5cb97ef7a5da6b2909856f3fc501af53344e14aaf0963
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2024, Meta
+</text>
+
+FileName: ./zephyr/lib/posix/options/device_io.c
+SPDXID: SPDXRef-File-device-io.c
+FileChecksum: SHA1: 42f2c6a5c1a6d0efb5e6807cac911bb247c07d0c
+FileChecksum: SHA256: 0b721fd55926a11aa5ca7b1d694024effe3d1a839a15d7e03aca0643a94218e0
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2024, Tenstorrent AI ULC
+</text>
+
+FileName: ./zephyr/lib/posix/options/env.c
+SPDXID: SPDXRef-File-env.c
+FileChecksum: SHA1: 2928dbfdfebf1786c8761c03c4ddeecd098b9d30
+FileChecksum: SHA256: 2b3d7d5a3a793a31f54e388767fdc513f7438343feb71c3987cce2d6c576834f
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2023, Meta
+</text>
+
+FileName: ./zephyr/lib/posix/options/env_common.c
+SPDXID: SPDXRef-File-env-common.c
+FileChecksum: SHA1: 79ddf3d0c88303edbe64f8dc57cb9a52fc9a8f03
+FileChecksum: SHA256: 172662ce7edbcbd756063013e8dca6cccffda1b773a31dc74ff1d0f8c385fcdf
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2023, Meta
+ * Copyright (c) 2025 Tenstorrent AI ULC
+</text>
+
+FileName: ./zephyr/lib/posix/options/fd_mgmt.c
+SPDXID: SPDXRef-File-fd-mgmt.c
+FileChecksum: SHA1: c3eeb45961d104fec3c8f278e7cb9bc3f0db3d80
+FileChecksum: SHA256: f1a6b012ee0e06d9619c7bcb476da08670a99e8fc0672c84962e145883690aaf
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2024, Tenstorrent AI ULC
+</text>
+
+FileName: ./zephyr/lib/posix/options/file_system_r.c
+SPDXID: SPDXRef-File-file-system-r.c
+FileChecksum: SHA1: 611a95e0e0a7d57f51d6f01d3011b85ca819eb65
+FileChecksum: SHA256: 4a21b9d5c0b7f8936975160ccd031a8edfff58bd41b32d1e08d098b690e76b92
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2024 Tenstorrent AI ULC
+</text>
+
+FileName: ./zephyr/lib/posix/options/fs.c
+SPDXID: SPDXRef-File-fs.c
+FileChecksum: SHA1: c49138d203f989c349b84b09744996a1e03f47af
+FileChecksum: SHA256: 9b442def607ada9cd129510e3fba2e02f3ec109b1565d26e2ddceb82b1ead364
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2018 Intel Corporation
+</text>
+
+FileName: ./zephyr/lib/posix/options/fsync.c
+SPDXID: SPDXRef-File-fsync.c
+FileChecksum: SHA1: b9442b501791f17810c57565360aceae1d9c1f2f
+FileChecksum: SHA256: 9d94c2181202b070cafc3fc0274288a6b27c8e0c19a7fb5b71c8c379c39d3fcd
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2024 Tenstorrent AI ULC
+</text>
+
+FileName: ./zephyr/lib/posix/options/grp.c
+SPDXID: SPDXRef-File-grp.c
+FileChecksum: SHA1: 7633a629d1df7ad1e3b5109a55c028b845fb592d
+FileChecksum: SHA256: 8759aeed8f6256d9f09a39af5fba6e6d7f6eea1bd7f575bfe108a80026887b00
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2024 Meta Platforms
+</text>
+
+FileName: ./zephyr/lib/posix/options/key.c
+SPDXID: SPDXRef-File-key.c
+FileChecksum: SHA1: 1e50a8ea31416b5d0c06ae3ea20380d51ac13d2e
+FileChecksum: SHA256: afbc7a0ec51288d597d71a96fb9ed1c20ae0eba97c600495ec8dd68ca967797c
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2018 Intel Corporation
+ * Copyright (c) 2023 Meta
+</text>
+
+FileName: ./zephyr/lib/posix/options/mlock.c
+SPDXID: SPDXRef-File-mlock.c
+FileChecksum: SHA1: ae159e666acc0a50a3b0cdc44b781ca96748e742
+FileChecksum: SHA256: 47dd00e59ebc226944a0c6955d1b43dbfc0708fb2e1d587555ad2fd612bc9331
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2024, Tenstorrent AI ULC
+</text>
+
+FileName: ./zephyr/lib/posix/options/mlockall.c
+SPDXID: SPDXRef-File-mlockall.c
+FileChecksum: SHA1: e0b7533c158b701797d3fc61613ab874c6318492
+FileChecksum: SHA256: a58bd7c63822293e86f1f3d15253dc0dcc1bccb49c31db9de5dd606cf51f953c
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2024, Tenstorrent AI ULC
+</text>
+
+FileName: ./zephyr/lib/posix/options/mmap.c
+SPDXID: SPDXRef-File-mmap.c
+FileChecksum: SHA1: 944fd61e6981eee373c96baaeafd7d54d0b81942
+FileChecksum: SHA256: 268896f29ddfa56f8392bb485a6cee5f26e4cf915bb5d81fc09b99bcd24a0751
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2024, Tenstorrent AI ULC
+</text>
+
+FileName: ./zephyr/lib/posix/options/mprotect.c
+SPDXID: SPDXRef-File-mprotect.c
+FileChecksum: SHA1: af4622e4bf3fff8f28f3bd7648ff039e89877512
+FileChecksum: SHA256: e5242cd966f5a9185799126296a06ac415a86a5c2821bc60298e501a454cc6b5
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2024, Tenstorrent AI ULC
+</text>
+
+FileName: ./zephyr/lib/posix/options/multi_process.c
+SPDXID: SPDXRef-File-multi-process.c
+FileChecksum: SHA1: 31daf201695e132c8fac1a8ae642537d28c402f8
+FileChecksum: SHA256: 7b1d2a1a7994e030900d5fa40f6a9adbc0e9d021d902ec391140fb581e7cebae
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2024, Tenstorrent AI ULC
+</text>
+
+FileName: ./zephyr/lib/posix/options/mutex.c
+SPDXID: SPDXRef-File-mutex.c-2
+FileChecksum: SHA1: 0832a36b7fd055ee57816049577a62d754acb32b
+FileChecksum: SHA256: 135c8a7d5849936d71690b29e6eb9953dbbffe96838773311e7978878fa73c91
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2017 Intel Corporation
+ * Copyright (c) 2023 Meta
+</text>
+
+FileName: ./zephyr/lib/posix/options/net.c
+SPDXID: SPDXRef-File-net.c
+FileChecksum: SHA1: eeaf05cc8538807ed98224d2e6bc0b9410bd987a
+FileChecksum: SHA256: 703d4c0d98a73177ee29b5b4afae6079bee67e29df0698775398405d33f133b1
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2024, Friedt Professional Engineering Services, Inc
+ * Copyright (c) 2019 Linaro Limited
+</text>
+
+FileName: ./zephyr/lib/posix/options/perror.c
+SPDXID: SPDXRef-File-perror.c
+FileChecksum: SHA1: 5f41c288caa73bc0884a2e7c7b6bbb87acf5e115
+FileChecksum: SHA256: 6316cdd343b3f1045f4eed97143a20bfe761b9d7aa81a25592ad55c56001ada6
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2022 Meta
+</text>
+
+FileName: ./zephyr/lib/posix/options/pthread.c
+SPDXID: SPDXRef-File-pthread.c
+FileChecksum: SHA1: 689d6754b950ff48a777b15bd7cccfcfeaef0036
+FileChecksum: SHA256: 243d484a8ff25438fd237b075f80b37caceb517916e20b82217c90e0abd2036c
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2018 Intel Corporation
+ * Copyright (c) 2023 Meta
+</text>
+
+FileName: ./zephyr/lib/posix/options/pwd.c
+SPDXID: SPDXRef-File-pwd.c
+FileChecksum: SHA1: 7b507b80c0e137972791d550d7f1a36233b8ce7e
+FileChecksum: SHA256: 2be2335d7a70738485aef18f6fe62170149b6fde6a8070be24a9a1aada977b9d
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2024 Meta Platforms
+</text>
+
+FileName: ./zephyr/lib/posix/options/rwlock.c
+SPDXID: SPDXRef-File-rwlock.c
+FileChecksum: SHA1: 761f048404f4342433d27ff1fb6a0f75e02e4afc
+FileChecksum: SHA256: b9e6d2050318a714b120ca2d84bbbeb0f1d645b5d0e0763a189cfbd5cd084e5a
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2018 Intel Corporation
+</text>
+
+FileName: ./zephyr/lib/posix/options/semaphore.c
+SPDXID: SPDXRef-File-semaphore.c
+FileChecksum: SHA1: 61ef6783ff184d0ebe1dbbf1c25ffd5ff4228870
+FileChecksum: SHA256: 6692b2bf26d19aec69b30b02e0a33adde8e9dca67e500b67170e2eb4d34e5732
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2018 Intel Corporation
+ * Copyright (c) 2023 Meta
+</text>
+
+FileName: ./zephyr/lib/posix/options/shm.c
+SPDXID: SPDXRef-File-shm.c
+FileChecksum: SHA1: eea7c4734aba0c9204fbb262aa5b914d9aeec149
+FileChecksum: SHA256: bda5654596f38f4c93fdf93bcb5076fb9e9ea8d337ff8fc004ca59f007b0ae02
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2024, Tenstorrent AI ULC
+</text>
+
+FileName: ./zephyr/lib/posix/options/signal.c
+SPDXID: SPDXRef-File-signal.c
+FileChecksum: SHA1: 3e9ae343c158b032987b5aa1806deeaaacfd9c3d
+FileChecksum: SHA256: 0883dcecadb96801f7db1fe42f4ef69a6b84de9e28e74250f5ca6b362deeb068
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2023 Meta
+</text>
+
+FileName: ./zephyr/lib/posix/options/sleep.c
+SPDXID: SPDXRef-File-sleep.c
+FileChecksum: SHA1: 2cbe17c3a309c863785ea27587c39336da0684d3
+FileChecksum: SHA256: 6e1513153c48e21696301a041024dfb73c4be42cf7fa4ceba2d69fc6b2eebb56
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2018 Intel Corporation
+</text>
+
+FileName: ./zephyr/lib/posix/options/spinlock.c
+SPDXID: SPDXRef-File-spinlock.c
+FileChecksum: SHA1: 23191ae45ede5fdf966ebe2d4f1cd29a626f5936
+FileChecksum: SHA256: a1e0bc108bc040ad68674aedc511a77118d4dcc9b199461cdb6be220b4140751
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2023, Meta
+</text>
+
+FileName: ./zephyr/lib/posix/options/sysconf.c
+SPDXID: SPDXRef-File-sysconf.c
+FileChecksum: SHA1: 10ce1bbb7d1ba997df029b55ede0958d9032c70d
+FileChecksum: SHA256: 78020e9f9e4a428155bb1f42b6629daf6f7e9a64f3b6ebbc34726c9c4020706a
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2024, Meta
+</text>
+
+FileName: ./zephyr/lib/posix/options/timer.c
+SPDXID: SPDXRef-File-timer.c-2
+FileChecksum: SHA1: 81896eda19ce5e00d1d8a031a580ddcc5c11e037
+FileChecksum: SHA256: 5fccded03b2e083c963ab29a1df9463ae506f84599b9cea2f288a401512762b7
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2018 Intel Corporation
+ * Copyright (c) 2024, Meta
+</text>
+
+FileName: ./zephyr/lib/posix/options/timespec_to_timeout.c
+SPDXID: SPDXRef-File-timespec-to-timeout.c
+FileChecksum: SHA1: 591ab750d02c936ca3863ad8b7a8328dda67d439
+FileChecksum: SHA256: ad5791d232daec8842b6876df5876169320aad123e0298e7406a2287359beccb
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2017 Intel Corporation
+</text>
+
+FileName: ./zephyr/lib/posix/options/uname.c
+SPDXID: SPDXRef-File-uname.c
+FileChecksum: SHA1: e4160c77287cec5523fb169864bb5bd0495e7097
+FileChecksum: SHA256: 2b2c315072be48326979e90240300e4aee8ccec60cc917269a961d4a43e1bbed
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2023 Meta
+</text>
+
+FileName: ./zephyr/lib/posix/options/xsi_single_process.c
+SPDXID: SPDXRef-File-xsi-single-process.c
+FileChecksum: SHA1: 4872f79c5f02904281c4b0aac01e5184aeedb4a9
+FileChecksum: SHA256: 0a6fa958619c3e18b0a0e3bdff81deb01bf3665c000ec056996153fe9869dbdf
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2018 Intel Corporation
+ * Copyright (c) 2025 Tenstorrent AI ULC
+ * Copyright (c) 2023 Meta
+</text>
+
+FileName: ./zephyr/lib/utils/base64.c
+SPDXID: SPDXRef-File-base64.c-2
+FileChecksum: SHA1: 4b5924913636f31b95b6ad1911a15aa6310fb614
+FileChecksum: SHA256: 5ea24b127ba8b4a6fc10930103543a841a488decd4bc4ac005510de1870e1f8a
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (C) 2018, Nordic Semiconductor ASA
+ * Copyright (C) 2006-2015, ARM Limited, All Rights Reserved
+</text>
+
+FileName: ./zephyr/lib/utils/bitarray.c
+SPDXID: SPDXRef-File-bitarray.c
+FileChecksum: SHA1: 544276c379bc144b0d1bb832c7b19be8670f8030
+FileChecksum: SHA256: 9ef876c65835e0344d956d96e164e982c01ec31284ba44f07e87b46cca9b5239
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2021 Intel Corporation
+</text>
+
+FileName: ./zephyr/lib/utils/bitmask.c
+SPDXID: SPDXRef-File-bitmask.c
+FileChecksum: SHA1: dd82760a283009478b34bec21f851c946cc027b4
+FileChecksum: SHA256: 264a17d6646b7eac0cbdf3aa5cff388aa8fa576cf67fa73f31656df8110311ca
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2025 Nordic Semiconductor ASA
+</text>
+
+FileName: ./zephyr/lib/utils/dec.c
+SPDXID: SPDXRef-File-dec.c
+FileChecksum: SHA1: d319043c3e3063ddf8a7d731c76f3371708c7977
+FileChecksum: SHA256: b6991d4a5dd46650e0b3a85ed0adcdb87842832bc4c5108fc0918f125316ade0
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2019 Oticon A/S
+</text>
+
+FileName: ./zephyr/lib/utils/getopt/getopt.c
+SPDXID: SPDXRef-File-getopt.c
+FileChecksum: SHA1: 25747564c0cf959baa49a34eb2c3e3ad9ed2e854
+FileChecksum: SHA256: c0bafb860b2fcc627aacaedac509360ebacac0cab8da169c7785ddaa4ed6b51f
+LicenseConcluded: BSD-3-Clause
+LicenseInfoInFile: BSD-3-Clause
+FileCopyrightText: <text>
+ * Copyright (c) 1987, 1993, 1994
+</text>
+
+FileName: ./zephyr/lib/utils/getopt/getopt_common.c
+SPDXID: SPDXRef-File-getopt-common.c
+FileChecksum: SHA1: 80c0a83f5e42876cd2ae3cf29b56b4eca82cfbc9
+FileChecksum: SHA256: b08caf78cbfe2138068bf12c2ca2802f833f7d598048bee55fb9c0a1d05c4366
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2021 Nordic Semiconductor ASA
+</text>
+
+FileName: ./zephyr/lib/utils/hex.c
+SPDXID: SPDXRef-File-hex.c
+FileChecksum: SHA1: 4e0446c2b4530dd44be488fb5df24feb2caa17e9
+FileChecksum: SHA256: 7d999d00f81e38a56bb8e11e82c691504c12e3fdbd5e1b6e02ae4f63c683b99d
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2019 Nordic Semiconductor ASA
+</text>
+
+FileName: ./zephyr/lib/utils/json.c
+SPDXID: SPDXRef-File-json.c
+FileChecksum: SHA1: 4f07205a18e0a757c1784a813bba4b27128a7f9e
+FileChecksum: SHA256: 05584dfea04b5b1e7993775c52aa8bc009ea36343ed51ee832990c24482e4034
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2017 Intel Corporation
+</text>
+
+FileName: ./zephyr/lib/utils/last_section_id.c
+SPDXID: SPDXRef-File-last-section-id.c
+FileChecksum: SHA1: 70325b8820b4b82239394b85ff52e9c29ddbb393
+FileChecksum: SHA256: e45c01dca52130f43b1c1dc2422762ea4d7dbde468085dc3534bfef3c5ef600d
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (C) 2025, Nordic Semiconductor ASA
+</text>
+
+FileName: ./zephyr/lib/utils/notify.c
+SPDXID: SPDXRef-File-notify.c
+FileChecksum: SHA1: 463bdc856288a3789fc5fa0314cb84c1362c620f
+FileChecksum: SHA256: 878e02b64f185cc5669bf87f5a3b8d502a4bcf8c05fe8ebdd25cce76a64c33dc
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2020 Nordic Semiconductor ASA
+ * Copyright (c) 2019 Peter Bigot Consulting, LLC
+</text>
+
+FileName: ./zephyr/lib/utils/onoff.c
+SPDXID: SPDXRef-File-onoff.c
+FileChecksum: SHA1: cf10fdd790a4c2f736c3b6a2b82927f13c74b1f6
+FileChecksum: SHA256: c856b683caaacc42c85a82b55da84f44d73ee1ec5088f204d3c3d2bdc1dd2446
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2020 Nordic Semiconductor ASA
+ * Copyright (c) 2019 Peter Bigot Consulting, LLC
+</text>
+
+FileName: ./zephyr/lib/utils/rb.c
+SPDXID: SPDXRef-File-rb.c
+FileChecksum: SHA1: e3e2adb9ab8c66113dfdbc8ece457ed19e2f9ef1
+FileChecksum: SHA256: 9ffd8e4d737a2a7f060f0c3a412895ddf5d093f41adbca6af301564ec319b961
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2018 Intel Corporation
+</text>
+
+FileName: ./zephyr/lib/utils/ring_buffer.c
+SPDXID: SPDXRef-File-ring-buffer.c
+FileChecksum: SHA1: 1092990eb11e378011c6ebf461e501639d04ccb3
+FileChecksum: SHA256: f9b6ce0d0aed74e80164beb61671b144fe6bc1b1093922145c3372cad7ff0fa1
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2015 Intel Corporation
+</text>
+
+FileName: ./zephyr/lib/utils/set.c
+SPDXID: SPDXRef-File-set.c
+FileChecksum: SHA1: de2f67039ad11e122f9f0d6cd0f81f2e199d42bb
+FileChecksum: SHA256: 6b683cae38d6b320433d92dc6e759332418f7b36e622f6ae16f371ddc0ea24d0
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2025 James Roy <rruuaanng@outlook.com>
+</text>
+
+FileName: ./zephyr/lib/utils/timeutil.c
+SPDXID: SPDXRef-File-timeutil.c
+FileChecksum: SHA1: 96599d83db0fe67d8b5720f6ede9e90dab8c0611
+FileChecksum: SHA256: 56a6f900dafc999d8bd34ceba5c915d40d7bf4888fb3d5919812a80a4cd3de59
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2019 Peter Bigot Consulting, LLC
+</text>
+
+FileName: ./zephyr/misc/empty_file.c
+SPDXID: SPDXRef-File-empty-file.c
+FileChecksum: SHA1: da39a3ee5e6b4b0d3255bfef95601890afd80709
+FileChecksum: SHA256: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+LicenseConcluded: NOASSERTION
+LicenseInfoInFile: NONE
+FileCopyrightText: NOASSERTION
+
+FileName: ./zephyr/modules/hal_nordic/nrfx/nrfx_glue.c
+SPDXID: SPDXRef-File-nrfx-glue.c
+FileChecksum: SHA1: f224ab1e82d04de6d1b4ce1e83745c79df418523
+FileChecksum: SHA256: dc8cf5c37db565f2d10123ac81940ac06c64c3c21766b3492675ef930af6949d
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2018, Nordic Semiconductor ASA
+</text>
+
+FileName: ./zephyr/modules/mbedtls/zephyr_entropy.c
+SPDXID: SPDXRef-File-zephyr-entropy.c
+FileChecksum: SHA1: 761d7d7e830eb962d3945117516988e7619c4309
+FileChecksum: SHA256: 302e373808c9bc019ab92523e92cdebb05bc45f0bf6e30c6a942bdce19982e6d
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2024 Nordic Semiconductor ASA
+</text>
+
+FileName: ./zephyr/modules/mbedtls/zephyr_init.c
+SPDXID: SPDXRef-File-zephyr-init.c
+FileChecksum: SHA1: 7a01f7390336e8e08eae8f262e3d168e91929bbd
+FileChecksum: SHA256: f8685129896b5e7a81cb5f27b54716f4624b53666c10faec68c49b44e4afd539
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2017 Intel Corporation
+ * Copyright (c) 2024 Nordic Semiconductor ASA
+</text>
+
+FileName: ./zephyr/samples/subsys/usb/common/sample_usbd_init.c
+SPDXID: SPDXRef-File-sample-usbd-init.c
+FileChecksum: SHA1: d6d4e587a3e89488c9ccd5ccc9167cfb6f58c06e
+FileChecksum: SHA256: e1dcb30e0aba346dc5cc75e0362a6095f9047c41e739f904cfc99d0f1fdfe282
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2023 Nordic Semiconductor ASA
+</text>
+
+FileName: ./zephyr/soc/nordic/common/gpiote_nrfx.c
+SPDXID: SPDXRef-File-gpiote-nrfx.c
+FileChecksum: SHA1: f08b079d946f385941400d4c79d7b443c8720a66
+FileChecksum: SHA256: be76952ff8e1932cd5d465cee0a6e2921e081de1df1fcb439e257a6e55591925
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2025 Nordic Semiconductor ASA
+</text>
+
+FileName: ./zephyr/soc/nordic/common/gppi_init.c
+SPDXID: SPDXRef-File-gppi-init.c
+FileChecksum: SHA1: 2565b9d3a1432cc64e81d2e55a6ec5b611726a1e
+FileChecksum: SHA256: 552c63871df619812936270054d98a9f3fa59a012987cd06e998c3a546b21193
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2025 Nordic Semiconductor ASA
+</text>
+
+FileName: ./zephyr/soc/nordic/common/reboot.c
+SPDXID: SPDXRef-File-reboot.c
+FileChecksum: SHA1: 26ba687d29d1f96d0f401a9029c8518f53946d34
+FileChecksum: SHA256: 87b2b405ca1ad6fc4a53e30a526e920ba70e40bb90a3191131ac0e699340c2bb
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2025 Nordic Semiconductor ASA
+</text>
+
+FileName: ./zephyr/soc/nordic/nrf52/soc.c
+SPDXID: SPDXRef-File-soc.c
+FileChecksum: SHA1: 6df245f80092b1d45ae3f94b1f18c086733bbb0a
+FileChecksum: SHA256: 30727e7ed5b044abd9e4fbe591a68ecb5cb6dfbd42ded538261a80fd17dc5a4b
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2016 Nordic Semiconductor ASA
+</text>
+
+FileName: ./zephyr/soc/nordic/validate_base_addresses.c
+SPDXID: SPDXRef-File-validate-base-addresses.c
+FileChecksum: SHA1: 32bc4dfd520254bf45394fe02870b73d3aae8fb3
+FileChecksum: SHA256: 3c8f7b4c7c977673e176e0799260e9bf2634bad270e4d827b50b7ebe74f545ba
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2019, 2020 Nordic Semiconductor ASA
+</text>
+
+FileName: ./zephyr/soc/nordic/validate_binding_headers.c
+SPDXID: SPDXRef-File-validate-binding-headers.c
+FileChecksum: SHA1: 5d9279a8ddfa9cb7d6ace1b0494def1c87be7b0b
+FileChecksum: SHA256: ce50cf31906382ec3004a4211ffbf50f0220accdfebfb7612ff929f26e556714
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2024 Nordic Semiconductor ASA
+</text>
+
+FileName: ./zephyr/soc/nordic/validate_enabled_instances.c
+SPDXID: SPDXRef-File-validate-enabled-instances.c
+FileChecksum: SHA1: ed86a3679036bcadb89151062e4671a8510e3e15
+FileChecksum: SHA256: 4f7737e02e12a2f386d5e02db4d63e9680042652aa7e7c9ffb2b9a357143a147
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2020 Nordic Semiconductor ASA
+</text>
+
+FileName: ./zephyr/subsys/fs/fs.c
+SPDXID: SPDXRef-File-fs.c-2
+FileChecksum: SHA1: 8fa3e0b1e08b1c0b7b5f504a3dd4f7338ebdb120
+FileChecksum: SHA256: c7a00dd04bd8d49ebb79c71483fc66b7f5eae63c1f7b50813c74908437c2ea57
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2020 Peter Bigot Consulting, LLC
+ * Copyright (c) 2020-2024 Nordic Semiconductor ASA
+ * Copyright (c) 2018 Intel Corporation.
+</text>
+
+FileName: ./zephyr/subsys/fs/fs_impl.c
+SPDXID: SPDXRef-File-fs-impl.c
+FileChecksum: SHA1: 16d1ebbb208744f44a6384b19201a08cc1329030
+FileChecksum: SHA256: cc7e635660232cffea1e159e21a57d4b78f3a7267b55a968f6b4b766ac659226
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2019 Peter Bigot Consulting, LLC
+</text>
+
+FileName: ./zephyr/subsys/logging/log_cache.c
+SPDXID: SPDXRef-File-log-cache.c
+FileChecksum: SHA1: 4125ec287989c407adcea6d589e11f0593f5f2c0
+FileChecksum: SHA256: db31bafa9a65e6f0e5bd0fbeba946512e2d2549c8524ef99c5d68e77d666a555
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2021 Nordic Semiconductor ASA
+</text>
+
+FileName: ./zephyr/subsys/logging/log_core.c
+SPDXID: SPDXRef-File-log-core.c
+FileChecksum: SHA1: e782dd51d3748a2c6140658f4c80aec8783c9636
+FileChecksum: SHA256: b46f1589fbd30a025c12ee4649eeda851e006dbfb52fe7bbac7655c6a419d04d
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2018 Nordic Semiconductor ASA
+</text>
+
+FileName: ./zephyr/subsys/logging/log_mgmt.c
+SPDXID: SPDXRef-File-log-mgmt.c
+FileChecksum: SHA1: 91749cbb0a28e2328d585314f00342c0b5ae7bfc
+FileChecksum: SHA256: e2b42c31a74bd567b717e0ef7f39ceb58277f68499fdeead499d9f000803e75b
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2021 Nordic Semiconductor ASA
+</text>
+
+FileName: ./zephyr/subsys/logging/log_msg.c
+SPDXID: SPDXRef-File-log-msg.c
+FileChecksum: SHA1: e883f53bc30fe115f1fbb33fb2a2d10bbf377f65
+FileChecksum: SHA256: 6f4880d0c962d5640ba161278001436b4cfe4232afc5780ea2816782a8aa8340
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2020 Nordic Semiconductor
+</text>
+
+FileName: ./zephyr/subsys/logging/log_output.c
+SPDXID: SPDXRef-File-log-output.c
+FileChecksum: SHA1: cbb0160713271191f8734ab8eb846d4d105a15da
+FileChecksum: SHA256: 6288a3886d1fdc48a91d8ed85aecc9d0e19ed6548251e3cd4ca55a48825322f3
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2018 Nordic Semiconductor ASA
+</text>
+
+FileName: ./zephyr/subsys/mem_mgmt/mem_attr.c
+SPDXID: SPDXRef-File-mem-attr.c
+FileChecksum: SHA1: 857e0589ae4ab88c67f100c2d3786fd08cba6bb8
+FileChecksum: SHA256: 9530ee0c032812b263a32d4f95f57e449550aad3d7b1bf31f611f76efe6eb3cf
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2023 Carlo Caione, <ccaione@baylibre.com>
+</text>
+
+FileName: ./zephyr/subsys/net/conn_mgr/conn_mgr_connectivity.c
+SPDXID: SPDXRef-File-conn-mgr-connectivity.c
+FileChecksum: SHA1: 296fad4a6f336245f6409c8288716245f88c60c2
+FileChecksum: SHA256: 7a337298951eaa4e6a1a5256d7c8b1834da2631efebdc3073c5a679080c632a2
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2023 Nordic Semiconductor ASA
+</text>
+
+FileName: ./zephyr/subsys/net/conn_mgr/conn_mgr_monitor.c
+SPDXID: SPDXRef-File-conn-mgr-monitor.c
+FileChecksum: SHA1: ba13a454978e768e0997bce73427588410a157b6
+FileChecksum: SHA256: 971b201f0462ca7f46d6b8d4d970c36eb83934ad472c605d8428a103d9ff354a
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2019 Intel Corporation
+</text>
+
+FileName: ./zephyr/subsys/net/conn_mgr/events_handler.c
+SPDXID: SPDXRef-File-events-handler.c
+FileChecksum: SHA1: cac4e8a8ef2a9728a29c4ce686d80de7f6ea2c74
+FileChecksum: SHA256: ba7e3414ef0ad64fa6d633080e6fdc9116bce5c30b779d907426d59a16e7b9fd
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2019 Intel Corporation
+</text>
+
+FileName: ./zephyr/subsys/net/hostname.c
+SPDXID: SPDXRef-File-hostname.c
+FileChecksum: SHA1: d7ecedeb6897cf5c2a7fd1499d3fdfdb88c9a5a4
+FileChecksum: SHA256: 9bfb2b30d8c9a4955efe9c95207657e26dcc0979ecebedccb4a66fef45a6bfcb
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2017 Intel Corporation
+</text>
+
+FileName: ./zephyr/subsys/net/ip/connection.c
+SPDXID: SPDXRef-File-connection.c
+FileChecksum: SHA1: 75021ccc99ae2cebb3221b117bf4c8cefa3cdd43
+FileChecksum: SHA256: c3dcd41854bc7e68b12aa35c2ea579559047f2b06af2384d40efb4ed7c76e5c4
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2016 Intel Corporation
+</text>
+
+FileName: ./zephyr/subsys/net/ip/icmp.c
+SPDXID: SPDXRef-File-icmp.c
+FileChecksum: SHA1: 7f70ad9f0bb906359b8ccfcd22ebbcf08b0ada39
+FileChecksum: SHA256: bc01207afc4ef2eacb0670ac5b566db9f505478dd9db8ef8660a1547847b8b78
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2023 Nordic Semiconductor ASA
+</text>
+
+FileName: ./zephyr/subsys/net/ip/icmpv4.c
+SPDXID: SPDXRef-File-icmpv4.c
+FileChecksum: SHA1: 41cd7f946deaa276701548a18c2a12376b7fba49
+FileChecksum: SHA256: 5e7edef0f40c93d326244251e9667acb04ae529bb3ca8186f6b4270a2c07d440
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2016 Intel Corporation
+</text>
+
+FileName: ./zephyr/subsys/net/ip/icmpv6.c
+SPDXID: SPDXRef-File-icmpv6.c
+FileChecksum: SHA1: 56ce65f4e6bd9dbdd331ffbe8dd42f2c032c3a47
+FileChecksum: SHA256: a2d64cdb5bbc9c7cf3a3eb3a33f992812e0d18543174684f9aa8f183c483f473
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2016 Intel Corporation
+</text>
+
+FileName: ./zephyr/subsys/net/ip/igmp.c
+SPDXID: SPDXRef-File-igmp.c
+FileChecksum: SHA1: f8a69faf45fdd040e0133782cf1ff3b946af89a8
+FileChecksum: SHA256: d26e6edeef3b5d8434d6d07772f4f3ad14ffaac52dfed561426a4a5e2b63a58d
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2021 Intel Corporation
+</text>
+
+FileName: ./zephyr/subsys/net/ip/ipv4.c
+SPDXID: SPDXRef-File-ipv4.c-2
+FileChecksum: SHA1: 6ab19b62eba0aa812bc164d7870fdf3a39f86562
+FileChecksum: SHA256: e67123865b4981eaeb7d693099c03c7e53902a9cebe45207ebd679703bd52a6c
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2016 Intel Corporation
+</text>
+
+FileName: ./zephyr/subsys/net/ip/ipv6.c
+SPDXID: SPDXRef-File-ipv6.c-2
+FileChecksum: SHA1: ea8b5e641aea6066611701f1e87f356a0dffb997
+FileChecksum: SHA256: 7830bda9a9087cba2deb2a32e26549eaa6d0dd2cbb67d5834d864e7cf32fc3e5
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2016 Intel Corporation
+</text>
+
+FileName: ./zephyr/subsys/net/ip/ipv6_mld.c
+SPDXID: SPDXRef-File-ipv6-mld.c
+FileChecksum: SHA1: fba92e98ded09a5a0f4a9ee5fa4d5afa0358d9a6
+FileChecksum: SHA256: a5f835b2be22ddb4467b05d65a991be33183d20649f4be156a9852126f590d75
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2018 Intel Corporation
+</text>
+
+FileName: ./zephyr/subsys/net/ip/ipv6_nbr.c
+SPDXID: SPDXRef-File-ipv6-nbr.c
+FileChecksum: SHA1: bb6cab9b9ad97653a06ffba7261b0a185103319d
+FileChecksum: SHA256: 32478e2929db43490d53199674f285d69a9c5db5de1f90dbfb3f3cb80e67d060
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2018 Intel Corporation
+</text>
+
+FileName: ./zephyr/subsys/net/ip/nbr.c
+SPDXID: SPDXRef-File-nbr.c-2
+FileChecksum: SHA1: 0234ed2f5005c274ecd453a8d4c70e7ba66c6242
+FileChecksum: SHA256: 93bcaa822dcd4703067072261da7b815ced90fec0fe968d86547c91765edb25e
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2016 Intel Corporation
+</text>
+
+FileName: ./zephyr/subsys/net/ip/net_context.c
+SPDXID: SPDXRef-File-net-context.c
+FileChecksum: SHA1: 8b35427ddf540c65f108b191df15b73589da2d46
+FileChecksum: SHA256: 99bba9b35c87e48aa790a611cd7478e4c8bc53da5799963bfe72234638957cc7
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2025 Aerlync Labs Inc.
+ * Copyright 2025 NXP
+ * Copyright (c) 2016 Intel Corporation
+ * Copyright (c) 2021 Nordic Semiconductor
+</text>
+
+FileName: ./zephyr/subsys/net/ip/net_core.c
+SPDXID: SPDXRef-File-net-core.c
+FileChecksum: SHA1: c9302c65fe61298b94ac32656a22c0d0045c12d2
+FileChecksum: SHA256: 73ab3a50dd06403809d23cd9896cb61cded44af9cef758b4577a9b7059f77c20
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2025 Aerlync Labs Inc.
+ * Copyright (c) 2016 Intel Corporation
+</text>
+
+FileName: ./zephyr/subsys/net/ip/net_if.c
+SPDXID: SPDXRef-File-net-if.c
+FileChecksum: SHA1: 2a92205ebd9e4e5486d8ac39e4011927a892e85a
+FileChecksum: SHA256: 1a921a6aa88dff37596bd1e6f994c8dbbb973c662c4833671dffffa54db7ba9f
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2023 Nordic Semiconductor ASA
+ * Copyright (c) 2016 Intel Corporation.
+</text>
+
+FileName: ./zephyr/subsys/net/ip/net_mgmt.c
+SPDXID: SPDXRef-File-net-mgmt.c
+FileChecksum: SHA1: 7d22d08a561785a21b7afb94ae91d89cb9810a4b
+FileChecksum: SHA256: 6b29c3951cbee7b64a4386a6ab29f1c8fb603dbead335cca7479f360cc5481e5
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2016 Intel Corporation.
+</text>
+
+FileName: ./zephyr/subsys/net/ip/net_pkt.c
+SPDXID: SPDXRef-File-net-pkt.c
+FileChecksum: SHA1: a35750dd9503f3dd28ced68f6ff5d70bd37e004f
+FileChecksum: SHA256: 6bbdc77e19ee252152ae7bac096cd9e85c3deb559eae282c18e84bf443ef7d1b
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2016 Intel Corporation
+</text>
+
+FileName: ./zephyr/subsys/net/ip/net_stats.c
+SPDXID: SPDXRef-File-net-stats.c
+FileChecksum: SHA1: 73db367459552323ff2491f1cc72e6550049e5a3
+FileChecksum: SHA256: d4b4d89b9c5715c5cac15f540dd11cd2f0edb92710ef6581bda98ca7eef8753a
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2016 Intel Corporation
+</text>
+
+FileName: ./zephyr/subsys/net/ip/net_tc.c
+SPDXID: SPDXRef-File-net-tc.c
+FileChecksum: SHA1: 46899ff901bf03a6d84846c2e2f544fc11369df4
+FileChecksum: SHA256: b99bce11b89d046440bf535e7a37f1ff927a6c49b117431d434530b49928d8cf
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2018 Intel Corporation.
+</text>
+
+FileName: ./zephyr/subsys/net/ip/net_timeout.c
+SPDXID: SPDXRef-File-net-timeout.c
+FileChecksum: SHA1: f7ae867b362809265eec8e16f7cd71fa9b7fff0c
+FileChecksum: SHA256: 168dd4963e8843d8a5a4a2b3bc9b9b0531e7387013a2bcce5228c4907aee6ea5
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2020 Nordic Semiconductor ASA
+</text>
+
+FileName: ./zephyr/subsys/net/ip/route.c
+SPDXID: SPDXRef-File-route.c-2
+FileChecksum: SHA1: e8fb2faef540b5ef9bef9d3f22d53bf10dfd82e6
+FileChecksum: SHA256: 669f240d95f42bc7bc8a6ed95744ff019812944b0a9673958d61afa504775f63
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2016 Intel Corporation
+</text>
+
+FileName: ./zephyr/subsys/net/ip/tcp.c
+SPDXID: SPDXRef-File-tcp.c-2
+FileChecksum: SHA1: 031897d81f08cae12e63da9d6f0f5c6846798f24
+FileChecksum: SHA256: 393b940e0d96adba9a0f7667c061b9e0e5d8d0ea2f49642e60f29ce1efdb7ad6
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2018-2020 Intel Corporation
+</text>
+
+FileName: ./zephyr/subsys/net/ip/udp.c
+SPDXID: SPDXRef-File-udp.c-2
+FileChecksum: SHA1: dc6d102ed0bdfd5c4d8e4516cd0e226dbb6cf9ee
+FileChecksum: SHA256: 005b5f67007b6fa7480bb213e05c564e335b4a04aee26dcb6e6953680f902721
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2017 Intel Corporation
+</text>
+
+FileName: ./zephyr/subsys/net/ip/utils.c
+SPDXID: SPDXRef-File-utils.c
+FileChecksum: SHA1: cba97a3c78efe0966bcf0c7d9adca7eeee8c269c
+FileChecksum: SHA256: f6e397cdcf73d531702ef1d3ec8ff04a2f3c6ced47fe29646e39a18961ca2942
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2016 Intel Corporation
+</text>
+
+FileName: ./zephyr/subsys/net/l2/ethernet/arp.c
+SPDXID: SPDXRef-File-arp.c-2
+FileChecksum: SHA1: 49ad2390b77b38f553573f8d7b28cb7d8c98b8e1
+FileChecksum: SHA256: 360a2a09c359056f6d598072dcf92d3c9d52626678523000764d3f0a83a196e1
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2016 Intel Corporation
+</text>
+
+FileName: ./zephyr/subsys/net/l2/ethernet/ethernet.c
+SPDXID: SPDXRef-File-ethernet.c
+FileChecksum: SHA1: 571760f62852cdfc0667e8f12b4f56d150e8c3f3
+FileChecksum: SHA256: dfe44acc3332b9f0b3e0e1f5ffe359f6272be35f720973a5d3a3a64665021336
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * SPDX-FileCopyrightText: Copyright 2025 NXP
+ * Copyright (c) 2016-2018 Intel Corporation.
+</text>
+
+FileName: ./zephyr/subsys/net/l2/ethernet/ethernet_stats.c
+SPDXID: SPDXRef-File-ethernet-stats.c
+FileChecksum: SHA1: 652ce9dd32f120ac3e9aef0653be348b01ac558c
+FileChecksum: SHA256: bd14edf8477456ca9a2a9458a3b22390228dcef9bbceabf3711c8b002ebfcc09
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2018 Intel Corporation
+</text>
+
+FileName: ./zephyr/subsys/net/lib/config/init.c
+SPDXID: SPDXRef-File-init.c-3
+FileChecksum: SHA1: 55d564e8832ff0117c53fdd77eafe8f347b273c6
+FileChecksum: SHA256: 7ff664d397cdab3f88ec3aa11362a043e17900b75e43f28ad7d8a1131fd08c16
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2017 Intel Corporation.
+</text>
+
+FileName: ./zephyr/subsys/net/lib/http/http_client.c
+SPDXID: SPDXRef-File-http-client.c
+FileChecksum: SHA1: cfa164334b32a1091626e10dadef360231ef143a
+FileChecksum: SHA256: 717a1794fa18e12b53e80fce08c8a0a44cf674aa1522363b5c07c9138fcc694c
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2019 Intel Corporation
+</text>
+
+FileName: ./zephyr/subsys/net/lib/http/http_hpack.c
+SPDXID: SPDXRef-File-http-hpack.c
+FileChecksum: SHA1: 8b7a8e52c1be352a0ec436ee74a2850c41a36062
+FileChecksum: SHA256: 03be6f5022f6d523c2e9e3b2ed51e651ba397bde0ac99e082b0219addd435c1c
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2024 Nordic Semiconductor ASA
+ * Copyright (c) 2023, Emna Rekik
+</text>
+
+FileName: ./zephyr/subsys/net/lib/http/http_huffman.c
+SPDXID: SPDXRef-File-http-huffman.c
+FileChecksum: SHA1: 39d9d8b5d5a52c5864bd34ee9a7a32c43e5a41c6
+FileChecksum: SHA256: d6c05474eb91edec0b775003922d70b044f2c47f1edc8e9c9dd47f271d7cc5de
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2024 Nordic Semiconductor ASA
+</text>
+
+FileName: ./zephyr/subsys/net/lib/http/http_parser.c
+SPDXID: SPDXRef-File-http-parser.c
+FileChecksum: SHA1: c76dca57db3ec5693a3e742bb952ac61197fcf75
+FileChecksum: SHA256: d75b78ad7d2ccfb0d8aeac2f115f47eee66cb5348538226ec056d25184ea503f
+LicenseConcluded: MIT
+LicenseInfoInFile: MIT
+FileCopyrightText: NOASSERTION
+
+FileName: ./zephyr/subsys/net/lib/http/http_parser_url.c
+SPDXID: SPDXRef-File-http-parser-url.c
+FileChecksum: SHA1: abfb184b27c9aa4e4e5bf94417e1bec63ae9915b
+FileChecksum: SHA256: 59ba0b7b3bc3511bf9b7665b002b84f0ebe5aaa4882b7cc2117b64067062aba0
+LicenseConcluded: MIT
+LicenseInfoInFile: MIT
+FileCopyrightText: NOASSERTION
+
+FileName: ./zephyr/subsys/net/lib/http/http_server_core.c
+SPDXID: SPDXRef-File-http-server-core.c
+FileChecksum: SHA1: 6d301f64c3f657ee2c89095844002fd9b8018c22
+FileChecksum: SHA256: f0d0ce9123bb2b07fd512c04a8f94d8b0142e80c54894adddd83b61e0e1e5150
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2024 Nordic Semiconductor ASA
+ * Copyright (c) 2023, Emna Rekik
+</text>
+
+FileName: ./zephyr/subsys/net/lib/http/http_server_http1.c
+SPDXID: SPDXRef-File-http-server-http1.c
+FileChecksum: SHA1: cb8f581f4e4c9b8e908ccdae792a07e79d662436
+FileChecksum: SHA256: cdd71eb74b4c0cf8043ea04a279b76253ee0b51b3162037b1e3173d36fa87911
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2024 Nordic Semiconductor ASA
+ * Copyright (c) 2023, Emna Rekik
+</text>
+
+FileName: ./zephyr/subsys/net/lib/http/http_server_http2.c
+SPDXID: SPDXRef-File-http-server-http2.c
+FileChecksum: SHA1: 9cb7537578c08f2be1b9e824f6eb85adffd0a672
+FileChecksum: SHA256: 88c1595e301a6328f8306a8fcf4937d7b642bafdabedbc76852888a7bd7a0a16
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2024 Nordic Semiconductor ASA
+ * Copyright (c) 2023, Emna Rekik
+</text>
+
+FileName: ./zephyr/subsys/net/lib/http/http_server_ws.c
+SPDXID: SPDXRef-File-http-server-ws.c
+FileChecksum: SHA1: e72ee60cee847bae6433ef512573ef4da95b711d
+FileChecksum: SHA256: 412deea140d2228c8a4745b4d2533b7f8aa6849e45bf6891ffc0f2adf6f31d06
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2024 Nordic Semiconductor ASA
+</text>
+
+FileName: ./zephyr/subsys/net/lib/shell/allocs.c
+SPDXID: SPDXRef-File-allocs.c
+FileChecksum: SHA1: 6b98f2156913d1cd8c3fa0db3e7c83ce50312d11
+FileChecksum: SHA256: 81ca3e86c5e0e6cb19aa7ca04570e2b741af0c1f72af015da12428dba741a3c7
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2023 Nordic Semiconductor ASA
+ * Copyright (c) 2016 Intel Corporation
+</text>
+
+FileName: ./zephyr/subsys/net/lib/shell/arp.c
+SPDXID: SPDXRef-File-arp.c
+FileChecksum: SHA1: 6409b66ad40b9f276d5b24eea2d81b76b9f487a5
+FileChecksum: SHA256: b8c902d74082e5f5070c475205f5d763e8d03d2bdec3123ae907cef42eab00ed
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2023 Nordic Semiconductor ASA
+ * Copyright (c) 2016 Intel Corporation
+</text>
+
+FileName: ./zephyr/subsys/net/lib/shell/capture.c
+SPDXID: SPDXRef-File-capture.c
+FileChecksum: SHA1: 0e10be0d899b1527249d2803aad9604ad546c5a9
+FileChecksum: SHA256: 3046bfb28fae6e08300e13c5314f4011349f351b8659a06b92187fc0ed2a3a3c
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2023 Nordic Semiconductor ASA
+ * Copyright (c) 2016 Intel Corporation
+</text>
+
+FileName: ./zephyr/subsys/net/lib/shell/cm.c
+SPDXID: SPDXRef-File-cm.c
+FileChecksum: SHA1: 3184ae3fa58ac804cb10582f2c1d52293f82160f
+FileChecksum: SHA256: 6ee8f80fb323762ccb5f20e84ee2cfd04c05301290bdfcdb16e99c1aa9307167
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2024 Nordic Semiconductor ASA
+</text>
+
+FileName: ./zephyr/subsys/net/lib/shell/conn.c
+SPDXID: SPDXRef-File-conn.c
+FileChecksum: SHA1: f3016450f1784e1d7277b689f05e280a93471fcb
+FileChecksum: SHA256: 24139d85871046fc1cc0261e31d9306bd1c0bfab5c7ad7a6c39802075ca3334a
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2023 Nordic Semiconductor ASA
+ * Copyright (c) 2016 Intel Corporation
+</text>
+
+FileName: ./zephyr/subsys/net/lib/shell/dhcpv4.c
+SPDXID: SPDXRef-File-dhcpv4.c
+FileChecksum: SHA1: d0328f3ebc18fb02951c90c68d8e635a88aa315c
+FileChecksum: SHA256: 20d55f9facc874f8eadfdf20cfd64f679bc50efcfaa8a23c92053122ec0175e3
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2024 Nordic Semiconductor ASA
+</text>
+
+FileName: ./zephyr/subsys/net/lib/shell/dhcpv6.c
+SPDXID: SPDXRef-File-dhcpv6.c
+FileChecksum: SHA1: d1769b157fe9f16abe1e68c51168fa777b787fef
+FileChecksum: SHA256: 5abb43ffef7ee58b4ae0e365f94833b62ff4f45a2bedde08774342507936c10c
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2024 Nordic Semiconductor ASA
+</text>
+
+FileName: ./zephyr/subsys/net/lib/shell/dns.c
+SPDXID: SPDXRef-File-dns.c
+FileChecksum: SHA1: b11f4abd21489c5cb953a533c007c33b6cd3cc22
+FileChecksum: SHA256: 1a58a3e245ea194bd9bb6aae36e482003a03398f72f0b751d1ba4a6bd3e41bdb
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2023 Nordic Semiconductor ASA
+ * Copyright (c) 2016 Intel Corporation
+</text>
+
+FileName: ./zephyr/subsys/net/lib/shell/events.c
+SPDXID: SPDXRef-File-events.c-2
+FileChecksum: SHA1: d8e72ed685e95ad21626fffeed79d461c52f374d
+FileChecksum: SHA256: 8b7f333f61dc21efbe0ee9d552c80eb9745b106d92d3df411fd22bce3dfb8a3b
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2023 Nordic Semiconductor ASA
+ * Copyright (c) 2016 Intel Corporation
+</text>
+
+FileName: ./zephyr/subsys/net/lib/shell/filter.c
+SPDXID: SPDXRef-File-filter.c
+FileChecksum: SHA1: e9f5e7afcbe3f93a91dfe24d42dc89a255356e60
+FileChecksum: SHA256: 032c2113f74f509727552a4d0fde6e1401e1afa72d63b2f69ad101deaada0064
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2025 Nordic Semiconductor ASA
+</text>
+
+FileName: ./zephyr/subsys/net/lib/shell/ftp.c
+SPDXID: SPDXRef-File-ftp.c
+FileChecksum: SHA1: 9d54b369f9cb4f236ee648a07c18975b275fe888
+FileChecksum: SHA256: 7983ec7c2679f80d776cc164864262174f662e8c61f22e6acf0961e22cac367f
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2026 Nordic Semiconductor ASA
+</text>
+
+FileName: ./zephyr/subsys/net/lib/shell/gptp.c
+SPDXID: SPDXRef-File-gptp.c
+FileChecksum: SHA1: 3f3c04627aff58ac4b09a3c9bc9821e123741973
+FileChecksum: SHA256: dac0372684f22ccc9b8d25c616e6ae3259705ddf72d787848708b76d0a85c8a4
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2023 Nordic Semiconductor ASA
+ * Copyright (c) 2016 Intel Corporation
+</text>
+
+FileName: ./zephyr/subsys/net/lib/shell/http.c
+SPDXID: SPDXRef-File-http.c
+FileChecksum: SHA1: 8ff6f890167d1853a42f6cb9a6462fd0f3478469
+FileChecksum: SHA256: 8753448ed15f9768525fbfee992461d5dc36200b202ac3749f58da176bcbf649
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2024 Nordic Semiconductor ASA
+</text>
+
+FileName: ./zephyr/subsys/net/lib/shell/iface.c
+SPDXID: SPDXRef-File-iface.c
+FileChecksum: SHA1: 7c78196ec5202a1fcc4f5e6ff94bf59b9963dd8d
+FileChecksum: SHA256: 2a3ef23ee8dce07502e3d72f0519dbeaecf86d31ae0e22c37cf686ba3ca3a7b4
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2023 Nordic Semiconductor ASA
+ * Copyright (c) 2016 Intel Corporation
+</text>
+
+FileName: ./zephyr/subsys/net/lib/shell/ipv4.c
+SPDXID: SPDXRef-File-ipv4.c
+FileChecksum: SHA1: b8c77e8953462df9f3993aad4307c099c46f401b
+FileChecksum: SHA256: 6c660ea63205de675e93c827b43cdd62ebfe6621c08b44ea9d424548cfb2b21a
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2023 Nordic Semiconductor ASA
+ * Copyright (c) 2016 Intel Corporation
+</text>
+
+FileName: ./zephyr/subsys/net/lib/shell/ipv6.c
+SPDXID: SPDXRef-File-ipv6.c
+FileChecksum: SHA1: 569d957d39c118242f1a8dfbaacdaf17065cfee5
+FileChecksum: SHA256: fd8ec46a621470a3165657fa69899c7ee26517696a1e642fd4b163e011348e02
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2023 Nordic Semiconductor ASA
+ * Copyright (c) 2016 Intel Corporation
+</text>
+
+FileName: ./zephyr/subsys/net/lib/shell/mem.c
+SPDXID: SPDXRef-File-mem.c
+FileChecksum: SHA1: 5444f68072a08641fbacc5a077e52b6a08793d82
+FileChecksum: SHA256: f45c380e05d658368a0c0b8ce189a3c68a52de451bff721c125bb5ef0ebf264a
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2023 Nordic Semiconductor ASA
+ * Copyright (c) 2016 Intel Corporation
+</text>
+
+FileName: ./zephyr/subsys/net/lib/shell/nbr.c
+SPDXID: SPDXRef-File-nbr.c
+FileChecksum: SHA1: 4dfa89b8156ceadf6be034c3c03436a9de85cc74
+FileChecksum: SHA256: f0800a3d6de4f827b07aca8449608b88016f17a0446798b43325d36902550277
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2023 Nordic Semiconductor ASA
+ * Copyright (c) 2016 Intel Corporation
+</text>
+
+FileName: ./zephyr/subsys/net/lib/shell/net_shell.c
+SPDXID: SPDXRef-File-net-shell.c
+FileChecksum: SHA1: 9b1ea0cb3d2c654ea5cceb319e557e42d6030e00
+FileChecksum: SHA256: 1fe2dd6284a9b1bdaa548756502f447563a78f7dbab1b06428d1d2ae7ac80038
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2023 Nordic Semiconductor ASA
+ * Copyright (c) 2016 Intel Corporation
+</text>
+
+FileName: ./zephyr/subsys/net/lib/shell/ping.c
+SPDXID: SPDXRef-File-ping.c
+FileChecksum: SHA1: e54176871a7d9a1f7837fd5f52ac8a49233bf7b3
+FileChecksum: SHA256: 3a3b46467756c7d45aa6797d3e36f38ad0ee50b3ebb40ea679b1cd3f73148956
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2023 Nordic Semiconductor ASA
+ * Copyright (c) 2016 Intel Corporation
+</text>
+
+FileName: ./zephyr/subsys/net/lib/shell/pkt.c
+SPDXID: SPDXRef-File-pkt.c
+FileChecksum: SHA1: 73f9272649beffa0630cc406914519e7af03228c
+FileChecksum: SHA256: e1fcc87d663e819ee43e216c8b2de869c2665a9f2b25fbb58c5b9b41e6f19b91
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2023 Nordic Semiconductor ASA
+ * Copyright (c) 2016 Intel Corporation
+</text>
+
+FileName: ./zephyr/subsys/net/lib/shell/pmtu.c
+SPDXID: SPDXRef-File-pmtu.c
+FileChecksum: SHA1: 3fdc84921f84e57e4ab7b6184b2764fef958c0c9
+FileChecksum: SHA256: a1f7421045278bc5c8d4c5fbf33af367d83d11f859a9b29ea7b65239553e7e22
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2024 Nordic Semiconductor ASA
+</text>
+
+FileName: ./zephyr/subsys/net/lib/shell/ppp.c
+SPDXID: SPDXRef-File-ppp.c
+FileChecksum: SHA1: e05793b375fcc59648ce5f183fa4fa63404e1517
+FileChecksum: SHA256: f0b8794a02a68f9165c7e4048d29ff498aed798d573e1bbfd7b53a24dabf3c00
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2023 Nordic Semiconductor ASA
+ * Copyright (c) 2016 Intel Corporation
+</text>
+
+FileName: ./zephyr/subsys/net/lib/shell/qbv_shell.c
+SPDXID: SPDXRef-File-qbv-shell.c
+FileChecksum: SHA1: 101b4458a42adf82358134e3d3d1611db28015f7
+FileChecksum: SHA256: c3ba4aec92bfca78ac569ac233cd363a57f248363a8344febd86f37d1b688296
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * SPDX-FileCopyrightText: Copyright 2025-2026 NXP
+</text>
+
+FileName: ./zephyr/subsys/net/lib/shell/resume.c
+SPDXID: SPDXRef-File-resume.c
+FileChecksum: SHA1: 568a0065a310e5e9cbc77ddf7690082a1fb7da37
+FileChecksum: SHA256: c7dc8ce5b3ba4d50a237a5dc00bf4315d852782e239479dd2727a45568aa6cee
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2023 Nordic Semiconductor ASA
+ * Copyright (c) 2016 Intel Corporation
+</text>
+
+FileName: ./zephyr/subsys/net/lib/shell/route.c
+SPDXID: SPDXRef-File-route.c
+FileChecksum: SHA1: a6818d4e57f46107851cb4cddff30d8ab31a8c0c
+FileChecksum: SHA256: ff2e838f0463e2c517bd577688f1b0772a84adff9ead9dfb5f98de733be63638
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2023 Nordic Semiconductor ASA
+ * Copyright (c) 2016 Intel Corporation
+</text>
+
+FileName: ./zephyr/subsys/net/lib/shell/sockets.c
+SPDXID: SPDXRef-File-sockets.c-2
+FileChecksum: SHA1: 4d07ddddeccfcbe1a682cc3c167bdcceffd78b33
+FileChecksum: SHA256: 6128e61efa6bd651153255b6af3c50692f0dcfd4be64bddb43fcb312bc85640e
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2023 Nordic Semiconductor ASA
+</text>
+
+FileName: ./zephyr/subsys/net/lib/shell/stats.c
+SPDXID: SPDXRef-File-stats.c
+FileChecksum: SHA1: c428c18e191780a57077bc8bda6c8a3e9c4f4238
+FileChecksum: SHA256: f2df0bdaf2bb3672e3c19cd2f544e4aa874f46c99cb874ebadfdcea947d373df
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2023 Nordic Semiconductor ASA
+ * Copyright (c) 2016 Intel Corporation
+</text>
+
+FileName: ./zephyr/subsys/net/lib/shell/suspend.c
+SPDXID: SPDXRef-File-suspend.c
+FileChecksum: SHA1: dc572b2fa684ee35088dbe4cfc8eab2762fda41c
+FileChecksum: SHA256: 5f5e027be32c8aeb39cc19911cc8342f73cf88d6547ea242555ea029b2b5516a
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2023 Nordic Semiconductor ASA
+ * Copyright (c) 2016 Intel Corporation
+</text>
+
+FileName: ./zephyr/subsys/net/lib/shell/tcp.c
+SPDXID: SPDXRef-File-tcp.c
+FileChecksum: SHA1: f46fcd8834d5864a2c405f486f04024cdd8e03bc
+FileChecksum: SHA256: 16ea3406e462522a6ad7ef35cb80f9198e47afc29d434bcfa44cf37fcef11a57
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2023 Nordic Semiconductor ASA
+ * Copyright (c) 2016 Intel Corporation
+</text>
+
+FileName: ./zephyr/subsys/net/lib/shell/udp.c
+SPDXID: SPDXRef-File-udp.c
+FileChecksum: SHA1: 511afbfe59f095f5820ae7849457c49445c0a74c
+FileChecksum: SHA256: 77851a6047a6ab605bad6341048429428adeb10993481b20d400021e8e783c1a
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2023 Nordic Semiconductor ASA
+ * Copyright (c) 2016 Intel Corporation
+</text>
+
+FileName: ./zephyr/subsys/net/lib/shell/virtual.c
+SPDXID: SPDXRef-File-virtual.c
+FileChecksum: SHA1: 0244b67703a6da21b263bc7b6faf768c7a8c705d
+FileChecksum: SHA256: 3297e414d2610c548deb8d22090da55f9ba533f50b76dc7d358d57765822d9a3
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2023 Nordic Semiconductor ASA
+ * Copyright (c) 2016 Intel Corporation
+</text>
+
+FileName: ./zephyr/subsys/net/lib/shell/vlan.c
+SPDXID: SPDXRef-File-vlan.c
+FileChecksum: SHA1: bb4c7919280dd7ae859e4201bc81976733910837
+FileChecksum: SHA256: ec98e68f7845b2b8447306d716bef1d4c17b69cddfd73bdf296c8cca7ee24274
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2023 Nordic Semiconductor ASA
+ * Copyright (c) 2016 Intel Corporation
+</text>
+
+FileName: ./zephyr/subsys/net/lib/shell/websocket.c
+SPDXID: SPDXRef-File-websocket.c
+FileChecksum: SHA1: d76de8d1fc4cb1a310d4d20901d738ac744deeae
+FileChecksum: SHA256: c5558f627e2f24f59f84bbfc85b2db4c418fe3cecb2baaeaf361b139b43c9742
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2023 Nordic Semiconductor ASA
+ * Copyright (c) 2016 Intel Corporation
+</text>
+
+FileName: ./zephyr/subsys/net/lib/shell/wg_shell.c
+SPDXID: SPDXRef-File-wg-shell.c
+FileChecksum: SHA1: 16b31af61153ef899b7186fc798366b5c3d3e742
+FileChecksum: SHA256: fdf85143aad1bc891f8431b682b16260ca0cce91c208c302fceab70a7e3a7bb2
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2026 Nordic Semiconductor ASA
+</text>
+
+FileName: ./zephyr/subsys/net/lib/sockets/getaddrinfo.c
+SPDXID: SPDXRef-File-getaddrinfo.c
+FileChecksum: SHA1: 7d2bed8c8f46111f667c65906394781145d39df3
+FileChecksum: SHA256: 7791cc67ab74f3e0edf4e81bf8c94d6091ad1511ded0f7e2f188c9da03b30eb6
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2020 Nordic Semiconductor ASA
+ * Copyright (c) 2017 Linaro Limited
+</text>
+
+FileName: ./zephyr/subsys/net/lib/sockets/getnameinfo.c
+SPDXID: SPDXRef-File-getnameinfo.c
+FileChecksum: SHA1: ae1486bf4dd8ec9e1982d8e8ea0aaf2d4a51bd42
+FileChecksum: SHA256: 6b5a155c75c91d6386d6c430e1b036e48ebf4bc84b83aa553bd0478eb9a813df
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2019 Linaro Limited
+</text>
+
+FileName: ./zephyr/subsys/net/lib/sockets/socketpair.c
+SPDXID: SPDXRef-File-socketpair.c
+FileChecksum: SHA1: 2b2fb1e8a4fc7de9d56c027aef1b8ea2a117ae10
+FileChecksum: SHA256: e257e3d9173709859bf47a38564924b2d1282b66db33caf0b88078ce51692339
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2020 Friedt Professional Engineering Services, Inc
+</text>
+
+FileName: ./zephyr/subsys/net/lib/sockets/sockets.c
+SPDXID: SPDXRef-File-sockets.c
+FileChecksum: SHA1: 9231c5b272f992f02c51e91d529824bc2fdc6d39
+FileChecksum: SHA256: 4c30941ec98ca655425973a55152bd6cb9c676530a425c8f02602b4ecc9ee4c2
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2021 Nordic Semiconductor
+ * Copyright (c) 2017 Linaro Limited
+ * Copyright (c) 2023 Arm Limited (or its affiliates). All rights reserved.
+</text>
+
+FileName: ./zephyr/subsys/net/lib/sockets/sockets_inet.c
+SPDXID: SPDXRef-File-sockets-inet.c
+FileChecksum: SHA1: a3117abb0256cd98b51568b0eec5b26cba28b007
+FileChecksum: SHA256: af9fe55d376a6c9c79d4cfbce7ec826382042ff5decf7852569eaf4b14d02e4e
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2025 Aerlync Labs Inc.
+ * Copyright 2025 NXP
+ * Copyright (c) 2017 Linaro Limited
+ * Copyright (c) 2023 Arm Limited (or its affiliates). All rights reserved.
+ * Copyright (c) 2021 Nordic Semiconductor
+</text>
+
+FileName: ./zephyr/subsys/net/lib/sockets/sockets_misc.c
+SPDXID: SPDXRef-File-sockets-misc.c
+FileChecksum: SHA1: 39c32b4a3de629f70c7bca0512ca241d12c21639
+FileChecksum: SHA256: 50fbd10c707e8bb4dd2ac21699a519d7f22138b9f593c5c4c30c0aa7fc45d2fe
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2019 Linaro Limited
+</text>
+
+FileName: ./zephyr/subsys/net/lib/sockets/sockets_tls.c
+SPDXID: SPDXRef-File-sockets-tls.c
+FileChecksum: SHA1: 11207e4c868b70c185bd8a0dfd30de80360ff73c
+FileChecksum: SHA256: aa2927f87a6276fa300b382393fa306641713ead2a567eb0cec9935911b7be10
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2018 Intel Corporation
+ * Copyright (c) 2018 Nordic Semiconductor ASA
+</text>
+
+FileName: ./zephyr/subsys/net/lib/tls_credentials/tls_credentials.c
+SPDXID: SPDXRef-File-tls-credentials.c
+FileChecksum: SHA1: 657afcaf53013e61bd7c9cd41450e441e4aa9962
+FileChecksum: SHA256: 0c82d889c0a8bfaf0f67971ed1fecc2e85d4445a465722fa56878da457ddb37a
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2018 Nordic Semiconductor ASA
+</text>
+
+FileName: ./zephyr/subsys/net/lib/tls_credentials/tls_credentials_digest_raw.c
+SPDXID: SPDXRef-File-tls-credentials-digest-raw.c
+FileChecksum: SHA1: dda833eec261e0b63f91f79fefae763660dbee87
+FileChecksum: SHA256: 630bb0d9e1cc109ec1fd6721236d5183d1281c95f433b14d1bec9efe0a722768
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2023 Nordic Semiconductor ASA
+</text>
+
+FileName: ./zephyr/subsys/net/lib/utils/addr_utils.c
+SPDXID: SPDXRef-File-addr-utils.c
+FileChecksum: SHA1: 92f9181dd66a0f69a50d59fd8970c147e81d3503
+FileChecksum: SHA256: 0d08149f3c24db7fd5077c3c8f3f3bdcf48e23447f4c48ffa43cf9e3ba3d410a
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2019 Linaro Limited
+</text>
+
+FileName: ./zephyr/subsys/net/lib/websocket/websocket.c
+SPDXID: SPDXRef-File-websocket.c-2
+FileChecksum: SHA1: 1002b763cf5b74c32e5d14edd463befbcfdfc4a7
+FileChecksum: SHA256: 3fb3f3f718288e621dad26f743cb2a49f78c8bbf6b652db377e12667a5fe7a33
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2019 Intel Corporation
+</text>
+
+FileName: ./zephyr/subsys/random/random_entropy_device.c
+SPDXID: SPDXRef-File-random-entropy-device.c
+FileChecksum: SHA1: 3a8c567b84c36a99b2f5d8a07d04ac026a773bce
+FileChecksum: SHA256: e63cf9bf6a8afd0930ae42d53b0fef13bd18f61eaee0c383556c3904b4d34a1d
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2017 Intel Corporation
+</text>
+
+FileName: ./zephyr/subsys/shell/backends/shell_uart.c
+SPDXID: SPDXRef-File-shell-uart.c
+FileChecksum: SHA1: fed38e6aa0f1af8330f0d5992a25940b985f6f4a
+FileChecksum: SHA256: f8fc7c8dd569db7491e8886c483feabc7cbd5876e0652b8014956987be33a964
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2018 Nordic Semiconductor ASA
+</text>
+
+FileName: ./zephyr/subsys/shell/modules/date_service.c
+SPDXID: SPDXRef-File-date-service.c
+FileChecksum: SHA1: 3186eb0c0953b0d12c49ab26f0aae34d648d2949
+FileChecksum: SHA256: 80212a55e1fb595c76b13b23a6b53773fb6a7d23a9639a179e7972bb5375ee3f
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2020 Nick Ward
+</text>
+
+FileName: ./zephyr/subsys/shell/modules/device_service.c
+SPDXID: SPDXRef-File-device-service.c
+FileChecksum: SHA1: 7cf5be9f973055e6396595fd1af6e017d1fbc70d
+FileChecksum: SHA256: c6ad126af38c3c5c788b917092953281b924ac9c998c9070bae84ef0ddc420d9
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (C) 2025 Bang & Olufsen A/S, Denmark
+ * Copyright (c) 2016 Intel Corporation
+ * Copyright (c) 2018 Nordic Semiconductor ASA
+</text>
+
+FileName: ./zephyr/subsys/shell/modules/devmem_service.c
+SPDXID: SPDXRef-File-devmem-service.c
+FileChecksum: SHA1: 8ed6f547e726e12f6884b44c5986c22882e70771
+FileChecksum: SHA256: 0ed508f063890f4797357b01fa8675295c79b24f4818bc83f8e942a4ca5064e2
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2020 Intel Corporation
+ * Copyright (c) 2022 Meta
+ * Copyright (c) 2021 Antmicro <www.antmicro.com>
+</text>
+
+FileName: ./zephyr/subsys/shell/modules/kernel_service/cycles.c
+SPDXID: SPDXRef-File-cycles.c
+FileChecksum: SHA1: f5abaad6c3d5b729e13841b2618e54545ba6a6a2
+FileChecksum: SHA256: 2041d9b0ecf21b233075c570a2f0c75afe5e3d9f8b96a41df19cabbe000e36eb
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2016 Intel Corporation
+ * Copyright (c) 2018 Nordic Semiconductor ASA
+</text>
+
+FileName: ./zephyr/subsys/shell/modules/kernel_service/kernel_shell.c
+SPDXID: SPDXRef-File-kernel-shell.c
+FileChecksum: SHA1: 3d73afe43a148caffe3edfca6fe7e31466cede63
+FileChecksum: SHA256: 0395ccc1b5946363fccb422e2681e1c86be3c0ab605d7a8da5d498858ecabea3
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2024 Meta Platforms
+</text>
+
+FileName: ./zephyr/subsys/shell/modules/kernel_service/log-level.c
+SPDXID: SPDXRef-File-log-level.c
+FileChecksum: SHA1: 96cb95ffb6ebc43fce8cd00303d8c4f6e5957cc1
+FileChecksum: SHA256: 2c793f406442d56afa7916c4ddc7277bd6dbf569f2019df4aa622a63f23a73cb
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2016 Intel Corporation
+ * Copyright (c) 2018 Nordic Semiconductor ASA
+</text>
+
+FileName: ./zephyr/subsys/shell/modules/kernel_service/sleep.c
+SPDXID: SPDXRef-File-sleep.c-2
+FileChecksum: SHA1: 0e575b13443638543cb9fea93fc51c77864d749f
+FileChecksum: SHA256: 2ed153fbd404b1aa40eb89ace7bc60ca859942ff9332f534a186dcf822e8065a
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2016 Intel Corporation
+ * Copyright (c) 2018 Nordic Semiconductor ASA
+</text>
+
+FileName: ./zephyr/subsys/shell/modules/kernel_service/thread/kill.c
+SPDXID: SPDXRef-File-kill.c
+FileChecksum: SHA1: 7f64759ae4edad70380e124f776d2b21f47d08d0
+FileChecksum: SHA256: aab336103657e8def148fb95bef9d14a77238ce7aea457a308c68f449b7c3760
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2025 Intel Corporation
+</text>
+
+FileName: ./zephyr/subsys/shell/modules/kernel_service/thread/list.c
+SPDXID: SPDXRef-File-list.c
+FileChecksum: SHA1: 31290eb83ff79e8a0f1d1b8f76234332efedacf4
+FileChecksum: SHA256: c49c44f5067945d72ca100281aea91d4087237ad6d84acc165b4bace6a899003
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2016 Intel Corporation
+ * Copyright (c) 2018 Nordic Semiconductor ASA
+</text>
+
+FileName: ./zephyr/subsys/shell/modules/kernel_service/thread/resume.c
+SPDXID: SPDXRef-File-resume.c-2
+FileChecksum: SHA1: 628b969a2be7bbf4c54775be28a4ca8b67e00040
+FileChecksum: SHA256: a1583d33e01fffb7c0c50bf4ecb5a51b3eeac7623e6503419315c23f789ed897
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2025 Intel Corporation
+</text>
+
+FileName: ./zephyr/subsys/shell/modules/kernel_service/thread/stacks.c
+SPDXID: SPDXRef-File-stacks.c
+FileChecksum: SHA1: aa1ff839f7036892d4b0e90bfdf3a97fe97a5942
+FileChecksum: SHA256: 63392affcfb653cc8637b63fb0dfacb5d64d282041db327697a0842431b15622
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2016 Intel Corporation
+ * Copyright (c) 2018 Nordic Semiconductor ASA
+</text>
+
+FileName: ./zephyr/subsys/shell/modules/kernel_service/thread/suspend.c
+SPDXID: SPDXRef-File-suspend.c-2
+FileChecksum: SHA1: 8a839eca4a8fefdfc5f1e61ea5b851a78b529df7
+FileChecksum: SHA256: 39570e189ea291a2633cd1eaa38efbef8c76bd2f6ece7232b1da3909bb40f7bd
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2025 Intel Corporation
+</text>
+
+FileName: ./zephyr/subsys/shell/modules/kernel_service/thread/thread.c
+SPDXID: SPDXRef-File-thread.c-3
+FileChecksum: SHA1: 48263fc7ef78241323496fb2c4b86759382d82bc
+FileChecksum: SHA256: f40527a3e1a200adf4d1e3d1ef5bdebef6243bb90afab3ce1d2b9c0c718b3287
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2024 Meta Platforms
+</text>
+
+FileName: ./zephyr/subsys/shell/modules/kernel_service/uptime.c
+SPDXID: SPDXRef-File-uptime.c
+FileChecksum: SHA1: d8b48631f72eead1a40bd9d284699bf4ffcef476
+FileChecksum: SHA256: 0eca821b5e2f6074d82de9be5a7fdc696a0c7da2438ae5b7dc90b0266f0039ce
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2016 Intel Corporation
+ * Copyright (c) 2018 Nordic Semiconductor ASA
+</text>
+
+FileName: ./zephyr/subsys/shell/modules/kernel_service/version.c
+SPDXID: SPDXRef-File-version.c-3
+FileChecksum: SHA1: d58f2534a8a6983e6fd419e36aead555e71dd67d
+FileChecksum: SHA256: 56d84b6f0f2adbd47af7ca05fedce62590a7ba96ba4ffa76a00de4a236fcdd48
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2016 Intel Corporation
+ * Copyright (c) 2018 Nordic Semiconductor ASA
+</text>
+
+FileName: ./zephyr/subsys/shell/shell.c
+SPDXID: SPDXRef-File-shell.c
+FileChecksum: SHA1: 114da6e8c2e0a37f3a31c745c99bf618a61c5418
+FileChecksum: SHA256: 6a9c3d0169855f1b5fdedcd26d1db0b8359720b1409d5ea15dc8879170295a3e
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2018 Nordic Semiconductor ASA
+</text>
+
+FileName: ./zephyr/subsys/shell/shell_cmds.c
+SPDXID: SPDXRef-File-shell-cmds.c
+FileChecksum: SHA1: 77db420f61b791932301150a89e82d25be565f3c
+FileChecksum: SHA256: 4484c375b6ee76b5ef21ca8d24c293b9b92653deac05383415394c59b023b6a2
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2018 Nordic Semiconductor ASA
+</text>
+
+FileName: ./zephyr/subsys/shell/shell_fprintf.c
+SPDXID: SPDXRef-File-shell-fprintf.c
+FileChecksum: SHA1: 1c6738655cf3725312c41c98533c66f2aab4f436
+FileChecksum: SHA256: d3a93271115433529de5d1a4a2039c4fb283839cfa4c7b686734ddda871997c3
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2018 Nordic Semiconductor ASA
+</text>
+
+FileName: ./zephyr/subsys/shell/shell_help.c
+SPDXID: SPDXRef-File-shell-help.c
+FileChecksum: SHA1: a89a60afda41e17f95b8b26fee9f9b0e1c534a64
+FileChecksum: SHA256: b8a4bdb9e01df044ba52413e2d8423b5b6904ebdeff8612b0cc1ebc7baf41004
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2018 Nordic Semiconductor ASA
+</text>
+
+FileName: ./zephyr/subsys/shell/shell_history.c
+SPDXID: SPDXRef-File-shell-history.c
+FileChecksum: SHA1: ddf4adc516f0d0c4a43c3aa7eed4b3d75db2f7d6
+FileChecksum: SHA256: da95756253135015c558af29fee75f3330f15a82f00932ba6b6aab990324146c
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2018 Nordic Semiconductor ASA
+</text>
+
+FileName: ./zephyr/subsys/shell/shell_log_backend.c
+SPDXID: SPDXRef-File-shell-log-backend.c
+FileChecksum: SHA1: 08064bf359cb3cc2588ea94d66e4bd3138158046
+FileChecksum: SHA256: 0263f2ab05a5e9195e49d539986c9652c1467e26090092ea395949818e06edba
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2018 Nordic Semiconductor ASA
+</text>
+
+FileName: ./zephyr/subsys/shell/shell_ops.c
+SPDXID: SPDXRef-File-shell-ops.c
+FileChecksum: SHA1: 5498576845aad28627ef52e72817aeb86aa6c196
+FileChecksum: SHA256: f8e34ad5754b0a3be9fd72970f97b5b099500531e1e657dd3f309f5bbb9b6253
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2018 Nordic Semiconductor ASA
+</text>
+
+FileName: ./zephyr/subsys/shell/shell_utils.c
+SPDXID: SPDXRef-File-shell-utils.c
+FileChecksum: SHA1: 85fb7fa336061e6fe517e3e67a160e3c1c76d443
+FileChecksum: SHA256: d322cc42cdd5f754b06b51780f4a86adbe100cf6d83aae4123636b895afa550b
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2018 Nordic Semiconductor ASA
+</text>
+
+FileName: ./zephyr/subsys/shell/shell_wildcard.c
+SPDXID: SPDXRef-File-shell-wildcard.c
+FileChecksum: SHA1: 0d704184652be0a6da041c219f4046eab4134030
+FileChecksum: SHA256: 4067fd2847f113ee79ee55bf4f08cc25657b710e4aa9b1fc4ebb893b06152fe6
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2018 Nordic Semiconductor ASA
+</text>
+
+FileName: ./zephyr/subsys/tracing/tracing_none.c
+SPDXID: SPDXRef-File-tracing-none.c
+FileChecksum: SHA1: bbff5c838a8591db381fb3fdd3dd27a7dc3137f5
+FileChecksum: SHA256: f8105978be522f4d6e6d90403d808af633e4781a327d04121c0519ebe205b78d
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2019 Intel corporation
+</text>
+
+FileName: ./zephyr/subsys/usb/device_next/class/usbd_cdc_ncm.c
+SPDXID: SPDXRef-File-usbd-cdc-ncm.c
+FileChecksum: SHA1: 9870982643f48d7e6d5fb396af6b15fb6e76b321
+FileChecksum: SHA256: 9a67524cab8ba537c391212f29e4c6cf2fe2267b2ffe3d53404bad0ebca95f1c
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2024 Nordic Semiconductor ASA
+</text>
+
+FileName: ./zephyr/subsys/usb/device_next/usbd_ch9.c
+SPDXID: SPDXRef-File-usbd-ch9.c
+FileChecksum: SHA1: 870f301474fd6cd18c167f6af4dd5b916dc55d54
+FileChecksum: SHA256: 364c3ff1f3de3decf59120a30dd910fd40f3b0fcef7b00389d476bc1bed34366
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2022 Nordic Semiconductor ASA
+</text>
+
+FileName: ./zephyr/subsys/usb/device_next/usbd_class.c
+SPDXID: SPDXRef-File-usbd-class.c
+FileChecksum: SHA1: 2093cdb1cfbfd2a846786c93b267ce13f3a1f72f
+FileChecksum: SHA256: 68339320062f2c12e8302cbee228bd8834aacc99d85424b09ab54ff7db14116c
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2022 Nordic Semiconductor ASA
+</text>
+
+FileName: ./zephyr/subsys/usb/device_next/usbd_config.c
+SPDXID: SPDXRef-File-usbd-config.c
+FileChecksum: SHA1: 862c33f1cacb9dfc0820585eb91290bd7164e39e
+FileChecksum: SHA256: 9f1a0699af1931751d9a895989a85a24d6cdb9fdaf8047079e8497b3940b94a2
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2022 Nordic Semiconductor ASA
+</text>
+
+FileName: ./zephyr/subsys/usb/device_next/usbd_core.c
+SPDXID: SPDXRef-File-usbd-core.c
+FileChecksum: SHA1: 4e718d7a3482d6f1fae11503e2170582250b02ca
+FileChecksum: SHA256: 54c55d6ee65c14c2919065ff1b346856307782a2a25c39e93151efba80d97eb7
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2022 Nordic Semiconductor ASA
+</text>
+
+FileName: ./zephyr/subsys/usb/device_next/usbd_desc.c
+SPDXID: SPDXRef-File-usbd-desc.c
+FileChecksum: SHA1: 44561c61e1bc644da98744c92129a5e993466bc3
+FileChecksum: SHA256: a7f443dd2b112beeb29e66d59357152065163cbda950abaed7b4a17b628ebdef
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2017, 2018 Intel Corporation
+ * Copyright (c) 2022 Nordic Semiconductor ASA
+ * Copyright (c) 2017 PHYTEC Messtechnik GmbH
+</text>
+
+FileName: ./zephyr/subsys/usb/device_next/usbd_device.c
+SPDXID: SPDXRef-File-usbd-device.c
+FileChecksum: SHA1: ffa666081c2af5d9b3833c7ecde932c32b5d38f0
+FileChecksum: SHA256: c5abc5a96f7f6c5d700154053caf7d0a773917cc78503d2921e61440cdd29755
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2022 Nordic Semiconductor ASA
+</text>
+
+FileName: ./zephyr/subsys/usb/device_next/usbd_endpoint.c
+SPDXID: SPDXRef-File-usbd-endpoint.c
+FileChecksum: SHA1: 1b98a7b3a7e26b81521df405c986d40be8767cb2
+FileChecksum: SHA256: 4e4235d5f477dff8d8fb087de075e26040d90c85df5715db8660ca84f43903f3
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2022 Nordic Semiconductor ASA
+</text>
+
+FileName: ./zephyr/subsys/usb/device_next/usbd_init.c
+SPDXID: SPDXRef-File-usbd-init.c
+FileChecksum: SHA1: 598242c01ad0024363cd78621d7cc549c269a0b0
+FileChecksum: SHA256: e93e5fae076b75a73b18e1161df098decc514cb68927ed5b5d1ebd5f7c5ba54b
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2021-2022 Nordic Semiconductor ASA
+</text>
+
+FileName: ./zephyr/subsys/usb/device_next/usbd_interface.c
+SPDXID: SPDXRef-File-usbd-interface.c
+FileChecksum: SHA1: 07d9c899632477c67d42e2704014f31e11f1d0be
+FileChecksum: SHA256: 223151ee699d7efa9910523fdac39f3bd30cd90c7a1813467740789dd5395596
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2022 Nordic Semiconductor ASA
+</text>
+
+FileName: ./zephyr/subsys/usb/device_next/usbd_msg.c
+SPDXID: SPDXRef-File-usbd-msg.c
+FileChecksum: SHA1: 9d1a9a4fc3ed0285155f2a109480d6c6f994ecb1
+FileChecksum: SHA256: b83afc83fc1392d71570bef8b6654a3c8f8c3615ba692c22c75ba976fa27d53f
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2024 Nordic Semiconductor ASA
+</text>
+
+##### Package: cmsis-sources
+
+PackageName: cmsis-sources
+SPDXID: SPDXRef-cmsis-sources
+PackageLicenseConcluded: NOASSERTION
+PackageLicenseDeclared: NOASSERTION
+PackageCopyrightText: NOASSERTION
+PrimaryPackagePurpose: SOURCE
+PackageDownloadLocation: git+https://github.com/zephyrproject-rtos/cmsis@512cc7e895e8491696b61f7ba8066b4a182569b8
+PackageVersion: 512cc7e895e8491696b61f7ba8066b4a182569b8
+FilesAnalyzed: false
+PackageComment: Utility target; no files
+
+##### Package: cmsis-6-sources
+
+PackageName: cmsis_6-sources
+SPDXID: SPDXRef-cmsis-6-sources
+PackageLicenseConcluded: NOASSERTION
+PackageLicenseDeclared: NOASSERTION
+PackageCopyrightText: NOASSERTION
+PrimaryPackagePurpose: SOURCE
+PackageDownloadLocation: git+https://github.com/zephyrproject-rtos/CMSIS_6@30a859f44ef8ab4dc8f84b03ed586fd16ccf9d74
+PackageVersion: 30a859f44ef8ab4dc8f84b03ed586fd16ccf9d74
+FilesAnalyzed: false
+PackageComment: Utility target; no files
+
+##### Package: hal-nordic-sources
+
+PackageName: hal_nordic-sources
+SPDXID: SPDXRef-hal-nordic-sources
+PackageLicenseConcluded: BSD-3-Clause
+PackageLicenseDeclared: NOASSERTION
+PackageCopyrightText: NOASSERTION
+PrimaryPackagePurpose: SOURCE
+PackageDownloadLocation: git+https://github.com/zephyrproject-rtos/hal_nordic@44fd3d44b15cb75f80a25b4679f91d2787e28664
+PackageVersion: 44fd3d44b15cb75f80a25b4679f91d2787e28664
+PackageLicenseInfoFromFiles: BSD-3-Clause
+FilesAnalyzed: true
+PackageVerificationCode: 162aa5fc4f8664fe05e28056567c491fda802b82
+
+FileName: ./nrfx/bsp/stable/mdk/system_nrf52840.c
+SPDXID: SPDXRef-File-system-nrf52840.c
+FileChecksum: SHA1: d71d6f345fdf69c3ebad0723bfdb611bdcbf1b39
+FileChecksum: SHA256: fb055b7e28357934d85618663baefc9fa6b817abd9236cc8c3bcb93860e27ac8
+LicenseConcluded: BSD-3-Clause
+LicenseInfoInFile: BSD-3-Clause
+FileCopyrightText: <text>
+Copyright (c) 2010 - 2026, Nordic Semiconductor ASA All rights reserved.
+</text>
+
+FileName: ./nrfx/drivers/src/nrfx_clock.c
+SPDXID: SPDXRef-File-nrfx-clock.c
+FileChecksum: SHA1: a7c879980471e7d04989224026cade583cda15b5
+FileChecksum: SHA256: 676168c04ad1687cabf26ce6344c31cb3e29c5eb38a6aa6a50c61ae8351adb65
+LicenseConcluded: BSD-3-Clause
+LicenseInfoInFile: BSD-3-Clause
+FileCopyrightText: <text>
+ * Copyright (c) 2016 - 2026, Nordic Semiconductor ASA
+</text>
+
+FileName: ./nrfx/drivers/src/nrfx_clock_hfclk.c
+SPDXID: SPDXRef-File-nrfx-clock-hfclk.c
+FileChecksum: SHA1: a229d5815e95b385ec20dc05d3bdc195095b04f7
+FileChecksum: SHA256: 334b49236c0687714dba92ce9babd3f14c7823004f3386bee1306e5429ffb982
+LicenseConcluded: BSD-3-Clause
+LicenseInfoInFile: BSD-3-Clause
+FileCopyrightText: <text>
+ * Copyright (c) 2025 - 2026, Nordic Semiconductor ASA
+</text>
+
+FileName: ./nrfx/drivers/src/nrfx_clock_hfclk192m.c
+SPDXID: SPDXRef-File-nrfx-clock-hfclk192m.c
+FileChecksum: SHA1: bf71b57137bfe14d6f7c6f30a09b1c7654d6d21c
+FileChecksum: SHA256: 853e7fe922ddcbb2c22692c7c5817851e7135aec956ad29aa6819d2ee7e65871
+LicenseConcluded: BSD-3-Clause
+LicenseInfoInFile: BSD-3-Clause
+FileCopyrightText: <text>
+ * Copyright (c) 2016 - 2026, Nordic Semiconductor ASA
+</text>
+
+FileName: ./nrfx/drivers/src/nrfx_clock_hfclkaudio.c
+SPDXID: SPDXRef-File-nrfx-clock-hfclkaudio.c
+FileChecksum: SHA1: 812a2a5d6415bf788e509f4d9dd3dc9e02b8f9ac
+FileChecksum: SHA256: fe68119c2bbb964918d7127b1aa5adf0191d72a89c261f2a3342f1205ee15b06
+LicenseConcluded: BSD-3-Clause
+LicenseInfoInFile: BSD-3-Clause
+FileCopyrightText: <text>
+ * Copyright (c) 2025 - 2026, Nordic Semiconductor ASA
+</text>
+
+FileName: ./nrfx/drivers/src/nrfx_clock_lfclk.c
+SPDXID: SPDXRef-File-nrfx-clock-lfclk.c
+FileChecksum: SHA1: 94b158d81a9f0b1b084db797ff6cff2e70f17336
+FileChecksum: SHA256: 21cb9c76f7f3cdf7b430b41463b49a8bfa6ac85630d183ae9dd07b8307941c40
+LicenseConcluded: BSD-3-Clause
+LicenseInfoInFile: BSD-3-Clause
+FileCopyrightText: <text>
+ * Copyright (c) 2025 - 2026, Nordic Semiconductor ASA
+</text>
+
+FileName: ./nrfx/drivers/src/nrfx_clock_xo.c
+SPDXID: SPDXRef-File-nrfx-clock-xo.c
+FileChecksum: SHA1: 00089edfa199f5d7059afcf9263feeb00151644f
+FileChecksum: SHA256: 785cfa894ac8ca90aafe434c40c8f04e5ff50892f11c1543d206f0aea5b4a271
+LicenseConcluded: BSD-3-Clause
+LicenseInfoInFile: BSD-3-Clause
+FileCopyrightText: <text>
+ * Copyright (c) 2025 - 2026, Nordic Semiconductor ASA
+</text>
+
+FileName: ./nrfx/drivers/src/nrfx_clock_xo24m.c
+SPDXID: SPDXRef-File-nrfx-clock-xo24m.c
+FileChecksum: SHA1: b9b4f416b6d42ee951c07e4988f30d10ecac7a30
+FileChecksum: SHA256: 9650b2181cd45368d6583224502ccf428ec292d5e0ed9cba03824fec7757565d
+LicenseConcluded: BSD-3-Clause
+LicenseInfoInFile: BSD-3-Clause
+FileCopyrightText: <text>
+ * Copyright (c) 2025 - 2026, Nordic Semiconductor ASA
+</text>
+
+FileName: ./nrfx/drivers/src/nrfx_gpiote.c
+SPDXID: SPDXRef-File-nrfx-gpiote.c
+FileChecksum: SHA1: 61670ae9b6cd2bd134208509fcaa8788fdfd6490
+FileChecksum: SHA256: 817d1241a91ab1a17d0bf46eae93a4be6db8effccba82d06ab0dd344200b0845
+LicenseConcluded: BSD-3-Clause
+LicenseInfoInFile: BSD-3-Clause
+FileCopyrightText: <text>
+ * Copyright (c) 2015 - 2026, Nordic Semiconductor ASA
+</text>
+
+FileName: ./nrfx/drivers/src/nrfx_power.c
+SPDXID: SPDXRef-File-nrfx-power.c
+FileChecksum: SHA1: 9012624d2f9bf9e862704b331e11d12349c4fed2
+FileChecksum: SHA256: f069559fd6a5c7aa9687ef9558af9d6c74fa2fe588ea573a6cc2d09a51636afe
+LicenseConcluded: BSD-3-Clause
+LicenseInfoInFile: BSD-3-Clause
+FileCopyrightText: <text>
+ * Copyright (c) 2017 - 2026, Nordic Semiconductor ASA
+</text>
+
+FileName: ./nrfx/drivers/src/nrfx_pwm.c
+SPDXID: SPDXRef-File-nrfx-pwm.c
+FileChecksum: SHA1: 53835f4990014ceb55c8d6dd61ceb8fb4d53ddb3
+FileChecksum: SHA256: 8c6f9a15d40e53146d40f7149732f44dcf80d7cd34fd5aced84c49431d59709b
+LicenseConcluded: BSD-3-Clause
+LicenseInfoInFile: BSD-3-Clause
+FileCopyrightText: <text>
+ * Copyright (c) 2015 - 2026, Nordic Semiconductor ASA
+</text>
+
+FileName: ./nrfx/helpers/nrfx_flag32_allocator.c
+SPDXID: SPDXRef-File-nrfx-flag32-allocator.c
+FileChecksum: SHA1: b1e8a650011f4fc9ce38784751e414bd2f060efe
+FileChecksum: SHA256: ee581983f8e52b6ab2f05796d65891b85810a3434b58b50ecd11aed6a85ffd23
+LicenseConcluded: BSD-3-Clause
+LicenseInfoInFile: BSD-3-Clause
+FileCopyrightText: <text>
+ * Copyright (c) 2021 - 2026, Nordic Semiconductor ASA
+</text>
+
+FileName: ./nrfx/helpers/nrfx_gppi_ppi.c
+SPDXID: SPDXRef-File-nrfx-gppi-ppi.c
+FileChecksum: SHA1: ffcc1095e89f887119992f4fff6401a8354d8913
+FileChecksum: SHA256: 642d022671cc7b91db923d5f11f25c8d5c7e5bb94f3660fd72f4df774226a731
+LicenseConcluded: BSD-3-Clause
+LicenseInfoInFile: BSD-3-Clause
+FileCopyrightText: <text>
+ * Copyright (c) 2025 - 2026, Nordic Semiconductor ASA
+</text>
+
+FileName: ./nrfx/helpers/nrfx_ram_ctrl.c
+SPDXID: SPDXRef-File-nrfx-ram-ctrl.c
+FileChecksum: SHA1: 68e985c8755e8e55e73aaf1c841355d26df64b44
+FileChecksum: SHA256: 68384ac96990767f48b28c92af444792424456d0dda0c568d56f154da68e872b
+LicenseConcluded: BSD-3-Clause
+LicenseInfoInFile: BSD-3-Clause
+FileCopyrightText: <text>
+ * Copyright (c) 2023 - 2026, Nordic Semiconductor ASA
+</text>
+
+##### Package: mbedtls-sources
+
+PackageName: mbedtls-sources
+SPDXID: SPDXRef-mbedtls-sources
+PackageLicenseConcluded: Apache-2.0 OR GPL-2.0-or-later
+PackageLicenseDeclared: NOASSERTION
+PackageCopyrightText: NOASSERTION
+PrimaryPackagePurpose: SOURCE
+PackageDownloadLocation: git+https://github.com/zephyrproject-rtos/mbedtls@a3e190fe44c78d1ba67f55979e1257328cc7d0d8
+PackageVersion: a3e190fe44c78d1ba67f55979e1257328cc7d0d8
+PackageLicenseInfoFromFiles: Apache-2.0
+PackageLicenseInfoFromFiles: GPL-2.0-or-later
+FilesAnalyzed: true
+PackageVerificationCode: a75f13fbcca4d23092677c68c6abad0bf9a47274
+
+FileName: ./library/debug.c
+SPDXID: SPDXRef-File-debug.c
+FileChecksum: SHA1: ef2437e998b45ca15c515a31c622eaa170bb67e2
+FileChecksum: SHA256: 10d8431f13a66c096b764532b15e491b0bd75301a38a5ec13bd1e420998898ef
+LicenseConcluded: Apache-2.0 OR GPL-2.0-or-later
+LicenseInfoInFile: Apache-2.0
+LicenseInfoInFile: GPL-2.0-or-later
+FileCopyrightText: <text>
+ *  Copyright The Mbed TLS Contributors
+</text>
+
+FileName: ./library/error.c
+SPDXID: SPDXRef-File-error.c
+FileChecksum: SHA1: ef5c8784d28e66f36bc0d6eb5d809fcda3834bd6
+FileChecksum: SHA256: 649b29de6ae271814701e47cc360b8557d65ff320bcc9785b30c44e0081ebbd3
+LicenseConcluded: Apache-2.0 OR GPL-2.0-or-later
+LicenseInfoInFile: Apache-2.0
+LicenseInfoInFile: GPL-2.0-or-later
+FileCopyrightText: <text>
+ *  Copyright The Mbed TLS Contributors
+</text>
+
+FileName: ./library/mbedtls_config.c
+SPDXID: SPDXRef-File-mbedtls-config.c
+FileChecksum: SHA1: 4c5ca7f10e3ab6908a7b3bf5185531b924180776
+FileChecksum: SHA256: ec33e4aeb28e6a39e6ac6d34f43467f97627d1a183b4028c7f78c74d5ec3415c
+LicenseConcluded: Apache-2.0 OR GPL-2.0-or-later
+LicenseInfoInFile: Apache-2.0
+LicenseInfoInFile: GPL-2.0-or-later
+FileCopyrightText: <text>
+ *  Copyright The Mbed TLS Contributors
+</text>
+
+FileName: ./library/mps_reader.c
+SPDXID: SPDXRef-File-mps-reader.c
+FileChecksum: SHA1: 89bde4856396d42c84b78e55d5d9890874f283fb
+FileChecksum: SHA256: 1c9188848afaa32d4218fcf53a99cbff3352dfb5ffe15f1e48b2d123f39bfdf3
+LicenseConcluded: Apache-2.0 OR GPL-2.0-or-later
+LicenseInfoInFile: Apache-2.0
+LicenseInfoInFile: GPL-2.0-or-later
+FileCopyrightText: <text>
+ *  Copyright The Mbed TLS Contributors
+</text>
+
+FileName: ./library/mps_trace.c
+SPDXID: SPDXRef-File-mps-trace.c
+FileChecksum: SHA1: 047c8370cf324aa24fc050d34b3588cfeabf9153
+FileChecksum: SHA256: 223443e336e6e695bcf2e9309673ebfdd5c661aa17865189d287076a2534e74b
+LicenseConcluded: Apache-2.0 OR GPL-2.0-or-later
+LicenseInfoInFile: Apache-2.0
+LicenseInfoInFile: GPL-2.0-or-later
+FileCopyrightText: <text>
+ *  Copyright The Mbed TLS Contributors
+</text>
+
+FileName: ./library/net_sockets.c
+SPDXID: SPDXRef-File-net-sockets.c
+FileChecksum: SHA1: 0c3d4b83593f860a1045edb7aba5f529c8541b58
+FileChecksum: SHA256: 66ee0d0710bdf717fef1c10850abdf431410b7d4cbe2169c0cce2e06758766d1
+LicenseConcluded: Apache-2.0 OR GPL-2.0-or-later
+LicenseInfoInFile: Apache-2.0
+LicenseInfoInFile: GPL-2.0-or-later
+FileCopyrightText: <text>
+ *  Copyright The Mbed TLS Contributors
+</text>
+
+FileName: ./library/pkcs7.c
+SPDXID: SPDXRef-File-pkcs7.c
+FileChecksum: SHA1: 72bcca3285ad3f60fb5aedfeaf888f1d0f6e0ed4
+FileChecksum: SHA256: aea53802c880cc396a22163cc8842441b8dd829f9ea7f9da75ae0ad6f38c5208
+LicenseConcluded: Apache-2.0 OR GPL-2.0-or-later
+LicenseInfoInFile: Apache-2.0
+LicenseInfoInFile: GPL-2.0-or-later
+FileCopyrightText: <text>
+ *  Copyright The Mbed TLS Contributors
+</text>
+
+FileName: ./library/ssl_cache.c
+SPDXID: SPDXRef-File-ssl-cache.c
+FileChecksum: SHA1: 6110c1775e855619130c2968dbfbdcc2de7bb5fd
+FileChecksum: SHA256: 518badf0e8b7f405f24a4abe9e29d508fd7b1853a3b9b0a6d0b04fffcdd29357
+LicenseConcluded: Apache-2.0 OR GPL-2.0-or-later
+LicenseInfoInFile: Apache-2.0
+LicenseInfoInFile: GPL-2.0-or-later
+FileCopyrightText: <text>
+ *  Copyright The Mbed TLS Contributors
+</text>
+
+FileName: ./library/ssl_ciphersuites.c
+SPDXID: SPDXRef-File-ssl-ciphersuites.c
+FileChecksum: SHA1: 728352110c81ff90272839cd25a571b0b4f34d4a
+FileChecksum: SHA256: b013b5f67cc4f3d1cbc1b937200243dc7de5590ebf3a0cfe353b0349e91a5f0d
+LicenseConcluded: Apache-2.0 OR GPL-2.0-or-later
+LicenseInfoInFile: Apache-2.0
+LicenseInfoInFile: GPL-2.0-or-later
+FileCopyrightText: <text>
+ *  Copyright The Mbed TLS Contributors
+</text>
+
+FileName: ./library/ssl_client.c
+SPDXID: SPDXRef-File-ssl-client.c
+FileChecksum: SHA1: fc6a3cdfe9ed3737f93b937ac1eaf5ee0a38650c
+FileChecksum: SHA256: 81414727c1a23761927a8a86e462eda7b782672eae7cff887e7ca0a48867ea13
+LicenseConcluded: Apache-2.0 OR GPL-2.0-or-later
+LicenseInfoInFile: Apache-2.0
+LicenseInfoInFile: GPL-2.0-or-later
+FileCopyrightText: <text>
+ *  Copyright The Mbed TLS Contributors
+</text>
+
+FileName: ./library/ssl_cookie.c
+SPDXID: SPDXRef-File-ssl-cookie.c
+FileChecksum: SHA1: e526ada7e5ba29eaef04e3b3878f9125ebd00c1f
+FileChecksum: SHA256: 6a44e514585fe9db1b616e1efa1141e7517c556a2877974817dcc2e0263c5540
+LicenseConcluded: Apache-2.0 OR GPL-2.0-or-later
+LicenseInfoInFile: Apache-2.0
+LicenseInfoInFile: GPL-2.0-or-later
+FileCopyrightText: <text>
+ *  Copyright The Mbed TLS Contributors
+</text>
+
+FileName: ./library/ssl_debug_helpers_generated.c
+SPDXID: SPDXRef-File-ssl-debug-helpers-generated.c
+FileChecksum: SHA1: e10453b91a4dd1f38dee3b614cf3cd00e6bebdb5
+FileChecksum: SHA256: ff6f9712f06d920c450f2e6d27676e77488ddc56f3a4a9adf6ec5f5244f55664
+LicenseConcluded: Apache-2.0 OR GPL-2.0-or-later
+LicenseInfoInFile: Apache-2.0
+LicenseInfoInFile: GPL-2.0-or-later
+FileCopyrightText: <text>
+ *  Copyright The Mbed TLS Contributors
+</text>
+
+FileName: ./library/ssl_msg.c
+SPDXID: SPDXRef-File-ssl-msg.c
+FileChecksum: SHA1: 045948f6005cfd66959f59f6faa937c2cc2dc367
+FileChecksum: SHA256: 46716c891f1ce273909e636cd1dad1447276aed01541b377813733be7470d449
+LicenseConcluded: Apache-2.0 OR GPL-2.0-or-later
+LicenseInfoInFile: Apache-2.0
+LicenseInfoInFile: GPL-2.0-or-later
+FileCopyrightText: <text>
+ *  Copyright The Mbed TLS Contributors
+</text>
+
+FileName: ./library/ssl_ticket.c
+SPDXID: SPDXRef-File-ssl-ticket.c
+FileChecksum: SHA1: cb50762eb9de8205de78a2e029e106c6a267fc4c
+FileChecksum: SHA256: 73a387024259119744a9ac509af05e0aa530a991bddd68cb56cf3b4598b2e643
+LicenseConcluded: Apache-2.0 OR GPL-2.0-or-later
+LicenseInfoInFile: Apache-2.0
+LicenseInfoInFile: GPL-2.0-or-later
+FileCopyrightText: <text>
+ *  Copyright The Mbed TLS Contributors
+</text>
+
+FileName: ./library/ssl_tls.c
+SPDXID: SPDXRef-File-ssl-tls.c
+FileChecksum: SHA1: b9f91c1834a1caaecab4d74b3a665dcd7dc249a9
+FileChecksum: SHA256: 73474ec032eafc81d88b4099da914f4ca0ac1629fe11b95e7b630a2b6c87c1e9
+LicenseConcluded: Apache-2.0 OR GPL-2.0-or-later
+LicenseInfoInFile: Apache-2.0
+LicenseInfoInFile: GPL-2.0-or-later
+FileCopyrightText: <text>
+ *  Copyright The Mbed TLS Contributors
+</text>
+
+FileName: ./library/ssl_tls12_client.c
+SPDXID: SPDXRef-File-ssl-tls12-client.c
+FileChecksum: SHA1: c61b15ffa422ecd3c1fabc232f3f503ac24f67ac
+FileChecksum: SHA256: 9a24dc7685ce5e59f28afc3ba10273763efc26456df6c65269a5ccdd1b0612ad
+LicenseConcluded: Apache-2.0 OR GPL-2.0-or-later
+LicenseInfoInFile: Apache-2.0
+LicenseInfoInFile: GPL-2.0-or-later
+FileCopyrightText: <text>
+ *  Copyright The Mbed TLS Contributors
+</text>
+
+FileName: ./library/ssl_tls12_server.c
+SPDXID: SPDXRef-File-ssl-tls12-server.c
+FileChecksum: SHA1: b069e7b437ac0471c5086c4a62812a180a1113ac
+FileChecksum: SHA256: 37a14f8a4d79e3fe64faf98e9bd30c4a3937e0ca101706c620e6302b5b3a5106
+LicenseConcluded: Apache-2.0 OR GPL-2.0-or-later
+LicenseInfoInFile: Apache-2.0
+LicenseInfoInFile: GPL-2.0-or-later
+FileCopyrightText: <text>
+ *  Copyright The Mbed TLS Contributors
+</text>
+
+FileName: ./library/ssl_tls13_client.c
+SPDXID: SPDXRef-File-ssl-tls13-client.c
+FileChecksum: SHA1: 5efd8c2d4389f70083bbb3f7b4bcfddf7f9c0a75
+FileChecksum: SHA256: e49a4a4604d4cc3e07f5b2fb283e6a05a55033836736ff40cc71a1066ff2b761
+LicenseConcluded: Apache-2.0 OR GPL-2.0-or-later
+LicenseInfoInFile: Apache-2.0
+LicenseInfoInFile: GPL-2.0-or-later
+FileCopyrightText: <text>
+ *  Copyright The Mbed TLS Contributors
+</text>
+
+FileName: ./library/ssl_tls13_generic.c
+SPDXID: SPDXRef-File-ssl-tls13-generic.c
+FileChecksum: SHA1: bdd35e8e90d4822b40c7250c0a54f1491d7c08ec
+FileChecksum: SHA256: 688736df0821d84020b1a1927c9d86f2f6251b57a4151c423343ad7e2bc6a6c2
+LicenseConcluded: Apache-2.0 OR GPL-2.0-or-later
+LicenseInfoInFile: Apache-2.0
+LicenseInfoInFile: GPL-2.0-or-later
+FileCopyrightText: <text>
+ *  Copyright The Mbed TLS Contributors
+</text>
+
+FileName: ./library/ssl_tls13_keys.c
+SPDXID: SPDXRef-File-ssl-tls13-keys.c
+FileChecksum: SHA1: 7bbf094813cf480ec79e718843f68bd9ba66cc78
+FileChecksum: SHA256: 49be5970bdce4e1026d1dc505f33c69d8904cab643c391f88e571c02bf758d1d
+LicenseConcluded: Apache-2.0 OR GPL-2.0-or-later
+LicenseInfoInFile: Apache-2.0
+LicenseInfoInFile: GPL-2.0-or-later
+FileCopyrightText: <text>
+ *  Copyright The Mbed TLS Contributors
+</text>
+
+FileName: ./library/ssl_tls13_server.c
+SPDXID: SPDXRef-File-ssl-tls13-server.c
+FileChecksum: SHA1: 6922eb1aeeb7e8d4d978a68f3f2cc426a5854ab3
+FileChecksum: SHA256: 75bcd5a6c5ea1af98bba43ee03f51fa4ab9d809c61a0603679f62d4f7495f507
+LicenseConcluded: Apache-2.0 OR GPL-2.0-or-later
+LicenseInfoInFile: Apache-2.0
+LicenseInfoInFile: GPL-2.0-or-later
+FileCopyrightText: <text>
+ *  Copyright The Mbed TLS Contributors
+</text>
+
+FileName: ./library/timing.c
+SPDXID: SPDXRef-File-timing.c
+FileChecksum: SHA1: 14e8b22da4b4c07f7086395a2af9b617cc7a680a
+FileChecksum: SHA256: c161bb618a0e275a899235bfdf4781f3e16b81bfb5dffa310c2b411a61b840a8
+LicenseConcluded: Apache-2.0 OR GPL-2.0-or-later
+LicenseInfoInFile: Apache-2.0
+LicenseInfoInFile: GPL-2.0-or-later
+FileCopyrightText: <text>
+ *  Copyright The Mbed TLS Contributors
+</text>
+
+FileName: ./library/version.c
+SPDXID: SPDXRef-File-version.c-2
+FileChecksum: SHA1: 66c884d2ca5358aa26c05bf8081a90e438ec4b98
+FileChecksum: SHA256: caae12f8d0080d9eeb15df7647b69d97a5f47d7d5bb2ab7632345cd73a04c04f
+LicenseConcluded: Apache-2.0 OR GPL-2.0-or-later
+LicenseInfoInFile: Apache-2.0
+LicenseInfoInFile: GPL-2.0-or-later
+FileCopyrightText: <text>
+ *  Copyright The Mbed TLS Contributors
+</text>
+
+FileName: ./library/version_features.c
+SPDXID: SPDXRef-File-version-features.c
+FileChecksum: SHA1: 9636a0cd3eb4d09058475626d3a38e0c53661d12
+FileChecksum: SHA256: 7aeaf9fc8d9537a007380bef169b06cef42bf44a60b624f6e796939117466dd1
+LicenseConcluded: Apache-2.0 OR GPL-2.0-or-later
+LicenseInfoInFile: Apache-2.0
+LicenseInfoInFile: GPL-2.0-or-later
+FileCopyrightText: <text>
+ *  Copyright The Mbed TLS Contributors
+</text>
+
+FileName: ./library/x509.c
+SPDXID: SPDXRef-File-x509.c
+FileChecksum: SHA1: a0908020fe69a9671e37410f5d45843338a60306
+FileChecksum: SHA256: 676b48c20aaa08c97ee871982eea739763810d7643e6299c3208d4bc0683653b
+LicenseConcluded: Apache-2.0 OR GPL-2.0-or-later
+LicenseInfoInFile: Apache-2.0
+LicenseInfoInFile: GPL-2.0-or-later
+FileCopyrightText: <text>
+ *  Copyright The Mbed TLS Contributors
+</text>
+
+FileName: ./library/x509_create.c
+SPDXID: SPDXRef-File-x509-create.c
+FileChecksum: SHA1: bda2b8cafe693c0dfcbe17f520e54a6bcc6e75ee
+FileChecksum: SHA256: fcc9d93ec815f57cac34d018ca729687be4b4dd1617e6bd5e9483e82936e7148
+LicenseConcluded: Apache-2.0 OR GPL-2.0-or-later
+LicenseInfoInFile: Apache-2.0
+LicenseInfoInFile: GPL-2.0-or-later
+FileCopyrightText: <text>
+ *  Copyright The Mbed TLS Contributors
+</text>
+
+FileName: ./library/x509_crl.c
+SPDXID: SPDXRef-File-x509-crl.c
+FileChecksum: SHA1: 7cc6f1b96f34832c64d8e504201891f4aa1b90bc
+FileChecksum: SHA256: f97f7f881aa9ea1aeb181e2f6c77ecb4798468552d877532cc25cce4fc977d01
+LicenseConcluded: Apache-2.0 OR GPL-2.0-or-later
+LicenseInfoInFile: Apache-2.0
+LicenseInfoInFile: GPL-2.0-or-later
+FileCopyrightText: <text>
+ *  Copyright The Mbed TLS Contributors
+</text>
+
+FileName: ./library/x509_crt.c
+SPDXID: SPDXRef-File-x509-crt.c
+FileChecksum: SHA1: 67cfccf5f6f06705de554c0c2fae373a7861aa61
+FileChecksum: SHA256: 02ab06050ac7b202b0b825af514d4543ad762eee84bc1caa86c3a89d1da28b8a
+LicenseConcluded: Apache-2.0 OR GPL-2.0-or-later
+LicenseInfoInFile: Apache-2.0
+LicenseInfoInFile: GPL-2.0-or-later
+FileCopyrightText: <text>
+ *  Copyright The Mbed TLS Contributors
+</text>
+
+FileName: ./library/x509_csr.c
+SPDXID: SPDXRef-File-x509-csr.c
+FileChecksum: SHA1: 192ff0ed387efbd0bf64ea40e1cc91cc66eb0989
+FileChecksum: SHA256: 2c0a1e68fbf752e4f84d1a85d0b524ae48da4344744758897db52350ff1b4b15
+LicenseConcluded: Apache-2.0 OR GPL-2.0-or-later
+LicenseInfoInFile: Apache-2.0
+LicenseInfoInFile: GPL-2.0-or-later
+FileCopyrightText: <text>
+ *  Copyright The Mbed TLS Contributors
+</text>
+
+FileName: ./library/x509_oid.c
+SPDXID: SPDXRef-File-x509-oid.c
+FileChecksum: SHA1: 7a0ae1e1e449c79c95c6885f74bded30c1575c6e
+FileChecksum: SHA256: 83d272e0776af2ab673e043f56e86a230c6e23e89cae56339783154638d7d914
+LicenseConcluded: Apache-2.0 OR GPL-2.0-or-later
+LicenseInfoInFile: Apache-2.0
+LicenseInfoInFile: GPL-2.0-or-later
+FileCopyrightText: <text>
+ *  Copyright The Mbed TLS Contributors
+</text>
+
+FileName: ./library/x509write.c
+SPDXID: SPDXRef-File-x509write.c
+FileChecksum: SHA1: 31d3ea4d3e956b9689201c2eb019f18f08860acc
+FileChecksum: SHA256: 1d1018f2745786dbb9b50bdf1f7ebe9abf68177ef2acd45e43fd0e9f5fcec51a
+LicenseConcluded: Apache-2.0 OR GPL-2.0-or-later
+LicenseInfoInFile: Apache-2.0
+LicenseInfoInFile: GPL-2.0-or-later
+FileCopyrightText: <text>
+ *  Copyright The Mbed TLS Contributors
+</text>
+
+FileName: ./library/x509write_crt.c
+SPDXID: SPDXRef-File-x509write-crt.c
+FileChecksum: SHA1: b359863fe36cde954a6cc4976d022942ab9ac221
+FileChecksum: SHA256: 2c3730e5b7ad8a3a29c2bc12ecd1daeb876f69528fc50ff246cb9404c9c91b04
+LicenseConcluded: Apache-2.0 OR GPL-2.0-or-later
+LicenseInfoInFile: Apache-2.0
+LicenseInfoInFile: GPL-2.0-or-later
+FileCopyrightText: <text>
+ *  Copyright The Mbed TLS Contributors
+</text>
+
+FileName: ./library/x509write_csr.c
+SPDXID: SPDXRef-File-x509write-csr.c
+FileChecksum: SHA1: e2b33b8180d1f3b779ac734a4f03641f0dcdcc46
+FileChecksum: SHA256: e603e14a01d61444d0d6ca7837b0eff0816be67680421658d3ca0f0b5322338e
+LicenseConcluded: Apache-2.0 OR GPL-2.0-or-later
+LicenseInfoInFile: Apache-2.0
+LicenseInfoInFile: GPL-2.0-or-later
+FileCopyrightText: <text>
+ *  Copyright The Mbed TLS Contributors
+</text>
+
+##### Package: mcuboot-sources
+
+PackageName: mcuboot-sources
+SPDXID: SPDXRef-mcuboot-sources
+PackageLicenseConcluded: NOASSERTION
+PackageLicenseDeclared: NOASSERTION
+PackageCopyrightText: NOASSERTION
+PrimaryPackagePurpose: SOURCE
+PackageDownloadLocation: git+https://github.com/zephyrproject-rtos/mcuboot@6d3b3d2c38ab20c242e5b9abb04d050086383eb2
+PackageVersion: 6d3b3d2c38ab20c242e5b9abb04d050086383eb2
+FilesAnalyzed: false
+PackageComment: Utility target; no files
+
+##### Package: tf-psa-crypto-sources
+
+PackageName: tf-psa-crypto-sources
+SPDXID: SPDXRef-tf-psa-crypto-sources
+PackageLicenseConcluded: Apache-2.0 AND (Apache-2.0 OR GPL-2.0-or-later)
+PackageLicenseDeclared: NOASSERTION
+PackageCopyrightText: NOASSERTION
+PrimaryPackagePurpose: SOURCE
+PackageDownloadLocation: git+https://github.com/zephyrproject-rtos/tf-psa-crypto@dc575a2ddcc8cb16275d24c42a52eaf79ebe2231
+PackageVersion: dc575a2ddcc8cb16275d24c42a52eaf79ebe2231
+PackageLicenseInfoFromFiles: Apache-2.0
+PackageLicenseInfoFromFiles: GPL-2.0-or-later
+FilesAnalyzed: true
+PackageVerificationCode: 769212d1a062cadc5e6c53f5a98abb0e3cef7953
+
+FileName: ./core/psa_crypto.c
+SPDXID: SPDXRef-File-psa-crypto.c
+FileChecksum: SHA1: 245d7192a5a001ebd1e8bd22f9cc6ac726c7efdd
+FileChecksum: SHA256: 37bd14e4b545d8f6644438e671d0fafbd58a3609a3379ae29742e1bac1c839f3
+LicenseConcluded: Apache-2.0 OR GPL-2.0-or-later
+LicenseInfoInFile: Apache-2.0
+LicenseInfoInFile: GPL-2.0-or-later
+FileCopyrightText: <text>
+ *  Copyright The Mbed TLS Contributors
+</text>
+
+FileName: ./core/psa_crypto_client.c
+SPDXID: SPDXRef-File-psa-crypto-client.c
+FileChecksum: SHA1: 1508b5d8babce8c9c9d648fcfeba6334160bb44b
+FileChecksum: SHA256: 622b752075a924573fc68aebd4fbb498b9d3a6bf30d03e28879ce7b1d7c169d9
+LicenseConcluded: Apache-2.0 OR GPL-2.0-or-later
+LicenseInfoInFile: Apache-2.0
+LicenseInfoInFile: GPL-2.0-or-later
+FileCopyrightText: <text>
+ *  Copyright The Mbed TLS Contributors
+</text>
+
+FileName: ./core/psa_crypto_driver_wrappers_no_static.c
+SPDXID: SPDXRef-File-psa-crypto-driver-wrappers-no-static.c
+FileChecksum: SHA1: 3ef46e25ef3e3fdd88360f43adcc9d5b171ee436
+FileChecksum: SHA256: 92d1d9001187cb5fdcac77d15963758e225f45d6d4f0022afe9c5ff849051008
+LicenseConcluded: Apache-2.0 OR GPL-2.0-or-later
+LicenseInfoInFile: Apache-2.0
+LicenseInfoInFile: GPL-2.0-or-later
+FileCopyrightText: <text>
+/*  Copyright The Mbed TLS Contributors
+</text>
+
+FileName: ./core/psa_crypto_random.c
+SPDXID: SPDXRef-File-psa-crypto-random.c
+FileChecksum: SHA1: de66d61325f4b70c74738be2b6bec2ce677cbbf8
+FileChecksum: SHA256: 631ee70a47e239e428fd18f9be6de0dc130d14283d2af7786d07bb268715a292
+LicenseConcluded: Apache-2.0 OR GPL-2.0-or-later
+LicenseInfoInFile: Apache-2.0
+LicenseInfoInFile: GPL-2.0-or-later
+FileCopyrightText: <text>
+ *  Copyright The Mbed TLS Contributors
+</text>
+
+FileName: ./core/psa_crypto_slot_management.c
+SPDXID: SPDXRef-File-psa-crypto-slot-management.c
+FileChecksum: SHA1: c30b1a5296332a4cc1f7defed4159164233f34e8
+FileChecksum: SHA256: 4544fb65cac46a87a2cefb10c5535e260669caffb36ffb38032e84a752486905
+LicenseConcluded: Apache-2.0 OR GPL-2.0-or-later
+LicenseInfoInFile: Apache-2.0
+LicenseInfoInFile: GPL-2.0-or-later
+FileCopyrightText: <text>
+ *  Copyright The Mbed TLS Contributors
+</text>
+
+FileName: ./core/psa_crypto_storage.c
+SPDXID: SPDXRef-File-psa-crypto-storage.c
+FileChecksum: SHA1: e936ce9497ceb30134ab72d452e055f1e0bf872a
+FileChecksum: SHA256: 0a12e41b32942638981824a6d06b2dfa7322e0f16529c384bf5a13dbeb052573
+LicenseConcluded: Apache-2.0 OR GPL-2.0-or-later
+LicenseInfoInFile: Apache-2.0
+LicenseInfoInFile: GPL-2.0-or-later
+FileCopyrightText: <text>
+ *  Copyright The Mbed TLS Contributors
+</text>
+
+FileName: ./core/psa_its_file.c
+SPDXID: SPDXRef-File-psa-its-file.c
+FileChecksum: SHA1: 12fc22fa13a9b28d9ee1a14ff8bbe8987b112ba9
+FileChecksum: SHA256: 9ad5150d9d074b94a966c7c7374bf017a5aa1bfea554c2305315509cd1886b08
+LicenseConcluded: Apache-2.0 OR GPL-2.0-or-later
+LicenseInfoInFile: Apache-2.0
+LicenseInfoInFile: GPL-2.0-or-later
+FileCopyrightText: <text>
+ *  Copyright The Mbed TLS Contributors
+</text>
+
+FileName: ./core/psa_util.c
+SPDXID: SPDXRef-File-psa-util.c
+FileChecksum: SHA1: e9457feebcb6e6258bd89e24ac7c2d135871986f
+FileChecksum: SHA256: b6bd4163875369769e393ea6b341d0194d3959c53dce1a24a424d137eb02a6fc
+LicenseConcluded: Apache-2.0 OR GPL-2.0-or-later
+LicenseInfoInFile: Apache-2.0
+LicenseInfoInFile: GPL-2.0-or-later
+FileCopyrightText: <text>
+ *  Copyright The Mbed TLS Contributors
+</text>
+
+FileName: ./core/tf_psa_crypto_config.c
+SPDXID: SPDXRef-File-tf-psa-crypto-config.c
+FileChecksum: SHA1: bfad433bdb835dbd257ac7e07ffca672ad204792
+FileChecksum: SHA256: d1d3f5d27df93d44145de3dd81eef62a2eff71a6290a34ffa5fb2d75183ca327
+LicenseConcluded: Apache-2.0 OR GPL-2.0-or-later
+LicenseInfoInFile: Apache-2.0
+LicenseInfoInFile: GPL-2.0-or-later
+FileCopyrightText: <text>
+ *  Copyright The Mbed TLS Contributors
+</text>
+
+FileName: ./core/tf_psa_crypto_version.c
+SPDXID: SPDXRef-File-tf-psa-crypto-version.c
+FileChecksum: SHA1: bb429a72da3a1e250127ff40affaa8eef185fa41
+FileChecksum: SHA256: 19e17395c4e3aaec984c379d428bfdf2d69265ae06e86e20f41b2656d9f8b062
+LicenseConcluded: Apache-2.0 OR GPL-2.0-or-later
+LicenseInfoInFile: Apache-2.0
+LicenseInfoInFile: GPL-2.0-or-later
+FileCopyrightText: <text>
+ *  Copyright The Mbed TLS Contributors
+</text>
+
+FileName: ./drivers/builtin/src/aes.c
+SPDXID: SPDXRef-File-aes.c
+FileChecksum: SHA1: e9cb611a922f2d1d22aaaeab6968c0fd9b5c9571
+FileChecksum: SHA256: e9d11d3c5daa95e5c746e542eaf6b927b5a2815e54492c2e545f64e9d98b0bde
+LicenseConcluded: Apache-2.0 OR GPL-2.0-or-later
+LicenseInfoInFile: Apache-2.0
+LicenseInfoInFile: GPL-2.0-or-later
+FileCopyrightText: <text>
+ *  Copyright The Mbed TLS Contributors
+</text>
+
+FileName: ./drivers/builtin/src/aesce.c
+SPDXID: SPDXRef-File-aesce.c
+FileChecksum: SHA1: f49854c52fa1583b899c71e4bb2638245fd6fd88
+FileChecksum: SHA256: 10f05ecd562053ffad322e543b8d12a960f90647438e054c4ad79a7fe80afe4f
+LicenseConcluded: Apache-2.0 OR GPL-2.0-or-later
+LicenseInfoInFile: Apache-2.0
+LicenseInfoInFile: GPL-2.0-or-later
+FileCopyrightText: <text>
+ *  Copyright The Mbed TLS Contributors
+</text>
+
+FileName: ./drivers/builtin/src/aesni.c
+SPDXID: SPDXRef-File-aesni.c
+FileChecksum: SHA1: 33f13ab334668a3eb622ab405579811f6d2aca06
+FileChecksum: SHA256: 3458909ee5509ba7aa4603aba5bc0e4a451afa755958d40e5e02e650de6e3e1d
+LicenseConcluded: Apache-2.0 OR GPL-2.0-or-later
+LicenseInfoInFile: Apache-2.0
+LicenseInfoInFile: GPL-2.0-or-later
+FileCopyrightText: <text>
+ *  Copyright The Mbed TLS Contributors
+</text>
+
+FileName: ./drivers/builtin/src/aria.c
+SPDXID: SPDXRef-File-aria.c
+FileChecksum: SHA1: 2e909775bbbee3a157c5652e81208ba2b070999a
+FileChecksum: SHA256: 43c1682e9010db91b0b8bbfe9559c8b7adc94ebcc6387e78f34629f6c2c41f4e
+LicenseConcluded: Apache-2.0 OR GPL-2.0-or-later
+LicenseInfoInFile: Apache-2.0
+LicenseInfoInFile: GPL-2.0-or-later
+FileCopyrightText: <text>
+ *  Copyright The Mbed TLS Contributors
+</text>
+
+FileName: ./drivers/builtin/src/bignum.c
+SPDXID: SPDXRef-File-bignum.c
+FileChecksum: SHA1: 493a78f28ad44cb9190f8bb4f71b478dfa996622
+FileChecksum: SHA256: 67bd2c518a3d9cbc9e91873d35b9cc718b1dc86fddb31c6838b46e26eebb5d16
+LicenseConcluded: Apache-2.0 OR GPL-2.0-or-later
+LicenseInfoInFile: Apache-2.0
+LicenseInfoInFile: GPL-2.0-or-later
+FileCopyrightText: <text>
+ *  Copyright The Mbed TLS Contributors
+</text>
+
+FileName: ./drivers/builtin/src/bignum_core.c
+SPDXID: SPDXRef-File-bignum-core.c
+FileChecksum: SHA1: 48bcfd2790c11e89f0cebbc3d697f81e9a0e5cd4
+FileChecksum: SHA256: 0dbf57bfd0d9fad361d65bce9bdf1d04d24cc9b27b2f00d9d6f2150d71337f4d
+LicenseConcluded: Apache-2.0 OR GPL-2.0-or-later
+LicenseInfoInFile: Apache-2.0
+LicenseInfoInFile: GPL-2.0-or-later
+FileCopyrightText: <text>
+ *  Copyright The Mbed TLS Contributors
+</text>
+
+FileName: ./drivers/builtin/src/bignum_mod.c
+SPDXID: SPDXRef-File-bignum-mod.c
+FileChecksum: SHA1: 58f3a0753730bf8bac96d2976f82866925e4b786
+FileChecksum: SHA256: c5db8fe8b70e2d666494e962a45d30a3f796dbbc34ab9c80645ece08a6e6f1ad
+LicenseConcluded: Apache-2.0 OR GPL-2.0-or-later
+LicenseInfoInFile: Apache-2.0
+LicenseInfoInFile: GPL-2.0-or-later
+FileCopyrightText: <text>
+ *  Copyright The Mbed TLS Contributors
+</text>
+
+FileName: ./drivers/builtin/src/bignum_mod_raw.c
+SPDXID: SPDXRef-File-bignum-mod-raw.c
+FileChecksum: SHA1: 652f5aaf66a7f70cffb6ba9afbb57db290eac72e
+FileChecksum: SHA256: 3f95ed690b715b95225c968f37a3410b3d8bce9a46b2919e55978c492ed74d9e
+LicenseConcluded: Apache-2.0 OR GPL-2.0-or-later
+LicenseInfoInFile: Apache-2.0
+LicenseInfoInFile: GPL-2.0-or-later
+FileCopyrightText: <text>
+ *  Copyright The Mbed TLS Contributors
+</text>
+
+FileName: ./drivers/builtin/src/block_cipher.c
+SPDXID: SPDXRef-File-block-cipher.c
+FileChecksum: SHA1: 0b2882ac362867331a09d8a8cf23446f2b838ca2
+FileChecksum: SHA256: d59fd3ed04d360929c28ef981bd9ad98cc6087ae3bdcc996897b7120678847dc
+LicenseConcluded: Apache-2.0 OR GPL-2.0-or-later
+LicenseInfoInFile: Apache-2.0
+LicenseInfoInFile: GPL-2.0-or-later
+FileCopyrightText: <text>
+ *  Copyright The Mbed TLS Contributors
+</text>
+
+FileName: ./drivers/builtin/src/camellia.c
+SPDXID: SPDXRef-File-camellia.c
+FileChecksum: SHA1: cd733d142ecf0e5eb6deabfe5f0e5529e64ff9fb
+FileChecksum: SHA256: f099ba55c4f31a3bc4785a900c4d25bdeb5f9687b7be8ec18bde1d25b02c6fe2
+LicenseConcluded: Apache-2.0 OR GPL-2.0-or-later
+LicenseInfoInFile: Apache-2.0
+LicenseInfoInFile: GPL-2.0-or-later
+FileCopyrightText: <text>
+ *  Copyright The Mbed TLS Contributors
+</text>
+
+FileName: ./drivers/builtin/src/ccm.c
+SPDXID: SPDXRef-File-ccm.c
+FileChecksum: SHA1: 81bbb11161067eb692e96bc12302c5aa7ae4b47b
+FileChecksum: SHA256: 41dcc38780e23e8a2a01620b4387d2d4639eba8ba83d1960ba4f787404f8b938
+LicenseConcluded: Apache-2.0 OR GPL-2.0-or-later
+LicenseInfoInFile: Apache-2.0
+LicenseInfoInFile: GPL-2.0-or-later
+FileCopyrightText: <text>
+ *  Copyright The Mbed TLS Contributors
+</text>
+
+FileName: ./drivers/builtin/src/chacha20.c
+SPDXID: SPDXRef-File-chacha20.c
+FileChecksum: SHA1: 27321784ee6bf5bd933351ff8f49d6e0784841fc
+FileChecksum: SHA256: f1284ef1bcf2cd1924445a36ba3c7b330dfa033de2bd10bbcbb81dd15852f3df
+LicenseConcluded: Apache-2.0 OR GPL-2.0-or-later
+LicenseInfoInFile: Apache-2.0
+LicenseInfoInFile: GPL-2.0-or-later
+FileCopyrightText: <text>
+ *  Copyright The Mbed TLS Contributors
+</text>
+
+FileName: ./drivers/builtin/src/chacha20_neon.c
+SPDXID: SPDXRef-File-chacha20-neon.c
+FileChecksum: SHA1: 513a81e2879912b8e0786c3eceb9ec7c3f122319
+FileChecksum: SHA256: ea1f45ee3723a2cee58753a0151cc454f75c17c9685fd43a9b52dc0efe089741
+LicenseConcluded: Apache-2.0 OR GPL-2.0-or-later
+LicenseInfoInFile: Apache-2.0
+LicenseInfoInFile: GPL-2.0-or-later
+FileCopyrightText: <text>
+ *  Copyright The Mbed TLS Contributors
+</text>
+
+FileName: ./drivers/builtin/src/chachapoly.c
+SPDXID: SPDXRef-File-chachapoly.c
+FileChecksum: SHA1: c120f1c413817d395e7ae52b5777ef79dad80d88
+FileChecksum: SHA256: 7aeebeb1e3138a1a5681bdd06c58128dbe233789fb8aad58e71f6cb561aa6c06
+LicenseConcluded: Apache-2.0 OR GPL-2.0-or-later
+LicenseInfoInFile: Apache-2.0
+LicenseInfoInFile: GPL-2.0-or-later
+FileCopyrightText: <text>
+ *  Copyright The Mbed TLS Contributors
+</text>
+
+FileName: ./drivers/builtin/src/cipher.c
+SPDXID: SPDXRef-File-cipher.c
+FileChecksum: SHA1: 99758a041a2daf37dca8d954ca667a34cab5c548
+FileChecksum: SHA256: 5c1d267026bb309ca2fb04daf7332d1e3fe2bf5f99aad28093f69eb02b7cba09
+LicenseConcluded: Apache-2.0 OR GPL-2.0-or-later
+LicenseInfoInFile: Apache-2.0
+LicenseInfoInFile: GPL-2.0-or-later
+FileCopyrightText: <text>
+ *  Copyright The Mbed TLS Contributors
+</text>
+
+FileName: ./drivers/builtin/src/cipher_wrap.c
+SPDXID: SPDXRef-File-cipher-wrap.c
+FileChecksum: SHA1: 97066f0135fec3f9c3becb816ea0033b99e91027
+FileChecksum: SHA256: 77a61ccd7dbfbe145bd2efcbe5cb2290f5d18fff7e25d88df256c45a218a771a
+LicenseConcluded: Apache-2.0 OR GPL-2.0-or-later
+LicenseInfoInFile: Apache-2.0
+LicenseInfoInFile: GPL-2.0-or-later
+FileCopyrightText: <text>
+ *  Copyright The Mbed TLS Contributors
+</text>
+
+FileName: ./drivers/builtin/src/cmac.c
+SPDXID: SPDXRef-File-cmac.c
+FileChecksum: SHA1: 0a0efe6eb2f59f5bc97172b29b1d60fa5292d2d6
+FileChecksum: SHA256: 3225afc60000939263b7e91a1f7431946b4ee0a68023df0c97d061e0146e796e
+LicenseConcluded: Apache-2.0 OR GPL-2.0-or-later
+LicenseInfoInFile: Apache-2.0
+LicenseInfoInFile: GPL-2.0-or-later
+FileCopyrightText: <text>
+ *  Copyright The Mbed TLS Contributors
+</text>
+
+FileName: ./drivers/builtin/src/ctr_drbg.c
+SPDXID: SPDXRef-File-ctr-drbg.c
+FileChecksum: SHA1: 40de3c20343aa6bcd3a5229e35a7b95f4e9729bc
+FileChecksum: SHA256: 8eba5c7240ea19ada6cec5471d066b94cb28c61f2b678f4c433236a3b88dcdc6
+LicenseConcluded: Apache-2.0 OR GPL-2.0-or-later
+LicenseInfoInFile: Apache-2.0
+LicenseInfoInFile: GPL-2.0-or-later
+FileCopyrightText: <text>
+ *  Copyright The Mbed TLS Contributors
+</text>
+
+FileName: ./drivers/builtin/src/ecdsa.c
+SPDXID: SPDXRef-File-ecdsa.c
+FileChecksum: SHA1: 5e22db9cbcaeaa3a2690a7cd45473d66c2c4a3f8
+FileChecksum: SHA256: 80610978896812e69d2f53e40328e16fe86be02d125662d3b83d6766b912e391
+LicenseConcluded: Apache-2.0 OR GPL-2.0-or-later
+LicenseInfoInFile: Apache-2.0
+LicenseInfoInFile: GPL-2.0-or-later
+FileCopyrightText: <text>
+ *  Copyright The Mbed TLS Contributors
+</text>
+
+FileName: ./drivers/builtin/src/ecjpake.c
+SPDXID: SPDXRef-File-ecjpake.c
+FileChecksum: SHA1: 14bd3c2630d18dcdc10bf1e03951fec7d925b587
+FileChecksum: SHA256: 74ba66ef37cbfb338affc1ba814150f985edb9373866b2d99528f8bf32c96fb2
+LicenseConcluded: Apache-2.0 OR GPL-2.0-or-later
+LicenseInfoInFile: Apache-2.0
+LicenseInfoInFile: GPL-2.0-or-later
+FileCopyrightText: <text>
+ *  Copyright The Mbed TLS Contributors
+</text>
+
+FileName: ./drivers/builtin/src/ecp.c
+SPDXID: SPDXRef-File-ecp.c
+FileChecksum: SHA1: 3c631c00cdc52959c4b34fec76b906ac31e37d7d
+FileChecksum: SHA256: 1a7f6f145b59c9e093dae277a877cd12b15cadfb72ad36fefc55efa12d14c053
+LicenseConcluded: Apache-2.0 OR GPL-2.0-or-later
+LicenseInfoInFile: Apache-2.0
+LicenseInfoInFile: GPL-2.0-or-later
+FileCopyrightText: <text>
+ *  Copyright The Mbed TLS Contributors
+</text>
+
+FileName: ./drivers/builtin/src/ecp_curves.c
+SPDXID: SPDXRef-File-ecp-curves.c
+FileChecksum: SHA1: b4f05f915b551651eba63d7e649a2a314be00a07
+FileChecksum: SHA256: 7ad64b8fc200d4ecabfe1c332e4ea683dc36b4cf91628824394155394b3d3cf3
+LicenseConcluded: Apache-2.0 OR GPL-2.0-or-later
+LicenseInfoInFile: Apache-2.0
+LicenseInfoInFile: GPL-2.0-or-later
+FileCopyrightText: <text>
+ *  Copyright The Mbed TLS Contributors
+</text>
+
+FileName: ./drivers/builtin/src/ecp_curves_new.c
+SPDXID: SPDXRef-File-ecp-curves-new.c
+FileChecksum: SHA1: b8d7128966701a1cdb12fb5a54b609fc4e5c2ba9
+FileChecksum: SHA256: 7d7688cbf1973e206ec5679f88e84b4a4428d9ca01b107e5487a4fc175e5cfe1
+LicenseConcluded: Apache-2.0 OR GPL-2.0-or-later
+LicenseInfoInFile: Apache-2.0
+LicenseInfoInFile: GPL-2.0-or-later
+FileCopyrightText: <text>
+ *  Copyright The Mbed TLS Contributors
+</text>
+
+FileName: ./drivers/builtin/src/entropy.c
+SPDXID: SPDXRef-File-entropy.c
+FileChecksum: SHA1: 44e7c571964f52d3f06b4c8319eb57487d41f927
+FileChecksum: SHA256: d5c9118b971fee3ee4bca3f1c9ec11f7a334899c8572d9959f4d08fe6d4c557a
+LicenseConcluded: Apache-2.0 OR GPL-2.0-or-later
+LicenseInfoInFile: Apache-2.0
+LicenseInfoInFile: GPL-2.0-or-later
+FileCopyrightText: <text>
+ *  Copyright The Mbed TLS Contributors
+</text>
+
+FileName: ./drivers/builtin/src/entropy_poll.c
+SPDXID: SPDXRef-File-entropy-poll.c
+FileChecksum: SHA1: 79bad21495792ca9706fe79860cd5f1b7a034ad4
+FileChecksum: SHA256: d8ad38faf55340574e6e9d4e054ef5881cba2816bf958a8c1df6c721e8f48a9b
+LicenseConcluded: Apache-2.0 OR GPL-2.0-or-later
+LicenseInfoInFile: Apache-2.0
+LicenseInfoInFile: GPL-2.0-or-later
+FileCopyrightText: <text>
+ *  Copyright The Mbed TLS Contributors
+</text>
+
+FileName: ./drivers/builtin/src/gcm.c
+SPDXID: SPDXRef-File-gcm.c
+FileChecksum: SHA1: 0254ab2f7146c2c34bc8dd6923211626c9ea4444
+FileChecksum: SHA256: b14b15e5c0baa197f89697810a2d2f97fd3c5c89ca7daf8c3214e903cae130b1
+LicenseConcluded: Apache-2.0 OR GPL-2.0-or-later
+LicenseInfoInFile: Apache-2.0
+LicenseInfoInFile: GPL-2.0-or-later
+FileCopyrightText: <text>
+ *  Copyright The Mbed TLS Contributors
+</text>
+
+FileName: ./drivers/builtin/src/hmac_drbg.c
+SPDXID: SPDXRef-File-hmac-drbg.c
+FileChecksum: SHA1: 01dc85e297c7a3ed1217aa9b4073222f5422a131
+FileChecksum: SHA256: 93698ff4a48094e2b5a59486fae0c8282da32475dcfbd18a95649940e005cb43
+LicenseConcluded: Apache-2.0 OR GPL-2.0-or-later
+LicenseInfoInFile: Apache-2.0
+LicenseInfoInFile: GPL-2.0-or-later
+FileCopyrightText: <text>
+ *  Copyright The Mbed TLS Contributors
+</text>
+
+FileName: ./drivers/builtin/src/md5.c
+SPDXID: SPDXRef-File-md5.c
+FileChecksum: SHA1: b07275f6168b71e93e91537218e3ce6a194af01d
+FileChecksum: SHA256: e39f6bd5f2a5f823dba195b455db677cdfda6f7fe140a3fcd66444fe87f93b8f
+LicenseConcluded: Apache-2.0 OR GPL-2.0-or-later
+LicenseInfoInFile: Apache-2.0
+LicenseInfoInFile: GPL-2.0-or-later
+FileCopyrightText: <text>
+ *  Copyright The Mbed TLS Contributors
+</text>
+
+FileName: ./drivers/builtin/src/poly1305.c
+SPDXID: SPDXRef-File-poly1305.c
+FileChecksum: SHA1: 40611234f61edd807a708af97b32679a8a9d58bd
+FileChecksum: SHA256: 7735cad5b69901ea980eb3051d798583e4acafc35890e55e4cd11f8ac83c55df
+LicenseConcluded: Apache-2.0 OR GPL-2.0-or-later
+LicenseInfoInFile: Apache-2.0
+LicenseInfoInFile: GPL-2.0-or-later
+FileCopyrightText: <text>
+ *  Copyright The Mbed TLS Contributors
+</text>
+
+FileName: ./drivers/builtin/src/psa_crypto_aead.c
+SPDXID: SPDXRef-File-psa-crypto-aead.c
+FileChecksum: SHA1: af8aa54864a8647be2084aa3f57957baccdffb2d
+FileChecksum: SHA256: b3d317ea71de1c26096ebe5b819ec293bfdf36cd817a3da6520569d7b6586dc6
+LicenseConcluded: Apache-2.0 OR GPL-2.0-or-later
+LicenseInfoInFile: Apache-2.0
+LicenseInfoInFile: GPL-2.0-or-later
+FileCopyrightText: <text>
+ *  Copyright The Mbed TLS Contributors
+</text>
+
+FileName: ./drivers/builtin/src/psa_crypto_cipher.c
+SPDXID: SPDXRef-File-psa-crypto-cipher.c
+FileChecksum: SHA1: 818e10581b962cf3c8a38091115c20cc5edab047
+FileChecksum: SHA256: ae6d9b57a0661f857feab9a6471e01a44afa67503fb8a6a97469ce235fb63714
+LicenseConcluded: Apache-2.0 OR GPL-2.0-or-later
+LicenseInfoInFile: Apache-2.0
+LicenseInfoInFile: GPL-2.0-or-later
+FileCopyrightText: <text>
+ *  Copyright The Mbed TLS Contributors
+</text>
+
+FileName: ./drivers/builtin/src/psa_crypto_ecp.c
+SPDXID: SPDXRef-File-psa-crypto-ecp.c
+FileChecksum: SHA1: f25889565f07428d466f23216e061ea495b1f22e
+FileChecksum: SHA256: 8d6e2245774ef2f672f3ee29657a9f8bb341fc0224f24d2380d460a2b739b8d5
+LicenseConcluded: Apache-2.0 OR GPL-2.0-or-later
+LicenseInfoInFile: Apache-2.0
+LicenseInfoInFile: GPL-2.0-or-later
+FileCopyrightText: <text>
+ *  Copyright The Mbed TLS Contributors
+</text>
+
+FileName: ./drivers/builtin/src/psa_crypto_ffdh.c
+SPDXID: SPDXRef-File-psa-crypto-ffdh.c
+FileChecksum: SHA1: 7fc72ef00a1ffe7cf246f46a6a81db62a21000ae
+FileChecksum: SHA256: 72afa6ab3a31a9e3b92160afeb7cee231aeece82ed2a81df20cf75c71d2066a6
+LicenseConcluded: Apache-2.0 OR GPL-2.0-or-later
+LicenseInfoInFile: Apache-2.0
+LicenseInfoInFile: GPL-2.0-or-later
+FileCopyrightText: <text>
+ *  Copyright The Mbed TLS Contributors
+</text>
+
+FileName: ./drivers/builtin/src/psa_crypto_hash.c
+SPDXID: SPDXRef-File-psa-crypto-hash.c
+FileChecksum: SHA1: 3312365980cdedab612bda50f803587e7e34be1e
+FileChecksum: SHA256: 0840b40c54497dcc9934b57d3b003332411e602980aefc111ff70b870209aeb4
+LicenseConcluded: Apache-2.0 OR GPL-2.0-or-later
+LicenseInfoInFile: Apache-2.0
+LicenseInfoInFile: GPL-2.0-or-later
+FileCopyrightText: <text>
+ *  Copyright The Mbed TLS Contributors
+</text>
+
+FileName: ./drivers/builtin/src/psa_crypto_mac.c
+SPDXID: SPDXRef-File-psa-crypto-mac.c
+FileChecksum: SHA1: 308049d201cca4fec48974d24e5e55fdbe554cd1
+FileChecksum: SHA256: e1f6ae88ab68ffe4f0bdf696ecd4130136de454a4f3751ba07528a69558268b3
+LicenseConcluded: Apache-2.0 OR GPL-2.0-or-later
+LicenseInfoInFile: Apache-2.0
+LicenseInfoInFile: GPL-2.0-or-later
+FileCopyrightText: <text>
+ *  Copyright The Mbed TLS Contributors
+</text>
+
+FileName: ./drivers/builtin/src/psa_crypto_pake.c
+SPDXID: SPDXRef-File-psa-crypto-pake.c
+FileChecksum: SHA1: af21164161cc3daec636bba20d9e77d076705e9b
+FileChecksum: SHA256: 0d13af7a8aa07dc0ea6a5a21e200d661982ed7842096560e7b7ff643cac8705d
+LicenseConcluded: Apache-2.0 OR GPL-2.0-or-later
+LicenseInfoInFile: Apache-2.0
+LicenseInfoInFile: GPL-2.0-or-later
+FileCopyrightText: <text>
+ *  Copyright The Mbed TLS Contributors
+</text>
+
+FileName: ./drivers/builtin/src/psa_crypto_rsa.c
+SPDXID: SPDXRef-File-psa-crypto-rsa.c
+FileChecksum: SHA1: 40b161fa94dfdf0d70d839429a0d4e76cff724ae
+FileChecksum: SHA256: 06f3a581c743bced41153e780eebc79e8a90be48c8634d2c070091fdcc74758e
+LicenseConcluded: Apache-2.0 OR GPL-2.0-or-later
+LicenseInfoInFile: Apache-2.0
+LicenseInfoInFile: GPL-2.0-or-later
+FileCopyrightText: <text>
+ *  Copyright The Mbed TLS Contributors
+</text>
+
+FileName: ./drivers/builtin/src/psa_crypto_xof.c
+SPDXID: SPDXRef-File-psa-crypto-xof.c
+FileChecksum: SHA1: 99993ab5e1e560f338454304e2f2fde0a391f44c
+FileChecksum: SHA256: d59060121d3b6128bbc6ac56631884b5c938517befb9dd803a862f1af7f3be2b
+LicenseConcluded: Apache-2.0 OR GPL-2.0-or-later
+LicenseInfoInFile: Apache-2.0
+LicenseInfoInFile: GPL-2.0-or-later
+FileCopyrightText: <text>
+ *  Copyright The Mbed TLS Contributors
+</text>
+
+FileName: ./drivers/builtin/src/psa_util_internal.c
+SPDXID: SPDXRef-File-psa-util-internal.c
+FileChecksum: SHA1: 5c4250bfe642fd8efb7f281150c452c523276969
+FileChecksum: SHA256: 7f58722082d7d9c63bd2d91e10e3279520d7b0bfd6b6f64673ebfc044bdb743c
+LicenseConcluded: Apache-2.0 OR GPL-2.0-or-later
+LicenseInfoInFile: Apache-2.0
+LicenseInfoInFile: GPL-2.0-or-later
+FileCopyrightText: <text>
+ *  Copyright The Mbed TLS Contributors
+</text>
+
+FileName: ./drivers/builtin/src/ripemd160.c
+SPDXID: SPDXRef-File-ripemd160.c
+FileChecksum: SHA1: 3964c4ade4e07c915f79f507f341887ce7ca0e3a
+FileChecksum: SHA256: fdb879cfaa9fc5ed931499dca7187e0d20ccb45c15c8d1d86762a080a92939bc
+LicenseConcluded: Apache-2.0 OR GPL-2.0-or-later
+LicenseInfoInFile: Apache-2.0
+LicenseInfoInFile: GPL-2.0-or-later
+FileCopyrightText: <text>
+ *  Copyright The Mbed TLS Contributors
+</text>
+
+FileName: ./drivers/builtin/src/rsa.c
+SPDXID: SPDXRef-File-rsa.c
+FileChecksum: SHA1: 45a3f0e08e2fdf6d4ed1233355ac7be9c9909065
+FileChecksum: SHA256: f1265d8ecb7f883ed777ba2275f2e3816a530ee2469d093d5868a5f62cef85eb
+LicenseConcluded: Apache-2.0 OR GPL-2.0-or-later
+LicenseInfoInFile: Apache-2.0
+LicenseInfoInFile: GPL-2.0-or-later
+FileCopyrightText: <text>
+ *  Copyright The Mbed TLS Contributors
+</text>
+
+FileName: ./drivers/builtin/src/rsa_alt_helpers.c
+SPDXID: SPDXRef-File-rsa-alt-helpers.c
+FileChecksum: SHA1: 990c82f3cbf2431967c914a75067345641cce0e5
+FileChecksum: SHA256: f7fcbfea20d57afe82c43948be0a2c9f12bb990ef5e41a2043d03e06f19de74b
+LicenseConcluded: Apache-2.0 OR GPL-2.0-or-later
+LicenseInfoInFile: Apache-2.0
+LicenseInfoInFile: GPL-2.0-or-later
+FileCopyrightText: <text>
+ *  Copyright The Mbed TLS Contributors
+</text>
+
+FileName: ./drivers/builtin/src/sha1.c
+SPDXID: SPDXRef-File-sha1.c
+FileChecksum: SHA1: 80b52390828f03e569f87ce34765a4e0ef1a72d8
+FileChecksum: SHA256: ac4b2b41655adf357a849829f620cbab30c359236bd77a86c25e50cbae894881
+LicenseConcluded: Apache-2.0 OR GPL-2.0-or-later
+LicenseInfoInFile: Apache-2.0
+LicenseInfoInFile: GPL-2.0-or-later
+FileCopyrightText: <text>
+ *  Copyright The Mbed TLS Contributors
+</text>
+
+FileName: ./drivers/builtin/src/sha256.c
+SPDXID: SPDXRef-File-sha256.c
+FileChecksum: SHA1: 01b0227231681c2a4cc8aa51da87874f7876dd8a
+FileChecksum: SHA256: f1c3018055c8fe04722a99fdb18ff13bc871113ff5295e3ca5ee2eb3d652b5ad
+LicenseConcluded: Apache-2.0 OR GPL-2.0-or-later
+LicenseInfoInFile: Apache-2.0
+LicenseInfoInFile: GPL-2.0-or-later
+FileCopyrightText: <text>
+ *  Copyright The Mbed TLS Contributors
+</text>
+
+FileName: ./drivers/builtin/src/sha3.c
+SPDXID: SPDXRef-File-sha3.c
+FileChecksum: SHA1: 630ac0912bce3ba0239d4c220df2e6fefe458e69
+FileChecksum: SHA256: 31a812c016269969092d1b59c7013dfcee8390aae9bcd03050a875b760ebf529
+LicenseConcluded: Apache-2.0 OR GPL-2.0-or-later
+LicenseInfoInFile: Apache-2.0
+LicenseInfoInFile: GPL-2.0-or-later
+FileCopyrightText: <text>
+ *  Copyright The Mbed TLS Contributors
+</text>
+
+FileName: ./drivers/builtin/src/sha512.c
+SPDXID: SPDXRef-File-sha512.c
+FileChecksum: SHA1: 0d0b4c5213169819db4471cba718cbc6f349828d
+FileChecksum: SHA256: c87ffcec86617e374eba51a15149161b405fbcca6b07ffc703e3a4f9b82a987b
+LicenseConcluded: Apache-2.0 OR GPL-2.0-or-later
+LicenseInfoInFile: Apache-2.0
+LicenseInfoInFile: GPL-2.0-or-later
+FileCopyrightText: <text>
+ *  Copyright The Mbed TLS Contributors
+</text>
+
+FileName: ./drivers/everest/library/Hacl_Curve25519_joined.c
+SPDXID: SPDXRef-File-Hacl-Curve25519-joined.c
+FileChecksum: SHA1: aa0cef1d82b4db87c98ce5cfdb0b434641558bd9
+FileChecksum: SHA256: 4c81628a52ad2fd4d2434d763691bbd42c863c17d8f285deb77d66c946edf262
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ *  Copyright 2016-2018 INRIA and Microsoft Corporation
+</text>
+
+FileName: ./drivers/everest/library/x25519.c
+SPDXID: SPDXRef-File-x25519.c
+FileChecksum: SHA1: 965427ff78aa5ef984f62cc3f6ec1fd402f4c86a
+FileChecksum: SHA256: 8a363405a9289b77645dd71ea7a3271bad10b54548387b8d8b54501034d45ccf
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ *  Copyright 2016-2018 INRIA and Microsoft Corporation
+</text>
+
+FileName: ./drivers/p256-m/p256-m/p256-m.c
+SPDXID: SPDXRef-File-p256-m.c
+FileChecksum: SHA1: 871d2e1696c979072a714fceaf2c13f95d388988
+FileChecksum: SHA256: f546b6e993e268dd2fa464c68b740f708498d480c1f74aa1bbda518d1f7bb770
+LicenseConcluded: Apache-2.0 OR GPL-2.0-or-later
+LicenseInfoInFile: Apache-2.0
+LicenseInfoInFile: GPL-2.0-or-later
+FileCopyrightText: <text>
+ * Copyright The Mbed TLS Contributors
+</text>
+
+FileName: ./drivers/p256-m/p256-m_driver_entrypoints.c
+SPDXID: SPDXRef-File-p256-m-driver-entrypoints.c
+FileChecksum: SHA1: 2769f777b0784eab94cc0179cbd92329af9ae403
+FileChecksum: SHA256: 36db3e42a3ca76ce803bb346761aaad85d829fc6077f75934f87b1ec435ff329
+LicenseConcluded: Apache-2.0 OR GPL-2.0-or-later
+LicenseInfoInFile: Apache-2.0
+LicenseInfoInFile: GPL-2.0-or-later
+FileCopyrightText: <text>
+ *  Copyright The Mbed TLS Contributors
+</text>
+
+FileName: ./drivers/pqcp/src/psa_crypto_mldsa.c
+SPDXID: SPDXRef-File-psa-crypto-mldsa.c
+FileChecksum: SHA1: 99d5a47e9e2674135d25f70734766e7298966def
+FileChecksum: SHA256: 56557c393856d3c467791e4c5da9c6b2cb8d9ca7e31a7eecb4d7c6003b407d43
+LicenseConcluded: Apache-2.0 OR GPL-2.0-or-later
+LicenseInfoInFile: Apache-2.0
+LicenseInfoInFile: GPL-2.0-or-later
+FileCopyrightText: <text>
+ *  Copyright The Mbed TLS Contributors
+</text>
+
+FileName: ./drivers/pqcp/src/wrap_mldsa_native.c
+SPDXID: SPDXRef-File-wrap-mldsa-native.c
+FileChecksum: SHA1: 260f773d8dac06906f40a123013272a7e6534d13
+FileChecksum: SHA256: da3d5cec344d7dff5848e5f73c7cc11dda6aa9c68fa2469da4cdb8e34b803d5b
+LicenseConcluded: Apache-2.0 OR GPL-2.0-or-later
+LicenseInfoInFile: Apache-2.0
+LicenseInfoInFile: GPL-2.0-or-later
+FileCopyrightText: <text>
+/*  Copyright The Mbed TLS Contributors
+</text>
+
+FileName: ./extras/lmots.c
+SPDXID: SPDXRef-File-lmots.c
+FileChecksum: SHA1: 5dec8d7f49b973239b51a6398d9068138355f1ee
+FileChecksum: SHA256: 7a56b6dcbff5ae181b8e526f9366bb3194977389c526c83d65dee3490f8a3269
+LicenseConcluded: Apache-2.0 OR GPL-2.0-or-later
+LicenseInfoInFile: Apache-2.0
+LicenseInfoInFile: GPL-2.0-or-later
+FileCopyrightText: <text>
+ * Copyright The Mbed TLS Contributors
+</text>
+
+FileName: ./extras/lms.c
+SPDXID: SPDXRef-File-lms.c
+FileChecksum: SHA1: ac1595f86958b5ff649dc1218203bfdce227a794
+FileChecksum: SHA256: c15aaec2535ab3eb63ce94f9e710a659ba391ec2c3ce7f5b5a99da2e37b05e64
+LicenseConcluded: Apache-2.0 OR GPL-2.0-or-later
+LicenseInfoInFile: Apache-2.0
+LicenseInfoInFile: GPL-2.0-or-later
+FileCopyrightText: <text>
+ *  Copyright The Mbed TLS Contributors
+</text>
+
+FileName: ./extras/md.c
+SPDXID: SPDXRef-File-md.c
+FileChecksum: SHA1: 4e0143b16399f5d207901afe16c0463b8e909ec1
+FileChecksum: SHA256: d0d08e17566689ea51c44221b346f71dcd152135e2fc98a3eba503e315160605
+LicenseConcluded: Apache-2.0 OR GPL-2.0-or-later
+LicenseInfoInFile: Apache-2.0
+LicenseInfoInFile: GPL-2.0-or-later
+FileCopyrightText: <text>
+ *  Copyright The Mbed TLS Contributors
+</text>
+
+FileName: ./extras/nist_kw.c
+SPDXID: SPDXRef-File-nist-kw.c
+FileChecksum: SHA1: 8fe211aa582de0b8007dd5de9d62ef56a26dec3a
+FileChecksum: SHA256: 074aa0a06b3105ac714778ec392f9c9be7d3babd947e7437b91606e77e20921f
+LicenseConcluded: Apache-2.0 OR GPL-2.0-or-later
+LicenseInfoInFile: Apache-2.0
+LicenseInfoInFile: GPL-2.0-or-later
+FileCopyrightText: <text>
+ *  Copyright The Mbed TLS Contributors
+</text>
+
+FileName: ./extras/pk.c
+SPDXID: SPDXRef-File-pk.c
+FileChecksum: SHA1: 648b7dd4271eb6bfd384e05cae8b60c1db7318e9
+FileChecksum: SHA256: efb039613b4cc356427cdb2a9445983f43b5b42cb42e8dcbd48b3a765da9b716
+LicenseConcluded: Apache-2.0 OR GPL-2.0-or-later
+LicenseInfoInFile: Apache-2.0
+LicenseInfoInFile: GPL-2.0-or-later
+FileCopyrightText: <text>
+ *  Copyright The Mbed TLS Contributors
+</text>
+
+FileName: ./extras/pk_ecc.c
+SPDXID: SPDXRef-File-pk-ecc.c
+FileChecksum: SHA1: bd867acd2567e8887aae56320de508867fe73dd5
+FileChecksum: SHA256: dc99d5cd738ae0491582a8ddbe007c61f2e5415268ddd5fee22cba910eb25d13
+LicenseConcluded: Apache-2.0 OR GPL-2.0-or-later
+LicenseInfoInFile: Apache-2.0
+LicenseInfoInFile: GPL-2.0-or-later
+FileCopyrightText: <text>
+ *  Copyright The Mbed TLS Contributors
+</text>
+
+FileName: ./extras/pk_rsa.c
+SPDXID: SPDXRef-File-pk-rsa.c
+FileChecksum: SHA1: 1cf1ae126413cb1652b20ca7de05af54659de1f1
+FileChecksum: SHA256: 241d44cb1b8d134dc3c383aad5eb6f3e8f9c830eb66a3dcfe1fc921bb983bcec
+LicenseConcluded: Apache-2.0 OR GPL-2.0-or-later
+LicenseInfoInFile: Apache-2.0
+LicenseInfoInFile: GPL-2.0-or-later
+FileCopyrightText: <text>
+ *  Copyright The Mbed TLS Contributors
+</text>
+
+FileName: ./extras/pk_wrap.c
+SPDXID: SPDXRef-File-pk-wrap.c
+FileChecksum: SHA1: 91209378776d90988ec075a4705569bedab605ea
+FileChecksum: SHA256: 30e4b8d78638ecd45139a6b6033d853a9d61bc1e0c75220baba05a9da84d0ddb
+LicenseConcluded: Apache-2.0 OR GPL-2.0-or-later
+LicenseInfoInFile: Apache-2.0
+LicenseInfoInFile: GPL-2.0-or-later
+FileCopyrightText: <text>
+ *  Copyright The Mbed TLS Contributors
+</text>
+
+FileName: ./extras/pkparse.c
+SPDXID: SPDXRef-File-pkparse.c
+FileChecksum: SHA1: e8a745cd57fe549c61f24205410daa45a2f130f8
+FileChecksum: SHA256: 44ffe9f1a589f2bdc6118cbaf47760a521511858853d766b83c2ac38256f77ca
+LicenseConcluded: Apache-2.0 OR GPL-2.0-or-later
+LicenseInfoInFile: Apache-2.0
+LicenseInfoInFile: GPL-2.0-or-later
+FileCopyrightText: <text>
+ *  Copyright The Mbed TLS Contributors
+</text>
+
+FileName: ./extras/pkwrite.c
+SPDXID: SPDXRef-File-pkwrite.c
+FileChecksum: SHA1: 6cff3e4f0c9c9fa7a5099c126abc6a0d648bad67
+FileChecksum: SHA256: 5717e9742b9c51d5dbb91a0484cb4f5a5c3fc7eaf7003d3b27b86e2cdb3b13aa
+LicenseConcluded: Apache-2.0 OR GPL-2.0-or-later
+LicenseInfoInFile: Apache-2.0
+LicenseInfoInFile: GPL-2.0-or-later
+FileCopyrightText: <text>
+ *  Copyright The Mbed TLS Contributors
+</text>
+
+FileName: ./platform/memory_buffer_alloc.c
+SPDXID: SPDXRef-File-memory-buffer-alloc.c
+FileChecksum: SHA1: b24bdf895fefa2f1c5ac83d4b3ec1d87b3bf46e7
+FileChecksum: SHA256: 399b3c9aa7a6ccb7e7d3cf071545ad2f2f262a94438e6acad93d34570ebf327f
+LicenseConcluded: Apache-2.0 OR GPL-2.0-or-later
+LicenseInfoInFile: Apache-2.0
+LicenseInfoInFile: GPL-2.0-or-later
+FileCopyrightText: <text>
+ *  Copyright The Mbed TLS Contributors
+</text>
+
+FileName: ./platform/platform.c
+SPDXID: SPDXRef-File-platform.c
+FileChecksum: SHA1: e4bf7f5690201fb28250abcfb9e2aece0d9b73d6
+FileChecksum: SHA256: a56426c9d7ae2c4f233afe4b21a402a440a2e4554f632267c13398cd3c3b0fc0
+LicenseConcluded: Apache-2.0 OR GPL-2.0-or-later
+LicenseInfoInFile: Apache-2.0
+LicenseInfoInFile: GPL-2.0-or-later
+FileCopyrightText: <text>
+ *  Copyright The Mbed TLS Contributors
+</text>
+
+FileName: ./platform/platform_util.c
+SPDXID: SPDXRef-File-platform-util.c
+FileChecksum: SHA1: c242b9d2f1768220801997204dda060173b47c0d
+FileChecksum: SHA256: 8b2abd057d159e2d924cc30d824baeb74411460f1d2a5b1b6256bb0c54bc7330
+LicenseConcluded: Apache-2.0 OR GPL-2.0-or-later
+LicenseInfoInFile: Apache-2.0
+LicenseInfoInFile: GPL-2.0-or-later
+FileCopyrightText: <text>
+ *  Copyright The Mbed TLS Contributors
+</text>
+
+FileName: ./platform/threading.c
+SPDXID: SPDXRef-File-threading.c
+FileChecksum: SHA1: 70edb11ed5324c4a2423942b387a8a4f43ca2562
+FileChecksum: SHA256: f859933d72b9f943e3dfd1bcc71e6fdf76a5353ef31815bed5ec781f7406d247
+LicenseConcluded: Apache-2.0 OR GPL-2.0-or-later
+LicenseInfoInFile: Apache-2.0
+LicenseInfoInFile: GPL-2.0-or-later
+FileCopyrightText: <text>
+ *  Copyright The Mbed TLS Contributors
+</text>
+
+FileName: ./utilities/asn1parse.c
+SPDXID: SPDXRef-File-asn1parse.c
+FileChecksum: SHA1: fae71b39fbbf15b321214720dd6a8c0ace56d35a
+FileChecksum: SHA256: 51e307fb2632e5ff7c204fa4338c637a640cc19f9bbcb1bffef66876a9621a98
+LicenseConcluded: Apache-2.0 OR GPL-2.0-or-later
+LicenseInfoInFile: Apache-2.0
+LicenseInfoInFile: GPL-2.0-or-later
+FileCopyrightText: <text>
+ *  Copyright The Mbed TLS Contributors
+</text>
+
+FileName: ./utilities/asn1write.c
+SPDXID: SPDXRef-File-asn1write.c
+FileChecksum: SHA1: 880333c5a3d386c795266653aea89de9498cd42e
+FileChecksum: SHA256: 9643cbdaa713de801b2ed6d1b01f98bf62b6fd46dd9e7526efe5a175e146272d
+LicenseConcluded: Apache-2.0 OR GPL-2.0-or-later
+LicenseInfoInFile: Apache-2.0
+LicenseInfoInFile: GPL-2.0-or-later
+FileCopyrightText: <text>
+ *  Copyright The Mbed TLS Contributors
+</text>
+
+FileName: ./utilities/base64.c
+SPDXID: SPDXRef-File-base64.c
+FileChecksum: SHA1: 2e5a470135e74c95c90f5c17768ea6358f6ed378
+FileChecksum: SHA256: 4d8453f8c9a9df1649f8356eb101914f7d77c3e2c97e4b22487835a3a3d9151d
+LicenseConcluded: Apache-2.0 OR GPL-2.0-or-later
+LicenseInfoInFile: Apache-2.0
+LicenseInfoInFile: GPL-2.0-or-later
+FileCopyrightText: <text>
+ *  Copyright The Mbed TLS Contributors
+</text>
+
+FileName: ./utilities/constant_time.c
+SPDXID: SPDXRef-File-constant-time.c
+FileChecksum: SHA1: b951f1e00bb1eebb24fe32d1b6ad467c0878f386
+FileChecksum: SHA256: e8ff5457ea27b409944dfcda77f44503d1ce9ad0498807429d40317498a93936
+LicenseConcluded: Apache-2.0 OR GPL-2.0-or-later
+LicenseInfoInFile: Apache-2.0
+LicenseInfoInFile: GPL-2.0-or-later
+FileCopyrightText: <text>
+ *  Copyright The Mbed TLS Contributors
+</text>
+
+FileName: ./utilities/oid.c
+SPDXID: SPDXRef-File-oid.c
+FileChecksum: SHA1: e6be3a3128dd9f890323f08644cac8d5d97a8797
+FileChecksum: SHA256: 97190a28b514306e8613b96494c4bea9959064c023739d68bb9aa753fff46d4e
+LicenseConcluded: Apache-2.0 OR GPL-2.0-or-later
+LicenseInfoInFile: Apache-2.0
+LicenseInfoInFile: GPL-2.0-or-later
+FileCopyrightText: <text>
+ *  Copyright The Mbed TLS Contributors
+</text>
+
+FileName: ./utilities/pem.c
+SPDXID: SPDXRef-File-pem.c
+FileChecksum: SHA1: ae70c699553a755ad44eb8b04dff570a668003b8
+FileChecksum: SHA256: 3090d640bb733a7bcb7206c5faa4cdaf3d112e602d7f5b71e702b89fe17e2b39
+LicenseConcluded: Apache-2.0 OR GPL-2.0-or-later
+LicenseInfoInFile: Apache-2.0
+LicenseInfoInFile: GPL-2.0-or-later
+FileCopyrightText: <text>
+ *  Copyright The Mbed TLS Contributors
+</text>
+
+FileName: ./utilities/pkcs5.c
+SPDXID: SPDXRef-File-pkcs5.c
+FileChecksum: SHA1: 415819848188a501746243f706efe4c5e8b7b935
+FileChecksum: SHA256: ce5c0bbf80cd741850c1a0f8219c059e4a197ce8cdcf320bb505d5edbd38cc6d
+LicenseConcluded: Apache-2.0 OR GPL-2.0-or-later
+LicenseInfoInFile: Apache-2.0
+LicenseInfoInFile: GPL-2.0-or-later
+FileCopyrightText: <text>
+ *  Copyright The Mbed TLS Contributors
+</text>
+

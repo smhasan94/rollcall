@@ -1,0 +1,10 @@
+default: http_server
+build_dir: /zephyrproject/build/tls
+domains:
+  - name: http_server
+    build_dir: /zephyrproject/build/tls/http_server
+  - name: mcuboot
+    build_dir: /zephyrproject/build/tls/mcuboot
+flash_order:
+  - mcuboot
+  - http_server
