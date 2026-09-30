@@ -22,22 +22,22 @@
     {
       "bytes": 3731,
       "path": "baseline/mcuboot/spdx/app.spdx",
-      "sha256": "f84c6920502d3acdde5e62b51f6c4b536d8a6b5b52189b268870d2c15ce352b4"
+      "sha256": "a6d135f667881edaa4581e2eb462615338576f3e559a1671565a130d6079dc09"
     },
     {
       "bytes": 138325,
       "path": "baseline/mcuboot/spdx/build.spdx",
-      "sha256": "249c5a5d693f0fbd0a72650eea0ca331656de12aea442499a09ce5346658c2d9"
+      "sha256": "1634fa7085d404be041ea08b77247df7d788dd911fdde4c2f73a422f5f50bb15"
     },
     {
       "bytes": 3473,
       "path": "baseline/mcuboot/spdx/modules-deps.spdx",
-      "sha256": "cd4c3fda256a24aed5e38c448edbc5c2b1098cf6255eec2e851e9d7446556ade"
+      "sha256": "823f50334dee53604bd97033315a3441dbcd807f4df513f4745462cc9133826a"
     },
     {
       "bytes": 108440,
       "path": "baseline/mcuboot/spdx/zephyr.spdx",
-      "sha256": "207890aad742f18c99ef5e05e1230decd407f820eba497122052e1b03c81f40e"
+      "sha256": "97cc7e75b88f141a9b9224e02433452d81a8a9e9e3312bb2081d3347e38d9ffa"
     },
     {
       "bytes": 51738,
@@ -83,22 +83,22 @@
     {
       "bytes": 1018,
       "path": "baseline/with_mcuboot/spdx/app.spdx",
-      "sha256": "0d51e5d37c4a3c6e05f5c1da10859048c2d272e39e41136291604e2adddb09ea"
+      "sha256": "2d23bac6307f26f3c3080f0d7f79e9814656695bdf93048caa9688bea130bd03"
     },
     {
       "bytes": 64622,
       "path": "baseline/with_mcuboot/spdx/build.spdx",
-      "sha256": "9ef424ec618f5a64264c892d0578d0080c5043e53fbb8162ac35f10fd9a6cd01"
+      "sha256": "e24fa766ce24b3cde23ed36e4be7b86a8c42840af8c6cef8e6763a7bd9bf89ac"
     },
     {
       "bytes": 3478,
       "path": "baseline/with_mcuboot/spdx/modules-deps.spdx",
-      "sha256": "959ed4220e818fcb01d97dbfb13271183942b2d73e2356de87ae60975e35f6c1"
+      "sha256": "ef583f214b083323c44675574a182860b8a10c6b471a3c8ecf80f06d91134e3d"
     },
     {
       "bytes": 52008,
       "path": "baseline/with_mcuboot/spdx/zephyr.spdx",
-      "sha256": "1cbd4957ecc0031ce97dd3071db8b9f0a3fea104c9e0dc1d736f74b4841ea33b"
+      "sha256": "f7ad5f24cbfbb216290a161c031f12dac41bba87f86e65b7cecccd7a5b90b880"
     },
     {
       "bytes": 35859,
@@ -128,7 +128,7 @@
     {
       "bytes": 57596,
       "path": "baseline/with_mcuboot/zephyr/zephyr.signed.hex",
-      "sha256": "4043fccff2fe060561e3809b7c37ede15dde8463f58a75902d07b277f5fdf659"
+      "sha256": "780e1b723b6da2d365d85ac46a086b0f2621bbe744ee801ba229f84f4b793594"
     },
     {
       "bytes": 2132,
@@ -145,22 +145,22 @@
     {
       "bytes": 1008,
       "path": "bt/beacon/spdx/app.spdx",
-      "sha256": "3093832126ac77b35604a638f00cde656e72b22bb93cfe6e9bb2a8cb67344e74"
+      "sha256": "11bcae83c2e7f58afb0fcef9b9daad80d16ad531b9e05209cddb1c470a8db0d3"
     },
     {
       "bytes": 83023,
       "path": "bt/beacon/spdx/build.spdx",
-      "sha256": "1774e2f4739b187481bc0491086863188bccb0f162d6d7a2fabf70daeabf949c"
+      "sha256": "964b12d483304f8cde17823a651a04ce2171d5a658ff1f3f9b4b52e4adc9277c"
     },
     {
       "bytes": 3466,
       "path": "bt/beacon/spdx/modules-deps.spdx",
-      "sha256": "d8eb442f3e57c076ff2d3c3c80527602375b58cc2c26b81f8f04d8fa96caefe2"
+      "sha256": "2d9185d82a3502935bdf48d236ceb2e3f71504a7cadbd378bf985ec3beb50767"
     },
     {
       "bytes": 71032,
       "path": "bt/beacon/spdx/zephyr.spdx",
-      "sha256": "4491620436ea854fae823503460d562481e3009b57761c96e956284e0dc5d59d"
+      "sha256": "905edd1e1ba7444eb3c87890f56aee48f06afeefd223fd57806b6242692efd14"
     },
     {
       "bytes": 53111,
@@ -190,7 +190,7 @@
     {
       "bytes": 179776,
       "path": "bt/beacon/zephyr/zephyr.signed.hex",
-      "sha256": "e1b49c92bd90b012368a0a073a5044bb2d7648936dbd8142c80dcb2747de0873"
+      "sha256": "3f123e4f766f05ff348064328885b587c9bd1518d6fa53cd4954901aa4c881db"
     },
     {
       "bytes": 1042,
@@ -213,22 +213,22 @@
     {
       "bytes": 4075,
       "path": "bt/mcuboot/spdx/app.spdx",
-      "sha256": "dd36ce0f7f1c121dac6e886ad1b548899e103c3257ea4123c7823eb9922b14d9"
+      "sha256": "113c747f67d95aca57b1d03f8da4e38ea4272fc661e9e115b9548c7a67cfcd34"
     },
     {
       "bytes": 138403,
       "path": "bt/mcuboot/spdx/build.spdx",
-      "sha256": "ad1b1244491f08668bf0badbd193040904a99cae7dc22863c104ceae6659603b"
+      "sha256": "a95bc261a9ee89aeaf6bd0fe25edfb07a5086324b9f2ec54caa92030fe09b9d5"
     },
     {
       "bytes": 3467,
       "path": "bt/mcuboot/spdx/modules-deps.spdx",
-      "sha256": "1304bdb534f0368ca0473386af28053e14c639e36cce952bb52d1d31b651c192"
+      "sha256": "5eab0e562adf366f7992364f21f1a0bf032404242be1346c12197762ee1f8ef2"
     },
     {
       "bytes": 108479,
       "path": "bt/mcuboot/spdx/zephyr.spdx",
-      "sha256": "d174ff9c299474f90453d00af62070739f4011d067ef9bbc972cca64f062b27f"
+      "sha256": "99a09d7ab4830d6f54e885f0fe7119864ce38a176106eda07e1f3d42aebbcec6"
     },
     {
       "bytes": 51594,
@@ -292,22 +292,22 @@
     {
       "bytes": 1380,
       "path": "tls/http_server/spdx/app.spdx",
-      "sha256": "e2bd6a4969b9d9c3846c3a1ba0b1d56c3a73c992b3b341e4b2a83901311e236f"
+      "sha256": "addcddb7bf771dfca5744a0c70cb24fb84f42675808d82bf5853d43cb516881f"
     },
     {
       "bytes": 186846,
       "path": "tls/http_server/spdx/build.spdx",
-      "sha256": "1086e1420c4a1a98586066efcfec8aa59bef305c649322a1dd8a06fda43655de"
+      "sha256": "a5a51a3e128035dc848d94e3d0bcfef031fdf96a3a8dfb7a0e5730661ed57a1a"
     },
     {
       "bytes": 3472,
       "path": "tls/http_server/spdx/modules-deps.spdx",
-      "sha256": "2dbbec5ceca9ef198cab276baaecac3f476620dcf3fe64667332389c39570668"
+      "sha256": "1fc106be8b3f0aa460af3dd157cffbc656847961d0e474d5448a64553a08c5a9"
     },
     {
       "bytes": 175985,
       "path": "tls/http_server/spdx/zephyr.spdx",
-      "sha256": "065e656bb722c59e14cdcebb2d4097dec11665a074d04aba8e67c0eaed9cd1c3"
+      "sha256": "5c4d04b2abe0be4ca011d2e9a2af82bdb0626d006b6a995b991574748c61e2da"
     },
     {
       "bytes": 90335,
@@ -337,7 +337,7 @@
     {
       "bytes": 995052,
       "path": "tls/http_server/zephyr/zephyr.signed.hex",
-      "sha256": "13156ce03c6506c4551ca945095511e8a6a74e0880202b036343fa1f2d6fd45a"
+      "sha256": "bee4ef933f7c366f4cda89b298704e24d86ad276ce9f8ba9daf7ca4d37fb8902"
     },
     {
       "bytes": 2106,
@@ -348,22 +348,22 @@
     {
       "bytes": 4076,
       "path": "tls/mcuboot/spdx/app.spdx",
-      "sha256": "8944930bad1b2653078d977047b9aa535dc4a6710be3811df8a2b19c222e1a6a"
+      "sha256": "983ec3f0a91a6fb5e35e5b8fa5b2e695b4ce1fb714e14be1828efa7672b34fbc"
     },
     {
       "bytes": 138406,
       "path": "tls/mcuboot/spdx/build.spdx",
-      "sha256": "281d0ad122ad218dfcdd94fc0508b9b11398f14f426efb36029ec191a5bffb3c"
+      "sha256": "774ccd875648b3d88efab212bd3e08a246ca762cce630543a99734c88d866ab6"
     },
     {
       "bytes": 3468,
       "path": "tls/mcuboot/spdx/modules-deps.spdx",
-      "sha256": "78c259561e7602d9b7926a4c8caa5479e0dc37b877a5e126d7c05a8a2cb833f7"
+      "sha256": "d99e412aac316a22edc00050987fbb2fcb7ddd48f27117740f75e60dc193a800"
     },
     {
       "bytes": 108480,
       "path": "tls/mcuboot/spdx/zephyr.spdx",
-      "sha256": "5bc95d497399ec9384ce4a104686bf27da082529499c90e160aef29bea24551d"
+      "sha256": "a20e50d523e13c3d017093844f1281eab6ee2ac7a1d59bcd12eafc1266f2c0a3"
     },
     {
       "bytes": 51594,
@@ -457,6 +457,55 @@
   },
   "python": {
     "PyYAML": "6.0.3",
+    "freeze": [
+      "anytree==2.13.0",
+      "attrs==26.1.0",
+      "boolean.py==5.0",
+      "canopen==2.4.1",
+      "cbor2==6.1.4",
+      "cbor==1.0.0",
+      "certifi==2026.7.22",
+      "cffi==2.1.1",
+      "charset-normalizer==3.5.1",
+      "click==8.5.0",
+      "colorama==0.4.6",
+      "cryptography==50.0.1",
+      "docopt==0.6.2",
+      "idna==3.20",
+      "imgtool==2.4.0",
+      "intelhex==2.3.0",
+      "Jinja2==3.1.6",
+      "jsonschema-specifications==2025.9.1",
+      "jsonschema==4.26.0",
+      "license-expression==30.4.4",
+      "MarkupSafe==3.0.3",
+      "packaging==26.3",
+      "patool==4.1.0",
+      "psutil==7.2.2",
+      "pycparser==3.0",
+      "pyelftools==0.33",
+      "pykwalify==1.8.0",
+      "pylink-square==2.0.1",
+      "pyserial==3.5",
+      "python-can==4.6.1",
+      "python-dateutil==2.9.0.post0",
+      "python-debian==1.1.1",
+      "python-magic==0.4.27",
+      "PyYAML==6.0.3",
+      "referencing==0.37.0",
+      "requests==2.34.2",
+      "reuse==6.2.0",
+      "rpds-py==2026.6.3",
+      "ruamel.yaml==0.19.1",
+      "semver==3.1.0",
+      "six==1.17.0",
+      "tomlkit==0.15.1",
+      "tqdm==4.70.1",
+      "typing_extensions==4.16.0",
+      "urllib3==2.8.0",
+      "west==1.5.0",
+      "wrapt==1.17.3"
+    ],
     "imgtool": "2.4.0",
     "pyelftools": "0.33",
     "reuse": "6.2.0",
@@ -493,6 +542,71 @@
         "-DCONFIG_BUILD_OUTPUT_META=y",
         "-Dmcuboot_CONFIG_BUILD_OUTPUT_META=y"
       ],
+      "built_with": {
+        "host": {
+          "arch": "x86_64",
+          "os": "linux"
+        },
+        "python": {
+          "PyYAML": "6.0.3",
+          "freeze": [
+            "anytree==2.13.0",
+            "attrs==26.1.0",
+            "boolean.py==5.0",
+            "canopen==2.4.1",
+            "cbor2==6.1.4",
+            "cbor==1.0.0",
+            "certifi==2026.7.22",
+            "cffi==2.1.1",
+            "charset-normalizer==3.5.1",
+            "click==8.5.0",
+            "colorama==0.4.6",
+            "cryptography==50.0.1",
+            "docopt==0.6.2",
+            "idna==3.20",
+            "imgtool==2.4.0",
+            "intelhex==2.3.0",
+            "Jinja2==3.1.6",
+            "jsonschema-specifications==2025.9.1",
+            "jsonschema==4.26.0",
+            "license-expression==30.4.4",
+            "MarkupSafe==3.0.3",
+            "packaging==26.3",
+            "patool==4.1.0",
+            "psutil==7.2.2",
+            "pycparser==3.0",
+            "pyelftools==0.33",
+            "pykwalify==1.8.0",
+            "pylink-square==2.0.1",
+            "pyserial==3.5",
+            "python-can==4.6.1",
+            "python-dateutil==2.9.0.post0",
+            "python-debian==1.1.1",
+            "python-magic==0.4.27",
+            "PyYAML==6.0.3",
+            "referencing==0.37.0",
+            "requests==2.34.2",
+            "reuse==6.2.0",
+            "rpds-py==2026.6.3",
+            "ruamel.yaml==0.19.1",
+            "semver==3.1.0",
+            "six==1.17.0",
+            "tomlkit==0.15.1",
+            "tqdm==4.70.1",
+            "typing_extensions==4.16.0",
+            "urllib3==2.8.0",
+            "west==1.5.0",
+            "wrapt==1.17.3"
+          ],
+          "imgtool": "2.4.0",
+          "pyelftools": "0.33",
+          "reuse": "6.2.0",
+          "west": "1.5.0"
+        },
+        "sdk": {
+          "gcc_version": "14.3.0"
+        }
+      },
       "extra_conf_files": [],
       "extra_dtc_overlay_files": [],
       "images": {
@@ -517,6 +631,71 @@
         "-DCONFIG_BUILD_OUTPUT_META=y",
         "-Dmcuboot_CONFIG_BUILD_OUTPUT_META=y"
       ],
+      "built_with": {
+        "host": {
+          "arch": "x86_64",
+          "os": "linux"
+        },
+        "python": {
+          "PyYAML": "6.0.3",
+          "freeze": [
+            "anytree==2.13.0",
+            "attrs==26.1.0",
+            "boolean.py==5.0",
+            "canopen==2.4.1",
+            "cbor2==6.1.4",
+            "cbor==1.0.0",
+            "certifi==2026.7.22",
+            "cffi==2.1.1",
+            "charset-normalizer==3.5.1",
+            "click==8.5.0",
+            "colorama==0.4.6",
+            "cryptography==50.0.1",
+            "docopt==0.6.2",
+            "idna==3.20",
+            "imgtool==2.4.0",
+            "intelhex==2.3.0",
+            "Jinja2==3.1.6",
+            "jsonschema-specifications==2025.9.1",
+            "jsonschema==4.26.0",
+            "license-expression==30.4.4",
+            "MarkupSafe==3.0.3",
+            "packaging==26.3",
+            "patool==4.1.0",
+            "psutil==7.2.2",
+            "pycparser==3.0",
+            "pyelftools==0.33",
+            "pykwalify==1.8.0",
+            "pylink-square==2.0.1",
+            "pyserial==3.5",
+            "python-can==4.6.1",
+            "python-dateutil==2.9.0.post0",
+            "python-debian==1.1.1",
+            "python-magic==0.4.27",
+            "PyYAML==6.0.3",
+            "referencing==0.37.0",
+            "requests==2.34.2",
+            "reuse==6.2.0",
+            "rpds-py==2026.6.3",
+            "ruamel.yaml==0.19.1",
+            "semver==3.1.0",
+            "six==1.17.0",
+            "tomlkit==0.15.1",
+            "tqdm==4.70.1",
+            "typing_extensions==4.16.0",
+            "urllib3==2.8.0",
+            "west==1.5.0",
+            "wrapt==1.17.3"
+          ],
+          "imgtool": "2.4.0",
+          "pyelftools": "0.33",
+          "reuse": "6.2.0",
+          "west": "1.5.0"
+        },
+        "sdk": {
+          "gcc_version": "14.3.0"
+        }
+      },
       "extra_conf_files": [],
       "extra_dtc_overlay_files": [],
       "images": {
@@ -543,6 +722,71 @@
         "-DCONFIG_BUILD_OUTPUT_META=y",
         "-Dmcuboot_CONFIG_BUILD_OUTPUT_META=y"
       ],
+      "built_with": {
+        "host": {
+          "arch": "x86_64",
+          "os": "linux"
+        },
+        "python": {
+          "PyYAML": "6.0.3",
+          "freeze": [
+            "anytree==2.13.0",
+            "attrs==26.1.0",
+            "boolean.py==5.0",
+            "canopen==2.4.1",
+            "cbor2==6.1.4",
+            "cbor==1.0.0",
+            "certifi==2026.7.22",
+            "cffi==2.1.1",
+            "charset-normalizer==3.5.1",
+            "click==8.5.0",
+            "colorama==0.4.6",
+            "cryptography==50.0.1",
+            "docopt==0.6.2",
+            "idna==3.20",
+            "imgtool==2.4.0",
+            "intelhex==2.3.0",
+            "Jinja2==3.1.6",
+            "jsonschema-specifications==2025.9.1",
+            "jsonschema==4.26.0",
+            "license-expression==30.4.4",
+            "MarkupSafe==3.0.3",
+            "packaging==26.3",
+            "patool==4.1.0",
+            "psutil==7.2.2",
+            "pycparser==3.0",
+            "pyelftools==0.33",
+            "pykwalify==1.8.0",
+            "pylink-square==2.0.1",
+            "pyserial==3.5",
+            "python-can==4.6.1",
+            "python-dateutil==2.9.0.post0",
+            "python-debian==1.1.1",
+            "python-magic==0.4.27",
+            "PyYAML==6.0.3",
+            "referencing==0.37.0",
+            "requests==2.34.2",
+            "reuse==6.2.0",
+            "rpds-py==2026.6.3",
+            "ruamel.yaml==0.19.1",
+            "semver==3.1.0",
+            "six==1.17.0",
+            "tomlkit==0.15.1",
+            "tqdm==4.70.1",
+            "typing_extensions==4.16.0",
+            "urllib3==2.8.0",
+            "west==1.5.0",
+            "wrapt==1.17.3"
+          ],
+          "imgtool": "2.4.0",
+          "pyelftools": "0.33",
+          "reuse": "6.2.0",
+          "west": "1.5.0"
+        },
+        "sdk": {
+          "gcc_version": "14.3.0"
+        }
+      },
       "extra_conf_files": [
         "overlay-usbd.conf",
         "overlay-tls.conf"

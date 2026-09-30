@@ -4,10 +4,10 @@ SPDXID: SPDXRef-DOCUMENT
 DocumentName: build
 DocumentNamespace: http://spdx.org/spdxdocs/rollcall-baseline-with_mcuboot/build
 Creator: Tool: Zephyr SPDX builder
-Created: 2026-09-30T03:54:39Z
+Created: 2026-09-30T04:29:11Z
 
-ExternalDocumentRef: DocumentRef-app http://spdx.org/spdxdocs/rollcall-baseline-with_mcuboot/app SHA1: 8ab8f8d1519e155966b1f7fc6299f9d517070b35
-ExternalDocumentRef: DocumentRef-zephyr http://spdx.org/spdxdocs/rollcall-baseline-with_mcuboot/zephyr SHA1: 3995382954710994b13211a093e1454258ddd036
+ExternalDocumentRef: DocumentRef-app http://spdx.org/spdxdocs/rollcall-baseline-with_mcuboot/app SHA1: 5217bf890bf1bc10a111f192ed8f00a0c8adf0ce
+ExternalDocumentRef: DocumentRef-zephyr http://spdx.org/spdxdocs/rollcall-baseline-with_mcuboot/zephyr SHA1: 1a75fb0073ce8fdad17d678df3394cedbe94371b
 
 Relationship: SPDXRef-DOCUMENT DESCRIBES SPDXRef-zephyr-final
 

@@ -4,10 +4,10 @@ SPDXID: SPDXRef-DOCUMENT
 DocumentName: build
 DocumentNamespace: http://spdx.org/spdxdocs/rollcall-bt-beacon/build
 Creator: Tool: Zephyr SPDX builder
-Created: 2026-09-30T03:55:28Z
+Created: 2026-09-30T04:29:52Z
 
-ExternalDocumentRef: DocumentRef-app http://spdx.org/spdxdocs/rollcall-bt-beacon/app SHA1: 1998e90518e450ff7a7c1289d596543bc6374768
-ExternalDocumentRef: DocumentRef-zephyr http://spdx.org/spdxdocs/rollcall-bt-beacon/zephyr SHA1: 462261058d1135f929f931e6b19e254507316e68
+ExternalDocumentRef: DocumentRef-app http://spdx.org/spdxdocs/rollcall-bt-beacon/app SHA1: cb76a264d847f1b7182a311dd4063eb26c01c2b8
+ExternalDocumentRef: DocumentRef-zephyr http://spdx.org/spdxdocs/rollcall-bt-beacon/zephyr SHA1: 7424c34d320357bbba2d16c45fd27e27182d876d
 
 Relationship: SPDXRef-DOCUMENT DESCRIBES SPDXRef-zephyr-final
 

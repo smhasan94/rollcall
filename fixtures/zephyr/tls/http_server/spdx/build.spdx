@@ -4,10 +4,10 @@ SPDXID: SPDXRef-DOCUMENT
 DocumentName: build
 DocumentNamespace: http://spdx.org/spdxdocs/rollcall-tls-http_server/build
 Creator: Tool: Zephyr SPDX builder
-Created: 2026-09-30T03:56:47Z
+Created: 2026-09-30T04:30:58Z
 
-ExternalDocumentRef: DocumentRef-app http://spdx.org/spdxdocs/rollcall-tls-http_server/app SHA1: 96715d2b0deeb0715ef644cf668d735d0893d8e0
-ExternalDocumentRef: DocumentRef-zephyr http://spdx.org/spdxdocs/rollcall-tls-http_server/zephyr SHA1: ab45ef7e7fdf0f6d50ad6fb71bbf730c9ce91d22
+ExternalDocumentRef: DocumentRef-app http://spdx.org/spdxdocs/rollcall-tls-http_server/app SHA1: 79a68f58f87f1afb511d4c3a313617d42406b02a
+ExternalDocumentRef: DocumentRef-zephyr http://spdx.org/spdxdocs/rollcall-tls-http_server/zephyr SHA1: 8f11b53a5218852a4c1a2a762d37b63ca17e3786
 
 Relationship: SPDXRef-DOCUMENT DESCRIBES SPDXRef-zephyr-final
 

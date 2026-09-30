@@ -4,7 +4,7 @@ SPDXID: SPDXRef-DOCUMENT
 DocumentName: app-sources
 DocumentNamespace: http://spdx.org/spdxdocs/rollcall-bt-beacon/app
 Creator: Tool: Zephyr SPDX builder
-Created: 2026-09-30T03:55:28Z
+Created: 2026-09-30T04:29:52Z
 
 Relationship: SPDXRef-DOCUMENT DESCRIBES SPDXRef-app-sources
 
