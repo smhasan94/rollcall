@@ -4,7 +4,7 @@ SPDXID: SPDXRef-DOCUMENT
 DocumentName: modules-deps
 DocumentNamespace: http://spdx.org/spdxdocs/rollcall-bt-beacon/modules-deps
 Creator: Tool: Zephyr SPDX builder
-Created: 2026-09-30T03:45:21Z
+Created: 2026-09-30T03:55:28Z
 
 Relationship: SPDXRef-DOCUMENT DESCRIBES SPDXRef-zephyr-deps
 Relationship: SPDXRef-cmsis-deps DEPENDENCY_OF SPDXRef-zephyr-deps

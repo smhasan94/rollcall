@@ -4,7 +4,7 @@ SPDXID: SPDXRef-DOCUMENT
 DocumentName: modules-deps
 DocumentNamespace: http://spdx.org/spdxdocs/rollcall-bt-mcuboot/modules-deps
 Creator: Tool: Zephyr SPDX builder
-Created: 2026-09-30T03:45:22Z
+Created: 2026-09-30T03:55:29Z
 
 Relationship: SPDXRef-DOCUMENT DESCRIBES SPDXRef-zephyr-deps
 Relationship: SPDXRef-cmsis-deps DEPENDENCY_OF SPDXRef-zephyr-deps
