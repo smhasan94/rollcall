@@ -1,2 +1,16 @@
 # Golden files are compared byte for byte; keep LF line endings on every platform.
 *.json text eol=lf
+
+# Zephyr build fixtures (scripts/regen-fixtures.sh, docs/fixtures.md). MANIFEST.json records
+# the SHA-256 of every file, so checkout must not change any bytes.
+fixtures/zephyr/** linguist-generated=true
+*.elf binary
+fixtures/zephyr/**/.config text eol=lf
+fixtures/zephyr/**/*.yml text eol=lf
+fixtures/zephyr/**/*.yaml text eol=lf
+fixtures/zephyr/**/*.meta text eol=lf
+fixtures/zephyr/**/*.spdx text eol=lf
+fixtures/zephyr/**/*.txt text eol=lf
+fixtures/zephyr/**/*.map text eol=lf -diff
+# objcopy writes Intel HEX with CRLF line endings; keep them exactly as built.
+fixtures/zephyr/**/*.hex -text

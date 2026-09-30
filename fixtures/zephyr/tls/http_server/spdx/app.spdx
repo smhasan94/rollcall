@@ -1,0 +1,44 @@
+SPDXVersion: SPDX-2.3
+DataLicense: CC0-1.0
+SPDXID: SPDXRef-DOCUMENT
+DocumentName: app-sources
+DocumentNamespace: http://spdx.org/spdxdocs/rollcall-tls-http_server/app
+Creator: Tool: Zephyr SPDX builder
+Created: 2026-09-30T03:46:28Z
+
+Relationship: SPDXRef-DOCUMENT DESCRIBES SPDXRef-app-sources
+
+##### Package: app-sources
+
+PackageName: app-sources
+SPDXID: SPDXRef-app-sources
+PackageLicenseConcluded: Apache-2.0
+PackageLicenseDeclared: NOASSERTION
+PackageCopyrightText: NOASSERTION
+PrimaryPackagePurpose: SOURCE
+PackageDownloadLocation: NOASSERTION
+PackageLicenseInfoFromFiles: Apache-2.0
+FilesAnalyzed: true
+PackageVerificationCode: bc1ee731573cdfa26c87871c80bdba036ab41901
+
+FileName: ./src/main.c
+SPDXID: SPDXRef-File-main.c
+FileChecksum: SHA1: 29768665bc435cedddc14f32185ecf265df281e2
+FileChecksum: SHA256: cd5ec2248765e44c5b6c2d7c820c24370d802a17cef73bee2b7ca04e0f83d475
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2024, Nordic Semiconductor
+ * Copyright (c) 2023, Emna Rekik
+</text>
+
+FileName: ./src/ws.c
+SPDXID: SPDXRef-File-ws.c
+FileChecksum: SHA1: cd41a1ecbb5a122b80dbc67a7f6320d5fe389609
+FileChecksum: SHA256: 171f45fe2cedc89f742455064820c7540a6173eee3ef678d9523d42140aee171
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2024, Nordic Semiconductor
+</text>
+

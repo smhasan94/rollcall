@@ -107,6 +107,15 @@ releases of grype and osv-scanner into `.cache/tools/`, renders the fixtures in
 warnings, see every component, and report zero findings for the minimal fixture. It prints a
 PASS/FAIL table and runs in CI as the `smoke` job.
 
+## Zephyr build fixtures
+
+`fixtures/zephyr/` holds real build outputs (`west spdx`, `west list`, Kconfig `.config`,
+`build_info.yml`, maps, stripped ELFs and hex images) from a pinned, vanilla Zephyr v4.4.2
+built for `nrf52840dk/nrf52840` with sysbuild and MCUboot, in three variants (baseline,
+Bluetooth, TLS). `MANIFEST.json` there records the pins and the SHA-256 of every file. They
+are produced only by `scripts/regen-fixtures.sh`; the committed copy comes from the
+`regen-fixtures` workflow. See [docs/fixtures.md](docs/fixtures.md).
+
 ## Publishing the placeholders
 
 Crates must be published dependencies first: `rollcall-core` and `rollcall-assay`, then

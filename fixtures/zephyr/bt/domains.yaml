@@ -1,0 +1,10 @@
+default: beacon
+build_dir: /zephyrproject/build/bt
+domains:
+  - name: beacon
+    build_dir: /zephyrproject/build/bt/beacon
+  - name: mcuboot
+    build_dir: /zephyrproject/build/bt/mcuboot
+flash_order:
+  - mcuboot
+  - beacon

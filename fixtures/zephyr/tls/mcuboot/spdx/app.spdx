@@ -1,0 +1,119 @@
+SPDXVersion: SPDX-2.3
+DataLicense: CC0-1.0
+SPDXID: SPDXRef-DOCUMENT
+DocumentName: app-sources
+DocumentNamespace: http://spdx.org/spdxdocs/rollcall-tls-mcuboot/app
+Creator: Tool: Zephyr SPDX builder
+Created: 2026-09-30T03:46:29Z
+
+Relationship: SPDXRef-DOCUMENT DESCRIBES SPDXRef-app-sources
+
+##### Package: app-sources
+
+PackageName: app-sources
+SPDXID: SPDXRef-app-sources
+PackageLicenseConcluded: Apache-2.0
+PackageLicenseDeclared: NOASSERTION
+PackageCopyrightText: NOASSERTION
+PrimaryPackagePurpose: SOURCE
+PackageDownloadLocation: NOASSERTION
+PackageLicenseInfoFromFiles: Apache-2.0
+FilesAnalyzed: true
+PackageVerificationCode: fd0b1e1cbf77bcc1770ed52497cf7c41e6aaf53d
+
+FileName: ./cleanup/arm_cortex_m.c
+SPDXID: SPDXRef-File-arm-cortex-m.c
+FileChecksum: SHA1: 43c17e5ccefd2ce46cbf29eda887a1d6d267fba8
+FileChecksum: SHA256: 89f5adfe7558d465df443dfef4d0432217f9672d47f7a5a78b178d84f4a9c6cc
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2020 Nordic Semiconductor ASA
+</text>
+
+FileName: ./flash_check.c
+SPDXID: SPDXRef-File-flash-check.c
+FileChecksum: SHA1: 31c8cf7d02d213382cbb38871ebce99d7017d823
+FileChecksum: SHA256: d2a3bee1caa1318b32ae7ba9267cdf665a929b7022d57ed424f02fe4c9dacc4e
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2024 Nordic Semiconductor ASA
+</text>
+
+FileName: ./flash_map_extended.c
+SPDXID: SPDXRef-File-flash-map-extended.c
+FileChecksum: SHA1: 532936d58872bd7c6f301b55d287b9681c63d41f
+FileChecksum: SHA256: 3652f358bc5bb91aab7cce658d1628d66907a832fb4e9bc53a17abad6356c0ed
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2015 Runtime Inc
+ * Copyright (c) 2018 Nordic Semiconductor ASA
+</text>
+
+FileName: ./io.c
+SPDXID: SPDXRef-File-io.c
+FileChecksum: SHA1: 400755302c18d8afe31c2f735849cf87f786ca49
+FileChecksum: SHA256: 29064547a4d1d9160c9e28bc3a303e514453e8b00fd80499fba8c9781a194a5d
+LicenseConcluded: NOASSERTION
+LicenseInfoInFile: NONE
+FileCopyrightText: <text>
+ * Copyright (c) 2012-2014 Wind River Systems, Inc.
+ * Copyright (c) 2021-2023 Nordic Semiconductor ASA
+ * Copyright (c) 2020 Arm Limited
+</text>
+
+FileName: ./kernel/banner.c
+SPDXID: SPDXRef-File-banner.c
+FileChecksum: SHA1: b10a03a38ad672f079b6b88be445331a8b036808
+FileChecksum: SHA256: 8d9c09c62a4a346c65e3531bb4b82e26c4a6ce8ad6a9617a0026e3b86146e836
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2020 Intel Corporation
+ * Copyright (c) 2024 Nordic Semiconductor ASA
+</text>
+
+FileName: ./keys.c
+SPDXID: SPDXRef-File-keys.c
+FileChecksum: SHA1: e76a7d65fb37466e178d41feaadaf7d5b2f300f7
+FileChecksum: SHA256: cc1758de021770b2b3ad85b6cb33f9f928cf5cc402357de97c63fac2a1459257
+LicenseConcluded: NOASSERTION
+LicenseInfoInFile: NONE
+FileCopyrightText: NOASSERTION
+
+FileName: ./main.c
+SPDXID: SPDXRef-File-main.c
+FileChecksum: SHA1: f935e28336e177a35be6dabad82b326ad04945b3
+FileChecksum: SHA256: bac0ad5c34c94e2190cef0d31564f402387a40a7b7e61b7503b3a4c34f2310ac
+LicenseConcluded: NOASSERTION
+LicenseInfoInFile: NONE
+FileCopyrightText: <text>
+ * Copyright (c) 2025 Aerlync Labs Inc.
+ * Copyright (c) 2012-2014 Wind River Systems, Inc.
+ * Copyright (c) 2021-2023 Nordic Semiconductor ASA
+ * Copyright (c) 2020 Arm Limited
+ * Copyright (c) 2025 Siemens Mobility GmbH
+</text>
+
+FileName: ./os.c
+SPDXID: SPDXRef-File-os.c
+FileChecksum: SHA1: a980b254c25f1b1aa0d3df80fbbd8e7964c1e593
+FileChecksum: SHA256: cc04bb4b9013d02dc916ced3955418a7fd684346615fa593d48bc12dc8d09f1f
+LicenseConcluded: NOASSERTION
+LicenseInfoInFile: NONE
+FileCopyrightText: NOASSERTION
+
+FileName: ./watchdog.c
+SPDXID: SPDXRef-File-watchdog.c
+FileChecksum: SHA1: 4e22621e5a1742ac5c2869f007d853b080147a6a
+FileChecksum: SHA256: d90ef6af8ab999ef614e28e1b911965a6aa1e75f80b0c77e349ecd81f034f476
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2019-2023 MCUboot authors
+ * Copyright (c) 2021-2023 Nordic Semiconductor ASA
+ * Copyright (c) 2025 Jamie McCrae
+</text>
+

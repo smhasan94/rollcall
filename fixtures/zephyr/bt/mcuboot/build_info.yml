@@ -1,0 +1,54 @@
+cmake:
+  application:
+    configuration-dir: '/zephyrproject/bootloader/mcuboot/boot/zephyr'
+    source-dir: '/zephyrproject/bootloader/mcuboot/boot/zephyr'
+  board:
+    name: 'nrf52840dk'
+    path:
+     - '/zephyrproject/zephyr/boards/nordic/nrf52840dk'
+    qualifiers: 'nrf52840'
+    revision: ''
+  devicetree:
+    bindings-dirs:
+     - '/zephyrproject/zephyr/dts/bindings'
+    files:
+     - '/zephyrproject/zephyr/boards/nordic/nrf52840dk/nrf52840dk_nrf52840.dts'
+     - '/zephyrproject/bootloader/mcuboot/boot/zephyr/app.overlay'
+    include-dirs:
+     - '/zephyrproject/bootloader/mcuboot/boot/zephyr/include'
+     - '/zephyrproject/zephyr/include'
+     - '/zephyrproject/zephyr/include/zephyr'
+     - '/zephyrproject/zephyr/dts/common'
+     - '/zephyrproject/zephyr/dts/vendor'
+     - '/zephyrproject/zephyr/dts/rx'
+     - '/zephyrproject/zephyr/dts/x86'
+     - '/zephyrproject/zephyr/dts/xtensa'
+     - '/zephyrproject/zephyr/dts/sparc'
+     - '/zephyrproject/zephyr/dts/riscv'
+     - '/zephyrproject/zephyr/dts/posix'
+     - '/zephyrproject/zephyr/dts/arm64'
+     - '/zephyrproject/zephyr/dts/arm'
+     - '/zephyrproject/zephyr/dts/arc'
+     - '/zephyrproject/zephyr/dts'
+    user-files:
+     - '/zephyrproject/bootloader/mcuboot/boot/zephyr/app.overlay'
+  kconfig:
+    files:
+     - '/zephyrproject/zephyr/boards/nordic/nrf52840dk/nrf52840dk_nrf52840_defconfig'
+     - '/zephyrproject/bootloader/mcuboot/boot/zephyr/prj.conf'
+     - '/zephyrproject/bootloader/mcuboot/boot/zephyr/boards/nrf52840dk_nrf52840.conf'
+     - '/zephyrproject/build/bt/mcuboot/zephyr/misc/generated/extra_kconfig_options.conf'
+     - '/zephyrproject/build/bt/mcuboot/zephyr/.config.sysbuild'
+    user-files:
+     - '/zephyrproject/bootloader/mcuboot/boot/zephyr/prj.conf'
+     - '/zephyrproject/bootloader/mcuboot/boot/zephyr/boards/nrf52840dk_nrf52840.conf'
+  toolchain:
+    name: 'zephyr'
+    path: '/zephyr-sdk'
+  vendor-specific:
+    nordic:
+      svdfile: '/zephyrproject/modules/hal/nordic/nrfx/bsp/stable/mdk/nrf52840.svd'
+  zephyr:
+    version: '4.4.2'
+    zephyr-base: '/zephyrproject/zephyr'
+version: '0.1.0'

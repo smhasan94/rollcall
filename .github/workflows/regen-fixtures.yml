@@ -1,0 +1,119 @@
+name: Regenerate Zephyr fixtures
+
+# Rebuilds fixtures/zephyr from the pinned Zephyr release on a clean runner (see
+# docs/fixtures.md). The uploaded `zephyr-fixtures` artifact is the canonical fixture set: it is
+# downloaded and committed by hand, never pushed by this workflow.
+
+on:
+  workflow_dispatch:
+    inputs:
+      check_stable:
+        description: "Build everything twice and require identical output (--check-stable)"
+        type: boolean
+        default: true
+  pull_request:
+    paths:
+      - scripts/regen-fixtures.sh
+      - .github/workflows/regen-fixtures.yml
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  regen:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install build prerequisites
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends ninja-build gperf xz-utils file
+
+      - name: Disk space before
+        run: df -h
+
+      # Keep in sync with rust-toolchain.toml; the script ends with `cargo test`.
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: "1.91.1"
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Keep a copy of the committed fixtures
+        run: |
+          mkdir -p "$RUNNER_TEMP/committed"
+          if [[ -d fixtures/zephyr ]]; then
+            cp -R fixtures/zephyr "$RUNNER_TEMP/committed/zephyr"
+          fi
+
+      - name: Regenerate fixtures
+        env:
+          CHECK_STABLE: ${{ github.event_name != 'workflow_dispatch' || inputs.check_stable }}
+        run: |
+          args=()
+          if [[ "$CHECK_STABLE" == true ]]; then
+            args+=(--check-stable)
+          fi
+          scripts/regen-fixtures.sh "${args[@]}"
+
+      # Informational: a pin bump or a different host is expected to change the fixtures.
+      - name: Compare with the committed fixtures
+        continue-on-error: true
+        run: |
+          mkdir -p regen-reports
+          report=regen-reports/compare-committed.txt
+          if [[ ! -d "$RUNNER_TEMP/committed/zephyr" ]]; then
+            echo "No committed fixtures to compare with." | tee "$report"
+            echo "No committed fixtures to compare with." >>"$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          rc=0
+          scripts/regen-fixtures.sh compare "$RUNNER_TEMP/committed/zephyr" fixtures/zephyr \
+            >"$report" 2>&1 || rc=$?
+          cat "$report"
+          {
+            echo "### Regenerated fixtures vs committed fixtures"
+            echo
+            if [[ "$rc" -eq 0 ]]; then
+              echo "Matches the committed fixtures (apart from masked fields)."
+            else
+              echo "Differs from the committed fixtures:"
+              echo
+              echo '```'
+              grep -E '^FAIL|^ +[<>]' "$report" | head -100 || true
+              echo '```'
+            fi
+          } >>"$GITHUB_STEP_SUMMARY"
+          exit "$rc"
+
+      - name: Collect reports and logs
+        if: always()
+        run: |
+          mkdir -p regen-reports
+          cp .cache/fixtures-staging/compare-stable.txt regen-reports/ 2>/dev/null || true
+          cp -R .cache/fixtures-logs regen-reports/logs 2>/dev/null || true
+          df -h
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: zephyr-fixtures
+          path: fixtures/zephyr
+          if-no-files-found: error
+          include-hidden-files: true
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: zephyr-fixtures-reports
+          path: regen-reports
+          if-no-files-found: warn
