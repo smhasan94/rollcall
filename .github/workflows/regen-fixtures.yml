@@ -66,7 +66,8 @@ jobs:
           fi
           scripts/regen-fixtures.sh "${args[@]}"
 
-      # Informational: a pin bump or a different host is expected to change the fixtures.
+      # Informational only: a pin bump, or fixtures committed from another host, is expected to
+      # change the path-dependent files. The step always succeeds; the result is in the summary.
       - name: Compare with the committed fixtures
         continue-on-error: true
         run: |
@@ -85,16 +86,16 @@ jobs:
             echo "### Regenerated fixtures vs committed fixtures"
             echo
             if [[ "$rc" -eq 0 ]]; then
-              echo "Matches the committed fixtures (apart from masked fields)."
+              echo "**PASS**: matches the committed fixtures (apart from the masked fields)."
             else
-              echo "Differs from the committed fixtures:"
+              echo "**FAIL** (informational, exit $rc): differs from the committed fixtures:"
               echo
               echo '```'
               grep -E '^FAIL|^ +[<>]' "$report" | head -100 || true
               echo '```'
             fi
           } >>"$GITHUB_STEP_SUMMARY"
-          exit "$rc"
+          exit 0
 
       - name: Collect reports and logs
         if: always()

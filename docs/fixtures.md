@@ -90,13 +90,30 @@ All pins are constants at the top of `scripts/regen-fixtures.sh` and are copied 
 | Zephyr               | `v4.4.2` = `dccb09599635bdff17633fa7e9dab014b91dce90`, from https://github.com/zephyrproject-rtos/zephyr |
 | Modules              | the revisions in Zephyr's `west.yml`, filtered by `manifest.project-filter` `-.*,+hal_nordic,+cmsis,+cmsis_6,+mbedtls,+tf-psa-crypto,+mcuboot`; listed in `MANIFEST.json` `modules` |
 | Zephyr SDK           | `1.0.1`: `zephyr-sdk-1.0.1_<host>_minimal.tar.xz` plus `toolchain_gnu_<host>_arm-zephyr-eabi.tar.xz` (GCC 14.3.0), SHA-256 checked against the release's `sha256.sum` |
-| Python tools         | `west==1.5.0`, `reuse==6.2.0`, `imgtool==2.4.0`, plus Zephyr's `scripts/requirements-base.txt` and MCUboot's `zephyr/requirements.txt`; installed versions recorded in `MANIFEST.json` `python` |
+| Python tools         | `west==1.5.0`, `reuse==6.2.0`, `imgtool==2.4.0` exactly, plus Zephyr's `scripts/requirements-base.txt` and MCUboot's `zephyr/requirements.txt`, which float (see below) |
 | Board                | `nrf52840dk/nrf52840`                                                       |
+
+**Exact and floating pins.** Exact: the Zephyr commit, every module revision (from Zephyr's
+`west.yml` at that commit), the SDK bundles (by SHA-256) and so GCC, and `west`, `reuse` and
+`imgtool`, whose versions the script re-checks on every run, even when the venv already exists.
+Floating: the other Python packages. Zephyr's and MCUboot's requirement files give ranges
+(`pyelftools>=0.29`, `PyYAML>=6.0`, `cryptography>=40.0.0`, ...), so pip installs whatever is
+current when the venv is created. The full sorted `pip freeze` is recorded in `MANIFEST.json` as
+`python.freeze`, together with the versions of `west`, `reuse`, `imgtool`, `pyelftools` and
+`PyYAML`. Host tools (`cmake`, `ninja`, the host C compiler, `python3`) also float; only the
+minimum versions under **Prerequisites** are checked.
+
+Each variant also has `variants.<v>.built_with`: the host, `sdk.gcc_version` and `python`
+(including `freeze`) it was actually built with. They are the same as the top-level values when
+all variants are built together. A variant carried over by `--variant` keeps the `built_with` it
+had in the existing manifest.
 
 The SDK is installed without its host tools (QEMU, OpenOCD and so on are not needed to build),
 with the arm toolchain in `<sdk>/gnu/arm-zephyr-eabi`, where the SDK's CMake looks for it. The
-script refuses a Zephyr checkout whose `HEAD` is not the pinned commit, and any module whose
-`HEAD` is not its manifest revision.
+script refuses a Zephyr checkout whose `HEAD` is not the pinned commit, any module whose `HEAD`
+is not its manifest revision, and any of those repositories with local modifications
+(`git status --porcelain` not empty). The build directories, the venv and west's own files are
+in the workspace top directory, outside every project repository, so they do not count.
 
 ## Prerequisites
 
@@ -105,7 +122,9 @@ Supported hosts: Linux x86_64, Linux aarch64, macOS on Apple silicon.
 - **macOS:** Xcode Command Line Tools (`xcode-select --install`) and
   `brew install cmake ninja`. Python 3.10 or later.
 - **Ubuntu 24.04:**
-  `sudo apt-get install -y --no-install-recommends git cmake ninja-build gperf python3 python3-venv curl xz-utils file`
+  `sudo apt-get install -y --no-install-recommends git cmake ninja-build gperf python3 python3-venv curl xz-utils file`.
+  This is a superset of what the workflow installs (`ninja-build gperf xz-utils file`): the
+  GitHub-hosted `ubuntu-24.04` image already has the rest.
 - `cmake` 3.20 or later, `ninja`, `python3` 3.10 or later, `git`, `curl`, `tar`, `xz`, and
   `sha256sum` or `shasum`. `dtc` is not required.
 - About 4 GB of free disk under `.cache/` (SDK about 0.8 GB, workspace about 1 GB, build
@@ -113,7 +132,9 @@ Supported hosts: Linux x86_64, Linux aarch64, macOS on Apple silicon.
   copies of the fixtures, a few MB each).
 - Network access on the first run: GitHub for Zephyr, its modules and the SDK; PyPI for the
   Python tools.
-- A Rust toolchain, for the `cargo test` the script runs at the end.
+- A Rust toolchain: the script runs `cargo test -p rollcall-core --test fixtures` on the staged
+  result before installing it.
+- Any `bash` from 3.2 (macOS's `/bin/bash`) up.
 
 ## Regenerating
 
@@ -125,19 +146,23 @@ scripts/regen-fixtures.sh --check-stable
 
 This installs the SDK into `.cache/zephyr-sdk`, sets up the west workspace and its Python venv
 in `.cache/zephyr-workspace` (each step is skipped when its marker file exists), builds every
-variant twice from scratch, compares the two runs, replaces `fixtures/zephyr/`, runs
-`cargo test -p rollcall-core --test fixtures` and prints `git status` for the fixtures. Build
-logs are in `.cache/fixtures-logs/`. Other options: `--variant V` (repeatable) builds only some
-variants and carries the others over; `--skip-setup` downloads nothing; `--keep-build` keeps
-`build/<variant>`. The locations can be moved with `ROLLCALL_ZEPHYR_WORKSPACE`,
+variant twice from scratch, compares the two runs, runs
+`cargo test -p rollcall-core --test fixtures` on the staged tree (through
+`ROLLCALL_FIXTURES_DIR`), and only if that passes replaces `fixtures/zephyr/` (the old tree is
+put back if the swap fails half-way). It then prints `git status` for the fixtures. Build logs
+are in `.cache/fixtures-logs/`. Other options: `--variant V` (repeatable) builds only some
+variants and carries the others over from the existing output (it warns, and the staged tree
+then fails the tests and is not installed, if a variant has nothing to carry over);
+`--skip-setup` downloads nothing; `--keep-build` keeps `build/<variant>`. The locations can be moved with `ROLLCALL_ZEPHYR_WORKSPACE`,
 `ROLLCALL_ZEPHYR_SDK` and `ROLLCALL_FIXTURES_OUT`. `scripts/regen-fixtures.sh --help` lists
 everything.
 
 The canonical fixtures come from the `regen-fixtures` workflow
 (`.github/workflows/regen-fixtures.yml`), which runs the same script with `--check-stable` on
-`ubuntu-24.04`, compares the result with the committed fixtures (a report only; it does not fail
-the job) and uploads `fixtures/zephyr` as the `zephyr-fixtures` artifact. It runs on pull
-requests that change the script or the workflow, and on demand:
+`ubuntu-24.04`, compares the result with the committed fixtures (a report in the job summary
+only; that step always succeeds) and uploads `fixtures/zephyr` as the `zephyr-fixtures`
+artifact. It runs on pull requests that change the script or the workflow, and on demand; the
+artifact of either kind of run is canonical. On demand:
 
 ```sh
 gh workflow run regen-fixtures.yml --ref <branch>
@@ -158,19 +183,29 @@ the committed ones) and the build logs. Review the fixture diff like code.
 
 `--check-stable` builds everything twice from scratch into the same build paths and runs
 `scripts/regen-fixtures.sh compare`, which requires the same file set and byte-identical files,
-with three exceptions, each masked only as far as needed:
+with three exceptions, each masked only as far as needed. Any file that cannot be read or
+parsed under its rule is a FAIL, even when both sides fail the same way.
 
 - **`*.spdx`:** `west spdx` writes the current time in `Created:`, and `build.spdx` refers to
   the other documents by SHA1 in `ExternalDocumentRef:`, which changes with them. The compare
-  drops `Created:` lines and masks that SHA1. It also sorts each consecutive run of
-  `Relationship:` lines before comparing: `build.spdx` lists a target's `HAS_PREREQUISITE` and
+  replaces the value of each `Created:` line with `<masked>` (the line is kept, so an extra or
+  missing `Created:` line is a difference), and replaces the 40-hex SHA1 at the end of each
+  `ExternalDocumentRef: DocumentRef-<name> <namespace> SHA1: <sha1>` line with `<masked>`
+  (name and namespace are still compared). Both files must be UTF-8 and start with
+  `SPDXVersion: SPDX-`. It also sorts each consecutive run of `Relationship:` lines before
+  comparing, so a line moved into a different run is still a difference: `build.spdx` lists a target's `HAS_PREREQUISITE` and
   `STATIC_LINK` relationships in the order of CMake's file-API codemodel, and CMake does not
   keep that order stable between two configures of the same tree (the set of relationships is
   identical; only their order moves). Running `west spdx` again on one build tree gives
   identical output. The committed files keep the real values and order.
 - **`*.signed.hex`:** imgtool signs with RSA-PSS, whose salt is random, so the signature
-  differs on every build. The compare parses the Intel HEX, finds the MCUboot image header and
-  TLV area, and zeroes only the signature TLV; header, image, hash and key-hash TLVs must match.
+  differs on every build. The compare parses the Intel HEX and requires, unmasked, the same
+  sequence of records (type, address, byte count, and the payload of every non-data record) and
+  the same line terminator on every line. It then finds the MCUboot image header and the TLV
+  area, requires exactly one TLV of type `0x20` (`IMAGE_TLV_RSA2048_PSS`, the only signature
+  type in these images) at the same offset with the same length on both sides, and zeroes only
+  that TLV's value (256 bytes). Every other byte (the 0x200-byte header, the image, the SHA-256
+  TLV `0x10`, the key-hash TLV `0x01`) must match.
 - **`MANIFEST.json`:** compared as JSON, ignoring the `sha256` of those two kinds of file.
 
 What the script does to make the rest stable:
@@ -185,8 +220,12 @@ What the script does to make the rest stable:
 - **Path normalisation:** every text fixture (`.config`, `build_info.yml`, `domains.yaml`,
   `zephyr.meta`, `zephyr.map`, `*.spdx`, `west-list.txt`) has the workspace top directory
   replaced by `/zephyrproject` and the SDK directory by `/zephyr-sdk`, both in their logical
-  and physical (`pwd -P`, e.g. macOS `/private/...`) forms, longest first. The script then fails
-  if the workspace path, the SDK path or `$HOME` is still present in any of them. Files changed
+  and physical (`pwd -P`, e.g. macOS `/private/...`) forms, longest first. Before replacing, it
+  fails if either directory is immediately followed by another path character
+  (`[A-Za-z0-9_.-]`), so a sibling such as `<workspace>2` is never half-replaced. (That check
+  runs on the original text because the placeholder `/zephyrproject` is legitimately followed by
+  `-` in URLs like `github.com/zephyrproject-rtos`.) Afterwards it fails if the workspace path,
+  the SDK path or `$HOME` is still present in any of them. Files changed
   this way have `"transform": "normalise-paths"` in the manifest. Binary files are not touched.
 - `CCACHE_DISABLE=1`: Zephyr uses ccache when it is installed, and a cache hit in the second
   run would compare an object file with itself rather than with a fresh compile.
@@ -194,7 +233,7 @@ What the script does to make the rest stable:
   `WEST_CONFIG_SYSTEM`), and `ZEPHYR_MODULES`, `EXTRA_ZEPHYR_MODULES` and similar variables are
   unset, so nothing from the user's environment reaches the build.
 - `MANIFEST.json` is written with sorted keys and sorted file entries, and contains no
-  timestamps or host names.
+  timestamps or host names (it does record the host OS and architecture).
 
 What is not stable across build locations: the debug information in object files and
 libraries embeds the absolute build path, so building in a different directory (another
@@ -214,15 +253,16 @@ this is why the CI build is the canonical one.
   CMake caches and the unsigned app `.hex`/`.bin` are not.
 - The whole tree must stay under 50 MB; it is a few MB, so Git LFS is not used.
 
-In `.gitattributes`, `fixtures/zephyr/**` is marked `linguist-generated`, the text types are
-`text eol=lf`, `*.map` has diffs turned off, `*.elf` is binary and `*.hex` is `-text`: the
-MCUboot `zephyr.hex` from objcopy has CRLF line endings, which must survive checkout unchanged
-for the SHA-256 in the manifest to match.
+In `.gitattributes`, everything under `fixtures/zephyr/` is `-text` and `linguist-generated`,
+so Git never converts line endings there on checkout or commit and every SHA-256 in the
+manifest keeps matching. That rule comes after the repository-wide `*.json text eol=lf`, so it
+also covers `MANIFEST.json`. The MCUboot `zephyr.hex` files from objcopy have CRLF line
+endings; every other text fixture is LF. `*.map` has diffs turned off and `*.elf` is binary.
 
 ## Checks
 
 `crates/rollcall-core/tests/fixtures.rs` (part of `cargo test --workspace`) checks the committed
-tree:
+tree, or the tree named by `ROLLCALL_FIXTURES_DIR`:
 
 - the manifest pins Zephyr `v4.4.2` at a 40-hex commit and SDK `1.0.1`, with three variants;
 - each variant has the full file set, and the manifest lists exactly the files on disk, with
@@ -232,8 +272,13 @@ tree:
   above), and every variant enables MCUboot through sysbuild;
 - every SPDX document is SPDX 2.3 with a `http://spdx.org/spdxdocs/rollcall-<variant>-<image>/`
   namespace;
-- no text fixture contains `/Users/`, `/home/` or `/private/`, and `build_info.yml` uses
-  `/zephyrproject`;
+- no text fixture contains `/Users/`, `/home/`, `/private/`, `/root/`, `/work/` or
+  `/opt/hostedtoolcache`, and `build_info.yml` uses `/zephyrproject`;
+- `scripts/regen-fixtures.sh compare` passes identical copies of the tree and a flipped byte
+  inside the signature TLV or reordered relationships within a run, and fails a flipped image
+  byte, a CRLF-converted hex, a `.config` value change, a relationship moved to another run or
+  retargeted, an extra `Created:` line, and garbage or empty SPDX on both sides (skipped only if
+  `bash` or `python3` is missing);
 - this document has its sections.
 
 ## Bumping the pin

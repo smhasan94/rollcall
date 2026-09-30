@@ -10,19 +10,26 @@
 #   scripts/regen-fixtures.sh compare DIR_A DIR_B
 #
 #   --variant V      build only variant V (baseline, bt or tls); repeatable. Default: all.
-#                    Unselected variants already in the output are carried over unchanged.
+#                    Unselected variants already in the output are carried over unchanged,
+#                    with the provenance (`built_with`) recorded when they were built.
 #   --check-stable   build everything twice, from scratch, and compare the two trees
 #                    (see `compare`); fails without touching the output if they differ.
 #   --skip-setup     do not download, clone or pip-install anything; the pins are still
 #                    asserted against what is already there.
 #   --keep-build     keep the Zephyr build directories (default: deleted after collection).
 #
-#   compare A B      compare two fixture trees: identical file sets, every file byte-equal
-#                    except that *.spdx files ignore `Created:` lines, the SHA1 on
-#                    `ExternalDocumentRef:` lines and the order of lines within each run of
-#                    `Relationship:` lines, *.signed.hex files ignore the bytes of
-#                    the MCUboot signature TLV, and MANIFEST.json ignores the sha256 of those
-#                    two kinds of file. Prints a PASS/FAIL table; exits 1 on any difference.
+#   compare A B      compare two fixture trees: identical file sets, and every file
+#                    byte-equal except:
+#                    - *.spdx: the value of `Created:` lines, the SHA1 at the end of
+#                      `ExternalDocumentRef:` lines, and the order of lines within each run
+#                      of `Relationship:` lines are ignored;
+#                    - *.signed.hex: the bytes of the single RSA-PSS signature TLV (0x20) are
+#                      ignored; record layout and line endings must match;
+#                    - MANIFEST.json: the sha256 of those two kinds of file is ignored.
+#                    Prints a PASS/FAIL table; exits 1 on any difference or unreadable file.
+#
+# The staged result must pass `cargo test -p rollcall-core --test fixtures` (run with
+# ROLLCALL_FIXTURES_DIR pointing at it) before it replaces the output.
 #
 # Environment:
 #   ROLLCALL_ZEPHYR_WORKSPACE  west workspace (default .cache/zephyr-workspace)
@@ -158,7 +165,7 @@ version_ge() {
 
 check_prereqs() {
     local tool
-    for tool in git cmake ninja python3 curl tar xz cmp; do
+    for tool in git cmake ninja python3 curl tar xz cmp cargo; do
         command -v "$tool" >/dev/null 2>&1 || die "$tool is required (see docs/fixtures.md)"
     done
     command -v sha256sum >/dev/null 2>&1 || command -v shasum >/dev/null 2>&1 ||
@@ -262,18 +269,33 @@ setup_python_requirements() {
             -r "$WS/bootloader/mcuboot/zephyr/requirements.txt"
         mv "$marker.pending" "$marker"
     fi
-    PY_VERSIONS="$("$WS/.venv/bin/python" - <<'EOF'
+    # The versions that matter to the fixtures, the full `pip freeze` (the requirement files
+    # float), and a re-check of the exact pins even when the venv marker already existed.
+    PY_VERSIONS="$(WANT_REUSE="$REUSE_VERSION" WANT_IMGTOOL="$IMGTOOL_VERSION" \
+        WANT_WEST="$WEST_VERSION" "$WS/.venv/bin/python" - <<'EOF'
 import json
+import os
+import subprocess
+import sys
 from importlib.metadata import version, PackageNotFoundError
+
 out = {}
 for name in ["west", "reuse", "imgtool", "pyelftools", "PyYAML"]:
     try:
         out[name] = version(name)
     except PackageNotFoundError:
         out[name] = None
+for name, want in [("west", "WANT_WEST"), ("reuse", "WANT_REUSE"), ("imgtool", "WANT_IMGTOOL")]:
+    if out[name] != os.environ[want]:
+        sys.exit("%s in the venv is %s, pinned %s" % (name, out[name], os.environ[want]))
+freeze = subprocess.run(
+    [sys.executable, "-m", "pip", "freeze", "--disable-pip-version-check"],
+    check=True, capture_output=True, text=True,
+).stdout.splitlines()
+out["freeze"] = sorted((l.strip() for l in freeze if l.strip()), key=str.lower)
 print(json.dumps(out, sort_keys=True))
 EOF
-)"
+)" || die "Python venv in $WS/.venv does not match the pins; delete it and rerun"
 }
 
 # setup_workspace: shallow clone of the pinned tag, `west init -l`, the project filter, a
@@ -305,12 +327,26 @@ setup_workspace() {
     [[ "$filter" == "$PROJECT_FILTER" ]] ||
         die "manifest.project-filter is '$filter', expected '$PROJECT_FILTER'"
     local name path rev actual
+    local repos=("zephyr")
     while read -r name path rev; do
         [[ "$name" != manifest ]] || continue
         actual="$(git -C "$WS/$path" rev-parse 'HEAD^{commit}' 2>/dev/null)" ||
             die "project $name ($path) is not checked out; rerun without --skip-setup"
         [[ "$actual" == "$rev" ]] || die "project $name is at $actual, manifest says $rev"
+        repos+=("$path")
     done < <(cd "$WS" && west list -f '{name} {path} {revision}')
+    # Vanilla means unmodified, not just the right HEAD. The build directories, the venv and
+    # west's own files all live in the workspace topdir, outside every project repository, so
+    # they never show up here.
+    local changes
+    for path in "${repos[@]}"; do
+        changes="$(git -C "$WS/$path" status --porcelain)" ||
+            die "git status failed in $WS/$path"
+        if [[ -n "$changes" ]]; then
+            printf '%s\n' "$changes" | head -20 | sed 's/^/  /' >&2
+            die "$WS/$path has local modifications (above); restore it or delete the workspace"
+        fi
+    done
     export ZEPHYR_BASE="$WS/zephyr"
     # GCC takes __DATE__ and __TIME__ (used by e.g. lib/posix/options/uname.c) from this, so
     # builds are reproducible; the pinned commit's own timestamp keeps it meaningful.
@@ -400,6 +436,11 @@ sed_escape() {
     printf '%s' "$1" | sed -e 's/[]\/$*.^|[]/\\&/g'
 }
 
+# ere_escape <string>: escapes a literal for use in a grep -E pattern.
+ere_escape() {
+    printf '%s' "$1" | sed -e 's/[]\/$*.^|[+?(){}]/\\&/g'
+}
+
 # normalise_text <dir>: rewrites host paths in every text fixture under <dir> to the
 # placeholders, then fails if any host path is left.
 normalise_text() {
@@ -408,13 +449,24 @@ normalise_text() {
     local pairs=()
     for p in "$WS_REAL" "$WS_LOGICAL" "/private$WS_LOGICAL"; do pairs+=("$p|$WS_PLACEHOLDER"); done
     for p in "$SDK_REAL" "$SDK_LOGICAL" "/private$SDK_LOGICAL"; do pairs+=("$p|$SDK_PLACEHOLDER"); done
-    local script="" from to
+    local script="" from to froms=()
     while IFS='|' read -r from to; do
         script+="s|$(sed_escape "$from")|$to|g;"
+        froms+=("$from")
     done < <(printf '%s\n' "${pairs[@]}" | awk -F'|' '{print length($1) "\t" $0}' |
         sort -t$'\t' -k1,1nr -k2 | cut -f2- | awk '!seen[$0]++')
     local files=()
     while IFS= read -r f; do files+=("$f"); done < <(text_files "$dir")
+    [[ ${#files[@]} -gt 0 ]] || die "no text fixtures found under $dir"
+    # A host path must end at a path boundary: `<ws>2/...` or `<ws>.old` would otherwise become
+    # `/zephyrproject2/...`. Checked before replacing, because the placeholder itself is
+    # legitimately followed by `-` in URLs such as github.com/zephyrproject-rtos.
+    for from in "${froms[@]}"; do
+        if grep -lE -- "$(ere_escape "$from")[A-Za-z0-9_.-]" "${files[@]}" >/dev/null; then
+            grep -lE -- "$(ere_escape "$from")[A-Za-z0-9_.-]" "${files[@]}" | sed 's/^/  /' >&2
+            die "'$from' is followed by more path characters in the files above; not normalising"
+        fi
+    done
     for f in "${files[@]}"; do
         sed -e "$script" "$f" >"$f.tmp"
         if ! cmp -s "$f" "$f.tmp"; then
@@ -454,6 +506,7 @@ write_manifest() {
             "$(variant_build_argv "$v" | paste -sd $'\x1f' -)" "$(variant_fallback "$v")" >>"$vfile"
     done
     STAGE="$stage" VFILE="$vfile" TRANSFORMS="$TRANSFORMS" PY_VERSIONS="$PY_VERSIONS" \
+        CARRIED="$CARRIED" OLD_MANIFEST="$OUT_ABS/MANIFEST.json" \
         ZEPHYR_URL="$ZEPHYR_URL" ZEPHYR_TAG="$ZEPHYR_TAG" ZEPHYR_COMMIT="$ZEPHYR_COMMIT" \
         SOURCE_DATE_EPOCH="$SOURCE_DATE_EPOCH" \
         SDK_VERSION="$SDK_VERSION" HOST="$HOST" SDK_MINIMAL_FILE="$SDK_MINIMAL_FILE" \
@@ -525,6 +578,33 @@ with open(env["VFILE"], encoding="utf-8") as f:
         if fallback:
             variants[v]["fallback"] = fallback
 
+# Provenance per variant: what this run used, or, for a variant carried over from the existing
+# output by --variant, what that output recorded (its own built_with, else its top level).
+host_os, _, host_arch = env["HOST"].partition("-")
+python = json.loads(env["PY_VERSIONS"])
+this_run = {
+    "host": {"os": host_os, "arch": host_arch},
+    "sdk": {"gcc_version": env["GCC_VERSION"]},
+    "python": python,
+}
+carried = env["CARRIED"].split()
+old = {}
+if carried:
+    with open(env["OLD_MANIFEST"], encoding="utf-8") as f:
+        old = json.load(f)
+for v in variants:
+    if v not in carried:
+        variants[v]["built_with"] = this_run
+        continue
+    prev = old.get("variants", {}).get(v, {}).get("built_with")
+    if prev is None:
+        prev = {
+            "host": old.get("host"),
+            "sdk": {"gcc_version": old.get("sdk", {}).get("gcc_version")},
+            "python": old.get("python"),
+        }
+    variants[v]["built_with"] = prev
+
 modules = []
 if first_variant:
     with open(os.path.join(stage, first_variant, "west-list.txt"), encoding="utf-8") as f:
@@ -536,7 +616,6 @@ if first_variant:
             modules.append({"name": name, "path": path, "revision": revision, "url": url})
 modules.sort(key=lambda m: m["name"])
 
-host_os, _, host_arch = env["HOST"].partition("-")
 manifest = {
     "format": "rollcall-fixtures/1",
     "generator": "scripts/regen-fixtures.sh",
@@ -560,7 +639,7 @@ manifest = {
         "project_filter": env["PROJECT_FILTER"],
         "update_args": [a for a in env["WEST_UPDATE_ARGS"].split("\n") if a],
     },
-    "python": json.loads(env["PY_VERSIONS"]),
+    "python": python,
     "host": {"os": host_os, "arch": host_arch},
     "board": env["BOARD"],
     "path_placeholders": {
@@ -579,40 +658,48 @@ EOF
 }
 
 # --- Compare --------------------------------------------------------------------------------
-# signed_hex_equal <a> <b>: the two MCUboot-signed Intel HEX images are equal once the bytes
-# of each signature TLV (RSA-PSS and ECDSA signatures are randomised) are zeroed.
+# Each helper is one Python process that reads both files and exits 0 only when they are equal
+# under its rule; any error (unreadable, malformed, unexpected layout) exits 1.
+
+# signed_hex_equal <a> <b>: two MCUboot-signed Intel HEX images are equal except for the bytes
+# of the RSA-PSS signature, whose salt is random. Unmasked and required identical: every
+# record's type, address and byte count, every non-data record's payload, every line
+# terminator, and every data byte outside the signature. Each image must carry exactly one
+# signature TLV, of type 0x20 (IMAGE_TLV_RSA2048_PSS), at the same offset with the same length.
 signed_hex_equal() {
     python3 - "$1" "$2" <<'EOF'
 import struct
 import sys
 
-SIG_TLVS = {0x20, 0x22, 0x23, 0x24}  # RSA2048, ECDSASIG, RSA3072, ED25519
+SIG_TLV = 0x20  # IMAGE_TLV_RSA2048_PSS, the only signature type in these images
 
 
 def load(path):
-    mem = {}
-    base = 0
-    with open(path, encoding="ascii") as f:
-        for n, line in enumerate(f, 1):
-            line = line.strip()
-            if not line:
-                continue
-            if not line.startswith(":"):
-                raise ValueError("%s:%d: not an Intel HEX record" % (path, n))
-            raw = bytes.fromhex(line[1:])
-            if len(raw) < 5 or len(raw) != raw[0] + 5 or sum(raw) & 0xFF:
-                raise ValueError("%s:%d: bad record" % (path, n))
-            count, addr, kind = raw[0], (raw[1] << 8) | raw[2], raw[3]
-            data = raw[4 : 4 + count]
-            if kind == 0:
-                for i, b in enumerate(data):
-                    mem[base + addr + i] = b
-            elif kind == 1:
-                break
-            elif kind == 2:
-                base = int.from_bytes(data, "big") << 4
-            elif kind == 4:
-                base = int.from_bytes(data, "big") << 16
+    with open(path, "rb") as f:
+        lines = f.read().splitlines(keepends=True)
+    if not lines:
+        raise ValueError("%s: empty" % path)
+    shape, mem, base = [], {}, 0
+    for n, line in enumerate(lines, 1):
+        body = line.rstrip(b"\r\n")
+        term = line[len(body):]
+        if not body.startswith(b":"):
+            raise ValueError("%s:%d: not an Intel HEX record" % (path, n))
+        raw = bytes.fromhex(body[1:].decode("ascii"))
+        if len(raw) < 5 or len(raw) != raw[0] + 5 or sum(raw) & 0xFF:
+            raise ValueError("%s:%d: bad record" % (path, n))
+        count, addr, kind = raw[0], (raw[1] << 8) | raw[2], raw[3]
+        data = raw[4 : 4 + count]
+        shape.append((term, kind, addr, count, b"" if kind == 0 else data))
+        if kind == 0:
+            for i, b in enumerate(data):
+                mem[base + addr + i] = b
+        elif kind == 2:
+            base = int.from_bytes(data, "big") << 4
+        elif kind == 4:
+            base = int.from_bytes(data, "big") << 16
+        elif kind not in (1, 3, 5):
+            raise ValueError("%s:%d: unknown record type %d" % (path, n, kind))
     if not mem:
         raise ValueError("%s: no data" % path)
     lo, hi = min(mem), max(mem)
@@ -621,77 +708,96 @@ def load(path):
     buf = bytearray(b"\xff" * (hi - lo + 1))
     for a, b in mem.items():
         buf[a - lo] = b
-    return lo, buf
+    return shape, lo, buf
 
 
-def mask(buf):
+def mask(path, buf):
     magic, _load, hdr, prot, img = struct.unpack_from("<IIHHI", buf, 0)
     if magic != 0x96F3B83D:
-        raise ValueError("no MCUboot image header")
-    off = hdr + img
-    if prot:
-        off += prot
+        raise ValueError("%s: no MCUboot image header" % path)
+    off = hdr + img + prot
     tlv_magic, tlv_total = struct.unpack_from("<HH", buf, off)
     if tlv_magic != 0x6907:
-        raise ValueError("no TLV info at 0x%x" % off)
+        raise ValueError("%s: no TLV info at 0x%x" % (path, off))
     end = off + tlv_total
     if end > len(buf):
-        raise ValueError("TLV area runs past the end of the image")
+        raise ValueError("%s: TLV area runs past the end of the image" % path)
     off += 4
-    while off + 4 <= end:
+    sigs = []
+    while off < end:
         kind, length = struct.unpack_from("<HH", buf, off)
         if off + 4 + length > end:
-            raise ValueError("TLV at 0x%x runs past the TLV area" % off)
-        if (kind & 0xFF) in SIG_TLVS:
+            raise ValueError("%s: TLV at 0x%x runs past the TLV area" % (path, off))
+        if kind == SIG_TLV:
+            sigs.append((off + 4, length))
             buf[off + 4 : off + 4 + length] = bytes(length)
         off += 4 + length
-    return buf
+    if len(sigs) != 1:
+        raise ValueError("%s: %d signature TLVs of type 0x20, expected 1" % (path, len(sigs)))
+    return sigs[0]
 
 
 try:
-    la, a = load(sys.argv[1])
-    lb, b = load(sys.argv[2])
-    sys.exit(0 if la == lb and mask(a) == mask(b) else 1)
-except (ValueError, struct.error, OSError) as e:
+    shape_a, lo_a, a = load(sys.argv[1])
+    shape_b, lo_b, b = load(sys.argv[2])
+    if shape_a != shape_b or lo_a != lo_b:
+        print("signed_hex_equal: record layout or line endings differ", file=sys.stderr)
+        sys.exit(1)
+    if mask(sys.argv[1], a) != mask(sys.argv[2], b):
+        print("signed_hex_equal: signature TLV position differs", file=sys.stderr)
+        sys.exit(1)
+    sys.exit(0 if a == b else 1)
+except Exception as e:  # any failure to read or parse is a difference, never a pass
     print("signed_hex_equal: %s" % e, file=sys.stderr)
     sys.exit(1)
 EOF
 }
 
-# spdx_canonical <file>: the SPDX tag-value text without `Created:` lines, with the SHA1 on
-# `ExternalDocumentRef:` lines masked, and with each consecutive run of `Relationship:` lines
-# sorted (their order follows CMake's file-API codemodel, which varies between configures).
-spdx_canonical() {
-    python3 - "$1" <<'EOF'
-import os
+# spdx_equal <a> <b>: two SPDX tag-value documents are equal once, in each, the value of every
+# `Created:` line is replaced by `<masked>` (the line itself stays), the 40-hex SHA1 at the end
+# of every `ExternalDocumentRef:` line is replaced by `<masked>`, and each consecutive run of
+# `Relationship:` lines is sorted (their order follows CMake's file-API codemodel, which varies
+# between configures). Both files must be UTF-8 and start with `SPDXVersion: SPDX-`.
+spdx_equal() {
+    python3 - "$1" "$2" <<'EOF'
 import re
 import sys
 
-out, run = [], []
-with open(sys.argv[1], encoding="utf-8", errors="surrogateescape", newline="") as f:
-    for line in f:
-        if line.startswith("Created:"):
-            continue
-        line = re.sub(r"^(ExternalDocumentRef: .* SHA1: )[0-9a-fA-F]+", r"\1<masked>", line)
-        if line.startswith("Relationship:"):
+CREATED = re.compile(r"^Created: .*$")
+EXTREF = re.compile(r"^(ExternalDocumentRef: DocumentRef-\S+ \S+ SHA1: )[0-9a-f]{40}$")
+
+
+def canonical(path):
+    with open(path, "rb") as f:
+        text = f.read().decode("utf-8")
+    lines = text.splitlines(keepends=True)
+    if not lines or not lines[0].startswith("SPDXVersion: SPDX-"):
+        raise ValueError("%s: not an SPDX tag-value document" % path)
+    out, run = [], []
+    for line in lines:
+        body = line.rstrip("\r\n")
+        term = line[len(body):]
+        if body.startswith("Created:"):
+            body = CREATED.sub("Created: <masked>", body)
+        elif body.startswith("ExternalDocumentRef:"):
+            body = EXTREF.sub(r"\1<masked>", body)
+        line = body + term
+        if body.startswith("Relationship:"):
             run.append(line)
             continue
         out.extend(sorted(run))
         run = []
         out.append(line)
-out.extend(sorted(run))
-try:
-    sys.stdout.buffer.write("".join(out).encode("utf-8", "surrogateescape"))
-    sys.stdout.flush()
-except BrokenPipeError:
-    # `cmp -s` stops reading at the first difference; that is not an error here.
-    os.dup2(os.open(os.devnull, os.O_WRONLY), sys.stdout.fileno())
-EOF
-}
+    out.extend(sorted(run))
+    return out
 
-# spdx_equal <a> <b>: equal once both are in spdx_canonical form.
-spdx_equal() {
-    cmp -s <(spdx_canonical "$1") <(spdx_canonical "$2")
+
+try:
+    sys.exit(0 if canonical(sys.argv[1]) == canonical(sys.argv[2]) else 1)
+except Exception as e:  # any failure to read or parse is a difference, never a pass
+    print("spdx_equal: %s" % e, file=sys.stderr)
+    sys.exit(1)
+EOF
 }
 
 # manifest_equal <a> <b>: equal apart from the sha256 of *.spdx and *.signed.hex entries.
@@ -704,9 +810,9 @@ import sys
 def load(path):
     with open(path, encoding="utf-8") as f:
         doc = json.load(f)
-    if not isinstance(doc, dict) or not isinstance(doc.get("files", []), list):
+    if not isinstance(doc, dict) or not isinstance(doc.get("files"), list):
         raise ValueError("%s: not a fixtures manifest" % path)
-    for entry in doc.get("files", []):
+    for entry in doc["files"]:
         if not isinstance(entry, dict):
             raise ValueError("%s: file entry is not an object" % path)
         p = str(entry.get("path", ""))
@@ -717,13 +823,13 @@ def load(path):
 
 try:
     a, b = load(sys.argv[1]), load(sys.argv[2])
-except (OSError, ValueError) as e:
+    if a != b:
+        for key in sorted(set(a) | set(b)):
+            if a.get(key) != b.get(key):
+                print("manifest_equal: '%s' differs" % key, file=sys.stderr)
+        sys.exit(1)
+except Exception as e:  # any failure to read or parse is a difference, never a pass
     print("manifest_equal: %s" % e, file=sys.stderr)
-    sys.exit(1)
-if a != b:
-    for key in sorted(set(a) | set(b)):
-        if a.get(key) != b.get(key):
-            print("manifest_equal: '%s' differs" % key, file=sys.stderr)
     sys.exit(1)
 EOF
 }
@@ -772,8 +878,12 @@ compare_trees() {
 }
 
 # --- Main -----------------------------------------------------------------------------------
+# Runs under bash 3.2 (macOS /bin/bash) as well as bash 4+: with `set -u`, bash 3.2 treats
+# "${arr[@]}" of an empty array as unbound, so every array expanded here is non-empty by
+# construction (or checked, as in normalise_text) before it is used.
 if [[ "${1:-}" == compare ]]; then
     [[ $# -eq 3 ]] || die "usage: $0 compare DIR_A DIR_B"
+    command -v python3 >/dev/null 2>&1 || die "compare needs python3"
     compare_trees "$2" "$3"
     exit $?
 fi
@@ -865,11 +975,17 @@ run_once() {
         log "run $n: $v done in $((SECONDS - t))s"
     done
     normalise_text "$stage"
+    CARRIED=""
     for v in "${VARIANTS[@]}"; do
-        if [[ ! -d "$stage/$v" && -d "$OUT_ABS/$v" ]]; then
-            log "run $n: keeping existing $v"
+        [[ ! -d "$stage/$v" ]] || continue
+        if [[ -d "$OUT_ABS/$v" ]]; then
+            log "run $n: keeping existing $v (its built_with is carried over too)"
             cp -R "$OUT_ABS/$v" "$stage/$v"
             carry_transforms "$v"
+            CARRIED+=" $v"
+        else
+            log "WARNING: variant $v was not selected and $OUT has no $v to carry over;" \
+                "the result lacks it and will fail the fixture tests, so it will not be installed"
         fi
     done
     write_manifest "$stage"
@@ -900,17 +1016,26 @@ if [[ "$CHECK_STABLE" -eq 1 ]]; then
     fi
 fi
 
-# Replace the output in one move: the old tree is kept aside until the new one is in place.
+# The fixture tests run against the staged tree, so a tree that fails them is never installed.
+log "running cargo test -p rollcall-core --test fixtures on the staged tree"
+if ! ROLLCALL_FIXTURES_DIR="$STAGING/run1" cargo test -q -p rollcall-core --test fixtures --locked; then
+    die "the staged fixtures fail the fixture tests; $OUT left unchanged (staged tree: $STAGING/run1)"
+fi
+
+# Replace the output: the old tree is kept aside until the new one is in place, and put back
+# if anything fails in between.
+restore_old_output() {
+    if [[ ! -e "$OUT_ABS" && -e "$OUT_ABS.old" ]]; then
+        mv "$OUT_ABS.old" "$OUT_ABS"
+        echo "regen-fixtures: restored the previous $OUT" >&2
+    fi
+}
 rm -rf "$OUT_ABS.old"
+trap restore_old_output EXIT
 [[ ! -e "$OUT_ABS" ]] || mv "$OUT_ABS" "$OUT_ABS.old"
 mv "$STAGING/run1" "$OUT_ABS"
+trap - EXIT
 rm -rf "$OUT_ABS.old"
 [[ "$CHECK_STABLE" -eq 1 ]] || rm -rf "$STAGING"
 log "fixtures written to $OUT (total $(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["total_bytes"])' "$OUT_ABS/MANIFEST.json") bytes) in $((SECONDS - t0))s"
-
-if [[ "$OUT_ABS" == "$REPO_ROOT/fixtures/zephyr" ]]; then
-    cargo test -q -p rollcall-core --test fixtures --locked
-else
-    log "output is not fixtures/zephyr; skipping cargo test -p rollcall-core --test fixtures"
-fi
 git status --short -- "$OUT"

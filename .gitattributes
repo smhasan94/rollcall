@@ -2,15 +2,9 @@
 *.json text eol=lf
 
 # Zephyr build fixtures (scripts/regen-fixtures.sh, docs/fixtures.md). MANIFEST.json records
-# the SHA-256 of every file, so checkout must not change any bytes.
-fixtures/zephyr/** linguist-generated=true
+# the SHA-256 of every file, so checkout must never change a byte: no end-of-line conversion
+# for anything under fixtures/zephyr (this overrides the *.json rule above, so it comes after
+# it). objcopy writes the MCUboot zephyr.hex with CRLF line endings; everything else is LF.
+fixtures/zephyr/** -text linguist-generated=true
 *.elf binary
-fixtures/zephyr/**/.config text eol=lf
-fixtures/zephyr/**/*.yml text eol=lf
-fixtures/zephyr/**/*.yaml text eol=lf
-fixtures/zephyr/**/*.meta text eol=lf
-fixtures/zephyr/**/*.spdx text eol=lf
-fixtures/zephyr/**/*.txt text eol=lf
-fixtures/zephyr/**/*.map text eol=lf -diff
-# objcopy writes Intel HEX with CRLF line endings; keep them exactly as built.
-fixtures/zephyr/**/*.hex -text
+fixtures/zephyr/**/*.map -diff
