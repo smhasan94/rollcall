@@ -7,13 +7,15 @@ crypto-inventory module ships as `rollcall assay` and emits a CycloneDX 1.6 CBOM
 
 ## Status
 
-Early development. `rollcall generate` renders a rollcall model (the internal
-`rollcall-model/1` JSON form) as a CycloneDX 1.6 JSON SBOM, and `rollcall validate --schema`
-checks a document against the official CycloneDX 1.6 JSON schema. Ingesting real build
-metadata (`west spdx`, `west list`, Kconfig, MCUboot) is not implemented yet, and neither are
-`merge`, `vex`, `scan` and `assay`, which print `not implemented` and exit 64. The 0.0.1
-releases of `rollcall`, `rollcall-core`, `rollcall-cli` and `rollcall-assay` on crates.io and
-`rollcall` on PyPI are placeholders that reserve the names.
+Early development. `rollcall generate --zephyr <build-dir>` ingests a Zephyr image build
+directory (`west spdx` documents, `west list` output, Kconfig `.config`, `build_info.yml`) and
+writes a CycloneDX 1.6 JSON SBOM; `rollcall generate --model` renders a rollcall model (the
+internal `rollcall-model/1` JSON form) the same way; and `rollcall validate --schema` checks a
+document against the official CycloneDX 1.6 JSON schema. Merging the MCUboot bootloader into
+the same product is not implemented yet, and neither are `merge`, `vex`, `scan` and `assay`,
+which print `not implemented` and exit 64. The 0.0.1 releases of `rollcall`, `rollcall-core`,
+`rollcall-cli` and `rollcall-assay` on crates.io and `rollcall` on PyPI are placeholders that
+reserve the names.
 
 ## Workspace layout
 
@@ -40,7 +42,11 @@ releases of `rollcall`, `rollcall-core`, `rollcall-cli` and `rollcall-assay` on 
 ## Usage
 
 ```sh
-# Render a model as CycloneDX 1.6 JSON (stdout, or -o FILE).
+# Generate an SBOM from a Zephyr image build directory (stdout, or -o FILE).
+west list -f "{name} {path} {revision} {url}" > west-list.txt
+rollcall generate --zephyr build/app --west-list west-list.txt --include-sdk -o app.cdx.json
+
+# Render a model as CycloneDX 1.6 JSON.
 rollcall generate --model product.model.json -o product.cdx.json
 
 # Pin the timestamp (RFC 3339, normalised to UTC) and/or the serial number for
@@ -58,8 +64,41 @@ always produce byte-identical output; changing only `--timestamp` changes only t
 `timestamp` line. How each model field maps to CycloneDX is documented in the
 `rollcall_core::cyclonedx` module docs (`cargo doc -p rollcall-core --open`).
 
+Exactly one of `--model` and `--zephyr` is required; `--west-list` and `--include-sdk` only
+go with `--zephyr`.
+
 `validate` prints `<file>: valid CycloneDX 1.6` on success, or `<file>: <n> schema
 violation(s)` followed by one `  <JSON pointer>: <message>` line per violation, sorted.
+
+### Zephyr ingestion
+
+Pass the *image* build directory, the one holding `build_info.yml` and `spdx/` (with
+sysbuild that is `build/<app>/`, not `build/`; the top-level directory is refused with a
+message naming the image directory to use). Run `west spdx --init -d <build>` before the
+build and `west spdx -d <build>` after it to create `spdx/`.
+
+- Required: `build_info.yml` and `spdx/zephyr.spdx`.
+- Optional, each with a `rollcall generate: warning: …` line on stderr when missing (the
+  exit code stays 0): `spdx/app.spdx`, `spdx/build.spdx`, `spdx/modules-deps.spdx`,
+  `zephyr/.config`, and the `--west-list` file. A `--west-list` file that is named but
+  missing is an error.
+- The application is the product and its one `application` image. Zephyr is an
+  `operating-system` component versioned by its release (e.g. `4.4.2`), with the commit it
+  was built from recorded as `pkg:github/zephyrproject-rtos/zephyr@<sha>` purl evidence.
+- Every west module appears exactly once as a `library` component whose version is the git
+  revision it was built at (from `west list`, else from `zephyr.spdx`), with the upstream
+  purl, cpe and supplier from `modules-deps.spdx` when the module declares them, and a purl
+  pinned to the revision otherwise.
+- `spdx/zephyr.spdx` decides which modules exist. A `west list` row for Zephyr itself (as in a
+  T2 workspace, where the application is the manifest repository) becomes evidence on the
+  Zephyr component; any other row that is not a module of the build is ignored with a warning.
+- `--include-sdk` adds the toolchain as an `application` component (`zephyr-sdk`, versioned
+  `major.minor` from `CONFIG_TOOLCHAIN_ZEPHYR_<M>_<N>`).
+- `west list` output comes from `west list -f "{name} {path} {revision} {url}"` run in the
+  west workspace.
+
+Every fact carries evidence naming the file and line it came from. The full mapping is in the
+`rollcall_core::zephyr` module docs.
 
 ### Known scanner behaviour
 
@@ -75,8 +114,8 @@ such as Zephyr is typed is decided at ingestion. osv-scanner is unaffected.
 | 0    | Success (including `--help`, `--version`)                                |
 | 1    | `validate`: the document has schema violations                           |
 | 64   | Usage error (bad arguments, bad `--timestamp` or `--serial-number`), or subcommand/format not implemented |
-| 65   | Input is malformed: not JSON, not UTF-8, too deeply nested, or an invalid model |
-| 66   | Input file missing or unreadable (including a directory)                 |
+| 65   | Input is malformed: not JSON, not UTF-8, too deeply nested, or an invalid model; or a Zephyr input (SPDX, `west list`, `.config`, `build_info.yml`) is malformed, or `--zephyr` names a sysbuild top-level directory |
+| 66   | Input file missing or unreadable (including a directory), including a required Zephyr input or the `--west-list` file |
 | 74   | Output cannot be written                                                 |
 
 ## CycloneDX schema
@@ -94,7 +133,8 @@ run `scripts/vendor-cyclonedx-schema.sh`, which refuses any file whose SHA-256 d
 cargo build && cargo test
 ```
 
-Golden files (`crates/rollcall-core/tests/golden/`) are never edited by hand. Regenerate all of
+Golden files (`crates/rollcall-core/tests/golden/`, including the Zephyr ingestion goldens in
+`golden/zephyr/`) are never edited by hand. Regenerate all of
 them, and re-run the tests that compare against them, with one command:
 
 ```sh

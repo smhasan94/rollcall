@@ -72,3 +72,62 @@ fn cyclonedx_docs_have_mapping_section() {
         assert!(mapping.contains(term), "Mapping section lacks {term:?}");
     }
 }
+
+const ZEPHYR_DOCS: &str = include_str!("../src/zephyr/mod.rs");
+
+#[test]
+fn zephyr_docs_have_mapping_and_warnings_sections() {
+    for heading in [
+        "//! # Inputs",
+        "//! # Mapping",
+        "//! # Warnings",
+        "//! # Determinism",
+    ] {
+        assert!(
+            ZEPHYR_DOCS.lines().any(|l| l.trim_end() == heading),
+            "missing section {heading:?} in zephyr/mod.rs"
+        );
+    }
+    let section = |name: &str| -> String {
+        ZEPHYR_DOCS
+            .lines()
+            .skip_while(|l| l.trim_end() != format!("//! # {name}"))
+            .skip(1)
+            .take_while(|l| !l.starts_with("//! # "))
+            .collect::<Vec<_>>()
+            .join("\n")
+    };
+    let inputs = section("Inputs");
+    for term in [
+        "build_info.yml",
+        "spdx/zephyr.spdx",
+        "spdx/app.spdx",
+        "spdx/build.spdx",
+        "spdx/modules-deps.spdx",
+        "zephyr/.config",
+        "--west-list",
+    ] {
+        assert!(inputs.contains(term), "Inputs section lacks {term:?}");
+    }
+    let mapping = section("Mapping");
+    for term in [
+        "operating-system",
+        "library",
+        "application",
+        "revision",
+        "purl",
+        "cpe",
+        "--include-sdk",
+        "dependencies",
+        "west-spdx",
+        "west-list",
+        "kconfig",
+        "build-info",
+    ] {
+        assert!(mapping.contains(term), "Mapping section lacks {term:?}");
+    }
+    let warnings = section("Warnings");
+    for term in ["Warning", "order", "ZephyrError"] {
+        assert!(warnings.contains(term), "Warnings section lacks {term:?}");
+    }
+}

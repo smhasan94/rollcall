@@ -281,6 +281,11 @@ tree, or the tree named by `ROLLCALL_FIXTURES_DIR`:
   `bash` or `python3` is missing);
 - this document has its sections.
 
+`crates/rollcall-core/tests/zephyr.rs` ingests every image build (`<variant>/<app>` and
+`<variant>/mcuboot`) through `rollcall_core::zephyr`, checks the result is schema-valid
+CycloneDX 1.6, and compares the module set and revisions against each variant's
+`west-list.txt`.
+
 ## Bumping the pin
 
 1. Change `ZEPHYR_TAG` and `ZEPHYR_COMMIT` (check with

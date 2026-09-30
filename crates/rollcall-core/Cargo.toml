@@ -20,6 +20,7 @@ packageurl.workspace = true
 thiserror.workspace = true
 jsonschema.workspace = true
 time.workspace = true
+yaml_serde.workspace = true
 
 [dev-dependencies]
 proptest.workspace = true

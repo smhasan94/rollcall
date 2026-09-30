@@ -2,7 +2,7 @@
 //!
 //! See [`model`] for the product → image → component model, evidence, confidence and
 //! deterministic `bom-ref` derivation, and [`cyclonedx`] for CycloneDX 1.6 output and schema
-//! validation.
+//! validation. [`zephyr`] ingests a Zephyr image build directory into the model.
 
 #![deny(missing_docs)]
 #![deny(
@@ -23,6 +23,7 @@
 
 pub mod cyclonedx;
 pub mod model;
+pub mod zephyr;
 
 pub use cyclonedx::{
     SchemaViolation, SerialNumber, Timestamp, WriteError, WriteOptions, validate_cyclonedx_1_6,
@@ -33,3 +34,5 @@ pub use model::{
     HashAlgorithm, IdError, Image, ImageKind, License, MergeError, ModelError, NodeLevel, NodePath,
     NodeRef, Occurrence, PathSegment, Product, Purl, Schema, Supplier, Technique, ValidationError,
 };
+
+pub use zephyr::{Ingest, IngestOptions, Warning, ZephyrError};
