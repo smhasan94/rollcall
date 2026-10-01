@@ -4,10 +4,10 @@ SPDXID: SPDXRef-DOCUMENT
 DocumentName: build
 DocumentNamespace: http://spdx.org/spdxdocs/rollcall-smp-serial-smp_svr/build
 Creator: Tool: Zephyr SPDX builder
-Created: 2026-10-01T22:17:15Z
+Created: 2026-10-01T22:29:51Z
 
-ExternalDocumentRef: DocumentRef-app http://spdx.org/spdxdocs/rollcall-smp-serial-smp_svr/app SHA1: e8bcacc2eb4ea3b93a9900706939bb1c6a000cde
-ExternalDocumentRef: DocumentRef-zephyr http://spdx.org/spdxdocs/rollcall-smp-serial-smp_svr/zephyr SHA1: 3b7b2f904067ae8d764aa3dd70cedc79c51cf2d0
+ExternalDocumentRef: DocumentRef-app http://spdx.org/spdxdocs/rollcall-smp-serial-smp_svr/app SHA1: 5b61e727bfe7329be2246a202ea1c64198bae576
+ExternalDocumentRef: DocumentRef-zephyr http://spdx.org/spdxdocs/rollcall-smp-serial-smp_svr/zephyr SHA1: 01b92242ae40441524d445ad63f82239302ca7fb
 
 Relationship: SPDXRef-DOCUMENT DESCRIBES SPDXRef-zephyr-final
 
@@ -22,7 +22,7 @@ PrimaryPackagePurpose: LIBRARY
 PackageDownloadLocation: NOASSERTION
 PackageLicenseInfoFromFiles: NOASSERTION
 FilesAnalyzed: true
-PackageVerificationCode: f4f8e6458fd3850dc883497b15551913a831108f
+PackageVerificationCode: 87f1aedc06cde4e0a2828f21149255bde060d124
 
 Relationship: SPDXRef-app HAS_PREREQUISITE SPDXRef-version-h
 Relationship: SPDXRef-app HAS_PREREQUISITE SPDXRef-syscall-list-h-target
@@ -34,8 +34,8 @@ Relationship: SPDXRef-app HAS_PREREQUISITE SPDXRef-heap-constants-h
 
 FileName: ./app/libapp.a
 SPDXID: SPDXRef-File-libapp.a
-FileChecksum: SHA1: 27bd93dda44ad3e9e60e812155bb26ed77a80300
-FileChecksum: SHA256: ebfd2a8ea93614db1809e43338861a3189e3dd1631cec04e53119a50fd971ebe
+FileChecksum: SHA1: c7cbe0d418573cf540f1ef6534e7bffe992bdbda
+FileChecksum: SHA256: c2088195381ea5bd3ea65d9159ab4d726a01c57af927b1523174b4430e81fe6d
 LicenseConcluded: NOASSERTION
 LicenseInfoInFile: NONE
 FileCopyrightText: NOASSERTION
@@ -69,7 +69,7 @@ PrimaryPackagePurpose: LIBRARY
 PackageDownloadLocation: NOASSERTION
 PackageLicenseInfoFromFiles: NOASSERTION
 FilesAnalyzed: true
-PackageVerificationCode: cffd8f6a77c56c543bf66ccdd3315725c57b3d75
+PackageVerificationCode: e4bd80556ea244d940811520a721b0310bf05f25
 
 Relationship: SPDXRef-arch--arm--core HAS_PREREQUISITE SPDXRef-version-h
 Relationship: SPDXRef-arch--arm--core HAS_PREREQUISITE SPDXRef-syscall-list-h-target
@@ -81,8 +81,8 @@ Relationship: SPDXRef-arch--arm--core HAS_PREREQUISITE SPDXRef-heap-constants-h
 
 FileName: ./zephyr/arch/arch/arm/core/libarch__arm__core.a
 SPDXID: SPDXRef-File-libarch--arm--core.a
-FileChecksum: SHA1: c2014bfde90d5078afcb66651965e6550d4f27b3
-FileChecksum: SHA256: 19914447f5161fa85df3b01902af5c89fc651d4e38cfbe1eb921cd4a5d0d6b7d
+FileChecksum: SHA1: a789e3f5132ed1ee34e571fe9b9ae848c5c633a2
+FileChecksum: SHA256: fb3d162800fdaabaae4f6697f1510bd5533a5be705e0995b21891007b80304c4
 LicenseConcluded: NOASSERTION
 LicenseInfoInFile: NONE
 FileCopyrightText: NOASSERTION
@@ -103,7 +103,7 @@ PrimaryPackagePurpose: LIBRARY
 PackageDownloadLocation: NOASSERTION
 PackageLicenseInfoFromFiles: NOASSERTION
 FilesAnalyzed: true
-PackageVerificationCode: 7d29a53b8a829eff184e2d6900eb53fc7fb6cee7
+PackageVerificationCode: ef2c3c14ab164c3765c7ad8c524c5a1acfa732be
 
 Relationship: SPDXRef-arch--arm--core--cortex-m HAS_PREREQUISITE SPDXRef-version-h
 Relationship: SPDXRef-arch--arm--core--cortex-m HAS_PREREQUISITE SPDXRef-syscall-list-h-target
@@ -115,8 +115,8 @@ Relationship: SPDXRef-arch--arm--core--cortex-m HAS_PREREQUISITE SPDXRef-heap-co
 
 FileName: ./zephyr/arch/arch/arm/core/cortex_m/libarch__arm__core__cortex_m.a
 SPDXID: SPDXRef-File-libarch--arm--core--cortex-m.a
-FileChecksum: SHA1: 5d44a148f42f2ee67bf034d89e18fa828b6214f2
-FileChecksum: SHA256: fe2f460c9d67af5007424f8298f4c9b846581f462d1ac4dd0d6af47a364cf001
+FileChecksum: SHA1: f8579fcfc720f4a11a1dfa5a998fbdd70672683b
+FileChecksum: SHA256: 4a2ebc52246b5d5e80477ec6db80cc1a08adbea75f81b93c5f1a2a23d0dfb6f1
 LicenseConcluded: NOASSERTION
 LicenseInfoInFile: NONE
 FileCopyrightText: NOASSERTION
@@ -150,7 +150,7 @@ PrimaryPackagePurpose: LIBRARY
 PackageDownloadLocation: NOASSERTION
 PackageLicenseInfoFromFiles: NOASSERTION
 FilesAnalyzed: true
-PackageVerificationCode: 6cd05d180bf1f407041ff2def32bcdee6acf3ac7
+PackageVerificationCode: bf907cc9b9505fa98a7263e5860f5e85a6a6de8f
 
 Relationship: SPDXRef-arch--arm--core--mpu HAS_PREREQUISITE SPDXRef-version-h
 Relationship: SPDXRef-arch--arm--core--mpu HAS_PREREQUISITE SPDXRef-syscall-list-h-target
@@ -162,8 +162,8 @@ Relationship: SPDXRef-arch--arm--core--mpu HAS_PREREQUISITE SPDXRef-heap-constan
 
 FileName: ./zephyr/arch/arch/arm/core/mpu/libarch__arm__core__mpu.a
 SPDXID: SPDXRef-File-libarch--arm--core--mpu.a
-FileChecksum: SHA1: 3e1b369e49e1fa3ad1e48e02a0ec442a88da57a4
-FileChecksum: SHA256: 2c65f550b0e4e903f640f6e8e393ae96fb44531fdb7140c37ea707a294e68f22
+FileChecksum: SHA1: 5b4e4078474b7aadfe2d4ff0c9aae77c4e247019
+FileChecksum: SHA256: 710b26ce7179bca0d04f75bda8f4b8e0177f1aa85b4aa889bba21ee4bb1123fc
 LicenseConcluded: NOASSERTION
 LicenseInfoInFile: NONE
 FileCopyrightText: NOASSERTION
@@ -183,7 +183,7 @@ PrimaryPackagePurpose: LIBRARY
 PackageDownloadLocation: NOASSERTION
 PackageLicenseInfoFromFiles: NOASSERTION
 FilesAnalyzed: true
-PackageVerificationCode: f3a8f60c32fbca93df977f34190957940f5c33ff
+PackageVerificationCode: 8562bb5e4f14d27507d196061d11b29c130502d5
 
 Relationship: SPDXRef-arch--common HAS_PREREQUISITE SPDXRef-version-h
 Relationship: SPDXRef-arch--common HAS_PREREQUISITE SPDXRef-syscall-list-h-target
@@ -196,8 +196,8 @@ Relationship: SPDXRef-arch--common HAS_PREREQUISITE SPDXRef-heap-constants-h
 
 FileName: ./zephyr/arch/common/libarch__common.a
 SPDXID: SPDXRef-File-libarch--common.a
-FileChecksum: SHA1: c3ebb5baa85ab024639653c339a9ea494b01c211
-FileChecksum: SHA256: 399544bb36d5ebc2d12d90b109fef178a5248b3ffd91bf3a2c4545d06e93d4b8
+FileChecksum: SHA1: fe1a5a864afed3cea0243cda900b3ad6c695e275
+FileChecksum: SHA256: 132cb433e9b0927d173f1f91374c600456264be3290897581169bf8163e1034c
 LicenseConcluded: NOASSERTION
 LicenseInfoInFile: NONE
 FileCopyrightText: NOASSERTION
@@ -385,7 +385,7 @@ PrimaryPackagePurpose: LIBRARY
 PackageDownloadLocation: NOASSERTION
 PackageLicenseInfoFromFiles: NOASSERTION
 FilesAnalyzed: true
-PackageVerificationCode: b06c0f1789dfe8f0f336c330609c82692b92907b
+PackageVerificationCode: ddf08763c23f3bcf68b92a723c7baeaed409d0a0
 
 Relationship: SPDXRef-drivers--clock-control HAS_PREREQUISITE SPDXRef-version-h
 Relationship: SPDXRef-drivers--clock-control HAS_PREREQUISITE SPDXRef-syscall-list-h-target
@@ -397,8 +397,8 @@ Relationship: SPDXRef-drivers--clock-control HAS_PREREQUISITE SPDXRef-heap-const
 
 FileName: ./zephyr/drivers/clock_control/libdrivers__clock_control.a
 SPDXID: SPDXRef-File-libdrivers--clock-control.a
-FileChecksum: SHA1: 3580a6a39f9839ff5488aa47d7c2ea428b2233bb
-FileChecksum: SHA256: 6ac20d2c3eeb4cae54c37fa3f0e73fc495086ef036d2e0145d21139236ae5c6d
+FileChecksum: SHA1: e698350f918b826ffb80f9211fefe04c64f620d5
+FileChecksum: SHA256: 0c8d1591d02f9b2ed3f6612af000f914dadfae91ae1de1b766e932e13a1f734b
 LicenseConcluded: NOASSERTION
 LicenseInfoInFile: NONE
 FileCopyrightText: NOASSERTION
@@ -416,7 +416,7 @@ PrimaryPackagePurpose: LIBRARY
 PackageDownloadLocation: NOASSERTION
 PackageLicenseInfoFromFiles: NOASSERTION
 FilesAnalyzed: true
-PackageVerificationCode: 8dcf658c0b1171c665b6fec0fd41f65d52a44418
+PackageVerificationCode: 70e06ad6d6425ce4232e6788e24f49adf0b340f3
 
 Relationship: SPDXRef-drivers--console HAS_PREREQUISITE SPDXRef-version-h
 Relationship: SPDXRef-drivers--console HAS_PREREQUISITE SPDXRef-syscall-list-h-target
@@ -428,8 +428,8 @@ Relationship: SPDXRef-drivers--console HAS_PREREQUISITE SPDXRef-heap-constants-h
 
 FileName: ./zephyr/drivers/console/libdrivers__console.a
 SPDXID: SPDXRef-File-libdrivers--console.a
-FileChecksum: SHA1: df5e0b52315bd1a5d8c8d22599ab9d2141cccb80
-FileChecksum: SHA256: 3f119c514759e86d07dadb71d19dd68eef9693ce610e6d8296439b39c8e4c083
+FileChecksum: SHA1: fb81cb75e36f3b46f529ccdd0f8040a4884d692a
+FileChecksum: SHA256: 77f5bfaf0de70be04f44fff606d9ec77be0420dfab9b9aa639268afa8242de42
 LicenseConcluded: NOASSERTION
 LicenseInfoInFile: NONE
 FileCopyrightText: NOASSERTION
@@ -448,7 +448,7 @@ PrimaryPackagePurpose: LIBRARY
 PackageDownloadLocation: NOASSERTION
 PackageLicenseInfoFromFiles: NOASSERTION
 FilesAnalyzed: true
-PackageVerificationCode: 890577748d3ac8dd5491617d6f6c3699980b9eed
+PackageVerificationCode: 860dd45e72dfda14850ae7dd118fce0dfe2226ab
 
 Relationship: SPDXRef-drivers--flash HAS_PREREQUISITE SPDXRef-version-h
 Relationship: SPDXRef-drivers--flash HAS_PREREQUISITE SPDXRef-syscall-list-h-target
@@ -460,8 +460,8 @@ Relationship: SPDXRef-drivers--flash HAS_PREREQUISITE SPDXRef-heap-constants-h
 
 FileName: ./zephyr/drivers/flash/libdrivers__flash.a
 SPDXID: SPDXRef-File-libdrivers--flash.a
-FileChecksum: SHA1: 6d2238d8d03d69a0d38dd959422794bb66df447b
-FileChecksum: SHA256: b0d0cffd146954d6fbd196570402b622ec400b44619411ff0844dbf996f6e368
+FileChecksum: SHA1: 5b088f5250da3054c5a8229a876e357e1d1f7178
+FileChecksum: SHA256: 16dd3b3d631f2931815285483d684cae27476fe2d3dfc6ba6b3a6b8d283ae12c
 LicenseConcluded: NOASSERTION
 LicenseInfoInFile: NONE
 FileCopyrightText: NOASSERTION
@@ -482,7 +482,7 @@ PrimaryPackagePurpose: LIBRARY
 PackageDownloadLocation: NOASSERTION
 PackageLicenseInfoFromFiles: NOASSERTION
 FilesAnalyzed: true
-PackageVerificationCode: 8628a496212fa9c817f8d860adedcbdbe39547df
+PackageVerificationCode: 0eaa365c69c2819654815479c21059f60890587a
 
 Relationship: SPDXRef-drivers--gpio HAS_PREREQUISITE SPDXRef-version-h
 Relationship: SPDXRef-drivers--gpio HAS_PREREQUISITE SPDXRef-syscall-list-h-target
@@ -494,8 +494,8 @@ Relationship: SPDXRef-drivers--gpio HAS_PREREQUISITE SPDXRef-heap-constants-h
 
 FileName: ./zephyr/drivers/gpio/libdrivers__gpio.a
 SPDXID: SPDXRef-File-libdrivers--gpio.a
-FileChecksum: SHA1: e5f80b9ffccbd61b2ee121cc8938fb08c702b1ac
-FileChecksum: SHA256: 1ce325696c22a9756ad6acccc3dad575437283e83760e32a919ec1bcee4240f4
+FileChecksum: SHA1: 5a0b3cfc8c728c25de260cc29e3b4c609a2e3558
+FileChecksum: SHA256: 89a22e16b8da9c3b511ee261f87342da109dbce06096c8dcaab04f1931b72673
 LicenseConcluded: NOASSERTION
 LicenseInfoInFile: NONE
 FileCopyrightText: NOASSERTION
@@ -530,7 +530,7 @@ PrimaryPackagePurpose: LIBRARY
 PackageDownloadLocation: NOASSERTION
 PackageLicenseInfoFromFiles: NOASSERTION
 FilesAnalyzed: true
-PackageVerificationCode: 381879b6e598b8ac7c66ab6cc8d51f6633d95e33
+PackageVerificationCode: 426ed0c7444f2820ebf3c92d32c8c393bb871783
 
 Relationship: SPDXRef-drivers--pinctrl HAS_PREREQUISITE SPDXRef-version-h
 Relationship: SPDXRef-drivers--pinctrl HAS_PREREQUISITE SPDXRef-syscall-list-h-target
@@ -542,8 +542,8 @@ Relationship: SPDXRef-drivers--pinctrl HAS_PREREQUISITE SPDXRef-heap-constants-h
 
 FileName: ./zephyr/drivers/pinctrl/libdrivers__pinctrl.a
 SPDXID: SPDXRef-File-libdrivers--pinctrl.a
-FileChecksum: SHA1: 0ea97e9c1dec53ff549fc6ac39598ad96fefee34
-FileChecksum: SHA256: 3944dd11815b8e2bce0534ad5a6c29c3898b17be658c3413dae339608595bd97
+FileChecksum: SHA1: e0bd003e70d4d8b0680b1066300c0c247b51286b
+FileChecksum: SHA256: aca46633719702d6e4645bf8320b9b46db2fbb8877e87334d9cf6f3210eef8d2
 LicenseConcluded: NOASSERTION
 LicenseInfoInFile: NONE
 FileCopyrightText: NOASSERTION
@@ -562,7 +562,7 @@ PrimaryPackagePurpose: LIBRARY
 PackageDownloadLocation: NOASSERTION
 PackageLicenseInfoFromFiles: NOASSERTION
 FilesAnalyzed: true
-PackageVerificationCode: 081565bd988ba3eb5662eaf9f6ef3a2e8f8bc03b
+PackageVerificationCode: 616b5bd69a7a432b3fbae89047ec9fea0d0ba724
 
 Relationship: SPDXRef-drivers--serial HAS_PREREQUISITE SPDXRef-version-h
 Relationship: SPDXRef-drivers--serial HAS_PREREQUISITE SPDXRef-syscall-list-h-target
@@ -574,8 +574,8 @@ Relationship: SPDXRef-drivers--serial HAS_PREREQUISITE SPDXRef-heap-constants-h
 
 FileName: ./zephyr/drivers/serial/libdrivers__serial.a
 SPDXID: SPDXRef-File-libdrivers--serial.a
-FileChecksum: SHA1: ba5c8d51fbff2993a00777c1e1a5f08a3f954a4d
-FileChecksum: SHA256: 9d91ee6e06bf9802a1b5164472375e726ae626f11dcf15c6065952dc7be4eabe
+FileChecksum: SHA1: 778aa44f8add85d20dcc529a47a6d3b9b12b98e0
+FileChecksum: SHA256: 8d8076c6b870cc30c906d52ab7aefafc5a9b0971662c621dafcc094dc8f2e156
 LicenseConcluded: NOASSERTION
 LicenseInfoInFile: NONE
 FileCopyrightText: NOASSERTION
@@ -593,7 +593,7 @@ PrimaryPackagePurpose: LIBRARY
 PackageDownloadLocation: NOASSERTION
 PackageLicenseInfoFromFiles: NOASSERTION
 FilesAnalyzed: true
-PackageVerificationCode: 4717a068d3afdc302e6d5f70ef8a1960f22b11e7
+PackageVerificationCode: 2a59e383e115947c24a4f59ead345183247e0bb0
 
 Relationship: SPDXRef-drivers--timer HAS_PREREQUISITE SPDXRef-version-h
 Relationship: SPDXRef-drivers--timer HAS_PREREQUISITE SPDXRef-syscall-list-h-target
@@ -605,8 +605,8 @@ Relationship: SPDXRef-drivers--timer HAS_PREREQUISITE SPDXRef-heap-constants-h
 
 FileName: ./zephyr/drivers/timer/libdrivers__timer.a
 SPDXID: SPDXRef-File-libdrivers--timer.a
-FileChecksum: SHA1: ecfb4a81683b7141f63f842118952e6aafd2bb1c
-FileChecksum: SHA256: b6ddda822b23c6c5157d09e9c8d6a9691d4d8c40dc10ef9c3bb643affc1eafab
+FileChecksum: SHA1: 1cc2e885c52af67c750ac397f7744ea6a6f95999
+FileChecksum: SHA256: 937dfe489d5e952c14e64725d313e5982d50019dc876b4a60febb0e6875fc049
 LicenseConcluded: NOASSERTION
 LicenseInfoInFile: NONE
 FileCopyrightText: NOASSERTION
@@ -672,7 +672,7 @@ PrimaryPackagePurpose: LIBRARY
 PackageDownloadLocation: NOASSERTION
 PackageLicenseInfoFromFiles: NOASSERTION
 FilesAnalyzed: true
-PackageVerificationCode: 17822b6cebd27ff6eaccb9d4edc3809959ab9cd0
+PackageVerificationCode: 1b21d6d2bbb1176710b69416b410b966a6accc68
 
 Relationship: SPDXRef-heap-constants HAS_PREREQUISITE SPDXRef-syscall-list-h-target
 Relationship: SPDXRef-heap-constants HAS_PREREQUISITE SPDXRef-driver-validation-h-target
@@ -681,8 +681,8 @@ Relationship: SPDXRef-heap-constants HAS_PREREQUISITE SPDXRef-device-api-ld-targ
 
 FileName: ./zephyr/lib/heap/CMakeFiles/heap_constants.dir/heap_constants.c.obj
 SPDXID: SPDXRef-File-
-FileChecksum: SHA1: 39d9d6add00c38af3b17f429dd9ed1ec5e5f6fc6
-FileChecksum: SHA256: e699ff4bc716605d22e3aeb93e3ca5242da220cfa2cd39d2f53beb9ff492c04d
+FileChecksum: SHA1: bab937a355f4ffc50df86f8193d5cd160c4c923a
+FileChecksum: SHA256: 77a8397e84c282906d2299e25befc386176cbfcd8662f21cf6d23849efa380a0
 LicenseConcluded: NOASSERTION
 LicenseInfoInFile: NONE
 FileCopyrightText: NOASSERTION
@@ -726,7 +726,7 @@ PrimaryPackagePurpose: LIBRARY
 PackageDownloadLocation: NOASSERTION
 PackageLicenseInfoFromFiles: NOASSERTION
 FilesAnalyzed: true
-PackageVerificationCode: 784169b259dbfe3bf56055cf0d7ae04a644a069d
+PackageVerificationCode: baa2384b5782612fbe4dc71545117adfaa624e53
 
 Relationship: SPDXRef-isr-tables HAS_PREREQUISITE SPDXRef-version-h
 Relationship: SPDXRef-isr-tables HAS_PREREQUISITE SPDXRef-syscall-list-h-target
@@ -738,8 +738,8 @@ Relationship: SPDXRef-isr-tables HAS_PREREQUISITE SPDXRef-heap-constants-h
 
 FileName: ./zephyr/arch/common/libisr_tables.a
 SPDXID: SPDXRef-File-libisr-tables.a
-FileChecksum: SHA1: 9a1deda2281526d0074c2111eb43f949567e825e
-FileChecksum: SHA256: 892075746f1929259c33a24bd3d6aa8eec744b562fa4e728079be24c6fbb5150
+FileChecksum: SHA1: f3064fa6f8a76d4ac6650bfe086b8605a129f3fb
+FileChecksum: SHA256: 9079c656c5776763f3a552bce9effbe6abd9fa063629dbf6d9d65f165421bde4
 LicenseConcluded: NOASSERTION
 LicenseInfoInFile: NONE
 FileCopyrightText: NOASSERTION
@@ -757,7 +757,7 @@ PrimaryPackagePurpose: LIBRARY
 PackageDownloadLocation: NOASSERTION
 PackageLicenseInfoFromFiles: NOASSERTION
 FilesAnalyzed: true
-PackageVerificationCode: 4a0cd00e9487fd9a8c6341a997d951397cb5a4e8
+PackageVerificationCode: fcea5b7df28cc359395e061ac4c1eb809ca5a6bc
 
 Relationship: SPDXRef-kernel HAS_PREREQUISITE SPDXRef-version-h
 Relationship: SPDXRef-kernel HAS_PREREQUISITE SPDXRef-syscall-list-h-target
@@ -769,8 +769,8 @@ Relationship: SPDXRef-kernel HAS_PREREQUISITE SPDXRef-heap-constants-h
 
 FileName: ./zephyr/kernel/libkernel.a
 SPDXID: SPDXRef-File-libkernel.a
-FileChecksum: SHA1: 84748f27393c7d549cc5f734b32f789e9e2ad3ce
-FileChecksum: SHA256: 99205fa74497546d61c05c59909d43fbe07d49a82be582c830d966c3466e29e8
+FileChecksum: SHA1: b16c3570e374f0395966d5e8a54d9d8e55b3f1ec
+FileChecksum: SHA256: 159aa9ecb13add020be3676ef9777b2db90c9f18e19d7b685c9e2b19609bd237
 LicenseConcluded: NOASSERTION
 LicenseInfoInFile: NONE
 FileCopyrightText: NOASSERTION
@@ -828,7 +828,7 @@ PrimaryPackagePurpose: LIBRARY
 PackageDownloadLocation: NOASSERTION
 PackageLicenseInfoFromFiles: NOASSERTION
 FilesAnalyzed: true
-PackageVerificationCode: cec101f3476f1bde1699f5172ae10a21f42c5a99
+PackageVerificationCode: d2d94d0df061b5b876a1afec6a33f180aec8e3f6
 
 Relationship: SPDXRef-lib--libc--common HAS_PREREQUISITE SPDXRef-version-h
 Relationship: SPDXRef-lib--libc--common HAS_PREREQUISITE SPDXRef-syscall-list-h-target
@@ -840,8 +840,8 @@ Relationship: SPDXRef-lib--libc--common HAS_PREREQUISITE SPDXRef-heap-constants-
 
 FileName: ./zephyr/lib/libc/common/liblib__libc__common.a
 SPDXID: SPDXRef-File-liblib--libc--common.a
-FileChecksum: SHA1: a2fd32d9a31215b050b2fa412e0eb79b0de95be3
-FileChecksum: SHA256: 77ce4a695b0fcff86de9497621896ef6cb84c62ab1e58868810b65c4b396f363
+FileChecksum: SHA1: cfef3fad02d9dc4282087e1d99b31c9a35e97a65
+FileChecksum: SHA256: e85a81cbcc42c11c448c1f659a4b8a19ba18bccc3554f3b63362241df04f0d0a
 LicenseConcluded: NOASSERTION
 LicenseInfoInFile: NONE
 FileCopyrightText: NOASSERTION
@@ -861,7 +861,7 @@ PrimaryPackagePurpose: LIBRARY
 PackageDownloadLocation: NOASSERTION
 PackageLicenseInfoFromFiles: NOASSERTION
 FilesAnalyzed: true
-PackageVerificationCode: 355deee3373732273bf36119aaa8036305a0c050
+PackageVerificationCode: 6f2609ab85b31a33977e152be03968a6fea6d961
 
 Relationship: SPDXRef-lib--libc--picolibc HAS_PREREQUISITE SPDXRef-version-h
 Relationship: SPDXRef-lib--libc--picolibc HAS_PREREQUISITE SPDXRef-syscall-list-h-target
@@ -873,8 +873,8 @@ Relationship: SPDXRef-lib--libc--picolibc HAS_PREREQUISITE SPDXRef-heap-constant
 
 FileName: ./zephyr/lib/libc/picolibc/liblib__libc__picolibc.a
 SPDXID: SPDXRef-File-liblib--libc--picolibc.a
-FileChecksum: SHA1: 6430a219bf4fbdd9f6b792b496b6da4e4b98abc9
-FileChecksum: SHA256: cb60fb122b7a287e4c588333f47855824f44a34aba35cb6a160cd9f221aabac7
+FileChecksum: SHA1: 72bce3410c0f326bdc3895d6b6fb1bd811327364
+FileChecksum: SHA256: 29fe21c8650b664fe279fe4939b0348a22925a5891733677bae4e93abf66f141
 LicenseConcluded: NOASSERTION
 LicenseInfoInFile: NONE
 FileCopyrightText: NOASSERTION
@@ -898,7 +898,7 @@ PrimaryPackagePurpose: LIBRARY
 PackageDownloadLocation: NOASSERTION
 PackageLicenseInfoFromFiles: NOASSERTION
 FilesAnalyzed: true
-PackageVerificationCode: 1a0ca0320361371549387073db38fc5b828575f3
+PackageVerificationCode: 3cbf483b04e3a9a5982415214afd1b6133a5b0a4
 
 Relationship: SPDXRef-lib--net-buf HAS_PREREQUISITE SPDXRef-version-h
 Relationship: SPDXRef-lib--net-buf HAS_PREREQUISITE SPDXRef-syscall-list-h-target
@@ -910,8 +910,8 @@ Relationship: SPDXRef-lib--net-buf HAS_PREREQUISITE SPDXRef-heap-constants-h
 
 FileName: ./zephyr/lib/net_buf/liblib__net_buf.a
 SPDXID: SPDXRef-File-liblib--net-buf.a
-FileChecksum: SHA1: 90ff5826468910e45fc0cfdebc53bebcc07116e3
-FileChecksum: SHA256: 20734307aa8b54f4ea0c8eb989150badcec48b01c450799d3a160473a512c2c5
+FileChecksum: SHA1: 1dd6b200f1ba07addaede7c230aa229107e24418
+FileChecksum: SHA256: eb08ea2476802bd592ae35678e2cb1b696067fff1d634b0a8c03d09ec9f9a958
 LicenseConcluded: NOASSERTION
 LicenseInfoInFile: NONE
 FileCopyrightText: NOASSERTION
@@ -930,7 +930,7 @@ PrimaryPackagePurpose: LIBRARY
 PackageDownloadLocation: NOASSERTION
 PackageLicenseInfoFromFiles: NOASSERTION
 FilesAnalyzed: true
-PackageVerificationCode: 30073ae93c8a9bf3342bbb1220b5a19f6605f6f7
+PackageVerificationCode: 1eb78e352f9c3d31732f00609f6334467582e216
 
 Relationship: SPDXRef-lib--posix--c-lib-ext HAS_PREREQUISITE SPDXRef-version-h
 Relationship: SPDXRef-lib--posix--c-lib-ext HAS_PREREQUISITE SPDXRef-syscall-list-h-target
@@ -942,8 +942,8 @@ Relationship: SPDXRef-lib--posix--c-lib-ext HAS_PREREQUISITE SPDXRef-heap-consta
 
 FileName: ./zephyr/lib/posix/c_lib_ext/liblib__posix__c_lib_ext.a
 SPDXID: SPDXRef-File-liblib--posix--c-lib-ext.a
-FileChecksum: SHA1: d6a23c0e1da19b26d77f71399273688a983c0df9
-FileChecksum: SHA256: c8c931631db609b87586668f6f9693b91776f97f898c9aa6b96ef7b391b8a599
+FileChecksum: SHA1: ab56fa7ee44455648dc5ae87b905cb6f390d9a94
+FileChecksum: SHA256: 5f6746369de5441cc9dc6a33fcafbc12142a1f0defc66911bc622ba5aac56dd5
 LicenseConcluded: NOASSERTION
 LicenseInfoInFile: NONE
 FileCopyrightText: NOASSERTION
@@ -1005,7 +1005,7 @@ PrimaryPackagePurpose: LIBRARY
 PackageDownloadLocation: NOASSERTION
 PackageLicenseInfoFromFiles: NOASSERTION
 FilesAnalyzed: true
-PackageVerificationCode: e805c7b6c6ab7af5d6a0fb5a084adc165c7854a4
+PackageVerificationCode: a504ac3f5a79725496e12052af4bb2912a82ac15
 
 Relationship: SPDXRef-mcuboot-util HAS_PREREQUISITE SPDXRef-version-h
 Relationship: SPDXRef-mcuboot-util HAS_PREREQUISITE SPDXRef-syscall-list-h-target
@@ -1017,8 +1017,8 @@ Relationship: SPDXRef-mcuboot-util HAS_PREREQUISITE SPDXRef-heap-constants-h
 
 FileName: ./modules/mcuboot/libmcuboot_util.a
 SPDXID: SPDXRef-File-libmcuboot-util.a
-FileChecksum: SHA1: de83c57d9584ce3c6bc7e0d8f86ecca7277931df
-FileChecksum: SHA256: f99aa8fa68496fbc8ba6350e6b53d52cb1752763eff58c3ce1cf41413683f1fe
+FileChecksum: SHA1: ef2bf9e5380d587e9e6f927a8561bba428e75129
+FileChecksum: SHA256: 544b3d03dd225c823e35d085bc84192612d10047934412a7c20c8c7f1ee6a733
 LicenseConcluded: NOASSERTION
 LicenseInfoInFile: NONE
 FileCopyrightText: NOASSERTION
@@ -1036,7 +1036,7 @@ PrimaryPackagePurpose: LIBRARY
 PackageDownloadLocation: NOASSERTION
 PackageLicenseInfoFromFiles: NOASSERTION
 FilesAnalyzed: true
-PackageVerificationCode: 2e23c112bc89e1f089e422c9faebbcd15d25ac53
+PackageVerificationCode: 2f7a1b272b349dcecc6e47606fadaafc804c6ed0
 
 Relationship: SPDXRef-mcumgr-grp-img-mgmt HAS_PREREQUISITE SPDXRef-version-h
 Relationship: SPDXRef-mcumgr-grp-img-mgmt HAS_PREREQUISITE SPDXRef-syscall-list-h-target
@@ -1048,8 +1048,8 @@ Relationship: SPDXRef-mcumgr-grp-img-mgmt HAS_PREREQUISITE SPDXRef-heap-constant
 
 FileName: ./zephyr/subsys/mgmt/mcumgr/grp/img_mgmt/libmcumgr_grp_img_mgmt.a
 SPDXID: SPDXRef-File-libmcumgr-grp-img-mgmt.a
-FileChecksum: SHA1: d4382acf9e5551cfa10a2fb99cd176a275bfcc58
-FileChecksum: SHA256: ece2f53edc7ae6624ef207c852e24e7549ea3c69ca308c77d366631f2462e745
+FileChecksum: SHA1: 58d137a5196f65c11fc919630c439c06dcc25e32
+FileChecksum: SHA256: bfbbbd5e710edd005b3582d064a99762ab8a65363e29fcf5a2a4eb12660a37c5
 LicenseConcluded: NOASSERTION
 LicenseInfoInFile: NONE
 FileCopyrightText: NOASSERTION
@@ -1070,7 +1070,7 @@ PrimaryPackagePurpose: LIBRARY
 PackageDownloadLocation: NOASSERTION
 PackageLicenseInfoFromFiles: NOASSERTION
 FilesAnalyzed: true
-PackageVerificationCode: 397e3178af99d42162f0f7584f915cc5a751ad36
+PackageVerificationCode: c5f42a5ab6451c62ccddf7d22eeb31fa0337a260
 
 Relationship: SPDXRef-mcumgr-grp-os-mgmt HAS_PREREQUISITE SPDXRef-version-h
 Relationship: SPDXRef-mcumgr-grp-os-mgmt HAS_PREREQUISITE SPDXRef-syscall-list-h-target
@@ -1082,8 +1082,8 @@ Relationship: SPDXRef-mcumgr-grp-os-mgmt HAS_PREREQUISITE SPDXRef-heap-constants
 
 FileName: ./zephyr/subsys/mgmt/mcumgr/grp/os_mgmt/libmcumgr_grp_os_mgmt.a
 SPDXID: SPDXRef-File-libmcumgr-grp-os-mgmt.a
-FileChecksum: SHA1: 6e8033eeaeadc7c924874020122853c24a68cb7e
-FileChecksum: SHA256: b84aa4063efea8ce4283a0d156af8df3d019a90c8e41f90d15cebfb1a09e9f7f
+FileChecksum: SHA1: a009cd7bca7ca5223d5bfa8d2f59924f0e4f2f24
+FileChecksum: SHA256: 5450f38c8dcfdcf4d51ce1b6f9993a25daf008463e26983219a8d3321105cbd4
 LicenseConcluded: NOASSERTION
 LicenseInfoInFile: NONE
 FileCopyrightText: NOASSERTION
@@ -1101,7 +1101,7 @@ PrimaryPackagePurpose: LIBRARY
 PackageDownloadLocation: NOASSERTION
 PackageLicenseInfoFromFiles: NOASSERTION
 FilesAnalyzed: true
-PackageVerificationCode: 18032b82921b267e414424692ab6930e0fdc9961
+PackageVerificationCode: e796100d60acf995e467fbbeac4f00773155edbb
 
 Relationship: SPDXRef-mcumgr-grp-stat-mgmt HAS_PREREQUISITE SPDXRef-version-h
 Relationship: SPDXRef-mcumgr-grp-stat-mgmt HAS_PREREQUISITE SPDXRef-syscall-list-h-target
@@ -1113,8 +1113,8 @@ Relationship: SPDXRef-mcumgr-grp-stat-mgmt HAS_PREREQUISITE SPDXRef-heap-constan
 
 FileName: ./zephyr/subsys/mgmt/mcumgr/grp/stat_mgmt/libmcumgr_grp_stat_mgmt.a
 SPDXID: SPDXRef-File-libmcumgr-grp-stat-mgmt.a
-FileChecksum: SHA1: 6b9ae9453ab412ede270a9b8ca9856413f6b618e
-FileChecksum: SHA256: d9447d6c870df468c3315e70db83ebbcf91200e3d60b0501e3d1ce73d1608c03
+FileChecksum: SHA1: d21df0d49f8e337821ab807d90e8f9749e11f2f1
+FileChecksum: SHA256: c4da7b36d41219e41855131a79190c11af4ef08defbc9385359fb977a100e6a7
 LicenseConcluded: NOASSERTION
 LicenseInfoInFile: NONE
 FileCopyrightText: NOASSERTION
@@ -1132,7 +1132,7 @@ PrimaryPackagePurpose: LIBRARY
 PackageDownloadLocation: NOASSERTION
 PackageLicenseInfoFromFiles: NOASSERTION
 FilesAnalyzed: true
-PackageVerificationCode: 093fd8d63d51d08d9a2848d61eb56767e3e1bb00
+PackageVerificationCode: 76fdca010ee2e4420f66af81fe3c576def3c30d5
 
 Relationship: SPDXRef-mcumgr-mgmt HAS_PREREQUISITE SPDXRef-version-h
 Relationship: SPDXRef-mcumgr-mgmt HAS_PREREQUISITE SPDXRef-syscall-list-h-target
@@ -1144,8 +1144,8 @@ Relationship: SPDXRef-mcumgr-mgmt HAS_PREREQUISITE SPDXRef-heap-constants-h
 
 FileName: ./zephyr/subsys/mgmt/mcumgr/mgmt/libmcumgr_mgmt.a
 SPDXID: SPDXRef-File-libmcumgr-mgmt.a
-FileChecksum: SHA1: 9ee0d294b95a7602b8cfa5b4f810ce87acafd7e5
-FileChecksum: SHA256: e23272b4febbafe0422017b523948c11629cccbe347735a622a7cde9059a83dd
+FileChecksum: SHA1: 3566ed257e12c4ac07ac0ee1db03e52b2c782bdc
+FileChecksum: SHA256: a621c31ee68f5cb2ebaf56bde61301a91a36352b3b773f9ce4c6534c0d6fa14d
 LicenseConcluded: NOASSERTION
 LicenseInfoInFile: NONE
 FileCopyrightText: NOASSERTION
@@ -1163,7 +1163,7 @@ PrimaryPackagePurpose: LIBRARY
 PackageDownloadLocation: NOASSERTION
 PackageLicenseInfoFromFiles: NOASSERTION
 FilesAnalyzed: true
-PackageVerificationCode: 556703ad9dc6bd8e4aabecb6294e0ddfeacb2497
+PackageVerificationCode: 5a2f7e1186f50d4ed75b74b0833e7e2ca71078a6
 
 Relationship: SPDXRef-mcumgr-smp HAS_PREREQUISITE SPDXRef-version-h
 Relationship: SPDXRef-mcumgr-smp HAS_PREREQUISITE SPDXRef-syscall-list-h-target
@@ -1175,8 +1175,8 @@ Relationship: SPDXRef-mcumgr-smp HAS_PREREQUISITE SPDXRef-heap-constants-h
 
 FileName: ./zephyr/subsys/mgmt/mcumgr/smp/libmcumgr_smp.a
 SPDXID: SPDXRef-File-libmcumgr-smp.a
-FileChecksum: SHA1: b581cbca359d434c3d22850c7b40ead05b171339
-FileChecksum: SHA256: 0a3780b1bfbe9d723e90783ca1bdd926349b43b1a0ead58db4db86ac027168c6
+FileChecksum: SHA1: 61fb8f5dde6e5fc9612dd2a39d62a832f30192be
+FileChecksum: SHA256: 41cec0b72aa8fcaddcd27a8ce7b7489cef1d04f4ba3a8cc168f2a71ac6daa452
 LicenseConcluded: NOASSERTION
 LicenseInfoInFile: NONE
 FileCopyrightText: NOASSERTION
@@ -1194,7 +1194,7 @@ PrimaryPackagePurpose: LIBRARY
 PackageDownloadLocation: NOASSERTION
 PackageLicenseInfoFromFiles: NOASSERTION
 FilesAnalyzed: true
-PackageVerificationCode: c36ba17f321c50bd4e793647b1bdb730aa8fa5f5
+PackageVerificationCode: eedc7d89b75c1290389d8b59f258a3ab27179bfa
 
 Relationship: SPDXRef-mcumgr-transport HAS_PREREQUISITE SPDXRef-version-h
 Relationship: SPDXRef-mcumgr-transport HAS_PREREQUISITE SPDXRef-syscall-list-h-target
@@ -1206,8 +1206,8 @@ Relationship: SPDXRef-mcumgr-transport HAS_PREREQUISITE SPDXRef-heap-constants-h
 
 FileName: ./zephyr/subsys/mgmt/mcumgr/transport/libmcumgr_transport.a
 SPDXID: SPDXRef-File-libmcumgr-transport.a
-FileChecksum: SHA1: aa793b1070114490e66542181ab069ae79cbcbbc
-FileChecksum: SHA256: a610d78b818a2c831d736b3dda14d9be7f9106628c4e17750df2f1fb23b839c9
+FileChecksum: SHA1: abe4201a15f8ffc1856ff011dfec11011fec2753
+FileChecksum: SHA256: 8c06298ae2bb414dc51d36755ad77e4ff5fd9b452382bbf964cdf9bd92f0bece
 LicenseConcluded: NOASSERTION
 LicenseInfoInFile: NONE
 FileCopyrightText: NOASSERTION
@@ -1227,7 +1227,7 @@ PrimaryPackagePurpose: LIBRARY
 PackageDownloadLocation: NOASSERTION
 PackageLicenseInfoFromFiles: NOASSERTION
 FilesAnalyzed: true
-PackageVerificationCode: 093a31f4d7c096a0377c172d9f71532df79bc94a
+PackageVerificationCode: 710c2718167620f3b7a4bd1ae2b95b489f9090d7
 
 Relationship: SPDXRef-mcumgr-util HAS_PREREQUISITE SPDXRef-version-h
 Relationship: SPDXRef-mcumgr-util HAS_PREREQUISITE SPDXRef-syscall-list-h-target
@@ -1239,8 +1239,8 @@ Relationship: SPDXRef-mcumgr-util HAS_PREREQUISITE SPDXRef-heap-constants-h
 
 FileName: ./zephyr/subsys/mgmt/mcumgr/util/libmcumgr_util.a
 SPDXID: SPDXRef-File-libmcumgr-util.a
-FileChecksum: SHA1: b93394c3a5074d627a9921c11f347cac02cbe3d6
-FileChecksum: SHA256: 301a7094a4c38934c7da0101868a45618ea8f4ae0f5e53d106c2c6539310d6e4
+FileChecksum: SHA1: e3eb8bf613fdcd89845a496d233419e7e9dc47bf
+FileChecksum: SHA256: 75bab5f0d11687d2b81177712e93269393b26976596c8ce6879e2a8b94375273
 LicenseConcluded: NOASSERTION
 LicenseInfoInFile: NONE
 FileCopyrightText: NOASSERTION
@@ -1269,7 +1269,7 @@ PrimaryPackagePurpose: LIBRARY
 PackageDownloadLocation: NOASSERTION
 PackageLicenseInfoFromFiles: NOASSERTION
 FilesAnalyzed: true
-PackageVerificationCode: cba476f65fa9e6c40878f4bfb7388555fe571125
+PackageVerificationCode: e3a3d63f8d1f16c9b2c9a136dabd2287b99817db
 
 Relationship: SPDXRef-modules--zcbor HAS_PREREQUISITE SPDXRef-version-h
 Relationship: SPDXRef-modules--zcbor HAS_PREREQUISITE SPDXRef-syscall-list-h-target
@@ -1281,8 +1281,8 @@ Relationship: SPDXRef-modules--zcbor HAS_PREREQUISITE SPDXRef-heap-constants-h
 
 FileName: ./modules/zcbor/libmodules__zcbor.a
 SPDXID: SPDXRef-File-libmodules--zcbor.a
-FileChecksum: SHA1: 3ad6ffbf80dbad42a7dc7741c2ab833113181ce8
-FileChecksum: SHA256: 3bf818d254140fa9f203e3d5cf22c7260d8c7e1a53735bf63d868658986b0d6a
+FileChecksum: SHA1: 98d09a217b864436b5d6e96de861cf446dae13ce
+FileChecksum: SHA256: c9f1ab3f73b07c3b6fc99d7ba1c2d2bfbb6a983ac036559953e8846360668d2d
 LicenseConcluded: NOASSERTION
 LicenseInfoInFile: NONE
 FileCopyrightText: NOASSERTION
@@ -1303,7 +1303,7 @@ PrimaryPackagePurpose: LIBRARY
 PackageDownloadLocation: NOASSERTION
 PackageLicenseInfoFromFiles: NOASSERTION
 FilesAnalyzed: true
-PackageVerificationCode: d09b723770b583d4215c237faa52170700137700
+PackageVerificationCode: 171ad02ec5d9252d1fc9e92e2f9d63d76e34be7c
 
 Relationship: SPDXRef-nrfx HAS_PREREQUISITE SPDXRef-version-h
 Relationship: SPDXRef-nrfx HAS_PREREQUISITE SPDXRef-syscall-list-h-target
@@ -1315,8 +1315,8 @@ Relationship: SPDXRef-nrfx HAS_PREREQUISITE SPDXRef-heap-constants-h
 
 FileName: ./modules/hal_nordic/nrfx/libnrfx.a
 SPDXID: SPDXRef-File-libnrfx.a
-FileChecksum: SHA1: bad88ef6a5561094fadbf67897dc0d3da72bf7b1
-FileChecksum: SHA256: b5178e1089f9cb8ac3fcb3f8e1946b1a1f6406d402250bcc91cfc5d5e03dbf06
+FileChecksum: SHA1: 351e5cf5fc8dd2ddd2832a8167fb821c1421ae44
+FileChecksum: SHA256: debf63043ccd4e06d6f18f2f43737186717a53ebe2be024726e3adf15acb2ae6
 LicenseConcluded: NOASSERTION
 LicenseInfoInFile: NONE
 FileCopyrightText: NOASSERTION
@@ -1348,7 +1348,7 @@ PrimaryPackagePurpose: LIBRARY
 PackageDownloadLocation: NOASSERTION
 PackageLicenseInfoFromFiles: NOASSERTION
 FilesAnalyzed: true
-PackageVerificationCode: a0c514d9a218130ade1e176b255ec2bda4a16af9
+PackageVerificationCode: 2f9f6a986b07a95ad8df423648e8fb666a4ee23a
 
 Relationship: SPDXRef-offsets HAS_PREREQUISITE SPDXRef-syscall-list-h-target
 Relationship: SPDXRef-offsets HAS_PREREQUISITE SPDXRef-driver-validation-h-target
@@ -1358,8 +1358,8 @@ Relationship: SPDXRef-offsets HAS_PREREQUISITE SPDXRef-heap-constants-h
 
 FileName: ./zephyr/CMakeFiles/offsets.dir/arch/arm/core/offsets/offsets.c.obj
 SPDXID: SPDXRef-File--2
-FileChecksum: SHA1: d904daa5540f064ab1366de1779c61af1457e12a
-FileChecksum: SHA256: d7388a4b39edb8b67e0e5a204313d3329ebfd083eaa07d6b47db573b642691c1
+FileChecksum: SHA1: b275d4dc36de3f3c9496ca9b74c8f061b0101392
+FileChecksum: SHA256: 0ee196fe39deff741a04c83c274da1fa80d46b32819887c278387bc22096a7d3
 LicenseConcluded: NOASSERTION
 LicenseInfoInFile: NONE
 FileCopyrightText: NOASSERTION
@@ -1508,7 +1508,7 @@ PrimaryPackagePurpose: LIBRARY
 PackageDownloadLocation: NOASSERTION
 PackageLicenseInfoFromFiles: NOASSERTION
 FilesAnalyzed: true
-PackageVerificationCode: a4916b2fa4bab5488217353384d0576b25174554
+PackageVerificationCode: 1245b54a228c3ae23e02dff8b03a9e13880a2916
 
 Relationship: SPDXRef-soc--nordic HAS_PREREQUISITE SPDXRef-version-h
 Relationship: SPDXRef-soc--nordic HAS_PREREQUISITE SPDXRef-syscall-list-h-target
@@ -1520,8 +1520,8 @@ Relationship: SPDXRef-soc--nordic HAS_PREREQUISITE SPDXRef-heap-constants-h
 
 FileName: ./zephyr/soc/soc/nrf52840/libsoc__nordic.a
 SPDXID: SPDXRef-File-libsoc--nordic.a
-FileChecksum: SHA1: be93d29963d496ca78c52c8dcfac32e53350ea39
-FileChecksum: SHA256: ea37d42928a8d6ef2c984898eeebdd45529cc56a3bae8a8affef05104674c54f
+FileChecksum: SHA1: 466bd0481a67114aadd28c74f608aba8feb4efd0
+FileChecksum: SHA256: 64303e309734548b61b8a11d9bf17871a636dd34839fada28f102e6798562be3
 LicenseConcluded: NOASSERTION
 LicenseInfoInFile: NONE
 FileCopyrightText: NOASSERTION
@@ -1545,7 +1545,7 @@ PrimaryPackagePurpose: LIBRARY
 PackageDownloadLocation: NOASSERTION
 PackageLicenseInfoFromFiles: NOASSERTION
 FilesAnalyzed: true
-PackageVerificationCode: eb9bbe22654a99948135cd812effdbf0bfca713f
+PackageVerificationCode: 001b5d4059030e97dbd325b694f54d3b69cbf87e
 
 Relationship: SPDXRef-subsys--crc HAS_PREREQUISITE SPDXRef-version-h
 Relationship: SPDXRef-subsys--crc HAS_PREREQUISITE SPDXRef-syscall-list-h-target
@@ -1557,8 +1557,8 @@ Relationship: SPDXRef-subsys--crc HAS_PREREQUISITE SPDXRef-heap-constants-h
 
 FileName: ./zephyr/subsys/crc/libsubsys__crc.a
 SPDXID: SPDXRef-File-libsubsys--crc.a
-FileChecksum: SHA1: c1feef7edfd01e49e4978e0f204b7d4f4394db83
-FileChecksum: SHA256: 4a89632f46e78f0382ad3c2d05e116bc13e948cf6d89c42a04cad53b59125bcb
+FileChecksum: SHA1: 80b78d5af4afaddbc33fbd69ceb6f52ebc064def
+FileChecksum: SHA256: ac801c681feaccc2e6f8c14ddf2b2be4ef9a3efd6d3b6398df4e688166f46387
 LicenseConcluded: NOASSERTION
 LicenseInfoInFile: NONE
 FileCopyrightText: NOASSERTION
@@ -1583,7 +1583,7 @@ PrimaryPackagePurpose: LIBRARY
 PackageDownloadLocation: NOASSERTION
 PackageLicenseInfoFromFiles: NOASSERTION
 FilesAnalyzed: true
-PackageVerificationCode: ba4e064d37906f866a344be96c0259132652f601
+PackageVerificationCode: 24de356204e4b836950718f98d65c7dd64e1e7db
 
 Relationship: SPDXRef-subsys--dfu--boot HAS_PREREQUISITE SPDXRef-version-h
 Relationship: SPDXRef-subsys--dfu--boot HAS_PREREQUISITE SPDXRef-syscall-list-h-target
@@ -1595,8 +1595,8 @@ Relationship: SPDXRef-subsys--dfu--boot HAS_PREREQUISITE SPDXRef-heap-constants-
 
 FileName: ./zephyr/subsys/dfu/boot/libsubsys__dfu__boot.a
 SPDXID: SPDXRef-File-libsubsys--dfu--boot.a
-FileChecksum: SHA1: b7dbb31ef4bba97a452db4a95273d9e3cbe56cbd
-FileChecksum: SHA256: 5b8a1107e546b43abedf9a88cbb5d2de6be1b8d9010b257b6b171692b9193ad2
+FileChecksum: SHA1: a3eef3b178027c9a035b3cc4c76d0abcc434af1b
+FileChecksum: SHA256: c2c89c61866880f7271da0a1ba61a9a1aa96841816c7c893d7fdcdfd11398ac1
 LicenseConcluded: NOASSERTION
 LicenseInfoInFile: NONE
 FileCopyrightText: NOASSERTION
@@ -1669,7 +1669,7 @@ PrimaryPackagePurpose: LIBRARY
 PackageDownloadLocation: NOASSERTION
 PackageLicenseInfoFromFiles: NOASSERTION
 FilesAnalyzed: true
-PackageVerificationCode: 1dfe3c87e511676cc6a1342937a7ee7a5ff4b893
+PackageVerificationCode: 2f36451229e7aa3ec211fa8943a8c910f5232458
 
 Relationship: SPDXRef-zephyr HAS_PREREQUISITE SPDXRef-version-h
 Relationship: SPDXRef-zephyr HAS_PREREQUISITE SPDXRef-syscall-list-h-target
@@ -1681,8 +1681,8 @@ Relationship: SPDXRef-zephyr HAS_PREREQUISITE SPDXRef-heap-constants-h
 
 FileName: ./zephyr/libzephyr.a
 SPDXID: SPDXRef-File-libzephyr.a
-FileChecksum: SHA1: 5a1fc97ba2875cf6b71b6a267294136877323140
-FileChecksum: SHA256: ab4523d43a9936ce5dc3d84f0842950b432f3e0906be7b85852c295ea3962416
+FileChecksum: SHA1: e5f8846bb69fa5466db6024e375b1d1a77c1f610
+FileChecksum: SHA256: 65b45a24a6e5180c9e32a01b727a1057d44bbd5d1ffdb713d88af3a4768d6c50
 LicenseConcluded: NOASSERTION
 LicenseInfoInFile: NONE
 FileCopyrightText: NOASSERTION
@@ -1740,7 +1740,7 @@ PrimaryPackagePurpose: APPLICATION
 PackageDownloadLocation: NOASSERTION
 PackageLicenseInfoFromFiles: NOASSERTION
 FilesAnalyzed: true
-PackageVerificationCode: 8c36481fb46bc1ac308e086974e6cdd412d6750e
+PackageVerificationCode: fb2711bdcd6f24e187ba10e4b0bec3db792d5736
 
 Relationship: SPDXRef-zephyr-final HAS_PREREQUISITE SPDXRef-app
 Relationship: SPDXRef-zephyr-final HAS_PREREQUISITE SPDXRef-zephyr
@@ -1784,8 +1784,8 @@ Relationship: SPDXRef-zephyr-final HAS_PREREQUISITE SPDXRef-kernel
 
 FileName: ./zephyr/zephyr.elf
 SPDXID: SPDXRef-File-zephyr.elf
-FileChecksum: SHA1: 34f8a8f8c8432f06bbcf499bedcc9ac97a110b94
-FileChecksum: SHA256: 3aa9a6017c7f60e676218d6387ed24ac7ebd51194938be2087240caa2399a411
+FileChecksum: SHA1: e1112533abc132e6f194b8f3f9476e73b70f763c
+FileChecksum: SHA256: 5271158569070e71026796071da0edf124bf865aa6bf97cb4ec1e35eed6d1b05
 LicenseConcluded: NOASSERTION
 LicenseInfoInFile: NONE
 FileCopyrightText: NOASSERTION
@@ -1838,7 +1838,7 @@ PrimaryPackagePurpose: LIBRARY
 PackageDownloadLocation: NOASSERTION
 PackageLicenseInfoFromFiles: NOASSERTION
 FilesAnalyzed: true
-PackageVerificationCode: 3597089e256f7a40a8c415b5454dfeea9f948c28
+PackageVerificationCode: 251f95d56429a308699cf404d24b480ce9812a07
 
 Relationship: SPDXRef-zephyr-pre0 HAS_PREREQUISITE SPDXRef-app
 Relationship: SPDXRef-zephyr-pre0 HAS_PREREQUISITE SPDXRef-zephyr
@@ -1881,8 +1881,8 @@ Relationship: SPDXRef-zephyr-pre0 HAS_PREREQUISITE SPDXRef-kernel
 
 FileName: ./zephyr/zephyr_pre0.elf
 SPDXID: SPDXRef-File-zephyr-pre0.elf
-FileChecksum: SHA1: e9d1174fdac25ad71ca1bb6153298e6db7eb0f0f
-FileChecksum: SHA256: 508f5e445b31a3bc5ba13f836e6635874d95f3540443ce1cd8ee82581d83f51b
+FileChecksum: SHA1: 274a7f141ccd68e75713e286d3ad3600a6c1ddb5
+FileChecksum: SHA256: acaf2891bb352a5312a40436780b7b410f0a3acf92c6a7ef904221b14fb856f6
 LicenseConcluded: NOASSERTION
 LicenseInfoInFile: NONE
 FileCopyrightText: NOASSERTION

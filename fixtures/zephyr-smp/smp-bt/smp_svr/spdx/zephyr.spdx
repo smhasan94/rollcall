@@ -4,7 +4,7 @@ SPDXID: SPDXRef-DOCUMENT
 DocumentName: zephyr-sources
 DocumentNamespace: http://spdx.org/spdxdocs/rollcall-smp-bt-smp_svr/zephyr
 Creator: Tool: Zephyr SPDX builder
-Created: 2026-10-01T22:17:43Z
+Created: 2026-10-01T22:30:49Z
 
 Relationship: SPDXRef-DOCUMENT DESCRIBES SPDXRef-zephyr-sources
 Relationship: SPDXRef-DOCUMENT DESCRIBES SPDXRef-cmsis-sources

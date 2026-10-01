@@ -4,7 +4,7 @@ SPDXID: SPDXRef-DOCUMENT
 DocumentName: modules-deps
 DocumentNamespace: http://spdx.org/spdxdocs/rollcall-smp-bt-smp_svr/modules-deps
 Creator: Tool: Zephyr SPDX builder
-Created: 2026-10-01T22:17:43Z
+Created: 2026-10-01T22:30:49Z
 
 Relationship: SPDXRef-DOCUMENT DESCRIBES SPDXRef-zephyr-deps
 Relationship: SPDXRef-cmsis-deps DEPENDENCY_OF SPDXRef-zephyr-deps
