@@ -560,7 +560,7 @@ impl Supplier {
 }
 
 /// Rejects the characters an IRI reference can never contain, and malformed `%` escapes.
-fn check_iri_reference_chars(url: &str) -> Result<(), &'static str> {
+pub(crate) fn check_iri_reference_chars(url: &str) -> Result<(), &'static str> {
     if url.chars().any(|c| c.is_whitespace() || c.is_control()) {
         return Err("contains whitespace or a control character");
     }

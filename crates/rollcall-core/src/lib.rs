@@ -25,6 +25,7 @@
 
 pub mod blob;
 pub mod cyclonedx;
+pub mod identify;
 pub mod merge;
 pub mod model;
 pub mod warning;
@@ -35,6 +36,7 @@ pub use cyclonedx::{
     ReadError, SchemaViolation, SerialNumber, Timestamp, WriteError, WriteOptions,
     validate_cyclonedx_1_6,
 };
+pub use identify::{IdentifierDb, Level, Resolver};
 pub use merge::{ProductSpec, ProductSpecError};
 pub use warning::Warning;
 

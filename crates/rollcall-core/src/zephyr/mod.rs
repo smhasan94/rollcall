@@ -33,6 +33,8 @@
 //! | `spdx/modules-deps.spdx` | no (warning) | upstream module version, purl, cpe, supplier; which modules Zephyr depends on |
 //! | `zephyr/.config` | no (warning) | `CONFIG_ZEPHYR_<MODULE>_MODULE=y` name evidence; the SDK version |
 //! | `--west-list FILE` | no (warning) | module revisions and URLs from `west list -f "{name} {path} {revision} {url}"` |
+//! | `--identifier-db FILE` | no | each module's upstream version, purl, cpe and supplier, from an [identifier database](crate::identify) |
+//! | `--workspace DIR` | no | the west workspace, so `file_regex` and `git_tag` rules can read a module's sources at `DIR/<west list path>` |
 //!
 //! `spdx/` is written by `west spdx` after a build configured with
 //! `west spdx --init`; `west list` output has to be captured separately.
@@ -41,7 +43,8 @@
 //! directory. [`discover`] reads the images from its `build_info.yml` (`cmake.images[]`:
 //! `name` is the image's subdirectory, `type` `MAIN` marks the application); `domains.yaml` is
 //! not read, because its `build_dir`s are absolute build-machine paths. Each image directory
-//! is ingested as above (the `--west-list` file and `--include-sdk` apply to every image, and
+//! is ingested as above (the `--west-list` file, `--include-sdk` and the identifier database
+//! apply to every image, and
 //! each warning's location is prefixed with `<image>: `), and the products are merged with
 //! [`merge::merge`](crate::merge::merge) under a product named after the `MAIN` image's
 //! application, exactly as `rollcall merge --product <app>` would merge separately generated
@@ -62,22 +65,27 @@
 //! | module with no upstream purl | a derived `pkg:github/<owner>/<repo>@<rev>` (or `pkg:generic/<name>@<rev>?vcs_url=…`) purl |
 //! | module `PackageLicenseConcluded` | the module's `licence` when it is an asserted, valid expression |
 //! | `CONFIG_ZEPHYR_<MODULE>_MODULE=y` | `name` evidence on that module |
+//! | identifier-database entry for the module (only with `--identifier-db`) | `version`, `purl` and `cpe` evidence from source `identifier-db` at the database's file name, with the [`Level`](crate::identify::Level)'s confidence (technique `source-code-analysis` for a `file_regex` rule, else `manifest-analysis`), and `supplier` evidence, which the database asserts outright (`manifest-analysis`, `High`); the module's `purl`, `cpe` and `supplier` when `modules-deps.spdx` gave none (a purl that differs from the `modules-deps.spdx` one is a warning, and the SPDX one is kept; a differing cpe or supplier is not a warning). The module's `version` stays the git revision |
+//! | module missing from the identifier database | a warning, once per module per run (across every sysbuild image), and a paste-ready stub entry in [`Ingest::unknown_modules`] |
 //! | `--include-sdk` | component `application` `zephyr-sdk` (or `<toolchain>-toolchain`), version `M.N` from `CONFIG_TOOLCHAIN_ZEPHYR_<M>_<N>` |
 //! | — | dependencies: product → image; image → `zephyr` (and the SDK); `zephyr` → each module that `modules-deps.spdx` says is a `DEPENDENCY_OF SPDXRef-zephyr-deps` (every module when that file is missing) |
 //!
-//! Every fact carries evidence with technique `manifest-analysis` and a source of
-//! `west-spdx`, `west-list`, `kconfig` or `build-info`, located at the file (relative to the
+//! Every fact carries evidence with technique `manifest-analysis` (except as noted for the
+//! identifier database) and a source of `west-spdx`, `west-list`, `kconfig`, `build-info` or
+//! `identifier-db`, located at the file (relative to the
 //! build directory, or the `--west-list` file's name) and line it came from.
 //!
 //! # Warnings
 //!
 //! Missing optional inputs, and values that cannot be used (an unparsable licence, purl or
 //! cpe, a module whose revision differs between `west list` and SPDX, a `west list` project
-//! that is not a module of this build), are reported as [`Warning`]s, never errors. Warnings
+//! that is not a module of this build, a module the identifier database does not list or
+//! cannot version), are reported as [`Warning`]s, never errors. Warnings
 //! come in a fixed order: `spdx/app.spdx`, `spdx/build.spdx`, `spdx/modules-deps.spdx`,
 //! `zephyr/.config`, the west list, then the mapping's warnings sorted by file, line number
-//! and message. Missing or malformed *required* input, and a malformed optional file that is
-//! present, is a [`ZephyrError`] naming the file.
+//! and message. Missing or malformed *required* input, a malformed optional file that is
+//! present, and a missing or malformed identifier database, is a [`ZephyrError`] naming the
+//! file.
 //!
 //! # Determinism
 //!
@@ -95,6 +103,7 @@ pub mod west_list;
 use std::io;
 use std::path::{Path, PathBuf};
 
+use crate::identify::{self, IdentifierDb, LoadError, Resolver};
 use crate::model::{ModelError, Product};
 
 pub use crate::warning::Warning;
@@ -116,6 +125,10 @@ pub struct IngestOptions {
     /// Whether `build_dir` is a sysbuild top-level build directory whose images (found from
     /// its `build_info.yml`) are ingested and merged into one product.
     pub sysbuild: bool,
+    /// An identifier database to resolve modules' upstream identities with, if any.
+    pub identifier_db: Option<PathBuf>,
+    /// The west workspace (topdir), where module sources live at their `west list` path.
+    pub workspace: Option<PathBuf>,
 }
 
 impl IngestOptions {
@@ -126,6 +139,8 @@ impl IngestOptions {
             west_list: None,
             include_sdk: false,
             sysbuild: false,
+            identifier_db: None,
+            workspace: None,
         }
     }
 
@@ -146,6 +161,18 @@ impl IngestOptions {
         self.sysbuild = sysbuild;
         self
     }
+
+    /// Resolves modules with the identifier database at `path`.
+    pub fn with_identifier_db(mut self, path: impl Into<PathBuf>) -> Self {
+        self.identifier_db = Some(path.into());
+        self
+    }
+
+    /// Reads module sources from the west workspace at `dir`.
+    pub fn with_workspace(mut self, dir: impl Into<PathBuf>) -> Self {
+        self.workspace = Some(dir.into());
+        self
+    }
 }
 
 /// The result of [`ingest`].
@@ -155,6 +182,18 @@ pub struct Ingest {
     pub product: Product,
     /// Non-fatal problems, in the order described under *Warnings* in the module docs.
     pub warnings: Vec<Warning>,
+    /// The modules the identifier database does not list, sorted by name, each once (empty
+    /// without an identifier database).
+    pub unknown_modules: Vec<UnknownModule>,
+}
+
+/// A module the identifier database does not list.
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
+pub struct UnknownModule {
+    /// The module name.
+    pub name: String,
+    /// A ready-to-paste entry for the database's `modules:` mapping.
+    pub stub: String,
 }
 
 /// Everything read from one build directory, parsed but not yet mapped.
@@ -327,6 +366,14 @@ pub enum ZephyrError {
         /// The file.
         path: PathBuf,
     },
+    /// The identifier database is missing, unreadable or malformed.
+    #[error("{source}")]
+    IdentifierDb {
+        /// The database file.
+        path: PathBuf,
+        /// What is wrong, naming the file (and line, where known).
+        source: LoadError,
+    },
     /// A value read from this file is rejected by the model.
     #[error("{}: {source}", path.display())]
     Model {
@@ -345,7 +392,11 @@ impl ZephyrError {
 
     /// True for any read failure (missing, unreadable, a directory).
     pub fn is_read_error(&self) -> bool {
-        matches!(self, Self::Read { .. })
+        match self {
+            Self::Read { .. } => true,
+            Self::IdentifierDb { source, .. } => source.is_read_error(),
+            _ => false,
+        }
     }
 }
 
@@ -487,6 +538,20 @@ pub fn load(options: &IngestOptions) -> Result<ZephyrBuild, ZephyrError> {
     })
 }
 
+/// Loads [`IngestOptions::identifier_db`], if given.
+pub fn load_identifier_db(options: &IngestOptions) -> Result<Option<IdentifierDb>, ZephyrError> {
+    options
+        .identifier_db
+        .as_deref()
+        .map(|path| {
+            identify::load(path).map_err(|source| ZephyrError::IdentifierDb {
+                path: path.to_owned(),
+                source,
+            })
+        })
+        .transpose()
+}
+
 /// Reads, parses and maps one Zephyr image build directory, or, with
 /// [`IngestOptions::sysbuild`], every image of a sysbuild top-level build directory merged
 /// into one product ([`ingest_sysbuild`]).
@@ -494,6 +559,16 @@ pub fn ingest(options: &IngestOptions) -> Result<Ingest, ZephyrError> {
     if options.sysbuild {
         return ingest_sysbuild(options);
     }
+    let db = load_identifier_db(options)?;
+    let mut resolver = db.as_ref().map(Resolver::new);
+    ingest_image(options, resolver.as_mut())
+}
+
+/// Reads, parses and maps one image build directory, resolving modules with `resolver`.
+fn ingest_image(
+    options: &IngestOptions,
+    resolver: Option<&mut Resolver<'_>>,
+) -> Result<Ingest, ZephyrError> {
     let build = load(options)?;
-    map::to_product(&build, options)
+    map::to_product(&build, options, resolver)
 }

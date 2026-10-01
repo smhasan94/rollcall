@@ -1,6 +1,8 @@
 //! Pure mapping from parsed Zephyr inputs to the model. No I/O happens here.
 //!
-//! See the *Mapping* section of the [module docs](super) for what goes where.
+//! See the *Mapping* section of the [module docs](super) for what goes where. Where the
+//! identifier database and `modules-deps.spdx` disagree, only a differing purl is a warning;
+//! a differing cpe or supplier is kept as evidence without one.
 
 use std::collections::{BTreeMap, BTreeSet};
 use std::path::{Path, PathBuf};
@@ -13,7 +15,8 @@ use super::spdx::{
     spdx_id_stem,
 };
 use super::west_list::WestProject;
-use super::{Ingest, IngestOptions, Warning, ZephyrBuild, ZephyrError};
+use super::{Ingest, IngestOptions, UnknownModule, Warning, ZephyrBuild, ZephyrError};
+use crate::identify::{Level, Outcome, Query, Resolver, github_repo};
 use crate::model::{
     BomRef, Component, ComponentKind, Confidence, Cpe, Evidence, EvidenceField, IdError, Image,
     ImageKind, License, ModelError, Occurrence, PathSegment, Product, Purl, Supplier, Technique,
@@ -25,6 +28,7 @@ const WEST_SPDX: &str = "west-spdx";
 const WEST_LIST: &str = "west-list";
 const KCONFIG: &str = "kconfig";
 const BUILD_INFO: &str = "build-info";
+const IDENTIFIER_DB: &str = "identifier-db";
 
 /// Evidence locations, relative to the build directory.
 const ZEPHYR_SPDX: &str = "spdx/zephyr.spdx";
@@ -80,6 +84,11 @@ struct Mapper<'a> {
     warnings: Vec<Warning>,
     /// For each node name, the file its identity came from (to name it in errors).
     origin: BTreeMap<String, PathBuf>,
+    /// The identifier database's path (for errors) and the west workspace, from the options.
+    identifier_db: Option<&'a Path>,
+    workspace: Option<&'a Path>,
+    /// Modules the identifier database does not list, first seen in this image.
+    unknown: Vec<UnknownModule>,
 }
 
 fn conf(bp: u16) -> Result<Confidence, IdError> {
@@ -96,7 +105,28 @@ fn evidence(
     location: Option<&str>,
     line: Option<u32>,
 ) -> Result<Evidence, IdError> {
-    let entry = Evidence::new(field, Technique::ManifestAnalysis, source, value, conf(bp)?)?;
+    evidence_by(
+        Technique::ManifestAnalysis,
+        field,
+        source,
+        value,
+        bp,
+        location,
+        line,
+    )
+}
+
+/// [`evidence`] with another technique.
+fn evidence_by(
+    technique: Technique,
+    field: EvidenceField,
+    source: &str,
+    value: &str,
+    bp: u16,
+    location: Option<&str>,
+    line: Option<u32>,
+) -> Result<Evidence, IdError> {
+    let entry = Evidence::new(field, technique, source, value, conf(bp)?)?;
     Ok(match location.and_then(|l| Occurrence::new(l, line).ok()) {
         Some(occurrence) => entry.at(occurrence),
         None => entry,
@@ -115,17 +145,6 @@ fn supplier_name(actor: Option<&SpdxActor>) -> Option<&str> {
     actor
         .filter(|a| matches!(a.kind, SpdxActorKind::Organization | SpdxActorKind::Person))
         .map(|a| a.name.as_str())
-}
-
-/// `https://github.com/<owner>/<repo>[.git][/]` → `(owner, repo)`.
-fn github_repo(url: &str) -> Option<(&str, &str)> {
-    let rest = url
-        .strip_prefix("https://github.com/")
-        .or_else(|| url.strip_prefix("http://github.com/"))?;
-    let rest = rest.trim_end_matches('/');
-    let rest = rest.strip_suffix(".git").unwrap_or(rest);
-    let (owner, repo) = rest.split_once('/')?;
-    (!owner.is_empty() && !repo.is_empty() && !repo.contains('/')).then_some((owner, repo))
 }
 
 /// A purl pinned to the exact revision: `pkg:github/<owner>/<repo>@<rev>` for GitHub, else
@@ -308,22 +327,32 @@ pub(super) fn is_mcuboot(build: &ZephyrBuild) -> bool {
     }
 }
 
-/// Maps a loaded build into a product.
+/// Maps a loaded build into a product, resolving modules with `resolver` if given.
 pub(super) fn to_product(
     build: &ZephyrBuild,
     options: &IngestOptions,
+    resolver: Option<&mut Resolver<'_>>,
 ) -> Result<Ingest, ZephyrError> {
     let mut mapper = Mapper {
         build,
         warnings: Vec::new(),
         origin: BTreeMap::new(),
+        identifier_db: options.identifier_db.as_deref(),
+        workspace: options.workspace.as_deref(),
+        unknown: Vec::new(),
     };
-    let product = mapper.product(options)?;
+    let product = mapper.product(options, resolver)?;
     let mut warnings = build.warnings.clone();
     sort_warnings(&mut mapper.warnings);
     mapper.warnings.dedup();
     warnings.extend(mapper.warnings);
-    Ok(Ingest { product, warnings })
+    let mut unknown_modules = mapper.unknown;
+    unknown_modules.sort();
+    Ok(Ingest {
+        product,
+        warnings,
+        unknown_modules,
+    })
 }
 
 impl<'a> Mapper<'a> {
@@ -350,7 +379,11 @@ impl<'a> Mapper<'a> {
         }
     }
 
-    fn product(&mut self, options: &IngestOptions) -> Result<Product, ZephyrError> {
+    fn product(
+        &mut self,
+        options: &IngestOptions,
+        mut resolver: Option<&mut Resolver<'_>>,
+    ) -> Result<Product, ZephyrError> {
         let build = self.build;
         let paths = self.paths();
         let build_info_err = Self::model_error(&paths.build_info);
@@ -446,7 +479,7 @@ impl<'a> Mapper<'a> {
             .map(zephyr_dependency_stems);
         let mut module_segments = Vec::new();
         for (name, facts) in &modules.modules {
-            let component = self.module_component(name, facts)?;
+            let component = self.module_component(name, facts, resolver.as_deref_mut())?;
             let origin = self.origin.get(name).cloned().unwrap_or_default();
             let is_dependency = depends_on
                 .as_ref()
@@ -813,6 +846,7 @@ impl<'a> Mapper<'a> {
         &mut self,
         name: &str,
         facts: &ModuleFacts<'a>,
+        resolver: Option<&mut Resolver<'_>>,
     ) -> Result<Component, ZephyrError> {
         let paths = self.paths();
         let west_location = self.west_location();
@@ -1003,6 +1037,12 @@ impl<'a> Mapper<'a> {
                 &paths.modules_deps_spdx,
             )?;
         }
+        // Upstream identity from the identifier database, below modules-deps.spdx.
+        if let Some(resolver) = resolver {
+            let revision = chosen.map(|seen| seen.value.as_str());
+            let url = url.as_ref().map(|(url, ..)| url.as_str());
+            self.identify(&mut component, facts.west, revision, url, resolver)?;
+        }
         if component.purl.is_none() {
             component.purl = derived;
         }
@@ -1011,6 +1051,113 @@ impl<'a> Mapper<'a> {
             self.licence(&mut component, p, ZEPHYR_SPDX, &paths.zephyr_spdx)?;
         }
         Ok(component)
+    }
+
+    /// Resolves a module against the identifier database: evidence, and the purl, cpe and
+    /// supplier where nothing better is known; or, the first time a module is unknown, a
+    /// warning and a stub.
+    fn identify(
+        &mut self,
+        component: &mut Component,
+        west: Option<&WestProject>,
+        revision: Option<&str>,
+        url: Option<&str>,
+        resolver: &mut Resolver<'_>,
+    ) -> Result<(), ZephyrError> {
+        let db_name = resolver.db().name().to_owned();
+        let name = component.name.clone();
+        let source_dir = match (self.workspace, west) {
+            (Some(workspace), Some(row)) => Some(workspace.join(&row.path)),
+            _ => None,
+        };
+        let query = Query {
+            module: &name,
+            revision,
+            path: source_dir.as_deref(),
+        };
+        let identity = match resolver.resolve(&query, url) {
+            Outcome::Identified(identity) => identity,
+            Outcome::Unknown { stub } => {
+                if let Some(stub) = stub {
+                    self.warn(
+                        db_name.clone(),
+                        format!("module {name} is not in {db_name}; stub entry printed"),
+                    );
+                    self.unknown.push(UnknownModule {
+                        name,
+                        stub: stub.to_string(),
+                    });
+                }
+                return Ok(());
+            }
+        };
+        let err = Self::model_error(self.identifier_db.unwrap_or(Path::new(&db_name)));
+        let technique = if identity.from_source() {
+            Technique::SourceCodeAnalysis
+        } else {
+            Technique::ManifestAnalysis
+        };
+        let bp = identity.level.basis_points();
+        let fact = |field, value: &str| {
+            evidence_by(
+                technique,
+                field,
+                IDENTIFIER_DB,
+                value,
+                bp,
+                Some(&db_name),
+                None,
+            )
+        };
+        if let Some(version) = &identity.version {
+            component
+                .evidence
+                .insert(fact(EvidenceField::Version, version).map_err(&err)?);
+        }
+        if let Some(purl) = &identity.purl {
+            component
+                .evidence
+                .insert(fact(EvidenceField::Purl, purl.as_str()).map_err(&err)?);
+            match &component.purl {
+                None => component.purl = Some(purl.clone()),
+                Some(spdx) if spdx != purl => self.warn(
+                    db_name.clone(),
+                    format!(
+                        "module {name}: {db_name} purl {purl} differs from {MODULES_DEPS_SPDX} purl {spdx}; using {spdx}"
+                    ),
+                ),
+                Some(_) => {}
+            }
+        }
+        if let Some(cpe) = &identity.cpe {
+            component
+                .evidence
+                .insert(fact(EvidenceField::Cpe, cpe.as_str()).map_err(&err)?);
+            if component.cpe.is_none() {
+                component.cpe = Some(cpe.clone());
+            }
+        }
+        if let Some(supplier) = &identity.supplier {
+            // The database asserts the supplier outright: it does not depend on the version
+            // rule, so it takes neither the rule's technique nor its level.
+            let asserted = evidence(
+                EvidenceField::Supplier,
+                IDENTIFIER_DB,
+                supplier.name(),
+                Level::High.basis_points(),
+                Some(&db_name),
+                None,
+            )
+            .map_err(&err)?;
+            component.evidence.insert(asserted);
+            if component.supplier.is_none() {
+                component.supplier = Some(supplier.clone());
+            }
+        }
+        if let Some(note) = &identity.note {
+            self.warn(db_name.clone(), format!("module {name}: {note}"));
+        }
+        Ok(())
     }
 
     /// The SDK / toolchain component, or `None` (with a warning) if the toolchain is unknown.
@@ -1242,7 +1389,7 @@ SPDXID: SPDXRef-hal-nordic-deps
 
     fn ingest(sample: &Sample, include_sdk: bool) -> Ingest {
         let options = IngestOptions::new("b").with_include_sdk(include_sdk);
-        to_product(&build(sample), &options).unwrap()
+        to_product(&build(sample), &options, None).unwrap()
     }
 
     fn image(product: &Product) -> &Image {
@@ -1689,6 +1836,205 @@ SPDXID: SPDXRef-hal-nordic-deps
             out.warnings[0].to_string(),
             "west-list.txt:5: west list project bsim is not a module of this build \
              (no bsim-sources package in spdx/zephyr.spdx); ignored"
+        );
+    }
+
+    /// Ingests `sample` resolving modules with the identifier database `db`.
+    fn ingest_with_db(sample: &Sample, db: &str) -> Ingest {
+        let db = crate::identify::load_str("identifiers.yaml", db).unwrap();
+        let mut resolver = Resolver::new(&db);
+        let options = IngestOptions::new("b").with_identifier_db("d/identifiers.yaml");
+        to_product(&build(sample), &options, Some(&mut resolver)).unwrap()
+    }
+
+    fn db_entry(
+        module: &str,
+        purl: &str,
+        cpe: &str,
+        supplier: &str,
+        revision: &str,
+        version: &str,
+    ) -> String {
+        format!(
+            "  {module}:\n    upstream:\n      name: {module}\n      supplier: {supplier}\n    purl: {purl}\n    cpe: '{cpe}'\n    version_rule:\n      kind: manual\n      table:\n        {revision}: {version}\n"
+        )
+    }
+
+    #[test]
+    fn identifier_db_fills_purl_cpe_supplier_when_spdx_has_none() {
+        let db = format!(
+            "schema: 1\nmodules:\n{}{}",
+            db_entry(
+                "hal_nordic",
+                "pkg:github/NordicSemiconductor/nrfx@v{version}",
+                "cpe:2.3:a:nordicsemi:nrfx:{version}:*:*:*:*:*:*:*",
+                "Nordic Semiconductor ASA",
+                REV_B,
+                "3.2.1"
+            ),
+            db_entry(
+                "mbedtls",
+                "pkg:github/Mbed-TLS/mbedtls@v{version}",
+                "cpe:2.3:a:arm:mbed_tls:{version}:*:*:*:*:*:*:*",
+                "arm",
+                REV_A,
+                "4.1.0"
+            ),
+        );
+        let out = ingest_with_db(&Sample::default(), &db);
+        let nordic = component(&out.product, "hal_nordic");
+        // The version stays the revision; the upstream version is evidence.
+        assert_eq!(nordic.version.as_deref(), Some(REV_B));
+        assert_eq!(
+            nordic.purl.as_ref().unwrap().as_str(),
+            "pkg:github/nordicsemiconductor/nrfx@v3.2.1"
+        );
+        assert_eq!(
+            nordic.cpe.as_ref().unwrap().as_str(),
+            "cpe:2.3:a:nordicsemi:nrfx:3.2.1:*:*:*:*:*:*:*"
+        );
+        assert_eq!(
+            nordic.supplier.as_ref().unwrap().name(),
+            "Nordic Semiconductor ASA"
+        );
+        for field in [
+            EvidenceField::Version,
+            EvidenceField::Purl,
+            EvidenceField::Cpe,
+            EvidenceField::Supplier,
+        ] {
+            assert_eq!(
+                located(nordic, field, IDENTIFIER_DB),
+                ["identifiers.yaml"],
+                "{field:?}"
+            );
+        }
+        assert!(
+            values(nordic, EvidenceField::Version)
+                .contains(&(IDENTIFIER_DB.into(), "3.2.1".into()))
+        );
+        let db_version = nordic
+            .evidence
+            .iter()
+            .find(|e| e.source() == IDENTIFIER_DB && e.field == EvidenceField::Version)
+            .unwrap();
+        assert_eq!(db_version.confidence, Confidence::new(9000).unwrap());
+        assert_eq!(db_version.technique, Technique::ManifestAnalysis);
+        // The fork purl is still evidence.
+        assert!(
+            values(nordic, EvidenceField::Purl)
+                .iter()
+                .any(|(_, v)| v.starts_with("pkg:generic/hal_nordic@"))
+        );
+        // mbedtls agrees with modules-deps.spdx: no warning at all.
+        assert!(out.warnings.is_empty(), "{:?}", out.warnings);
+        assert!(out.unknown_modules.is_empty());
+
+        // Without modules-deps.spdx, the database supplies mbedtls's identity too.
+        let sample = Sample {
+            modules_deps: None,
+            ..Sample::default()
+        };
+        let out = ingest_with_db(&sample, &db);
+        let mbedtls = component(&out.product, "mbedtls");
+        assert_eq!(
+            mbedtls.purl.as_ref().unwrap().as_str(),
+            "pkg:github/mbed-tls/mbedtls@v4.1.0"
+        );
+        assert_eq!(
+            located(mbedtls, EvidenceField::Purl, IDENTIFIER_DB),
+            ["identifiers.yaml"]
+        );
+        assert_eq!(mbedtls.supplier.as_ref().unwrap().name(), "arm");
+    }
+
+    #[test]
+    fn identifier_db_supplier_is_asserted_regardless_of_version_rule() {
+        // A file_regex rule with no sources: Low, so no version, purl or cpe, and the version
+        // rule's technique would be source-code-analysis. The supplier is still asserted.
+        let db = "schema: 1\nmodules:\n  hal_nordic:\n    upstream:\n      name: nrfx\n      supplier: Nordic Semiconductor ASA\n    purl: pkg:github/NordicSemiconductor/nrfx@v{version}\n    version_rule:\n      kind: file_regex\n      file: nrfx.h\n      pattern: 'NRFX_VERSION (?P<version>\\S+)'\n";
+        let out = ingest_with_db(&Sample::default(), db);
+        let nordic = component(&out.product, "hal_nordic");
+        let from_db: Vec<_> = nordic
+            .evidence
+            .iter()
+            .filter(|e| e.source() == IDENTIFIER_DB)
+            .collect();
+        assert_eq!(from_db.len(), 1, "{from_db:?}");
+        let supplier = from_db[0];
+        assert_eq!(supplier.field, EvidenceField::Supplier);
+        assert_eq!(supplier.value, "Nordic Semiconductor ASA");
+        assert_eq!(supplier.technique, Technique::ManifestAnalysis);
+        assert_eq!(supplier.confidence, Confidence::new(9000).unwrap());
+        assert_eq!(
+            nordic.supplier.as_ref().unwrap().name(),
+            "Nordic Semiconductor ASA"
+        );
+        // No upstream version: the fork purl stays, and the reason is a warning.
+        assert!(
+            nordic
+                .purl
+                .as_ref()
+                .unwrap()
+                .as_str()
+                .starts_with("pkg:generic/hal_nordic@")
+        );
+        assert!(
+            out.warnings.iter().any(|w| w
+                .message
+                .starts_with("module hal_nordic: no module source tree")),
+            "{:?}",
+            out.warnings
+        );
+    }
+
+    #[test]
+    fn spdx_upstream_reference_outranks_identifier_db() {
+        let db = format!(
+            "schema: 1\nmodules:\n{}",
+            db_entry(
+                "mbedtls",
+                "pkg:github/ARMmbed/mbedtls@v{version}",
+                "cpe:2.3:a:armmbed:mbedtls:{version}:*:*:*:*:*:*:*",
+                "Arm Limited",
+                REV_A,
+                "3.2.1"
+            ),
+        );
+        let out = ingest_with_db(&Sample::default(), &db);
+        let mbedtls = component(&out.product, "mbedtls");
+        assert_eq!(
+            mbedtls.purl.as_ref().unwrap().as_str(),
+            "pkg:github/mbed-tls/mbedtls@v4.1.0"
+        );
+        assert_eq!(
+            mbedtls.cpe.as_ref().unwrap().as_str(),
+            "cpe:2.3:a:arm:mbed_tls:4.1.0:*:*:*:*:*:*:*"
+        );
+        assert_eq!(mbedtls.supplier.as_ref().unwrap().name(), "arm");
+        // The database's facts are kept as evidence.
+        assert!(values(mbedtls, EvidenceField::Purl).contains(&(
+            IDENTIFIER_DB.into(),
+            "pkg:github/armmbed/mbedtls@v3.2.1".into()
+        )));
+        assert!(
+            values(mbedtls, EvidenceField::Supplier)
+                .contains(&(IDENTIFIER_DB.into(), "Arm Limited".into()))
+        );
+        let warnings: Vec<String> = out.warnings.iter().map(ToString::to_string).collect();
+        assert_eq!(
+            warnings,
+            [
+                "identifiers.yaml: module hal_nordic is not in identifiers.yaml; stub entry printed",
+                "identifiers.yaml: module mbedtls: identifiers.yaml purl pkg:github/armmbed/mbedtls@v3.2.1 differs from spdx/modules-deps.spdx purl pkg:github/mbed-tls/mbedtls@v4.1.0; using pkg:github/mbed-tls/mbedtls@v4.1.0",
+            ]
+        );
+        assert_eq!(out.unknown_modules.len(), 1);
+        assert_eq!(out.unknown_modules[0].name, "hal_nordic");
+        assert!(
+            out.unknown_modules[0].stub.starts_with("  hal_nordic:\n"),
+            "{}",
+            out.unknown_modules[0].stub
         );
     }
 

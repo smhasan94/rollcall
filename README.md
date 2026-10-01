@@ -78,8 +78,9 @@ always produce byte-identical output; changing only `--timestamp` changes only t
 `timestamp` line. How each model field maps to CycloneDX is documented in the
 `rollcall_core::cyclonedx` module docs (`cargo doc -p rollcall-core --open`).
 
-Exactly one of `--model` and `--zephyr` is required; `--west-list`, `--include-sdk` and
-`--sysbuild` only go with `--zephyr`.
+Exactly one of `--model` and `--zephyr` is required; `--west-list`, `--include-sdk`,
+`--sysbuild` and `--identifier-db` only go with `--zephyr`, and `--workspace` needs both
+`--identifier-db` and `--west-list`.
 
 ### Merging
 
@@ -155,6 +156,50 @@ build and `west spdx -d <build>` after it to create `spdx/`.
 Every fact carries evidence naming the file and line it came from. The full mapping is in the
 `rollcall_core::zephyr` module docs.
 
+### Identifier database
+
+`--identifier-db FILE` resolves each module to its *upstream* project: the version of the
+fork revision the build used, and from it the upstream purl, cpe and supplier that
+vulnerability scanners match. It is optional; without it the output is unchanged.
+
+```yaml
+schema: 1
+modules:
+  mbedtls:
+    upstream:
+      name: Mbed TLS
+      homepage: https://github.com/Mbed-TLS/mbedtls   # optional
+      supplier: arm                                   # optional
+    purl: pkg:github/Mbed-TLS/mbedtls@v{version}
+    cpe: cpe:2.3:a:arm:mbed_tls:{version}:*:*:*:*:*:*:*  # optional
+    version_rule:                                     # one of:
+      kind: manual                                    #   manual: revision -> version table
+      table:
+        a3e190fe44c78d1ba67f55979e1257328cc7d0d8: 4.1.0
+#   kind: git_tag,    pattern: '^v(?P<version>\d+\.\d+\.\d+)$'
+#   kind: file_regex, file: include/version.h, pattern: '...(?P<version>...)...'
+```
+
+`git_tag` matches the revision itself, or a tag pointing at it; `file_regex` searches a
+file in the module's sources. Both need the module sources, found with `--workspace DIR`
+(the west workspace: each module is at `DIR/<west list path>`, so `--workspace` requires
+`--west-list`, and `--identifier-db`; without either it is a usage error, exit 64).
+Quote versions that YAML would read as numbers (`'2.0'`). The database is checked when it
+is loaded: a malformed entry, an unknown key, or a purl or cpe template that does not render
+to a valid purl or CPE 2.3 name is an error naming the file and line (exit 65); a missing
+file is exit 66.
+
+The module's `version` stays the git revision; the upstream version is recorded as evidence
+and drives the purl and cpe, which are only filled in when a version was found (otherwise a
+warning says why). A purl or cpe from `spdx/modules-deps.spdx` wins over the database (a
+differing purl is a warning; a differing cpe is not). A module the database does not list gets one warning per run
+(also across every image with `--sysbuild`), and after the warnings `rollcall generate`
+prints a stub entry for each such module to stderr, ready to paste under `modules:`: fill in
+the `""` blanks and `<vendor>`/`<product>` (or delete the lines marked optional). The exit
+code stays 0.
+
+rollcall carries a small seed database in `crates/rollcall-core/db/identifiers.yaml`.
+
 ### Known scanner behaviour
 
 grype (verified with 0.119.0) silently ignores CycloneDX components of type
@@ -169,8 +214,8 @@ such as Zephyr is typed is decided at ingestion. osv-scanner is unaffected.
 | 0    | Success (including `--help`, `--version`)                                |
 | 1    | `validate`: the document has schema violations                           |
 | 64   | Usage error (bad arguments, bad `--timestamp`, `--serial-number` or `--product`, `merge --blob-manifest` without inputs or `--product`), or subcommand/format not implemented |
-| 65   | Input is malformed: not JSON, not UTF-8, too deeply nested, or an invalid model; or a Zephyr input (SPDX, `west list`, `.config`, `build_info.yml`) is malformed, or `--zephyr` names a sysbuild top-level directory without `--sysbuild` (or an image directory with it); or a `merge` input is not a readable CycloneDX 1.6 document, the inputs conflict (including different product names or versions without `--product`), or the blob manifest is malformed |
-| 66   | Input file missing or unreadable (including a directory), including a required Zephyr input, the `--west-list` file, a `merge` input, the blob manifest or a blob it lists |
+| 65   | Input is malformed: not JSON, not UTF-8, too deeply nested, or an invalid model; or a Zephyr input (SPDX, `west list`, `.config`, `build_info.yml`) or the `--identifier-db` file is malformed, or `--zephyr` names a sysbuild top-level directory without `--sysbuild` (or an image directory with it); or a `merge` input is not a readable CycloneDX 1.6 document, the inputs conflict (including different product names or versions without `--product`), or the blob manifest is malformed |
+| 66   | Input file missing or unreadable (including a directory), including a required Zephyr input, the `--west-list` or `--identifier-db` file, a `merge` input, the blob manifest or a blob it lists |
 | 74   | Output cannot be written                                                 |
 
 ## CycloneDX schema

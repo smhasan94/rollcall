@@ -619,3 +619,247 @@ fn generate_zephyr_mcuboot_dir_yields_bootloader_image_named_mcuboot() {
     );
     assert!(out.stdout == golden("baseline.mcuboot").as_bytes());
 }
+
+/// `crates/rollcall-core/tests/data/identifiers-stub.yaml`: maps cmsis, mbedtls and
+/// tf-psa-crypto; the fixtures' cmsis_6, hal_nordic and mcuboot are left out on purpose.
+fn stub_db() -> PathBuf {
+    PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("../rollcall-core/tests/data/identifiers-stub.yaml")
+}
+
+const UNMAPPED: [&str; 3] = ["cmsis_6", "hal_nordic", "mcuboot"];
+
+#[test]
+fn generate_zephyr_identifier_db_prints_one_warning_and_stub_per_unknown_module() {
+    let dir = tempfile::tempdir().unwrap();
+    let mut runs: Vec<(String, Vec<String>)> = APP_BUILDS
+        .iter()
+        .map(|(variant, image)| {
+            (
+                format!("{variant}/{image}"),
+                vec![
+                    "--zephyr".to_owned(),
+                    fixture_build(variant, image).display().to_string(),
+                    "--west-list".to_owned(),
+                    west_list(variant).display().to_string(),
+                ],
+            )
+        })
+        .collect();
+    // With --sysbuild the rule holds across both images of the run.
+    for (variant, _) in APP_BUILDS {
+        runs.push((
+            format!("{variant} --sysbuild"),
+            vec![
+                "--zephyr".to_owned(),
+                fixtures_root().join(variant).display().to_string(),
+                "--sysbuild".to_owned(),
+                "--west-list".to_owned(),
+                west_list(variant).display().to_string(),
+            ],
+        ));
+    }
+    for (what, args) in runs {
+        let out_path = dir.path().join("out.cdx.json");
+        let out = rollcall()
+            .arg("generate")
+            .args(&args)
+            .arg("--identifier-db")
+            .arg(stub_db())
+            .arg("-o")
+            .arg(&out_path)
+            .output()
+            .unwrap();
+        let stderr = stderr_of(&out);
+        assert_eq!(out.status.code(), Some(0), "{what}: {stderr}");
+        assert!(!stderr.contains("panicked"), "{stderr}");
+        // One warning per unmapped module, and no other module is reported unknown.
+        let unknown: Vec<&str> = stderr
+            .lines()
+            .filter(|l| l.starts_with("rollcall generate: warning: "))
+            .filter_map(|l| l.strip_suffix(" is not in identifiers-stub.yaml; stub entry printed"))
+            .filter_map(|l| l.rsplit_once("module ").map(|(_, m)| m))
+            .collect();
+        assert_eq!(unknown, UNMAPPED, "{what}: {stderr}");
+        // Then the header and one stub per module, after every warning.
+        let header =
+            "rollcall generate: 3 module(s) not in identifiers-stub.yaml; paste and fill in:\n";
+        let (before, stubs) = stderr
+            .split_once(header)
+            .unwrap_or_else(|| panic!("{what}: no stub header in {stderr}"));
+        assert!(
+            before
+                .lines()
+                .all(|l| l.starts_with("rollcall generate: warning: "))
+        );
+        let keys: Vec<&str> = stubs
+            .lines()
+            .filter(|l| l.starts_with("  ") && !l.starts_with("   "))
+            .collect();
+        assert_eq!(
+            keys,
+            ["  cmsis_6:", "  hal_nordic:", "  mcuboot:"],
+            "{what}"
+        );
+        assert!(
+            stubs.contains("pkg:github/zephyrproject-rtos/hal_nordic@v{version}"),
+            "{stubs}"
+        );
+        assert!(
+            stubs.contains("\"44fd3d44b15cb75f80a25b4679f91d2787e28664\": \"\""),
+            "{stubs}"
+        );
+
+        // Pasted under modules: and filled in, the stubs load and nothing is unknown any more.
+        let filled = stubs
+            .replace("name: \"\"", "name: \"Upstream\"")
+            .replace("homepage: \"\"", "homepage: \"https://example.com/\"")
+            .replace("supplier: \"\"", "supplier: \"Example\"")
+            .replace("<vendor>", "example")
+            .replace("<product>", "product")
+            .replace(": \"\"    # the upstream", ": \"1.0.0\"    # the upstream");
+        let db = dir.path().join("identifiers.yaml");
+        fs::write(
+            &db,
+            format!("{}{filled}", fs::read_to_string(stub_db()).unwrap()),
+        )
+        .unwrap();
+        let out = rollcall()
+            .arg("generate")
+            .args(&args)
+            .arg("--identifier-db")
+            .arg(&db)
+            .arg("-o")
+            .arg(&out_path)
+            .output()
+            .unwrap();
+        let stderr = stderr_of(&out);
+        assert_eq!(out.status.code(), Some(0), "{what}: {stderr}");
+        assert!(
+            !stderr.contains("not in identifiers.yaml"),
+            "{what}: {stderr}"
+        );
+        assert!(!stderr.contains("paste and fill in"), "{what}: {stderr}");
+        let validated = rollcall()
+            .args(["validate", "--schema"])
+            .arg(&out_path)
+            .output()
+            .unwrap();
+        assert_eq!(
+            validated.status.code(),
+            Some(0),
+            "{}",
+            stderr_of(&validated)
+        );
+        // The filled-in upstream identity is in the document.
+        let doc: Value = serde_json::from_str(&fs::read_to_string(&out_path).unwrap()).unwrap();
+        let text = doc.to_string();
+        assert!(
+            text.contains("pkg:github/zephyrproject-rtos/hal_nordic@v1.0.0"),
+            "{what}"
+        );
+    }
+}
+
+#[test]
+fn generate_zephyr_bad_identifier_db_exit_65_names_file_and_line() {
+    let dir = tempfile::tempdir().unwrap();
+    let db = dir.path().join("identifiers.yaml");
+    let text = fs::read_to_string(stub_db()).unwrap().replace(
+        "purl: pkg:github/Mbed-TLS/mbedtls@v{version}",
+        "purl: pkg:github/Mbed-TLS/mbedtls@v{ver}",
+    );
+    fs::write(&db, text).unwrap();
+    for extra in [&[][..], &["--sysbuild"][..]] {
+        let build = if extra.is_empty() {
+            fixture_build("baseline", "with_mcuboot")
+        } else {
+            fixtures_root().join("baseline")
+        };
+        let mut args = extra.to_vec();
+        args.extend(["--identifier-db", db.to_str().unwrap()]);
+        let out = generate_zephyr(&build, &args);
+        let stderr = assert_fails(
+            &out,
+            65,
+            &db,
+            &["unknown placeholder {ver}", "modules.mbedtls.purl"],
+        );
+        assert!(
+            stderr.starts_with(&format!("rollcall generate: {}:20:11: ", db.display())),
+            "{stderr}"
+        );
+    }
+    // A missing database is "no input".
+    let absent = dir.path().join("absent.yaml");
+    let out = generate_zephyr(
+        &fixture_build("baseline", "with_mcuboot"),
+        &["--identifier-db", absent.to_str().unwrap()],
+    );
+    assert_fails(&out, 66, &absent, &[]);
+}
+
+#[test]
+fn generate_identifier_db_and_workspace_flags_need_their_inputs_exit_64() {
+    let model = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("../rollcall-core/tests/data/minimal.model.json");
+    let db = stub_db();
+    let out = rollcall()
+        .arg("generate")
+        .arg("--model")
+        .arg(&model)
+        .arg("--identifier-db")
+        .arg(&db)
+        .output()
+        .unwrap();
+    assert_eq!(out.status.code(), Some(64));
+    assert!(out.stdout.is_empty());
+    assert!(
+        stderr_of(&out).contains("cannot be used with"),
+        "{}",
+        stderr_of(&out)
+    );
+    // --workspace needs both an identifier database and a west list (module paths come from
+    // the west list); missing either is a usage error, never silently ignored.
+    let db_arg = db.display().to_string();
+    let west = west_list("baseline").display().to_string();
+    for (extra, missing) in [
+        (vec!["--workspace", "."], "--identifier-db <FILE>"),
+        (
+            vec!["--workspace", ".", "--identifier-db", db_arg.as_str()],
+            "--west-list <FILE>",
+        ),
+        (
+            vec!["--workspace", ".", "--west-list", west.as_str()],
+            "--identifier-db <FILE>",
+        ),
+    ] {
+        let out = generate_zephyr(&fixture_build("baseline", "with_mcuboot"), &extra);
+        assert_eq!(
+            out.status.code(),
+            Some(64),
+            "{extra:?}: {}",
+            stderr_of(&out)
+        );
+        assert!(out.stdout.is_empty());
+        assert!(
+            stderr_of(&out).contains(missing),
+            "{extra:?}: {}",
+            stderr_of(&out)
+        );
+    }
+    // With both, it is accepted.
+    let ws = tempfile::tempdir().unwrap();
+    let out = generate_zephyr(
+        &fixture_build("baseline", "with_mcuboot"),
+        &[
+            "--workspace",
+            ws.path().to_str().unwrap(),
+            "--identifier-db",
+            &db_arg,
+            "--west-list",
+            &west,
+        ],
+    );
+    assert_eq!(out.status.code(), Some(0), "{}", stderr_of(&out));
+}

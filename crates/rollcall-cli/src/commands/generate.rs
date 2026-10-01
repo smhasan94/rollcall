@@ -4,7 +4,7 @@
 use std::io::Write;
 
 use rollcall_core::model::Product;
-use rollcall_core::zephyr::{self, IngestOptions, Warning};
+use rollcall_core::zephyr::{self, IngestOptions, UnknownModule, Warning};
 
 use super::output::write_document;
 use crate::cli::{EXIT_DATAERR, EXIT_NOINPUT, EXIT_USAGE, Format, GenerateArgs};
@@ -16,8 +16,13 @@ pub fn run(args: GenerateArgs) -> u8 {
         return EXIT_USAGE;
     }
     let product = match load_product(&args) {
-        Ok((product, warnings)) => {
+        Ok(Loaded {
+            product,
+            warnings,
+            unknown_modules,
+        }) => {
             print_warnings(&warnings);
+            print_stubs(&args, &unknown_modules);
             product
         }
         Err((code, message)) => {
@@ -39,9 +44,16 @@ pub fn run(args: GenerateArgs) -> u8 {
     }
 }
 
-/// Reads the input named by `--model` or `--zephyr`: the product and any warnings, or the
-/// exit code and message to fail with.
-fn load_product(args: &GenerateArgs) -> Result<(Product, Vec<Warning>), (u8, String)> {
+/// What `--model` or `--zephyr` gave.
+struct Loaded {
+    product: Product,
+    warnings: Vec<Warning>,
+    unknown_modules: Vec<UnknownModule>,
+}
+
+/// Reads the input named by `--model` or `--zephyr`: the product, any warnings and modules
+/// missing from the identifier database, or the exit code and message to fail with.
+fn load_product(args: &GenerateArgs) -> Result<Loaded, (u8, String)> {
     if let Some(dir) = &args.zephyr {
         let mut options = IngestOptions::new(dir)
             .with_include_sdk(args.include_sdk)
@@ -49,8 +61,18 @@ fn load_product(args: &GenerateArgs) -> Result<(Product, Vec<Warning>), (u8, Str
         if let Some(west_list) = &args.west_list {
             options = options.with_west_list(west_list);
         }
+        if let Some(db) = &args.identifier_db {
+            options = options.with_identifier_db(db);
+        }
+        if let Some(workspace) = &args.workspace {
+            options = options.with_workspace(workspace);
+        }
         return match zephyr::ingest(&options) {
-            Ok(ingest) => Ok((ingest.product, ingest.warnings)),
+            Ok(ingest) => Ok(Loaded {
+                product: ingest.product,
+                warnings: ingest.warnings,
+                unknown_modules: ingest.unknown_modules,
+            }),
             // Missing or unreadable input (including a directory where a file should be).
             Err(e) if e.is_read_error() => Err((EXIT_NOINPUT, e.to_string())),
             Err(e) => Err((EXIT_DATAERR, e.to_string())),
@@ -66,7 +88,11 @@ fn load_product(args: &GenerateArgs) -> Result<(Product, Vec<Warning>), (u8, Str
     let bytes =
         std::fs::read(model).map_err(|e| (EXIT_NOINPUT, format!("{}: {e}", model.display())))?;
     let product = Product::from_json_bytes(&bytes).map_err(|e| (EXIT_DATAERR, e.to_string()))?;
-    Ok((product, Vec::new()))
+    Ok(Loaded {
+        product,
+        warnings: Vec::new(),
+        unknown_modules: Vec::new(),
+    })
 }
 
 /// One `rollcall generate: warning: …` line per warning on stderr. A closed stderr is not an
@@ -75,5 +101,28 @@ fn print_warnings(warnings: &[Warning]) {
     let mut stderr = std::io::stderr().lock();
     for warning in warnings {
         let _ = writeln!(stderr, "rollcall generate: warning: {warning}");
+    }
+}
+
+/// After the warnings, the stub entries for modules missing from the identifier database, on
+/// stderr, ready to paste under its `modules:` mapping.
+fn print_stubs(args: &GenerateArgs, unknown: &[UnknownModule]) {
+    if unknown.is_empty() {
+        return;
+    }
+    let db = args
+        .identifier_db
+        .as_deref()
+        .and_then(|p| p.file_name())
+        .map(|n| n.to_string_lossy().into_owned())
+        .unwrap_or_else(|| "the identifier database".to_owned());
+    let mut stderr = std::io::stderr().lock();
+    let _ = writeln!(
+        stderr,
+        "rollcall generate: {} module(s) not in {db}; paste and fill in:",
+        unknown.len()
+    );
+    for module in unknown {
+        let _ = write!(stderr, "{}", module.stub);
     }
 }
