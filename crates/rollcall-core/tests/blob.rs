@@ -9,11 +9,12 @@ mod common;
 use std::fs;
 use std::path::{Path, PathBuf};
 
-use common::GOLDEN_TIMESTAMP;
-use rollcall_core::blob::{self, BlobError};
+use common::{GOLDEN_TIMESTAMP, blob_product};
+use rollcall_core::blob::{self, BlobEntry, BlobError};
 use rollcall_core::cyclonedx::{self, Timestamp, WriteOptions, validate_cyclonedx_1_6};
-use rollcall_core::merge::{self, ProductSpec};
-use rollcall_core::model::{EvidenceField, HashAlgorithm, Image, ImageKind, Product, Technique};
+use rollcall_core::model::{
+    EvidenceField, HashAlgorithm, Image, ImageKind, ImageType, Product, Technique,
+};
 use serde_json::{Value, json};
 
 /// `sha256sum crates/rollcall-core/tests/data/blobs/s140_nrf52_7.3.0_softdevice.hex`.
@@ -28,7 +29,7 @@ fn blobs_dir() -> PathBuf {
 }
 
 fn manifest() -> PathBuf {
-    blobs_dir().join("blobs.yaml")
+    common::blobs_manifest()
 }
 
 fn fixtures_root() -> PathBuf {
@@ -45,15 +46,6 @@ fn sha256(image: &Image) -> &str {
         .find(|h| h.algorithm() == HashAlgorithm::Sha256)
         .map(|h| h.digest())
         .unwrap()
-}
-
-/// The blobs of `blobs.yaml` under the product `blobs-demo@1.0.0`.
-fn blob_product() -> Product {
-    let ingest = blob::load(&manifest()).unwrap();
-    let spec: ProductSpec = "blobs-demo@1.0.0".parse().unwrap();
-    let mut product = merge::merge(Vec::new(), Some(&spec)).unwrap();
-    merge::add_blobs(&mut product, ingest.images).unwrap();
-    product
 }
 
 fn render(product: &Product) -> String {
@@ -250,6 +242,7 @@ fn malformed_manifest_and_missing_file_error_never_panic() {
         BlobError::Duplicate { index: 1, .. }
     ));
     assert!(matches!(load("bad-truncated.yaml"), BlobError::Yaml(_)));
+    assert!(matches!(load("bad-kind.yaml"), BlobError::Yaml(m) if m.contains("bogus")));
     assert!(matches!(
         load("bad-licence.yaml"),
         BlobError::Id { index: 0, .. }
@@ -350,4 +343,149 @@ fn blob_path_may_climb_out_of_the_manifest_directory() {
     let ingest = blob::load(&manifest).unwrap();
     assert_eq!(ingest.images.len(), 1);
     assert!(ingest.warnings.is_empty(), "{:?}", ingest.warnings);
+}
+
+#[test]
+fn static_archive_blob_is_library_and_softdevice_is_firmware() {
+    // In the model: the recogniser (and the `.a` extension) make libphy a library; the
+    // SoftDevice `.hex` stays firmware.
+    let product = blob_product();
+    let type_of = |name: &str| {
+        product
+            .images
+            .iter()
+            .find(|i| i.name == name)
+            .map(|i| i.image_type)
+            .unwrap()
+    };
+    assert_eq!(type_of("libphy"), ImageType::Library);
+    assert_eq!(type_of("s140_nrf52_softdevice"), ImageType::Firmware);
+
+    // In CycloneDX: the component `type`, in a schema-valid document; the product root
+    // stays firmware.
+    let doc: Value = serde_json::from_str(&render(&product)).unwrap();
+    validate_cyclonedx_1_6(&doc).unwrap();
+    assert_eq!(doc["metadata"]["component"]["type"], "firmware");
+    let images = doc["components"].as_array().unwrap();
+    let doc_type = |name: &str| {
+        images
+            .iter()
+            .find(|i| i["name"] == name)
+            .map(|i| i["type"].clone())
+            .unwrap()
+    };
+    assert_eq!(doc_type("libphy"), "library");
+    assert_eq!(doc_type("s140_nrf52_softdevice"), "firmware");
+}
+
+/// Writes `files` (each a few bytes) and a manifest with `body` into a temporary directory
+/// and loads it.
+fn load_with(body: &str, files: &[&str]) -> Result<blob::BlobIngest, BlobError> {
+    let tmp = tempfile::tempdir().unwrap();
+    for file in files {
+        fs::write(tmp.path().join(file), b"blob").unwrap();
+    }
+    let manifest = tmp.path().join("m.yaml");
+    fs::write(&manifest, body).unwrap();
+    blob::load(&manifest)
+}
+
+#[test]
+fn manifest_kind_library_firmware_and_bogus() {
+    // `kind: firmware` on libphy.a overrides both the recogniser and the `.a` extension.
+    let ingest = load_with(
+        "blobs:\n  - path: libphy.a\n    version: '1'\n    kind: firmware\n",
+        &["libphy.a"],
+    )
+    .unwrap();
+    assert_eq!(ingest.images[0].name, "libphy");
+    assert_eq!(ingest.images[0].image_type, ImageType::Firmware);
+
+    // `kind: library` on radio.bin overrides the `.bin` extension.
+    let ingest = load_with(
+        "blobs:\n  - name: radio\n    version: '1'\n    supplier: V\n    path: radio.bin\n    \
+         kind: library\n",
+        &["radio.bin"],
+    )
+    .unwrap();
+    assert_eq!(ingest.images[0].image_type, ImageType::Library);
+    // Without `kind`, the same file is firmware by its extension.
+    let ingest = load_with(
+        "blobs:\n  - name: radio\n    version: '1'\n    supplier: V\n    path: radio.bin\n",
+        &["radio.bin"],
+    )
+    .unwrap();
+    assert_eq!(ingest.images[0].image_type, ImageType::Firmware);
+
+    // `kind: bogus` is a manifest error naming the value, from the committed bad manifest
+    // and from a generated one.
+    let err = blob::load(&blobs_dir().join("bad-kind.yaml")).unwrap_err();
+    assert!(
+        matches!(&err, BlobError::Yaml(m) if m.contains("bogus")),
+        "{err}"
+    );
+    assert!(!err.is_read_error(), "{err}");
+    let err = load_with(
+        "blobs:\n  - name: radio\n    path: radio.bin\n    kind: bogus\n",
+        &["radio.bin"],
+    )
+    .unwrap_err();
+    assert!(
+        matches!(&err, BlobError::Yaml(m) if m.contains("bogus")),
+        "{err}"
+    );
+}
+
+#[test]
+fn blob_type_falls_back_to_extension_then_firmware() {
+    let entry = |path: &str| BlobEntry {
+        name: Some("x".to_owned()),
+        version: None,
+        supplier: None,
+        path: path.to_owned(),
+        licence: None,
+        purl: None,
+        kind: None,
+    };
+    // No manifest kind, no recogniser: the extension decides.
+    for (file, expected) in [
+        ("vendor.a", ImageType::Library),
+        ("vendor.LIB", ImageType::Library),
+        ("vendor.o", ImageType::Library),
+        ("vendor.hex", ImageType::Firmware),
+        ("vendor.bin", ImageType::Firmware),
+        ("vendor.elf", ImageType::Firmware),
+        // No extension that means anything: firmware.
+        ("vendor.so", ImageType::Firmware),
+        ("vendor", ImageType::Firmware),
+        ("", ImageType::Firmware),
+    ] {
+        assert_eq!(
+            blob::blob_type(&entry(file), None, file),
+            expected,
+            "{file:?}"
+        );
+    }
+    // A recogniser beats the extension; the manifest beats both.
+    let recognised = blob::recognise("libphy.a").unwrap();
+    assert_eq!(
+        blob::blob_type(&entry("libphy.hex"), Some(&recognised), "libphy.hex"),
+        ImageType::Library
+    );
+    let mut explicit = entry("libphy.a");
+    explicit.kind = Some(ImageType::Firmware);
+    assert_eq!(
+        blob::blob_type(&explicit, Some(&recognised), "libphy.a"),
+        ImageType::Firmware
+    );
+
+    // End to end through `load`: an unrecognised `.a` is a library, an unknown extension
+    // firmware.
+    let ingest = load_with(
+        "blobs:\n  - name: vendor\n    path: vendor.a\n  - name: other\n    path: other.dat\n",
+        &["vendor.a", "other.dat"],
+    )
+    .unwrap();
+    assert_eq!(ingest.images[0].image_type, ImageType::Library);
+    assert_eq!(ingest.images[1].image_type, ImageType::Firmware);
 }

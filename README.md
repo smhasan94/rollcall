@@ -109,6 +109,11 @@ blobs:
     supplier: Example Radio Ltd
     path: radio/radio-fw.bin
     purl: pkg:generic/example/radio-fw@2.1.0
+  - name: vendor-crypto
+    version: 1.0.0
+    supplier: Example Radio Ltd
+    path: lib/vendor-crypto.bin
+    kind: library                           # optional: firmware | library
 ```
 
 Each entry becomes a `blob` image with the file's SHA-256, the supplier, and the property
@@ -116,6 +121,19 @@ Each entry becomes a `blob` image with the file's SHA-256, the supplier, and the
 recognisers fill a missing name, version or supplier for Nordic SoftDevices
 (`s<nnn>_nrf5<n>_<M.m.p>_softdevice.hex`) and common Espressif, Nordic and Silicon Labs HAL
 libraries; licences are never guessed. Without input documents, `--product` is required.
+
+The optional `kind:` (`firmware` or `library`) sets the blob's CycloneDX component `type`;
+it does not change its `rollcall:image-kind`, which is always `blob`. Any other value is a
+malformed manifest (exit 65). Without `kind:`, the type comes from the built-in recogniser
+(SoftDevices are `firmware`, vendor libraries `library`), then from the file extension, and
+otherwise is `firmware`. A blob that is already in an input SBOM with a different type is a
+merge conflict (exit 65). The extensions:
+
+| Extension (any case)    | CycloneDX `type` |
+|-------------------------|------------------|
+| `.a`, `.lib`, `.o`      | `library`        |
+| `.hex`, `.bin`, `.elf`  | `firmware`       |
+| anything else           | `firmware`       |
 
 `validate` prints `<file>: valid CycloneDX 1.6` on success, or `<file>: <n> schema
 violation(s)` followed by one `  <JSON pointer>: <message>` line per violation, sorted.

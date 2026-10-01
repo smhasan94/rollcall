@@ -137,8 +137,8 @@ pub struct MergeArgs {
     /// last @). Without it the inputs must name the same product and version
     #[arg(long, value_name = "NAME[@VERSION]", value_parser = ProductSpec::from_str)]
     pub product: Option<ProductSpec>,
-    /// YAML manifest of opaque binary blobs (name, version, supplier, path, licence, purl) to
-    /// add as blob images, hashed with SHA-256
+    /// YAML manifest of opaque binary blobs (name, version, supplier, path, licence, purl,
+    /// kind: firmware|library) to add as blob images, hashed with SHA-256
     #[arg(long, value_name = "FILE")]
     pub blob_manifest: Option<PathBuf>,
     /// Document timestamp, RFC 3339 (e.g. 2026-01-02T03:04:05Z); normalised to UTC.

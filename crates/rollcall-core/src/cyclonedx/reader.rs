@@ -10,7 +10,9 @@
 //!
 //! - a top-level component without a `rollcall:image-kind` property is an `application` image;
 //! - a top-level component whose `type` is not `firmware`, `application` or `device` (e.g. a
-//!   `library`) is still read as an image, and the warning names its original type;
+//!   `framework`) is still read as an image, and the warning names its original type. A
+//!   `library` is read as an image of type [`ImageType::Library`]; it warns unless its
+//!   `rollcall:image-kind` is `blob` (rollcall writes static-archive blobs as `library`);
 //! - evidence that is not in `rollcall:evidence` properties is dropped;
 //! - components nested under `metadata.component` are dropped, and so is every dependency
 //!   edge to or from one of them or to or from a `services[]` entry.
@@ -30,8 +32,8 @@ use serde_json::Value;
 use super::writer::{EVIDENCE_PROPERTY, IMAGE_KIND};
 use crate::model::{
     BomRef, Component, ComponentKind, Cpe, Evidence, EvidenceSet, Hash, HashAlgorithm, IdError,
-    Image, ImageKind, License, MergeError, NodePath, PathSegment, Product, Purl, Supplier,
-    ValidationError,
+    Image, ImageKind, ImageType, License, MergeError, NodePath, PathSegment, Product, Purl,
+    Supplier, ValidationError,
 };
 use crate::warning::Warning;
 
@@ -442,7 +444,12 @@ impl Reader {
                 });
             }
         };
-        if !IMAGE_TYPES.contains(&component_type.as_str()) {
+        let image_type = match component_type {
+            ComponentKind::Library => ImageType::Library,
+            _ => ImageType::Firmware,
+        };
+        let library_blob = image_type == ImageType::Library && kind == ImageKind::Blob;
+        if !library_blob && !IMAGE_TYPES.contains(&component_type.as_str()) {
             self.warn(
                 &named,
                 format!(
@@ -462,6 +469,7 @@ impl Reader {
         let mut image =
             Image::new(kind, &raw.name).map_err(|source| ReadError::Id { at: named, source })?;
         image.version = raw.version.clone();
+        image.image_type = image_type;
         let path = root.child(PathSegment::of_image(&image));
         let at = path.to_string();
         self.bind(raw, &path)?;

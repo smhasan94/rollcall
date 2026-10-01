@@ -12,7 +12,8 @@ use crate::model::{
     Product, Purl,
 };
 
-/// CycloneDX component type used for the product and for every image.
+/// CycloneDX component type used for the product. Each image is written with its own
+/// [`ImageType`](crate::model::ImageType).
 const FIRMWARE: &str = "firmware";
 /// Property carrying an image's [`ImageKind`](crate::model::ImageKind).
 pub(super) const IMAGE_KIND: &str = "rollcall:image-kind";
@@ -274,7 +275,7 @@ pub(super) fn to_document(product: &Product, options: &WriteOptions) -> Result<B
                 });
             }
             let mut out = Facts::of_image(image).to_component(
-                FIRMWARE,
+                image.image_type.as_str(),
                 &BomRef::derive(&path),
                 properties,
             )?;

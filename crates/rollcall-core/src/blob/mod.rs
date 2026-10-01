@@ -16,6 +16,15 @@
 //! A recogniser only fills facts the manifest leaves out, and its evidence is recorded only
 //! for values it agrees with. An entry with no name after recognition is an error; one with
 //! no version or no supplier is a [`Warning`].
+//!
+//! # Type
+//!
+//! Each blob image's CycloneDX component type ([`ImageType`]) is decided by [`blob_type`], in
+//! this order: the manifest's `kind:` (`firmware` or `library`), then a built-in recogniser
+//! (a SoftDevice is `firmware`, a vendor library `library`), then the file extension
+//! ([`type_from_extension`]: `.a`, `.lib`, `.o` → `library`; `.hex`, `.bin`, `.elf` →
+//! `firmware`), and otherwise `firmware`. Static archives such as `libphy.a` are therefore
+//! written as CycloneDX `library` components, not `firmware`.
 
 pub mod manifest;
 pub mod recognise;
@@ -27,13 +36,13 @@ use std::path::{Path, PathBuf};
 use sha2::{Digest, Sha256};
 
 use crate::model::{
-    Confidence, Evidence, EvidenceField, Hash, HashAlgorithm, IdError, Image, ImageKind, License,
-    Occurrence, Purl, Supplier, Technique,
+    Confidence, Evidence, EvidenceField, Hash, HashAlgorithm, IdError, Image, ImageKind, ImageType,
+    License, Occurrence, Purl, Supplier, Technique,
 };
 use crate::warning::Warning;
 
 pub use manifest::{BlobEntry, BlobManifest};
-pub use recognise::{Recognised, recognise};
+pub use recognise::{Recognised, recognise, type_from_extension};
 
 /// Evidence source for values read from the manifest.
 const MANIFEST_SOURCE: &str = "blob-manifest";
@@ -201,6 +210,16 @@ fn evidence(
     })
 }
 
+/// A blob's CycloneDX type: the manifest's `kind`, else the recogniser's, else the one
+/// `file_name`'s extension suggests, else [`ImageType::Firmware`].
+pub fn blob_type(entry: &BlobEntry, recognised: Option<&Recognised>, file_name: &str) -> ImageType {
+    entry
+        .kind
+        .or_else(|| recognised.map(|r| r.image_type))
+        .or_else(|| type_from_extension(file_name))
+        .unwrap_or_default()
+}
+
 /// Turns one manifest entry into a `blob` image: hashes the file at `entry.path` (relative
 /// to `manifest_path`'s directory), fills missing facts from a recogniser and records
 /// evidence for every fact. Returns warnings for a missing version or supplier.
@@ -254,6 +273,7 @@ pub fn to_image(
 
     let mut image = Image::new(ImageKind::Blob, &name).map_err(id)?;
     image.version = version.clone();
+    image.image_type = blob_type(entry, recognised.as_ref(), &file_name);
     image.supplier = supplier
         .as_deref()
         .map(Supplier::new)

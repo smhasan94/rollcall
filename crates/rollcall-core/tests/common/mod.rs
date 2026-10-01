@@ -27,6 +27,21 @@ pub fn fixture_path(name: &str) -> PathBuf {
         .join(format!("{name}.model.json"))
 }
 
+/// `tests/data/blobs/blobs.yaml`, the hand-written blob manifest.
+pub fn blobs_manifest() -> PathBuf {
+    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/data/blobs/blobs.yaml")
+}
+
+/// The blobs of `blobs.yaml` under the product `blobs-demo@1.0.0` (rendered as
+/// `tests/golden/blobs.cdx.json`).
+pub fn blob_product() -> Product {
+    let ingest = rollcall_core::blob::load(&blobs_manifest()).unwrap();
+    let spec: rollcall_core::merge::ProductSpec = "blobs-demo@1.0.0".parse().unwrap();
+    let mut product = rollcall_core::merge::merge(Vec::new(), Some(&spec)).unwrap();
+    rollcall_core::merge::add_blobs(&mut product, ingest.images).unwrap();
+    product
+}
+
 /// Reads and parses (with validation) `tests/data/<name>.model.json`.
 pub fn load_fixture(name: &str) -> Product {
     let path = fixture_path(name);

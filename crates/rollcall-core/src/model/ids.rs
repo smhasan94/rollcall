@@ -633,6 +633,55 @@ impl fmt::Display for ImageKind {
     }
 }
 
+/// The CycloneDX 1.6 component `type` of an image: `firmware` (the default) or `library`
+/// (e.g. a static archive such as `libphy.a`, which is linked into an image rather than
+/// shipped as one).
+///
+/// Not part of the image's identity ([`ImageKind`] is): it is a fact like the supplier, and
+/// two images that differ only in their type conflict when merged.
+#[derive(
+    Debug,
+    Clone,
+    Copy,
+    Default,
+    PartialEq,
+    Eq,
+    PartialOrd,
+    Ord,
+    std::hash::Hash,
+    Serialize,
+    Deserialize,
+)]
+#[serde(rename_all = "lowercase")]
+pub enum ImageType {
+    /// Standalone firmware, e.g. a SoftDevice `.hex`.
+    #[default]
+    Firmware,
+    /// A library linked into an image, e.g. a static archive (`.a`).
+    Library,
+}
+
+impl ImageType {
+    /// The serialised (CycloneDX) name.
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::Firmware => "firmware",
+            Self::Library => "library",
+        }
+    }
+
+    /// True for the default, [`ImageType::Firmware`] (which the model's JSON omits).
+    pub fn is_firmware(&self) -> bool {
+        *self == Self::Firmware
+    }
+}
+
+impl fmt::Display for ImageType {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str(self.as_str())
+    }
+}
+
 /// The type of a component, as the CycloneDX 1.6 component `type`.
 ///
 /// The derived `Ord` follows declaration order and decides how sibling components sort, so

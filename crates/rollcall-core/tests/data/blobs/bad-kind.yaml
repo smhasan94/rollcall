@@ -1,0 +1,6 @@
+# Hand-written test manifest (not a real build artefact). See ../README.md.
+# `kind` must be `firmware` or `library`.
+blobs:
+  - name: libphy
+    path: libphy.a
+    kind: bogus
