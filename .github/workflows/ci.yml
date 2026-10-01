@@ -146,3 +146,107 @@ jobs:
             .cache/grype-cves-attempt-1
             .cache/grype-cves-attempt-2
           if-no-files-found: warn
+
+  # rollcall's VEX output against the reference tooling (SHA-113): vexctl (pinned,
+  # SHA-256-verified) loads and validates every OpenVEX statement, the CycloneDX VEX
+  # document validates against the CycloneDX 1.6 schema, and grype --vex suppresses the
+  # old-mbedTLS findings marked not_affected. Needs the network.
+  vex:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # Keep in sync with rust-toolchain.toml.
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: "1.91.1"
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo build -p rollcall-cli --locked
+      # One retry, as in the smoke job; each attempt keeps its own logs.
+      - name: VEX check (vexctl, CycloneDX schema, grype --vex)
+        run: |
+          ROLLCALL_VEX_OUT=.cache/vex-check-attempt-1 scripts/vex-check.sh --install || {
+            echo "vex-check failed; retrying once"
+            ROLLCALL_VEX_OUT=.cache/vex-check-attempt-2 scripts/vex-check.sh --install
+          }
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: vex-check
+          path: |
+            .cache/vex-check-attempt-1
+            .cache/vex-check-attempt-2
+          if-no-files-found: warn
+
+  # Sigstore keyless signing of a VEX document (`rollcall vex --sign cosign`) and its
+  # verification, including a tampered copy that must fail. Keyless signing needs the
+  # workflow's OIDC token, which GitHub grants only to trusted events, so both jobs run on
+  # push only (not on pull requests, which may come from forks). The token is confined to a
+  # minimal job: vex-cosign-build compiles rollcall without it and hands over the binary as
+  # an artifact; vex-cosign runs no build, no cache and no unpinned action, and every action
+  # in it is pinned to a full commit SHA.
+  vex-cosign-build:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      # Keep in sync with rust-toolchain.toml.
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: "1.91.1"
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo build -p rollcall-cli --locked
+      - uses: actions/upload-artifact@v4
+        with:
+          name: rollcall-vex-cosign-bin
+          path: target/debug/rollcall
+          if-no-files-found: error
+          retention-days: 1
+
+  vex-cosign:
+    if: github.event_name == 'push'
+    needs: vex-cosign-build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      # The installer verifies the cosign binary against checksums pinned in the action.
+      - uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6 # v4.1.2
+        with:
+          cosign-release: v3.0.6
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: rollcall-vex-cosign-bin
+          path: .cache/bin
+      - name: Sign with cosign, verify, and reject a tampered copy
+        run: |
+          set -euo pipefail
+          rollcall=.cache/bin/rollcall
+          chmod +x "$rollcall"
+          data=crates/rollcall-core/tests/data
+          out=.cache/vex-cosign
+          mkdir -p "$out"
+          "$rollcall" vex --model "$data/old-mbedtls.model.json" \
+            --kconfig fixtures/zephyr/tls/http_server/zephyr/.config \
+            --findings "$data/findings/old-mbedtls.grype.json" \
+            --rules "$data/vex/old-mbedtls.rules.yml" \
+            --format openvex --author rollcall-ci --sign cosign -o "$out/vex.openvex.json"
+          test -s "$out/vex.openvex.json.sigstore.json"
+          verify() {
+            "$rollcall" vex verify "$1" --cosign --bundle "$out/vex.openvex.json.sigstore.json" \
+              --certificate-identity-regexp "^https://github.com/${GITHUB_REPOSITORY}/" \
+              --certificate-oidc-issuer https://token.actions.githubusercontent.com
+          }
+          verify "$out/vex.openvex.json"
+          # Flip one bit of one byte of a copy.
+          python3 -c 'import sys; b = bytearray(open(sys.argv[1], "rb").read()); b[100] ^= 1; open(sys.argv[2], "wb").write(b)' \
+            "$out/vex.openvex.json" "$out/tampered.json"
+          rc=0
+          verify "$out/tampered.json" || rc=$?
+          echo "tampered document: exit $rc"
+          test "$rc" -eq 1

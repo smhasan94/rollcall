@@ -4,9 +4,10 @@
 //! Kconfig `.config`), scanner [`Finding`]s (grype or osv-scanner JSON, see
 //! [`parse_findings`]) and a [`RuleSet`] (see [`parse_rules`]). It returns a [`Report`]: a VEX
 //! [`Statement`] for every finding a rule decides, and an [`Unresolved`] entry, with a rule
-//! template to fill in, for every other finding. Rendering statements as CycloneDX VEX or
-//! OpenVEX is separate (SHA-113); [`Report::to_json`] writes rollcall's own
-//! `rollcall-vex/1` JSON.
+//! template to fill in, for every other finding. [`Report::to_json`] writes rollcall's own
+//! `rollcall-vex/1` JSON; [`to_openvex`], [`to_cyclonedx_vex`] and [`embed`] render the same
+//! statements as standard VEX (see [Output formats](#output-formats)), and [`sign()`] signs
+//! the result (see [Signing](#signing)).
 //!
 //! # Rule format
 //!
@@ -80,7 +81,58 @@
 //!    one of them and the finding is unresolved ([`Reason::Conflict`]). With no applicable
 //!    rule it is unresolved ([`Reason::NoRule`]).
 //!
+//! # Output formats
+//!
+//! The renderers never re-evaluate: each [`Statement`] of the report becomes one OpenVEX
+//! statement and one `affects` entry of a CycloneDX vulnerability. Unresolved findings are
+//! not rendered (they are not claims). Status and justification words are mapped by
+//! [`Status::openvex`], [`Status::cyclonedx_state`], [`Justification::openvex`] and
+//! [`Justification::cyclonedx`].
+//!
+//! - **OpenVEX** ([`to_openvex`], v0.2.0): each statement's product `@id` is the component's
+//!   purl exactly as the SBOM spells it (what grype's `--vex` matches against); a component
+//!   without a purl gets its BOM-Link (or `bom-ref`) and a warning. The rule's `detail` is
+//!   the `impact_statement` of a `not_affected` statement, the `action_statement` of an
+//!   `affected` one (which OpenVEX requires; [`DEFAULT_ACTION`] when the rule has no
+//!   detail), and the `status_notes` otherwise. `author` is `--author`, else the SBOM
+//!   product's supplier, else `rollcall` with a warning (the author should be the party
+//!   responsible for the statements).
+//! - **CycloneDX VEX** ([`to_cyclonedx_vex`], 1.6): a standalone BOM with no components
+//!   whose `metadata.component` summarises the SBOM's product and whose
+//!   `vulnerabilities[].affects[].ref` are BOM-Links (`urn:cdx:<serial>/<version>#<bom-ref>`)
+//!   into the SBOM, so the SBOM needs a lowercase `urn:uuid:` `serialNumber` and a
+//!   `version` of at least 1 (an SBOM with a malformed one is rejected for every format). Statements with the same
+//!   id, status, justification and detail are one vulnerability affecting several
+//!   components. `source` is NVD for `CVE-` ids, else OSV; aliases are `references`. Each
+//!   vulnerability carries `rollcall:rule` and `rollcall:evidence` properties and, when it
+//!   has a justification, [`OPENVEX_JUSTIFICATION_PROPERTY`] so the many-to-one mapping
+//!   loses nothing. A grouped vulnerability's `rollcall:rule` and `rollcall:evidence`
+//!   properties are the union, sorted and without duplicates, of its statements' rules and
+//!   evidence.
+//! - **Embedded** ([`embed`]): the SBOM with a `vulnerabilities` array like the CycloneDX
+//!   VEX one but citing bare `bom-ref`s, and its `version` incremented by one (CycloneDX 1.6:
+//!   a modified BOM's version SHOULD be incremented; `serialNumber` is kept). Only those two
+//!   token spans change: the top-level `version` value is rewritten in place and the array
+//!   is appended before the closing `}` (or replaces an existing empty `vulnerabilities:
+//!   []`); every other byte is kept. An SBOM without `version` is implicitly version 1 and
+//!   gets `"version": 2` appended next to the array. A non-empty `vulnerabilities` is
+//!   refused. The SBOM is never VEX-bearing unless asked for: `rollcall generate` writes no
+//!   `vulnerabilities`, and `rollcall vex` without `--embed` never touches the SBOM.
+//!
+//! # Signing
+//!
+//! [`sign()`] makes a detached Ed25519 signature (`rollcall-signature/1` JSON, see the
+//! [`sign`](mod@sign) module) over a rendered document's exact bytes; [`verify`] reports a
+//! modified document, a different key, or an invalid signature as distinct
+//! [`VerifyError`]s. Sigstore keyless signing is done by the CLI through `cosign`.
+//!
 //! # Determinism
+//!
+//! Rendered documents depend only on the report, the SBOM and [`VexOptions`]: the document
+//! id is `--id` or [`document_id`] (derived from the document kind, the statements and the
+//! SBOM's serial number and version, not the timestamp, so an OpenVEX and a CycloneDX VEX
+//! document never share a derived id), and the timestamp is `--timestamp` or the current
+//! time.
 //!
 //! The report depends only on the contents of the inputs, not on their order: findings,
 //! statements, unresolved entries and warnings are sorted. `bom-ref`s are the input
@@ -92,7 +144,10 @@ mod evaluate;
 mod evidence;
 mod findings;
 mod pattern;
+mod render;
 mod rules;
+mod sbom;
+pub mod sign;
 mod version;
 
 pub use evaluate::{
@@ -104,8 +159,16 @@ pub use findings::{
     Finding, Findings, FindingsError, Scanner, parse_findings, parse_grype, parse_osv,
 };
 pub use pattern::{PurlPattern, Specificity};
+pub use render::{
+    DEFAULT_ACTION, DocumentKind, OPENVEX_CONTEXT, OPENVEX_JUSTIFICATION_PROPERTY, Rendered,
+    VexError, VexOptions, document_id, embed, to_cyclonedx_vex, to_openvex,
+};
 pub use rules::{
     CONDITIONS, Condition, Justification, Match, RULES_VERSION, Rule, RuleError, RuleSet, Status,
     parse_rules, parse_rules_bytes, template,
+};
+pub use sbom::SbomIndex;
+pub use sign::{
+    DetachedSignature, PemForm, SigningKey, VerifyError, VerifyingKey, Zeroizing, sign, verify,
 };
 pub use version::{VersionKind, VersionRange, classify_version, effective_version, parse_version};

@@ -331,3 +331,53 @@ fn validate_module_docs_have_required_sections() {
         );
     }
 }
+
+const VEX_DOCS: &str = include_str!("../src/vex/mod.rs");
+
+#[test]
+fn vex_docs_have_mapping_signing_and_determinism_sections() {
+    let section = |heading: &str| -> String {
+        assert!(
+            VEX_DOCS.lines().any(|l| l.trim_end() == heading),
+            "missing section {heading:?} in vex/mod.rs"
+        );
+        VEX_DOCS
+            .lines()
+            .skip_while(|l| l.trim_end() != heading)
+            .skip(1)
+            .take_while(|l| !l.starts_with("//! # "))
+            .collect::<Vec<_>>()
+            .join("\n")
+    };
+    let formats = section("//! # Output formats");
+    for term in [
+        "OpenVEX",
+        "CycloneDX VEX",
+        "purl",
+        "BOM-Link",
+        "affects[].ref",
+        "impact_statement",
+        "action_statement",
+        "rollcall:rule",
+        "Embedded",
+        "--embed",
+        "incremented",
+        "union",
+    ] {
+        assert!(
+            formats.contains(term),
+            "Output formats section lacks {term:?}"
+        );
+    }
+    let signing = section("//! # Signing");
+    for term in ["Ed25519", "rollcall-signature/1", "cosign"] {
+        assert!(signing.contains(term), "Signing section lacks {term:?}");
+    }
+    let determinism = section("//! # Determinism");
+    for term in ["--id", "--timestamp", "document_id"] {
+        assert!(
+            determinism.contains(term),
+            "Determinism section lacks {term:?}"
+        );
+    }
+}

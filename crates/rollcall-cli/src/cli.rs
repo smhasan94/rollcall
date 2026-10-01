@@ -17,6 +17,9 @@ pub const EXIT_DATAERR: u8 = 65;
 pub const EXIT_NOINPUT: u8 = 66;
 /// Exit code for an internal error, e.g. a report that cannot be serialised (`EX_SOFTWARE`).
 pub const EXIT_SOFTWARE: u8 = 70;
+/// Exit code when a required external tool (e.g. `cosign`) is not available
+/// (`EX_UNAVAILABLE`).
+pub const EXIT_UNAVAILABLE: u8 = 69;
 /// Exit code when output cannot be written (`EX_IOERR`).
 pub const EXIT_IOERR: u8 = 74;
 
@@ -166,10 +169,97 @@ pub struct MergeArgs {
     pub output: Option<PathBuf>,
 }
 
+/// Output formats for `rollcall vex`.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, ValueEnum)]
+pub enum VexFormat {
+    /// rollcall's own `rollcall-vex/1` report: statements, unresolved findings with rule
+    /// templates, and warnings.
+    Rollcall,
+    /// A standalone CycloneDX 1.6 VEX BOM whose `affects` are BOM-Links into the SBOM (needs
+    /// --sbom).
+    Cyclonedx,
+    /// An OpenVEX v0.2.0 document whose products are the components' purls.
+    Openvex,
+}
+
+/// How `rollcall vex --sign` signs the output.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum SignSpec {
+    /// A detached Ed25519 signature with this PKCS#8 private key PEM, written to
+    /// `<output>.sig`.
+    Local(PathBuf),
+    /// Sigstore keyless signing with `cosign sign-blob`, bundle written to
+    /// `<output>.sigstore.json`.
+    Cosign,
+}
+
+impl FromStr for SignSpec {
+    type Err = String;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "cosign" => Ok(Self::Cosign),
+            _ => match s.strip_prefix("local:") {
+                Some(path) if !path.is_empty() => Ok(Self::Local(PathBuf::from(path))),
+                _ => Err(format!("expected local:<key.pem> or cosign, got {s:?}")),
+            },
+        }
+    }
+}
+
+/// Subcommands of `rollcall vex`.
+#[derive(Debug, Subcommand)]
+pub enum VexCommand {
+    /// Verify a signed VEX document: its rollcall Ed25519 signature (--key) or its Sigstore
+    /// bundle (--cosign)
+    Verify(VexVerifyArgs),
+}
+
+/// Arguments of `rollcall vex verify`.
+#[derive(Debug, Args)]
+#[command(
+    group = ArgGroup::new("method").required(true).multiple(false),
+    group = ArgGroup::new("identity").multiple(false)
+)]
+pub struct VexVerifyArgs {
+    /// The signed document
+    #[arg(value_name = "FILE")]
+    pub file: PathBuf,
+    /// The signer's Ed25519 public key PEM (SPKI; a PKCS#8 private key PEM also works)
+    #[arg(long, value_name = "PEM", group = "method")]
+    pub key: Option<PathBuf>,
+    /// The rollcall signature file (default: FILE.sig)
+    #[arg(long, value_name = "FILE", requires = "key")]
+    pub signature: Option<PathBuf>,
+    /// Verify a Sigstore bundle with `cosign verify-blob`. Requires the signer's identity
+    /// (--certificate-identity or --certificate-identity-regexp) and
+    /// --certificate-oidc-issuer
+    #[arg(long, group = "method", requires_all = ["identity", "certificate_oidc_issuer"])]
+    pub cosign: bool,
+    /// The Sigstore bundle (default: FILE.sigstore.json)
+    #[arg(long, value_name = "FILE", requires = "cosign")]
+    pub bundle: Option<PathBuf>,
+    /// The signing certificate's expected identity (passed to cosign)
+    #[arg(long, value_name = "ID", requires = "cosign", group = "identity")]
+    pub certificate_identity: Option<String>,
+    /// A regular expression the signing certificate's identity must match (passed to cosign)
+    #[arg(long, value_name = "REGEX", requires = "cosign", group = "identity")]
+    pub certificate_identity_regexp: Option<String>,
+    /// The signing certificate's expected OIDC issuer (passed to cosign)
+    #[arg(long, value_name = "URL", requires = "cosign")]
+    pub certificate_oidc_issuer: Option<String>,
+}
+
 /// Arguments of `rollcall vex`.
 #[derive(Debug, Args)]
-#[command(group = ArgGroup::new("input").required(true).multiple(false))]
+#[command(
+    group = ArgGroup::new("input").required(true).multiple(false),
+    args_conflicts_with_subcommands = true,
+    subcommand_negates_reqs = true
+)]
 pub struct VexArgs {
+    /// Verify a signed VEX document instead of producing one
+    #[command(subcommand)]
+    pub command: Option<VexCommand>,
     /// The CycloneDX 1.6 SBOM the findings are about (e.g. from `rollcall generate`)
     #[arg(long, value_name = "FILE", group = "input")]
     pub sbom: Option<PathBuf>,
@@ -194,7 +284,31 @@ pub struct VexArgs {
     /// and matches nothing (with a warning)
     #[arg(long, value_name = "FILE")]
     pub rules: Vec<PathBuf>,
-    /// Write the report here instead of to stdout
+    /// Output format. cyclonedx and openvex render only the statements; unresolved
+    /// findings are summarised on stderr
+    #[arg(long, value_enum, default_value_t = VexFormat::Rollcall)]
+    pub format: VexFormat,
+    /// Write the SBOM (--sbom) with the statements added as its `vulnerabilities`, instead
+    /// of a separate VEX document. The input file is never modified; write to -o
+    #[arg(long, requires = "sbom")]
+    pub embed: bool,
+    /// Document timestamp for --format cyclonedx|openvex, RFC 3339; normalised to UTC.
+    /// Defaults to the current time
+    #[arg(long, value_name = "RFC3339", value_parser = Timestamp::from_str)]
+    pub timestamp: Option<Timestamp>,
+    /// Document id for --format cyclonedx|openvex: urn:uuid: followed by a lowercase UUID.
+    /// Defaults to one derived from the statements and the SBOM's serial number
+    #[arg(long, value_name = "URN", value_parser = SerialNumber::from_str)]
+    pub id: Option<SerialNumber>,
+    /// OpenVEX author. Defaults to the SBOM product's supplier, else "rollcall"
+    #[arg(long, value_name = "TEXT")]
+    pub author: Option<String>,
+    /// Sign the output: local:KEY.pem (Ed25519, detached signature in OUTPUT.sig) or cosign
+    /// (Sigstore keyless, bundle in OUTPUT.sigstore.json; needs cosign and an OIDC
+    /// identity, e.g. in CI). Requires -o
+    #[arg(long, value_name = "local:KEY.pem|cosign", value_parser = SignSpec::from_str, requires = "output")]
+    pub sign: Option<SignSpec>,
+    /// Write the output here instead of to stdout
     #[arg(short, long, value_name = "FILE")]
     pub output: Option<PathBuf>,
 }

@@ -1,31 +1,116 @@
 //! `rollcall vex`: triage scanner findings for an SBOM with VEX rules and build evidence, and
-//! write the resulting statements and unresolved findings as `rollcall-vex/1` JSON.
+//! write the resulting statements as rollcall's `rollcall-vex/1` report, a CycloneDX 1.6 VEX
+//! document, an OpenVEX document, or embedded in the SBOM; optionally signed. `rollcall vex
+//! verify` checks a signature.
+
+mod cosign;
+mod sign;
+mod verify;
 
 use std::collections::{BTreeMap, BTreeSet};
 use std::io::Write;
 use std::path::{Path, PathBuf};
 
-use rollcall_core::cyclonedx;
+use rollcall_core::cyclonedx::{self, Timestamp};
 use rollcall_core::model::{NodePath, Product};
-use rollcall_core::vex::{self, BuildEvidence, Finding, RuleSet};
+use rollcall_core::vex::{self, BuildEvidence, Finding, Report, RuleSet, SbomIndex, VexOptions};
 use rollcall_core::warning::Warning;
 use rollcall_core::zephyr::kconfig;
 
 use super::output::write_atomically;
-use crate::cli::{EXIT_DATAERR, EXIT_IOERR, EXIT_NOINPUT, EXIT_SOFTWARE, EXIT_USAGE, VexArgs};
+use crate::cli::{
+    EXIT_DATAERR, EXIT_IOERR, EXIT_NOINPUT, EXIT_SOFTWARE, EXIT_USAGE, VexArgs, VexCommand,
+    VexFormat,
+};
 
 type Failure = (u8, String);
 
-/// Runs `rollcall vex`, returning the exit code. Unresolved findings and rule conflicts are
-/// part of the report and are summarised on stderr; they do not fail the command.
+/// Runs `rollcall vex` (or `rollcall vex verify`), returning the exit code. Unresolved
+/// findings and rule conflicts are summarised on stderr; they do not fail the command.
 pub fn run(args: VexArgs) -> u8 {
-    match report(&args) {
-        Ok(text) => match write_output(args.output.as_deref(), &text) {
-            Ok(()) => 0,
-            Err((code, message)) => fail(code, &message),
-        },
+    if let Some(VexCommand::Verify(verify)) = &args.command {
+        return verify::run(verify);
+    }
+    match produce(&args) {
+        Ok(()) => 0,
         Err((code, message)) => fail(code, &message),
     }
+}
+
+/// Rejects flag combinations clap cannot express.
+fn check_flags(args: &VexArgs) -> Result<(), Failure> {
+    let usage = |m: &str| Err((EXIT_USAGE, m.to_owned()));
+    if args.embed && args.format != VexFormat::Cyclonedx {
+        return usage("--embed writes CycloneDX: use it with --format cyclonedx");
+    }
+    if args.format == VexFormat::Cyclonedx && args.sbom.is_none() {
+        return usage(
+            "--format cyclonedx needs --sbom: its statements link to the SBOM's components by \
+             serial number and bom-ref (use --format openvex with --model)",
+        );
+    }
+    let document = matches!(args.format, VexFormat::Cyclonedx | VexFormat::Openvex) && !args.embed;
+    if !document && (args.timestamp.is_some() || args.id.is_some()) {
+        return usage(
+            "--timestamp and --id apply to a VEX document: use them with --format cyclonedx \
+             or --format openvex (without --embed)",
+        );
+    }
+    if args.author.is_some() && args.format != VexFormat::Openvex {
+        return usage("--author applies to --format openvex");
+    }
+    Ok(())
+}
+
+fn produce(args: &VexArgs) -> Result<(), Failure> {
+    check_flags(args)?;
+    // Load the signing key (or find cosign) first: a bad key must not leave an unsigned
+    // document behind.
+    let signer = match &args.sign {
+        Some(spec) => Some(sign::Signer::prepare(spec)?),
+        None => None,
+    };
+    let sbom_bytes = match &args.sbom {
+        Some(path) => Some(read(path)?),
+        None => None,
+    };
+    let report = evaluate(args, sbom_bytes.as_deref())?;
+    let text = render(args, &report, sbom_bytes.as_deref())?;
+    write_output(args.output.as_deref(), &text)?;
+    if let (Some(signer), Some(output)) = (&signer, &args.output) {
+        signer.sign(output, text.as_bytes())?;
+    }
+    Ok(())
+}
+
+fn render(args: &VexArgs, report: &Report, sbom_bytes: Option<&[u8]>) -> Result<String, Failure> {
+    let sbom_path = || args.sbom.clone().unwrap_or_default();
+    let index = match sbom_bytes {
+        Some(bytes) => Some(SbomIndex::from_bytes(bytes).map_err(|e| malformed(&sbom_path(), e))?),
+        None => None,
+    };
+    let mut options = VexOptions::new(args.timestamp.clone().unwrap_or_else(Timestamp::now));
+    options.id = args.id.clone();
+    options.author = args.author.clone();
+    let rendered = match (args.format, sbom_bytes, &index) {
+        (VexFormat::Rollcall, _, _) => {
+            return report
+                .to_json()
+                .map_err(|e| (EXIT_SOFTWARE, format!("cannot serialise the report: {e}")));
+        }
+        (VexFormat::Openvex, _, index) => vex::to_openvex(report, index.as_ref(), &options),
+        (VexFormat::Cyclonedx, Some(bytes), _) if args.embed => vex::embed(bytes, report),
+        (VexFormat::Cyclonedx, _, Some(index)) => vex::to_cyclonedx_vex(report, index, &options),
+        (VexFormat::Cyclonedx, _, None) => {
+            return Err((EXIT_USAGE, "--format cyclonedx needs --sbom".to_owned()));
+        }
+    };
+    let rendered = rendered.map_err(|e| match e {
+        vex::VexError::Json(_) => (EXIT_SOFTWARE, e.to_string()),
+        _ => malformed(&sbom_path(), e),
+    })?;
+    warn(None, &rendered.warnings);
+    Ok(rendered.text)
 }
 
 fn fail(code: u8, message: &str) -> u8 {
@@ -58,9 +143,9 @@ fn malformed(path: &Path, error: impl std::fmt::Display) -> Failure {
 /// The product, and for `--sbom` the document's `bom-ref` → node path table.
 type Loaded = (Product, Option<BTreeMap<String, NodePath>>);
 
-fn load_product(args: &VexArgs) -> Result<Loaded, Failure> {
-    if let Some(path) = &args.sbom {
-        let read = cyclonedx::read_bytes(&read(path)?).map_err(|e| malformed(path, e))?;
+fn load_product(args: &VexArgs, sbom_bytes: Option<&[u8]>) -> Result<Loaded, Failure> {
+    if let (Some(path), Some(bytes)) = (&args.sbom, sbom_bytes) {
+        let read = cyclonedx::read_bytes(bytes).map_err(|e| malformed(path, e))?;
         warn(Some(path), &read.warnings);
         return Ok((read.product, Some(read.refs)));
     }
@@ -164,9 +249,9 @@ fn load_rules(args: &VexArgs) -> Result<RuleSet, Failure> {
     Ok(rules)
 }
 
-/// Loads every input, evaluates, prints warnings and returns the report text.
-fn report(args: &VexArgs) -> Result<String, Failure> {
-    let (product, document_refs) = load_product(args)?;
+/// Loads every input, evaluates, and prints the report's warnings.
+fn evaluate(args: &VexArgs, sbom_bytes: Option<&[u8]>) -> Result<Report, Failure> {
+    let (product, document_refs) = load_product(args, sbom_bytes)?;
     let evidence = load_evidence(args, &product)?;
     let findings = load_findings(args)?;
     let rules = load_rules(args)?;
@@ -176,17 +261,23 @@ fn report(args: &VexArgs) -> Result<String, Failure> {
     };
     warn(None, &report.warnings);
     if !report.unresolved.is_empty() {
-        let _ = writeln!(
-            std::io::stderr(),
-            "rollcall vex: warning: {} of {} finding(s) unresolved; see `unresolved` in the \
-             report for a rule template for each",
-            report.unresolved.len(),
-            report.unresolved.len() + report.statements.len()
-        );
+        let unresolved = report.unresolved.len();
+        let total = unresolved + report.statements.len();
+        let _ = if args.format == VexFormat::Rollcall {
+            writeln!(
+                std::io::stderr(),
+                "rollcall vex: warning: {unresolved} of {total} finding(s) unresolved; see \
+                 `unresolved` in the report for a rule template for each"
+            )
+        } else {
+            writeln!(
+                std::io::stderr(),
+                "rollcall vex: warning: {unresolved} of {total} finding(s) unresolved and not \
+                 in the VEX document; run with --format rollcall for a rule template for each"
+            )
+        };
     }
-    report
-        .to_json()
-        .map_err(|e| (EXIT_SOFTWARE, format!("cannot serialise the report: {e}")))
+    Ok(report)
 }
 
 fn write_output(output: Option<&Path>, text: &str) -> Result<(), Failure> {
