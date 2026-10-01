@@ -1,0 +1,343 @@
+{
+  "@context": "https://openvex.dev/ns/v0.2.0",
+  "@id": "urn:uuid:82f3e9c3-683b-8d27-9fbb-3b8d2921f5f0",
+  "author": "rollcall",
+  "timestamp": "2026-01-02T03:04:05Z",
+  "version": 1,
+  "tooling": "rollcall/0.0.1",
+  "statements": [
+    {
+      "vulnerability": {
+        "name": "CVE-2021-45451"
+      },
+      "products": [
+        {
+          "@id": "pkg:github/mbed-tls/mbedtls@v2.28.0",
+          "identifiers": {
+            "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0"
+          }
+        }
+      ],
+      "status": "under_investigation",
+      "status_notes": "Not yet triaged."
+    },
+    {
+      "vulnerability": {
+        "name": "CVE-2022-35409"
+      },
+      "products": [
+        {
+          "@id": "pkg:github/mbed-tls/mbedtls@v2.28.0",
+          "identifiers": {
+            "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0"
+          }
+        }
+      ],
+      "status": "not_affected",
+      "justification": "vulnerable_code_not_present",
+      "impact_statement": "DTLS support (MBEDTLS_SSL_PROTO_DTLS) is not compiled in."
+    },
+    {
+      "vulnerability": {
+        "name": "CVE-2022-46392"
+      },
+      "products": [
+        {
+          "@id": "pkg:github/mbed-tls/mbedtls@v2.28.0",
+          "identifiers": {
+            "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0"
+          }
+        }
+      ],
+      "status": "affected",
+      "action_statement": "Upgrade Mbed TLS to 2.28.2 or later."
+    },
+    {
+      "vulnerability": {
+        "name": "CVE-2022-46393"
+      },
+      "products": [
+        {
+          "@id": "pkg:github/mbed-tls/mbedtls@v2.28.0",
+          "identifiers": {
+            "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0"
+          }
+        }
+      ],
+      "status": "not_affected",
+      "justification": "vulnerable_code_not_present",
+      "impact_statement": "DTLS support (MBEDTLS_SSL_PROTO_DTLS) is not compiled in."
+    },
+    {
+      "vulnerability": {
+        "name": "CVE-2023-43615"
+      },
+      "products": [
+        {
+          "@id": "pkg:github/mbed-tls/mbedtls@v2.28.0",
+          "identifiers": {
+            "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0"
+          }
+        }
+      ],
+      "status": "under_investigation",
+      "status_notes": "Not yet triaged."
+    },
+    {
+      "vulnerability": {
+        "name": "CVE-2023-52353"
+      },
+      "products": [
+        {
+          "@id": "pkg:github/mbed-tls/mbedtls@v2.28.0",
+          "identifiers": {
+            "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0"
+          }
+        }
+      ],
+      "status": "under_investigation",
+      "status_notes": "Not yet triaged."
+    },
+    {
+      "vulnerability": {
+        "name": "CVE-2024-23170"
+      },
+      "products": [
+        {
+          "@id": "pkg:github/mbed-tls/mbedtls@v2.28.0",
+          "identifiers": {
+            "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0"
+          }
+        }
+      ],
+      "status": "under_investigation",
+      "status_notes": "Not yet triaged."
+    },
+    {
+      "vulnerability": {
+        "name": "CVE-2024-23775"
+      },
+      "products": [
+        {
+          "@id": "pkg:github/mbed-tls/mbedtls@v2.28.0",
+          "identifiers": {
+            "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0"
+          }
+        }
+      ],
+      "status": "not_affected",
+      "justification": "vulnerable_code_not_present",
+      "impact_statement": "Neither X.509 CSR writing nor certificate writing is compiled in."
+    },
+    {
+      "vulnerability": {
+        "name": "CVE-2024-28960"
+      },
+      "products": [
+        {
+          "@id": "pkg:github/mbed-tls/mbedtls@v2.28.0",
+          "identifiers": {
+            "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0"
+          }
+        }
+      ],
+      "status": "under_investigation",
+      "status_notes": "Not yet triaged."
+    },
+    {
+      "vulnerability": {
+        "name": "CVE-2025-27809"
+      },
+      "products": [
+        {
+          "@id": "pkg:github/mbed-tls/mbedtls@v2.28.0",
+          "identifiers": {
+            "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0"
+          }
+        }
+      ],
+      "status": "under_investigation",
+      "status_notes": "Not yet triaged."
+    },
+    {
+      "vulnerability": {
+        "name": "CVE-2025-27810"
+      },
+      "products": [
+        {
+          "@id": "pkg:github/mbed-tls/mbedtls@v2.28.0",
+          "identifiers": {
+            "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0"
+          }
+        }
+      ],
+      "status": "under_investigation",
+      "status_notes": "Not yet triaged."
+    },
+    {
+      "vulnerability": {
+        "name": "CVE-2025-47917"
+      },
+      "products": [
+        {
+          "@id": "pkg:github/mbed-tls/mbedtls@v2.28.0",
+          "identifiers": {
+            "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0"
+          }
+        }
+      ],
+      "status": "under_investigation",
+      "status_notes": "Not yet triaged."
+    },
+    {
+      "vulnerability": {
+        "name": "CVE-2025-48965"
+      },
+      "products": [
+        {
+          "@id": "pkg:github/mbed-tls/mbedtls@v2.28.0",
+          "identifiers": {
+            "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0"
+          }
+        }
+      ],
+      "status": "under_investigation",
+      "status_notes": "Not yet triaged."
+    },
+    {
+      "vulnerability": {
+        "name": "CVE-2025-52496"
+      },
+      "products": [
+        {
+          "@id": "pkg:github/mbed-tls/mbedtls@v2.28.0",
+          "identifiers": {
+            "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0"
+          }
+        }
+      ],
+      "status": "under_investigation",
+      "status_notes": "Not yet triaged."
+    },
+    {
+      "vulnerability": {
+        "name": "CVE-2025-52497"
+      },
+      "products": [
+        {
+          "@id": "pkg:github/mbed-tls/mbedtls@v2.28.0",
+          "identifiers": {
+            "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0"
+          }
+        }
+      ],
+      "status": "under_investigation",
+      "status_notes": "Not yet triaged."
+    },
+    {
+      "vulnerability": {
+        "name": "CVE-2025-54764"
+      },
+      "products": [
+        {
+          "@id": "pkg:github/mbed-tls/mbedtls@v2.28.0",
+          "identifiers": {
+            "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0"
+          }
+        }
+      ],
+      "status": "under_investigation",
+      "status_notes": "Not yet triaged."
+    },
+    {
+      "vulnerability": {
+        "name": "CVE-2025-59438"
+      },
+      "products": [
+        {
+          "@id": "pkg:github/mbed-tls/mbedtls@v2.28.0",
+          "identifiers": {
+            "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0"
+          }
+        }
+      ],
+      "status": "under_investigation",
+      "status_notes": "Not yet triaged."
+    },
+    {
+      "vulnerability": {
+        "name": "CVE-2025-66442"
+      },
+      "products": [
+        {
+          "@id": "pkg:github/mbed-tls/mbedtls@v2.28.0",
+          "identifiers": {
+            "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0"
+          }
+        }
+      ],
+      "status": "under_investigation",
+      "status_notes": "Not yet triaged."
+    },
+    {
+      "vulnerability": {
+        "name": "CVE-2026-25835"
+      },
+      "products": [
+        {
+          "@id": "pkg:github/mbed-tls/mbedtls@v2.28.0",
+          "identifiers": {
+            "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0"
+          }
+        }
+      ],
+      "status": "under_investigation",
+      "status_notes": "Not yet triaged."
+    },
+    {
+      "vulnerability": {
+        "name": "CVE-2026-34871"
+      },
+      "products": [
+        {
+          "@id": "pkg:github/mbed-tls/mbedtls@v2.28.0",
+          "identifiers": {
+            "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0"
+          }
+        }
+      ],
+      "status": "under_investigation",
+      "status_notes": "Not yet triaged."
+    },
+    {
+      "vulnerability": {
+        "name": "CVE-2026-34872"
+      },
+      "products": [
+        {
+          "@id": "pkg:github/mbed-tls/mbedtls@v2.28.0",
+          "identifiers": {
+            "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0"
+          }
+        }
+      ],
+      "status": "under_investigation",
+      "status_notes": "Not yet triaged."
+    },
+    {
+      "vulnerability": {
+        "name": "CVE-2026-34877"
+      },
+      "products": [
+        {
+          "@id": "pkg:github/mbed-tls/mbedtls@v2.28.0",
+          "identifiers": {
+            "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0"
+          }
+        }
+      ],
+      "status": "under_investigation",
+      "status_notes": "Not yet triaged."
+    }
+  ]
+}

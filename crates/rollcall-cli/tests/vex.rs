@@ -460,3 +460,363 @@ fn sbom_statements_cite_the_documents_own_bom_refs() {
         golden["unresolved"].as_array().unwrap().len()
     );
 }
+
+// ---------------------------------------------------------------------------------------
+// --format cyclonedx|openvex and --embed (SHA-113). Expected documents are the goldens
+// `crates/rollcall-core/tests/golden/vex/old-mbedtls.{openvex,vex.cdx,embed.cdx}.json`,
+// generated only by scripts/regen-golden.sh.
+
+fn vex_golden(name: &str) -> String {
+    let path = core("tests/golden/vex").join(name);
+    std::fs::read_to_string(&path).unwrap_or_else(|e| {
+        panic!(
+            "cannot read golden {}: {e}; run scripts/regen-golden.sh",
+            path.display()
+        )
+    })
+}
+
+/// Generates the old-mbedTLS SBOM into `dir`, returning its path.
+fn generate_sbom(dir: &std::path::Path) -> PathBuf {
+    let sbom = dir.join("old-mbedtls.cdx.json");
+    rollcall()
+        .args(["generate", "--model", &data("old-mbedtls.model.json")])
+        .args(["--timestamp", GOLDEN_TIMESTAMP, "-o"])
+        .arg(&sbom)
+        .assert()
+        .code(0);
+    sbom
+}
+
+fn vex_document(sbom: &std::path::Path, format: &str) -> Command {
+    let sbom = sbom.display().to_string();
+    let mut cmd = vex_old_mbedtls(&["--sbom", &sbom], "vex/old-mbedtls.rules.yml");
+    cmd.args(["--format", format]);
+    cmd
+}
+
+#[test]
+fn vex_openvex_output_matches_golden() {
+    let dir = tempfile::tempdir().unwrap();
+    let sbom = generate_sbom(dir.path());
+    let output = vex_document(&sbom, "openvex")
+        .args(["--timestamp", GOLDEN_TIMESTAMP])
+        .output()
+        .unwrap();
+    assert_eq!(output.status.code(), Some(0), "{output:?}");
+    assert!(String::from_utf8(output.stdout).unwrap() == vex_golden("old-mbedtls.openvex.json"));
+    assert_eq!(
+        String::from_utf8(output.stderr).unwrap(),
+        "rollcall vex: warning: 1 of 23 finding(s) unresolved and not in the VEX document; run \
+         with --format rollcall for a rule template for each\n\
+         rollcall vex: warning: OpenVEX author: no --author and no supplier on the SBOM's \
+         product, so the document's author is \"rollcall\"; name the party responsible for \
+         these statements with --author\n"
+    );
+}
+
+#[test]
+fn vex_cyclonedx_output_passes_rollcall_validate_schema() {
+    let dir = tempfile::tempdir().unwrap();
+    let sbom = generate_sbom(dir.path());
+    let out = dir.path().join("old-mbedtls.vex.cdx.json");
+    vex_document(&sbom, "cyclonedx")
+        .args(["--timestamp", GOLDEN_TIMESTAMP, "-o"])
+        .arg(&out)
+        .assert()
+        .code(0)
+        .stdout(predicate::str::is_empty());
+    assert!(std::fs::read_to_string(&out).unwrap() == vex_golden("old-mbedtls.vex.cdx.json"));
+    rollcall()
+        .args(["validate", "--schema"])
+        .arg(&out)
+        .assert()
+        .code(0)
+        .stdout(predicate::str::contains("valid CycloneDX 1.6"));
+}
+
+#[test]
+fn vex_embed_output_matches_golden_and_validates() {
+    let dir = tempfile::tempdir().unwrap();
+    let sbom = generate_sbom(dir.path());
+    let before = std::fs::read(&sbom).unwrap();
+    let out = dir.path().join("embedded.cdx.json");
+    vex_document(&sbom, "cyclonedx")
+        .arg("--embed")
+        .arg("-o")
+        .arg(&out)
+        .assert()
+        .code(0);
+    assert!(std::fs::read_to_string(&out).unwrap() == vex_golden("old-mbedtls.embed.cdx.json"));
+    assert_eq!(
+        std::fs::read(&sbom).unwrap(),
+        before,
+        "the input SBOM was modified"
+    );
+    rollcall()
+        .args(["validate", "--schema"])
+        .arg(&out)
+        .assert()
+        .code(0);
+}
+
+#[test]
+fn vex_default_leaves_sbom_file_untouched_and_output_has_no_components() {
+    let dir = tempfile::tempdir().unwrap();
+    let sbom = generate_sbom(dir.path());
+    let before = std::fs::read(&sbom).unwrap();
+    for format in ["cyclonedx", "openvex", "rollcall"] {
+        let output = vex_document(&sbom, format).output().unwrap();
+        assert_eq!(output.status.code(), Some(0), "{format}: {output:?}");
+        let doc: Value = serde_json::from_slice(&output.stdout).unwrap();
+        assert!(doc.get("components").is_none(), "{format}");
+        assert_eq!(
+            std::fs::read(&sbom).unwrap(),
+            before,
+            "{format} modified the SBOM"
+        );
+    }
+    let sbom_doc: Value = serde_json::from_slice(&before).unwrap();
+    assert!(sbom_doc.get("vulnerabilities").is_none());
+}
+
+#[test]
+fn vex_openvex_from_model_uses_purls() {
+    let model = data("old-mbedtls.model.json");
+    let output = vex_old_mbedtls(&["--model", &model], "vex/old-mbedtls.rules.yml")
+        .args(["--format", "openvex", "--timestamp", GOLDEN_TIMESTAMP])
+        .args(["--author", "Example Devices Ltd"])
+        .output()
+        .unwrap();
+    assert_eq!(output.status.code(), Some(0), "{output:?}");
+    let doc: Value = serde_json::from_slice(&output.stdout).unwrap();
+    assert_eq!(doc["author"], "Example Devices Ltd");
+    assert_eq!(doc["timestamp"], GOLDEN_TIMESTAMP);
+    for s in doc["statements"].as_array().unwrap() {
+        assert_eq!(
+            s["products"][0]["@id"],
+            "pkg:github/mbed-tls/mbedtls@v2.28.0"
+        );
+    }
+}
+
+#[test]
+fn vex_id_override_is_used_by_both_formats() {
+    let dir = tempfile::tempdir().unwrap();
+    let sbom = generate_sbom(dir.path());
+    let id = "urn:uuid:3e671687-395b-41f5-a30f-a58921a69b79";
+    let mut derived = Vec::new();
+    for (format, key) in [("openvex", "@id"), ("cyclonedx", "serialNumber")] {
+        let output = vex_document(&sbom, format)
+            .args(["--id", id])
+            .output()
+            .unwrap();
+        assert_eq!(output.status.code(), Some(0), "{output:?}");
+        let doc: Value = serde_json::from_slice(&output.stdout).unwrap();
+        assert_eq!(doc[key], id, "{format}");
+        // Without --id each format derives its own id.
+        let output = vex_document(&sbom, format).output().unwrap();
+        let doc: Value = serde_json::from_slice(&output.stdout).unwrap();
+        derived.push(doc[key].as_str().unwrap().to_owned());
+    }
+    assert_ne!(
+        derived[0], derived[1],
+        "OpenVEX and CycloneDX VEX share a derived id"
+    );
+    vex_document(&sbom, "openvex")
+        .args(["--id", "urn:uuid:NOT-A-UUID"])
+        .assert()
+        .code(64);
+}
+
+#[test]
+fn vex_embed_requires_cyclonedx_exit_64() {
+    let dir = tempfile::tempdir().unwrap();
+    let sbom = generate_sbom(dir.path());
+    for format in ["openvex", "rollcall"] {
+        vex_document(&sbom, format)
+            .arg("--embed")
+            .assert()
+            .code(64)
+            .stdout(predicate::str::is_empty())
+            .stderr(predicate::str::contains(
+                "--embed writes CycloneDX: use it with --format cyclonedx",
+            ));
+    }
+    // --embed needs an SBOM to embed into.
+    let model = data("old-mbedtls.model.json");
+    vex_old_mbedtls(&["--model", &model], "vex/old-mbedtls.rules.yml")
+        .args(["--format", "cyclonedx", "--embed"])
+        .assert()
+        .code(64);
+}
+
+#[test]
+fn vex_flag_combinations_are_usage_errors_exit_64() {
+    let dir = tempfile::tempdir().unwrap();
+    let sbom = generate_sbom(dir.path());
+    let model = data("old-mbedtls.model.json");
+    vex_old_mbedtls(&["--model", &model], "vex/old-mbedtls.rules.yml")
+        .args(["--format", "cyclonedx"])
+        .assert()
+        .code(64)
+        .stderr(predicate::str::contains("--format cyclonedx needs --sbom"));
+    vex_document(&sbom, "rollcall")
+        .args(["--timestamp", GOLDEN_TIMESTAMP])
+        .assert()
+        .code(64)
+        .stderr(predicate::str::contains(
+            "--timestamp and --id apply to a VEX document",
+        ));
+    vex_document(&sbom, "cyclonedx")
+        .args(["--embed", "--timestamp", GOLDEN_TIMESTAMP])
+        .assert()
+        .code(64);
+    vex_document(&sbom, "cyclonedx")
+        .args(["--author", "x"])
+        .assert()
+        .code(64)
+        .stderr(predicate::str::contains(
+            "--author applies to --format openvex",
+        ));
+    vex_document(&sbom, "spdx").assert().code(64);
+}
+
+#[test]
+fn vex_missing_input_exit_66() {
+    let dir = tempfile::tempdir().unwrap();
+    vex_document(&dir.path().join("missing.cdx.json"), "cyclonedx")
+        .assert()
+        .code(66)
+        .stdout(predicate::str::is_empty());
+}
+
+/// `text` with its serialNumber's UUID in upper case (the schema requires lower case).
+fn uppercase_serial(text: &str) -> String {
+    let doc: Value = serde_json::from_str(text).unwrap();
+    let serial = doc["serialNumber"].as_str().unwrap();
+    let upper = format!(
+        "urn:uuid:{}",
+        serial.trim_start_matches("urn:uuid:").to_uppercase()
+    );
+    assert_ne!(upper, serial);
+    text.replacen(serial, &upper, 1)
+}
+
+#[test]
+fn vex_embed_increments_the_sbom_version() {
+    let dir = tempfile::tempdir().unwrap();
+    let sbom = generate_sbom(dir.path());
+    let out = dir.path().join("embedded.cdx.json");
+    vex_document(&sbom, "cyclonedx")
+        .arg("--embed")
+        .arg("-o")
+        .arg(&out)
+        .assert()
+        .code(0);
+    let before: Value = serde_json::from_slice(&std::fs::read(&sbom).unwrap()).unwrap();
+    let after: Value = serde_json::from_slice(&std::fs::read(&out).unwrap()).unwrap();
+    assert_eq!(before["version"], 1);
+    assert_eq!(after["version"], 2);
+    assert_eq!(after["serialNumber"], before["serialNumber"]);
+}
+
+#[test]
+fn vex_bom_link_inputs_version_0_and_uppercase_uuid_exit_65() {
+    let dir = tempfile::tempdir().unwrap();
+    let sbom = generate_sbom(dir.path());
+    let text = std::fs::read_to_string(&sbom).unwrap();
+    for (name, bytes, needle) in [
+        (
+            "version-0",
+            text.replacen("\"version\": 1,", "\"version\": 0,", 1),
+            "version 0 is not an integer of at least 1",
+        ),
+        (
+            "uppercase-uuid",
+            uppercase_serial(&text),
+            "is not a lowercase urn:uuid:",
+        ),
+    ] {
+        let path = dir.path().join(format!("{name}.cdx.json"));
+        std::fs::write(&path, bytes).unwrap();
+        for format in ["cyclonedx", "openvex"] {
+            let output = vex_document(&path, format).output().unwrap();
+            assert_eq!(
+                output.status.code(),
+                Some(65),
+                "{name} {format}: {output:?}"
+            );
+            let stderr = String::from_utf8(output.stderr).unwrap();
+            assert!(stderr.contains(needle), "{name} {format}: {stderr}");
+        }
+    }
+}
+
+#[test]
+fn vex_malformed_inputs_exit_65_no_panic() {
+    let dir = tempfile::tempdir().unwrap();
+    let sbom = generate_sbom(dir.path());
+    let text = std::fs::read_to_string(&sbom).unwrap();
+    let cases: Vec<(&str, Vec<u8>)> = vec![
+        ("empty", Vec::new()),
+        ("truncated", text.as_bytes()[..text.len() / 2].to_vec()),
+        ("not-utf8", b"\xff\xfe{}".to_vec()),
+        ("wrong-type", b"[\"CycloneDX\"]".to_vec()),
+        (
+            "no-serial",
+            text.replacen("\"serialNumber\"", "\"x-serialNumber\"", 1)
+                .into_bytes(),
+        ),
+        (
+            "version-0",
+            text.replacen("\"version\": 1,", "\"version\": 0,", 1)
+                .into_bytes(),
+        ),
+        ("uppercase-uuid", uppercase_serial(&text).into_bytes()),
+    ];
+    for (name, bytes) in cases {
+        let path = dir.path().join(format!("{name}.cdx.json"));
+        std::fs::write(&path, bytes).unwrap();
+        let output = vex_document(&path, "cyclonedx").output().unwrap();
+        assert_eq!(output.status.code(), Some(65), "{name}: {output:?}");
+        assert!(output.stdout.is_empty(), "{name}");
+        let stderr = String::from_utf8(output.stderr).unwrap();
+        assert!(!stderr.contains("panicked"), "{name}: {stderr}");
+        assert!(stderr.starts_with("rollcall vex: "), "{name}: {stderr}");
+    }
+    // An SBOM that already carries vulnerabilities is not embedded into twice.
+    let embedded = dir.path().join("embedded.cdx.json");
+    vex_document(&sbom, "cyclonedx")
+        .arg("--embed")
+        .arg("-o")
+        .arg(&embedded)
+        .assert()
+        .code(0);
+    vex_document(&embedded, "cyclonedx")
+        .arg("--embed")
+        .assert()
+        .code(65)
+        .stderr(predicate::str::contains(
+            "already has a `vulnerabilities` array",
+        ));
+}
+
+#[test]
+fn vex_unresolved_findings_are_warned() {
+    let output = rollcall()
+        .arg("vex")
+        .args(["--model", &data("old-heapless.model.json")])
+        .args(["--findings", &data("findings/old-heapless.osv.json")])
+        .args(["--format", "openvex", "--timestamp", GOLDEN_TIMESTAMP])
+        .output()
+        .unwrap();
+    assert_eq!(output.status.code(), Some(0), "{output:?}");
+    let doc: Value = serde_json::from_slice(&output.stdout).unwrap();
+    assert!(doc["statements"].as_array().unwrap().is_empty());
+    let stderr = String::from_utf8(output.stderr).unwrap();
+    assert!(
+        stderr.contains("unresolved and not in the VEX document"),
+        "{stderr}"
+    );
+}

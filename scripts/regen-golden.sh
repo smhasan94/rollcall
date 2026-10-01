@@ -3,11 +3,12 @@
 # documents rendered from tests/data/*.model.json, the blob-manifest document rendered from
 # tests/data/blobs/, and the Zephyr ingestion goldens under tests/golden/zephyr/ rendered from
 # fixtures/zephyr/, including the MCUboot image and the merged sysbuild product, and the VEX
-# report under tests/golden/vex/ evaluated from tests/data/findings/ and tests/data/vex/, and
-# the validation goldens under tests/golden/validate/: the clean document stripped of two
-# components' supplier and hashes, and its expected `--profile all` findings), then re-runs the
-# golden tests and the reader round trips against them, and the CLI tests that compare
-# `rollcall generate`, `rollcall merge`, `rollcall vex` and `rollcall validate` output with them.
+# report under tests/golden/vex/ evaluated from tests/data/findings/ and tests/data/vex/,
+# with its OpenVEX, CycloneDX VEX and embedded-SBOM renderings, and the validation goldens
+# under tests/golden/validate/: the clean document stripped of two components' supplier and
+# hashes, and its expected `--profile all` findings), then re-runs the golden tests and the
+# reader round trips against them, and the CLI tests that compare `rollcall generate`,
+# `rollcall merge`, `rollcall vex` and `rollcall validate` output with them.
 #
 # Golden files are only ever produced by this script, never edited by hand. Review the
 # resulting diff like code.

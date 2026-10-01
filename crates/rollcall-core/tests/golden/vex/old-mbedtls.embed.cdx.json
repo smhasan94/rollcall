@@ -1,0 +1,601 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.6",
+  "serialNumber": "urn:uuid:69f2589c-ad74-860e-9e94-8014f9de18a7",
+  "version": 2,
+  "metadata": {
+    "timestamp": "2026-01-02T03:04:05Z",
+    "tools": {
+      "components": [
+        {
+          "type": "application",
+          "name": "rollcall",
+          "version": "0.0.1"
+        }
+      ]
+    },
+    "component": {
+      "type": "firmware",
+      "bom-ref": "product:cb91904541becd528b35755f21604693",
+      "name": "old-tls-node",
+      "version": "1.0.0"
+    }
+  },
+  "components": [
+    {
+      "type": "firmware",
+      "bom-ref": "image:be3761a0a392e54d71f0486a3a1ee0e4",
+      "name": "old-tls-app",
+      "version": "1.0.0",
+      "properties": [
+        {
+          "name": "rollcall:image-kind",
+          "value": "application"
+        }
+      ],
+      "components": [
+        {
+          "type": "library",
+          "bom-ref": "component:9404b57b22a8bf72df5b6d6c93f4defd",
+          "name": "mbedtls",
+          "version": "2.28.0",
+          "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0",
+          "cpe": "cpe:2.3:a:arm:mbed_tls:2.28.0:*:*:*:*:*:*:*",
+          "licenses": [
+            {
+              "expression": "Apache-2.0 OR GPL-2.0-or-later"
+            }
+          ]
+        },
+        {
+          "type": "operating-system",
+          "bom-ref": "component:6caab9ee8bc7b61fc5c32954f127d553",
+          "name": "zephyr",
+          "version": "3.7.0",
+          "purl": "pkg:github/zephyrproject-rtos/zephyr@v3.7.0",
+          "cpe": "cpe:2.3:o:zephyrproject:zephyr:3.7.0:-:*:*:*:*:*:*",
+          "licenses": [
+            {
+              "expression": "Apache-2.0"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "dependencies": [
+    {
+      "ref": "product:cb91904541becd528b35755f21604693",
+      "dependsOn": []
+    },
+    {
+      "ref": "image:be3761a0a392e54d71f0486a3a1ee0e4",
+      "dependsOn": []
+    },
+    {
+      "ref": "component:9404b57b22a8bf72df5b6d6c93f4defd",
+      "dependsOn": []
+    },
+    {
+      "ref": "component:6caab9ee8bc7b61fc5c32954f127d553",
+      "dependsOn": []
+    }
+  ],
+  "vulnerabilities": [
+    {
+      "id": "CVE-2021-45451",
+      "source": {
+        "name": "NVD",
+        "url": "https://nvd.nist.gov/vuln/detail/CVE-2021-45451"
+      },
+      "analysis": {
+        "state": "in_triage",
+        "detail": "Not yet triaged."
+      },
+      "affects": [
+        {
+          "ref": "component:9404b57b22a8bf72df5b6d6c93f4defd"
+        }
+      ],
+      "properties": [
+        {
+          "name": "rollcall:rule",
+          "value": "mbedtls-triage"
+        }
+      ]
+    },
+    {
+      "id": "CVE-2022-35409",
+      "source": {
+        "name": "NVD",
+        "url": "https://nvd.nist.gov/vuln/detail/CVE-2022-35409"
+      },
+      "analysis": {
+        "state": "not_affected",
+        "justification": "code_not_present",
+        "detail": "DTLS support (MBEDTLS_SSL_PROTO_DTLS) is not compiled in."
+      },
+      "affects": [
+        {
+          "ref": "component:9404b57b22a8bf72df5b6d6c93f4defd"
+        }
+      ],
+      "properties": [
+        {
+          "name": "rollcall:evidence",
+          "value": "old-tls-app/zephyr/.config:403: CONFIG_MBEDTLS_SSL_PROTO_DTLS is not set"
+        },
+        {
+          "name": "rollcall:openvex-justification",
+          "value": "vulnerable_code_not_present"
+        },
+        {
+          "name": "rollcall:rule",
+          "value": "mbedtls-dtls-compiled-out"
+        }
+      ]
+    },
+    {
+      "id": "CVE-2022-46392",
+      "source": {
+        "name": "NVD",
+        "url": "https://nvd.nist.gov/vuln/detail/CVE-2022-46392"
+      },
+      "analysis": {
+        "state": "exploitable",
+        "detail": "Upgrade Mbed TLS to 2.28.2 or later."
+      },
+      "affects": [
+        {
+          "ref": "component:9404b57b22a8bf72df5b6d6c93f4defd"
+        }
+      ],
+      "properties": [
+        {
+          "name": "rollcall:rule",
+          "value": "mbedtls-2-28-before-2-28-2"
+        }
+      ]
+    },
+    {
+      "id": "CVE-2022-46393",
+      "source": {
+        "name": "NVD",
+        "url": "https://nvd.nist.gov/vuln/detail/CVE-2022-46393"
+      },
+      "analysis": {
+        "state": "not_affected",
+        "justification": "code_not_present",
+        "detail": "DTLS support (MBEDTLS_SSL_PROTO_DTLS) is not compiled in."
+      },
+      "affects": [
+        {
+          "ref": "component:9404b57b22a8bf72df5b6d6c93f4defd"
+        }
+      ],
+      "properties": [
+        {
+          "name": "rollcall:evidence",
+          "value": "old-tls-app/zephyr/.config:403: CONFIG_MBEDTLS_SSL_PROTO_DTLS is not set"
+        },
+        {
+          "name": "rollcall:openvex-justification",
+          "value": "vulnerable_code_not_present"
+        },
+        {
+          "name": "rollcall:rule",
+          "value": "mbedtls-dtls-compiled-out"
+        }
+      ]
+    },
+    {
+      "id": "CVE-2023-43615",
+      "source": {
+        "name": "NVD",
+        "url": "https://nvd.nist.gov/vuln/detail/CVE-2023-43615"
+      },
+      "analysis": {
+        "state": "in_triage",
+        "detail": "Not yet triaged."
+      },
+      "affects": [
+        {
+          "ref": "component:9404b57b22a8bf72df5b6d6c93f4defd"
+        }
+      ],
+      "properties": [
+        {
+          "name": "rollcall:rule",
+          "value": "mbedtls-triage"
+        }
+      ]
+    },
+    {
+      "id": "CVE-2023-52353",
+      "source": {
+        "name": "NVD",
+        "url": "https://nvd.nist.gov/vuln/detail/CVE-2023-52353"
+      },
+      "analysis": {
+        "state": "in_triage",
+        "detail": "Not yet triaged."
+      },
+      "affects": [
+        {
+          "ref": "component:9404b57b22a8bf72df5b6d6c93f4defd"
+        }
+      ],
+      "properties": [
+        {
+          "name": "rollcall:rule",
+          "value": "mbedtls-triage"
+        }
+      ]
+    },
+    {
+      "id": "CVE-2024-23170",
+      "source": {
+        "name": "NVD",
+        "url": "https://nvd.nist.gov/vuln/detail/CVE-2024-23170"
+      },
+      "analysis": {
+        "state": "in_triage",
+        "detail": "Not yet triaged."
+      },
+      "affects": [
+        {
+          "ref": "component:9404b57b22a8bf72df5b6d6c93f4defd"
+        }
+      ],
+      "properties": [
+        {
+          "name": "rollcall:rule",
+          "value": "mbedtls-triage"
+        }
+      ]
+    },
+    {
+      "id": "CVE-2024-23775",
+      "source": {
+        "name": "NVD",
+        "url": "https://nvd.nist.gov/vuln/detail/CVE-2024-23775"
+      },
+      "analysis": {
+        "state": "not_affected",
+        "justification": "code_not_present",
+        "detail": "Neither X.509 CSR writing nor certificate writing is compiled in."
+      },
+      "affects": [
+        {
+          "ref": "component:9404b57b22a8bf72df5b6d6c93f4defd"
+        }
+      ],
+      "properties": [
+        {
+          "name": "rollcall:evidence",
+          "value": "old-tls-app/zephyr/.config:433: CONFIG_MBEDTLS_X509_CSR_WRITE_C is not set"
+        },
+        {
+          "name": "rollcall:evidence",
+          "value": "old-tls-app/zephyr/.config:435: CONFIG_MBEDTLS_X509_CRT_WRITE_C is not set"
+        },
+        {
+          "name": "rollcall:openvex-justification",
+          "value": "vulnerable_code_not_present"
+        },
+        {
+          "name": "rollcall:rule",
+          "value": "mbedtls-x509-write-compiled-out"
+        }
+      ]
+    },
+    {
+      "id": "CVE-2024-28960",
+      "source": {
+        "name": "NVD",
+        "url": "https://nvd.nist.gov/vuln/detail/CVE-2024-28960"
+      },
+      "analysis": {
+        "state": "in_triage",
+        "detail": "Not yet triaged."
+      },
+      "affects": [
+        {
+          "ref": "component:9404b57b22a8bf72df5b6d6c93f4defd"
+        }
+      ],
+      "properties": [
+        {
+          "name": "rollcall:rule",
+          "value": "mbedtls-triage"
+        }
+      ]
+    },
+    {
+      "id": "CVE-2025-27809",
+      "source": {
+        "name": "NVD",
+        "url": "https://nvd.nist.gov/vuln/detail/CVE-2025-27809"
+      },
+      "analysis": {
+        "state": "in_triage",
+        "detail": "Not yet triaged."
+      },
+      "affects": [
+        {
+          "ref": "component:9404b57b22a8bf72df5b6d6c93f4defd"
+        }
+      ],
+      "properties": [
+        {
+          "name": "rollcall:rule",
+          "value": "mbedtls-triage"
+        }
+      ]
+    },
+    {
+      "id": "CVE-2025-27810",
+      "source": {
+        "name": "NVD",
+        "url": "https://nvd.nist.gov/vuln/detail/CVE-2025-27810"
+      },
+      "analysis": {
+        "state": "in_triage",
+        "detail": "Not yet triaged."
+      },
+      "affects": [
+        {
+          "ref": "component:9404b57b22a8bf72df5b6d6c93f4defd"
+        }
+      ],
+      "properties": [
+        {
+          "name": "rollcall:rule",
+          "value": "mbedtls-triage"
+        }
+      ]
+    },
+    {
+      "id": "CVE-2025-47917",
+      "source": {
+        "name": "NVD",
+        "url": "https://nvd.nist.gov/vuln/detail/CVE-2025-47917"
+      },
+      "analysis": {
+        "state": "in_triage",
+        "detail": "Not yet triaged."
+      },
+      "affects": [
+        {
+          "ref": "component:9404b57b22a8bf72df5b6d6c93f4defd"
+        }
+      ],
+      "properties": [
+        {
+          "name": "rollcall:rule",
+          "value": "mbedtls-triage"
+        }
+      ]
+    },
+    {
+      "id": "CVE-2025-48965",
+      "source": {
+        "name": "NVD",
+        "url": "https://nvd.nist.gov/vuln/detail/CVE-2025-48965"
+      },
+      "analysis": {
+        "state": "in_triage",
+        "detail": "Not yet triaged."
+      },
+      "affects": [
+        {
+          "ref": "component:9404b57b22a8bf72df5b6d6c93f4defd"
+        }
+      ],
+      "properties": [
+        {
+          "name": "rollcall:rule",
+          "value": "mbedtls-triage"
+        }
+      ]
+    },
+    {
+      "id": "CVE-2025-52496",
+      "source": {
+        "name": "NVD",
+        "url": "https://nvd.nist.gov/vuln/detail/CVE-2025-52496"
+      },
+      "analysis": {
+        "state": "in_triage",
+        "detail": "Not yet triaged."
+      },
+      "affects": [
+        {
+          "ref": "component:9404b57b22a8bf72df5b6d6c93f4defd"
+        }
+      ],
+      "properties": [
+        {
+          "name": "rollcall:rule",
+          "value": "mbedtls-triage"
+        }
+      ]
+    },
+    {
+      "id": "CVE-2025-52497",
+      "source": {
+        "name": "NVD",
+        "url": "https://nvd.nist.gov/vuln/detail/CVE-2025-52497"
+      },
+      "analysis": {
+        "state": "in_triage",
+        "detail": "Not yet triaged."
+      },
+      "affects": [
+        {
+          "ref": "component:9404b57b22a8bf72df5b6d6c93f4defd"
+        }
+      ],
+      "properties": [
+        {
+          "name": "rollcall:rule",
+          "value": "mbedtls-triage"
+        }
+      ]
+    },
+    {
+      "id": "CVE-2025-54764",
+      "source": {
+        "name": "NVD",
+        "url": "https://nvd.nist.gov/vuln/detail/CVE-2025-54764"
+      },
+      "analysis": {
+        "state": "in_triage",
+        "detail": "Not yet triaged."
+      },
+      "affects": [
+        {
+          "ref": "component:9404b57b22a8bf72df5b6d6c93f4defd"
+        }
+      ],
+      "properties": [
+        {
+          "name": "rollcall:rule",
+          "value": "mbedtls-triage"
+        }
+      ]
+    },
+    {
+      "id": "CVE-2025-59438",
+      "source": {
+        "name": "NVD",
+        "url": "https://nvd.nist.gov/vuln/detail/CVE-2025-59438"
+      },
+      "analysis": {
+        "state": "in_triage",
+        "detail": "Not yet triaged."
+      },
+      "affects": [
+        {
+          "ref": "component:9404b57b22a8bf72df5b6d6c93f4defd"
+        }
+      ],
+      "properties": [
+        {
+          "name": "rollcall:rule",
+          "value": "mbedtls-triage"
+        }
+      ]
+    },
+    {
+      "id": "CVE-2025-66442",
+      "source": {
+        "name": "NVD",
+        "url": "https://nvd.nist.gov/vuln/detail/CVE-2025-66442"
+      },
+      "analysis": {
+        "state": "in_triage",
+        "detail": "Not yet triaged."
+      },
+      "affects": [
+        {
+          "ref": "component:9404b57b22a8bf72df5b6d6c93f4defd"
+        }
+      ],
+      "properties": [
+        {
+          "name": "rollcall:rule",
+          "value": "mbedtls-triage"
+        }
+      ]
+    },
+    {
+      "id": "CVE-2026-25835",
+      "source": {
+        "name": "NVD",
+        "url": "https://nvd.nist.gov/vuln/detail/CVE-2026-25835"
+      },
+      "analysis": {
+        "state": "in_triage",
+        "detail": "Not yet triaged."
+      },
+      "affects": [
+        {
+          "ref": "component:9404b57b22a8bf72df5b6d6c93f4defd"
+        }
+      ],
+      "properties": [
+        {
+          "name": "rollcall:rule",
+          "value": "mbedtls-triage"
+        }
+      ]
+    },
+    {
+      "id": "CVE-2026-34871",
+      "source": {
+        "name": "NVD",
+        "url": "https://nvd.nist.gov/vuln/detail/CVE-2026-34871"
+      },
+      "analysis": {
+        "state": "in_triage",
+        "detail": "Not yet triaged."
+      },
+      "affects": [
+        {
+          "ref": "component:9404b57b22a8bf72df5b6d6c93f4defd"
+        }
+      ],
+      "properties": [
+        {
+          "name": "rollcall:rule",
+          "value": "mbedtls-triage"
+        }
+      ]
+    },
+    {
+      "id": "CVE-2026-34872",
+      "source": {
+        "name": "NVD",
+        "url": "https://nvd.nist.gov/vuln/detail/CVE-2026-34872"
+      },
+      "analysis": {
+        "state": "in_triage",
+        "detail": "Not yet triaged."
+      },
+      "affects": [
+        {
+          "ref": "component:9404b57b22a8bf72df5b6d6c93f4defd"
+        }
+      ],
+      "properties": [
+        {
+          "name": "rollcall:rule",
+          "value": "mbedtls-triage"
+        }
+      ]
+    },
+    {
+      "id": "CVE-2026-34877",
+      "source": {
+        "name": "NVD",
+        "url": "https://nvd.nist.gov/vuln/detail/CVE-2026-34877"
+      },
+      "analysis": {
+        "state": "in_triage",
+        "detail": "Not yet triaged."
+      },
+      "affects": [
+        {
+          "ref": "component:9404b57b22a8bf72df5b6d6c93f4defd"
+        }
+      ],
+      "properties": [
+        {
+          "name": "rollcall:rule",
+          "value": "mbedtls-triage"
+        }
+      ]
+    }
+  ]
+}

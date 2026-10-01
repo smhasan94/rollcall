@@ -1,0 +1,19 @@
+# Hand-written, ILLUSTRATIVE rules for the real Zephyr v4.2.0 build
+# fixtures/zephyr-old-mbedtls/old-mbedtls/ (Mbed TLS 3.6.4), evaluated by scripts/vex-check.sh
+# against live grype output for the SBOM generated with the seed identifier database and that
+# build's own Kconfig (fixtures/zephyr-old-mbedtls/old-mbedtls/mbedtls/zephyr/.config).
+# Test data, not a security assessment of Mbed TLS or of the sample.
+version: 1
+rules:
+  # CVE-2026-34873: client impersonation while resuming a TLS 1.3 session. The sample is
+  # built without TLS 1.3 (`# CONFIG_MBEDTLS_TLS_VERSION_1_3 is not set`), so Mbed TLS's
+  # TLS 1.3 code, session resumption included, is not compiled in.
+  - id: mbedtls-tls13-compiled-out
+    match:
+      name: mbedtls
+      cves: [CVE-2026-34873]
+    when:
+      - kconfig_off: CONFIG_MBEDTLS_TLS_VERSION_1_3
+    status: not_affected
+    justification: vulnerable_code_not_present
+    detail: TLS 1.3 support (CONFIG_MBEDTLS_TLS_VERSION_1_3) is not compiled in, so TLS 1.3 session resumption cannot occur.

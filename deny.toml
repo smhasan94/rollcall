@@ -8,6 +8,8 @@ yanked = "deny"
 [licenses]
 allow = [
     "Apache-2.0",
+    # BSD-3-Clause: ed25519-dalek, curve25519-dalek, subtle (VEX signing, SHA-113).
+    "BSD-3-Clause",
     "MIT",
     # MIT-0: borrow-or-share (via jsonschema's fluent-uri); Zlib: foldhash (via hashbrown).
     "MIT-0",

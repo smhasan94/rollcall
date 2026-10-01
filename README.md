@@ -320,8 +320,45 @@ rules:
   id is the CVE when there is one.
 - **bom-refs:** with `--sbom`, statements cite the document's own `bom-ref`s.
 
-Unresolved findings and conflicts are summarised on stderr; the exit code stays 0. Rendering
-CycloneDX VEX or OpenVEX is not implemented yet.
+Unresolved findings and conflicts are summarised on stderr; the exit code stays 0.
+
+### VEX documents and signing
+
+`--format` picks what `rollcall vex` writes: `rollcall` (the default, the report above),
+`openvex` (an OpenVEX v0.2.0 document whose products are the components' purls, as grype's
+`--vex` matches them) or `cyclonedx` (a standalone CycloneDX 1.6 VEX document whose
+`vulnerabilities[].affects[].ref` are BOM-Links into the `--sbom`). Only statements are
+rendered; unresolved findings are listed on stderr. The SBOM itself stays VEX-free unless
+you ask for `--embed` (with `--format cyclonedx`), which writes a copy of the SBOM with a
+`vulnerabilities` array added and its `version` incremented by one (CycloneDX: a modified
+BOM's version should be incremented; the `serialNumber` stays). Only the `version` value
+and the added array differ from the input; an SBOM without `version` (implicitly 1) gets
+`"version": 2`. The input file is never modified. `--timestamp` and `--id` pin the
+document's timestamp and id for reproducible output; by default the id is derived from the
+statements, the SBOM and the format, so the OpenVEX and CycloneDX documents get different
+ids. The SBOM's `serialNumber` must be a lowercase `urn:uuid:` and its `version` at least 1.
+
+```sh
+rollcall vex --sbom product.cdx.json --kconfig app=build/app/zephyr/.config \
+  --findings grype.json --rules vex-rules.yml --format openvex -o product.openvex.json
+grype sbom:product.cdx.json --vex product.openvex.json   # not_affected findings suppressed
+```
+
+`--sign local:key.pem` writes a detached Ed25519 signature (`rollcall-signature/1` JSON) of
+the output to `OUTPUT.sig`; `rollcall vex verify OUTPUT --key key.pub.pem` checks it and
+says whether the document was modified, signed by another key, or carries an invalid
+signature (exit 1). Create a key with `openssl genpkey -algorithm ed25519 -out key.pem` and
+its public half with `openssl pkey -in key.pem -pubout -out key.pub.pem`.
+
+`--sign cosign` signs keylessly with Sigstore through `cosign sign-blob`, writing
+`OUTPUT.sigstore.json`; `rollcall vex verify OUTPUT --cosign --certificate-identity …
+--certificate-oidc-issuer …` verifies it with `cosign verify-blob`. This needs `cosign` on
+`PATH` and an OIDC identity (in GitHub Actions, `permissions: id-token: write`; elsewhere
+cosign prints a login URL on stderr, which rollcall passes through). Without cosign, or with
+an unreadable or malformed `--sign local:` key, rollcall exits (69, 66 or 65) before writing
+anything. `vex verify --cosign` requires `--certificate-identity` or
+`--certificate-identity-regexp`, and `--certificate-oidc-issuer`; a missing document or
+bundle is exit 66, so exit 1 always means the signature did not verify.
 
 ### Known scanner behaviour
 
@@ -335,10 +372,11 @@ such as Zephyr is typed is decided at ingestion. osv-scanner is unaffected.
 | Code | Meaning                                                                  |
 |------|--------------------------------------------------------------------------|
 | 0    | Success (including `--help`, `--version`)                                |
-| 1    | `validate`: the document has schema violations or error-severity profile findings |
-| 64   | Usage error (bad arguments, `validate` without `--schema` or `--profile` or with an unknown profile name, bad `--timestamp`, `--serial-number` or `--product`, `merge --blob-manifest` without inputs or `--product`, a `vex --kconfig` that names no image of the product, names one twice, or omits `IMAGE=` for a multi-image product), or subcommand/format not implemented |
-| 65   | Input is malformed: not JSON, not UTF-8, too deeply nested, or an invalid model; or a Zephyr input (SPDX, `west list`, `.config`, `build_info.yml`) or the `--identifier-db` file is malformed, or `--zephyr` names a sysbuild top-level directory without `--sysbuild` (or an image directory with it); or a `merge` input is not a readable CycloneDX 1.6 document, the inputs conflict (including different product names or versions without `--product`), or the blob manifest is malformed; or a `vex` input (SBOM, model, `--kconfig`, findings, rules) is malformed, with `file:line:column` for rules; or a `validate --profile` file is malformed |
+| 1    | `validate`: the document has schema violations or error-severity profile findings; `vex verify`: the signature does not verify |
+| 64   | Usage error (bad arguments, `validate` without `--schema` or `--profile` or with an unknown profile name, bad `--timestamp`, `--serial-number` or `--product`, `merge --blob-manifest` without inputs or `--product`, a `vex --kconfig` that names no image of the product, names one twice, or omits `IMAGE=` for a multi-image product; `vex` flags that do not combine, such as `--embed` without `--format cyclonedx`, `--format cyclonedx` without `--sbom`, or `--sign` without `-o`), or subcommand/format not implemented |
+| 65   | Input is malformed: not JSON, not UTF-8, too deeply nested, or an invalid model; or a Zephyr input (SPDX, `west list`, `.config`, `build_info.yml`) or the `--identifier-db` file is malformed, or `--zephyr` names a sysbuild top-level directory without `--sysbuild` (or an image directory with it); or a `merge` input is not a readable CycloneDX 1.6 document, the inputs conflict (including different product names or versions without `--product`), or the blob manifest is malformed; or a `vex` input (SBOM, model, `--kconfig`, findings, rules, signing key, signature file) is malformed, with `file:line:column` for rules, or the SBOM cannot take the requested VEX output (no `serialNumber` for `--format cyclonedx`, a `serialNumber` that is not a lowercase `urn:uuid:` or a `version` below 1, a non-empty `vulnerabilities` for `--embed`); or a `validate --profile` file is malformed |
 | 66   | Input file missing or unreadable (including a directory), including a required Zephyr input, the `--west-list` or `--identifier-db` file, a `merge` input, the blob manifest or a blob it lists, a `vex` input, or a `validate --profile` file |
+| 69   | `vex --sign cosign` / `vex verify --cosign`: cosign is not installed, or keyless signing failed (no OIDC identity) |
 | 70   | Internal error (`vex`, `validate --json`: the report cannot be serialised) |
 | 74   | Output cannot be written                                                 |
 

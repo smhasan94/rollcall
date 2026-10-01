@@ -29,9 +29,18 @@ impl SerialNumber {
         // The same bytes as `Product::to_json`: pretty-printed JSON and a trailing newline.
         let mut json = serde_json::to_vec_pretty(product)?;
         json.push(b'\n');
+        Ok(Self::derive_from(DOMAIN, &json))
+    }
+
+    /// Derives a serial number from `content` alone: SHA-256 over `domain` followed by
+    /// `content`, truncated to 128 bits and marked as a version-8 (custom), RFC 4122-variant
+    /// UUID. `domain` separates uses (e.g. `b"rollcall-serial/1\n"` for SBOMs,
+    /// `b"rollcall-vex-id/1\n"` for VEX documents), so equal content never collides across
+    /// them.
+    pub fn derive_from(domain: &[u8], content: &[u8]) -> Self {
         let mut hasher = Sha256::new();
-        hasher.update(DOMAIN);
-        hasher.update(&json);
+        hasher.update(domain);
+        hasher.update(content);
         let digest = hasher.finalize();
         let mut bytes = [0u8; 16];
         for (out, byte) in bytes.iter_mut().zip(digest.iter()) {
@@ -53,7 +62,7 @@ impl SerialNumber {
             text.push(hex_digit(byte >> 4));
             text.push(hex_digit(byte & 0x0f));
         }
-        Ok(Self(text))
+        Self(text)
     }
 
     /// Parses `urn:uuid:` followed by a UUID in lowercase 8-4-4-4-12 hex form (the pattern
