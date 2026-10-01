@@ -199,13 +199,14 @@ modules:
     upstream:
       name: Mbed TLS
       homepage: https://github.com/Mbed-TLS/mbedtls   # optional
-      supplier: arm                                   # optional
-    purl: pkg:github/Mbed-TLS/mbedtls@v{version}
-    cpe: cpe:2.3:a:arm:mbed_tls:{version}:*:*:*:*:*:*:*  # optional
+      supplier: Arm                                   # optional
+    purl: 'pkg:generic/mbedtls@{version}?vcs_url=git+https://github.com/Mbed-TLS/mbedtls'
+    cpe: 'cpe:2.3:a:trustedfirmware:mbed_tls:{version}:*:*:*:*:*:*:*'   # optional
+    cpe_aliases: ['cpe:2.3:a:arm:mbed_tls:{version}:*:*:*:*:*:*:*']   # optional
     version_rule:                                     # one of:
       kind: manual                                    #   manual: revision -> version table
       table:
-        a3e190fe44c78d1ba67f55979e1257328cc7d0d8: 4.1.0
+        'a3e190fe44c78d1ba67f55979e1257328cc7d0d8': '4.1.0'
 #   kind: git_tag,    pattern: '^v(?P<version>\d+\.\d+\.\d+)$'
 #   kind: file_regex, file: include/version.h, pattern: '...(?P<version>...)...'
 ```
@@ -214,7 +215,8 @@ modules:
 file in the module's sources. Both need the module sources, found with `--workspace DIR`
 (the west workspace: each module is at `DIR/<west list path>`, so `--workspace` requires
 `--west-list`, and `--identifier-db`; without either it is a usage error, exit 64).
-Quote versions that YAML would read as numbers (`'2.0'`). The database is checked when it
+Quote revisions and versions, which YAML could otherwise read as numbers (`'2.0'`, or a
+commit such as `1e753266…`). The database is checked when it
 is loaded: a malformed entry, an unknown key, or a purl or cpe template that does not render
 to a valid purl or CPE 2.3 name is an error naming the file and line (exit 65); a missing
 file is exit 66.
@@ -222,13 +224,20 @@ file is exit 66.
 The module's `version` stays the git revision; the upstream version is recorded as evidence
 and drives the purl and cpe, which are only filled in when a version was found (otherwise a
 warning says why). A purl or cpe from `spdx/modules-deps.spdx` wins over the database (a
-differing purl is a warning; a differing cpe is not). A module the database does not list gets one warning per run
+differing purl or cpe is a warning, except a purl naming the same repository or a cpe that
+is one of the database's `cpe_aliases`). Every other CPE (the database's when the SPDX one won,
+and each of its `cpe_aliases`: further NVD vendor:products the same project's CVEs are filed
+under) is written as an additional CPE: a `syft:cpe23` property, which grype matches on, and
+an `evidence.identity` entry. A module the database does not list gets one warning per run
 (also across every image with `--sysbuild`), and after the warnings `rollcall generate`
 prints a stub entry for each such module to stderr, ready to paste under `modules:`: fill in
 the `""` blanks and `<vendor>`/`<product>` (or delete the lines marked optional). The exit
 code stays 0.
 
-rollcall carries a small seed database in `crates/rollcall-core/db/identifiers.yaml`.
+rollcall carries a seed database in `crates/rollcall-core/db/identifiers.yaml` covering 33
+common Zephyr modules, each fork revision pinned by Zephyr v4.2.0 to v4.4.2 mapped to its
+upstream version (`pkg:generic` purls; CPEs only from the NVD CPE dictionary). Its
+conventions and how the versions are derived are in [docs/identifiers.md](docs/identifiers.md).
 Next to it, `crates/rollcall-core/db/subsystems.yaml` maps Zephyr subsystems to their Kconfig
 symbols and source paths, checked against the pinned Zephyr tree by
 `scripts/verify-subsystems.sh`; see [docs/subsystems.md](docs/subsystems.md).

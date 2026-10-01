@@ -12,6 +12,10 @@
 #   --variant V      build only variant V (baseline, bt or tls); repeatable. Default: all.
 #                    Unselected variants already in the output are carried over unchanged,
 #                    with the provenance (`built_with`) recorded when they were built.
+#                    `--variant old-mbedtls` (alone) builds the separately pinned old-mbedTLS
+#                    tree instead: Zephyr v4.2.0, SDK 0.17.2, its own workspace and SDK
+#                    directory, output fixtures/zephyr-old-mbedtls; fixtures/zephyr is not
+#                    touched.
 #   --check-stable   build everything twice, from scratch, and compare the two trees
 #                    (see `compare`); fails without touching the output if they differ.
 #   --skip-setup     do not download, clone or pip-install anything; the pins are still
@@ -31,10 +35,11 @@
 # The staged result must pass `cargo test -p rollcall-core --test fixtures` (run with
 # ROLLCALL_FIXTURES_DIR pointing at it) before it replaces the output.
 #
-# Environment:
-#   ROLLCALL_ZEPHYR_WORKSPACE  west workspace (default .cache/zephyr-workspace)
-#   ROLLCALL_ZEPHYR_SDK        Zephyr SDK install dir (default .cache/zephyr-sdk)
-#   ROLLCALL_FIXTURES_OUT      output directory (default fixtures/zephyr)
+# Environment (each applies to the pin set being built; defaults in brackets for the main set,
+# then for old-mbedtls):
+#   ROLLCALL_ZEPHYR_WORKSPACE  west workspace [.cache/zephyr-workspace, .cache/zephyr-workspace-v4.2.0]
+#   ROLLCALL_ZEPHYR_SDK        Zephyr SDK install dir [.cache/zephyr-sdk, .cache/zephyr-sdk-0.17.2]
+#   ROLLCALL_FIXTURES_OUT      output directory [fixtures/zephyr, fixtures/zephyr-old-mbedtls]
 #
 # Every setup step is idempotent: it is skipped when its marker file exists. Build logs go to
 # .cache/fixtures-logs/; with --check-stable, the staging trees and compare-stable.txt stay in
@@ -45,38 +50,79 @@ cd "$(dirname "$0")/.."
 REPO_ROOT="$(pwd -P)"
 
 # --- Pins -----------------------------------------------------------------------------------
+# Two pin sets. The main one (fixtures/zephyr: baseline, bt, tls) and old-mbedtls
+# (fixtures/zephyr-old-mbedtls), a build against an older Zephyr whose mbedTLS has known CVEs.
+# select_pins sets the per-set values; everything else is shared.
 ZEPHYR_URL=https://github.com/zephyrproject-rtos/zephyr
-ZEPHYR_TAG=v4.4.2
-ZEPHYR_COMMIT=dccb09599635bdff17633fa7e9dab014b91dce90
-SDK_VERSION=1.0.1
-SDK_URL_BASE="https://github.com/zephyrproject-rtos/sdk-ng/releases/download/v${SDK_VERSION}"
 WEST_VERSION=1.5.0
 REUSE_VERSION=6.2.0
 IMGTOOL_VERSION=2.4.0
 BOARD=nrf52840dk/nrf52840
-VARIANTS=(baseline bt tls)
+ALL_VARIANTS=(baseline bt tls old-mbedtls)
 PROJECT_FILTER="-.*,+hal_nordic,+cmsis,+cmsis_6,+mbedtls,+tf-psa-crypto,+mcuboot"
 WEST_UPDATE_ARGS=(--narrow -o=--depth=1)
 # Placeholders that replace host-specific directories in every text fixture.
 WS_PLACEHOLDER=/zephyrproject
 SDK_PLACEHOLDER=/zephyr-sdk
 
+# select_pins <set>: the Zephyr release, SDK, default directories and variants of a pin set.
+select_pins() {
+    case "$1" in
+        main)
+            PIN_SET=main
+            ZEPHYR_TAG=v4.4.2
+            ZEPHYR_COMMIT=dccb09599635bdff17633fa7e9dab014b91dce90
+            SDK_VERSION=1.0.1
+            # SDK 1.x: the GNU toolchain bundle unpacks under <sdk>/gnu.
+            SDK_ARM_PREFIX=toolchain_gnu_
+            SDK_TOOLCHAIN_PARENT=gnu
+            DEFAULT_WS=.cache/zephyr-workspace
+            DEFAULT_SDK=.cache/zephyr-sdk
+            DEFAULT_OUT=fixtures/zephyr
+            VARIANTS=(baseline bt tls)
+            ;;
+        old-mbedtls)
+            PIN_SET=old-mbedtls
+            ZEPHYR_TAG=v4.2.0
+            ZEPHYR_COMMIT=413b789deb391d3a37d06b463288a5fe765ee57e
+            # zephyr/SDK_VERSION at v4.2.0.
+            SDK_VERSION=0.17.2
+            # SDK 0.17: the toolchain bundle unpacks to <sdk>/arm-zephyr-eabi.
+            SDK_ARM_PREFIX=toolchain_
+            SDK_TOOLCHAIN_PARENT=.
+            DEFAULT_WS=.cache/zephyr-workspace-v4.2.0
+            DEFAULT_SDK=.cache/zephyr-sdk-0.17.2
+            DEFAULT_OUT=fixtures/zephyr-old-mbedtls
+            VARIANTS=(old-mbedtls)
+            ;;
+        *) return 1 ;;
+    esac
+    SDK_URL_BASE="https://github.com/zephyrproject-rtos/sdk-ng/releases/download/v${SDK_VERSION}"
+}
+
 # SHA-256 of zephyr-sdk-<version>_<host>_minimal.tar.xz (sdk-ng release sha256.sum).
 sdk_minimal_sha256() {
-    case "$1" in
-        linux-x86_64) echo ca9bc0ff66fafca1dac9d592a36d953cf16d096a9d09b1c0357f021cf9f6a7eb ;;
-        linux-aarch64) echo d79c5bfc68e679488659bea289a4026e52a64f03338875c8c9c850fff13cee30 ;;
-        macos-aarch64) echo 867063901f39528a6175a80ebc20367bd6cb440593e7e2650eda30392f1f6b65 ;;
+    case "$SDK_VERSION/$1" in
+        1.0.1/linux-x86_64) echo ca9bc0ff66fafca1dac9d592a36d953cf16d096a9d09b1c0357f021cf9f6a7eb ;;
+        1.0.1/linux-aarch64) echo d79c5bfc68e679488659bea289a4026e52a64f03338875c8c9c850fff13cee30 ;;
+        1.0.1/macos-aarch64) echo 867063901f39528a6175a80ebc20367bd6cb440593e7e2650eda30392f1f6b65 ;;
+        0.17.2/linux-x86_64) echo a95082150d5df6255f682f05eab00228b858444b581db90ec47e5ded090ca74d ;;
+        0.17.2/linux-aarch64) echo 439e1bc94823ce7ca833ce46232acff9cae4cbbc7eb440875d7363c9094e243b ;;
+        0.17.2/macos-aarch64) echo ef9d34fda0a92037c98b7c28824e536f9418f92b3eeecc15098641e843c7d7c8 ;;
         *) return 1 ;;
     esac
 }
 
-# SHA-256 of toolchain_gnu_<host>_arm-zephyr-eabi.tar.xz (sdk-ng release sha256.sum).
+# SHA-256 of the arm-zephyr-eabi toolchain bundle, <SDK_ARM_PREFIX><host>_arm-zephyr-eabi.tar.xz
+# (sdk-ng release sha256.sum).
 sdk_arm_sha256() {
-    case "$1" in
-        linux-x86_64) echo 21b85981cb5a1818d9bc53d82af80f208946ec038b982ff1907287572ed3a634 ;;
-        linux-aarch64) echo b9805b691f2f0a8926c92694cae378d05ba07b76abca745e216fcc52753cc4d6 ;;
-        macos-aarch64) echo 4008edb5d4840cd994aedd7f1309bfb63e7243729d57839ebf1cc83c1f17c886 ;;
+    case "$SDK_VERSION/$1" in
+        1.0.1/linux-x86_64) echo 21b85981cb5a1818d9bc53d82af80f208946ec038b982ff1907287572ed3a634 ;;
+        1.0.1/linux-aarch64) echo b9805b691f2f0a8926c92694cae378d05ba07b76abca745e216fcc52753cc4d6 ;;
+        1.0.1/macos-aarch64) echo 4008edb5d4840cd994aedd7f1309bfb63e7243729d57839ebf1cc83c1f17c886 ;;
+        0.17.2/linux-x86_64) echo ecbfb362a9347b247848d5d8ffa7bd7ff566689bbb47cddeb7e504c87f143d17 ;;
+        0.17.2/linux-aarch64) echo 32579e7fa4e56cf0d5312eac0021e92d9ec47ed2ce6ec0e7f6b37bf9779a4fd7 ;;
+        0.17.2/macos-aarch64) echo 83bc167273d9208121c2ebe67a0f4a29910efeba2c0d47928f17e85e88f82007 ;;
         *) return 1 ;;
     esac
 }
@@ -88,6 +134,7 @@ variant_sample() {
         baseline) echo zephyr/samples/sysbuild/with_mcuboot ;;
         bt) echo zephyr/samples/bluetooth/beacon ;;
         tls) echo zephyr/samples/net/sockets/http_server ;;
+        old-mbedtls) echo zephyr/tests/crypto/mbedtls ;;
         *) return 1 ;;
     esac
 }
@@ -98,6 +145,7 @@ variant_app() {
         baseline) echo with_mcuboot ;;
         bt) echo beacon ;;
         tls) echo http_server ;;
+        old-mbedtls) echo mbedtls ;;
         *) return 1 ;;
     esac
 }
@@ -123,6 +171,7 @@ variant_extra_dtc() {
 variant_fallback() {
     case "$1" in
         tls) echo "planned sample samples/net/sockets/echo_client with overlay-802154.conf;overlay-tls.conf aborts on Kconfig warnings on this board; the planned fallback samples/net/sockets/echo_server with the same overlays fails on MBEDTLS_SSL_PROTO_DTLS needing MBEDTLS_SSL_PROTO_TLS1_2, and with that forced, tf-psa-crypto md.c fails -Werror; any IEEE 802.15.4 build also crashes west spdx (zspdx walker.py:704, the unbuilt hal_nordic target nrf-802154-serialization); using samples/net/sockets/http_server with its own overlay-usbd.conf, overlay-tls.conf and usbd_cdc_ncm.overlay (TLS sockets over USB CDC-NCM), each built by upstream CI" ;;
+        old-mbedtls) echo "planned a TLS sample like the tls variant: at v4.2.0 samples/net/sockets/http_server declares depends_on netif, and nrf52840dk has no network interface without the USB CDC-NCM overlays (overlay-usbd.conf, usbd_cdc_ncm.overlay) that only exist in later releases; using tests/crypto/mbedtls, which builds Mbed TLS (CONFIG_MBEDTLS_BUILTIN) and links its self-tests, and is built by upstream CI" ;;
         *) echo "" ;;
     esac
 }
@@ -226,19 +275,20 @@ install_sdk() {
         tar -xJf "$dl/$SDK_MINIMAL_FILE" -C "$SDK" --strip-components=1 \
             --exclude="zephyr-sdk-$SDK_VERSION/hosttools" \
             --exclude="zephyr-sdk-$SDK_VERSION/hosttools/*"
-        mkdir -p "$SDK/gnu"
-        tar -xJf "$dl/$SDK_ARM_FILE" -C "$SDK/gnu"
+        mkdir -p "$SDK/$SDK_TOOLCHAIN_PARENT"
+        tar -xJf "$dl/$SDK_ARM_FILE" -C "$SDK/$SDK_TOOLCHAIN_PARENT"
         rm -f "$dl/$SDK_MINIMAL_FILE" "$dl/$SDK_ARM_FILE"
         touch "$marker"
     fi
     [[ "$(cat "$SDK/sdk_version")" == "$SDK_VERSION" ]] ||
         die "$SDK/sdk_version is not $SDK_VERSION"
-    [[ -x "$SDK/gnu/arm-zephyr-eabi/bin/arm-zephyr-eabi-gcc" ]] ||
-        die "arm-zephyr-eabi toolchain missing under $SDK/gnu"
+    local tc="$SDK/$SDK_TOOLCHAIN_PARENT/arm-zephyr-eabi/bin"
+    [[ -x "$tc/arm-zephyr-eabi-gcc" ]] ||
+        die "arm-zephyr-eabi toolchain missing under $SDK/$SDK_TOOLCHAIN_PARENT"
     export ZEPHYR_SDK_INSTALL_DIR="$SDK"
     export ZEPHYR_TOOLCHAIN_VARIANT=zephyr
-    STRIP="$SDK/gnu/arm-zephyr-eabi/bin/arm-zephyr-eabi-strip"
-    GCC_VERSION="$("$SDK/gnu/arm-zephyr-eabi/bin/arm-zephyr-eabi-gcc" -dumpversion)"
+    STRIP="$tc/arm-zephyr-eabi-strip"
+    GCC_VERSION="$("$tc/arm-zephyr-eabi-gcc" -dumpversion)"
 }
 
 # setup_python: a venv inside the workspace with the pinned tools and Zephyr's and MCUboot's
@@ -896,7 +946,7 @@ while [[ $# -gt 0 ]]; do
     case "$1" in
         --variant)
             [[ $# -ge 2 ]] || die "--variant needs a value"
-            variant_sample "$2" >/dev/null || die "unknown variant '$2' (known: ${VARIANTS[*]})"
+            variant_sample "$2" >/dev/null || die "unknown variant '$2' (known: ${ALL_VARIANTS[*]})"
             SELECTED+=("$2")
             shift 2
             ;;
@@ -910,20 +960,29 @@ while [[ $# -gt 0 ]]; do
         *) die "unknown argument: $1" ;;
     esac
 done
+# old-mbedtls is its own pin set and output tree, so it is never mixed with the others.
+select_pins main
+if [[ ${#SELECTED[@]} -gt 0 && " ${SELECTED[*]} " == *" old-mbedtls "* ]]; then
+    for v in "${SELECTED[@]}"; do
+        [[ "$v" == old-mbedtls ]] ||
+            die "--variant old-mbedtls has its own pins and output; build it on its own"
+    done
+    select_pins old-mbedtls
+fi
 [[ ${#SELECTED[@]} -gt 0 ]] || SELECTED=("${VARIANTS[@]}")
 
 check_prereqs
 HOST="$(host_platform)"
 SDK_MINIMAL_FILE="zephyr-sdk-${SDK_VERSION}_${HOST}_minimal.tar.xz"
-SDK_MINIMAL_SHA256="$(sdk_minimal_sha256 "$HOST")"
-SDK_ARM_FILE="toolchain_gnu_${HOST}_arm-zephyr-eabi.tar.xz"
-SDK_ARM_SHA256="$(sdk_arm_sha256 "$HOST")"
+SDK_MINIMAL_SHA256="$(sdk_minimal_sha256 "$HOST")" || die "no pinned SDK $SDK_VERSION for $HOST"
+SDK_ARM_FILE="${SDK_ARM_PREFIX}${HOST}_arm-zephyr-eabi.tar.xz"
+SDK_ARM_SHA256="$(sdk_arm_sha256 "$HOST")" || die "no pinned SDK $SDK_VERSION toolchain for $HOST"
 
 CACHE="$REPO_ROOT/.cache"
 mkdir -p "$CACHE"
-WS="${ROLLCALL_ZEPHYR_WORKSPACE:-.cache/zephyr-workspace}"
-SDK="${ROLLCALL_ZEPHYR_SDK:-.cache/zephyr-sdk}"
-OUT="${ROLLCALL_FIXTURES_OUT:-fixtures/zephyr}"
+WS="${ROLLCALL_ZEPHYR_WORKSPACE:-$DEFAULT_WS}"
+SDK="${ROLLCALL_ZEPHYR_SDK:-$DEFAULT_SDK}"
+OUT="${ROLLCALL_FIXTURES_OUT:-$DEFAULT_OUT}"
 mkdir -p "$WS" "$SDK" "$(dirname "$OUT")"
 # Logical (as given, made absolute) and physical (symlinks resolved, e.g. macOS /private)
 # forms of each directory; both are normalised away.

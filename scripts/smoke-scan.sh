@@ -1,15 +1,18 @@
 #!/usr/bin/env bash
 # Smoke test: pinned grype and osv-scanner load rollcall's CycloneDX 1.6 output without
-# warnings, see every component, and report zero findings for the minimal fixture.
+# warnings, see every component, and report zero findings for the minimal fixture; and grype
+# reports the expected CVEs for the old-mbedTLS Zephyr build.
 #
 # NEEDS THE NETWORK: `--install` downloads the pinned scanner releases, grype downloads its
 # vulnerability database, and osv-scanner queries osv.dev.
 #
-# Usage: scripts/smoke-scan.sh [--install]
+# Usage: scripts/smoke-scan.sh [--install] [--only FIXTURE]
 #
 #   --install   download the pinned grype and osv-scanner into $ROLLCALL_TOOLS_DIR
 #               (default .cache/tools), verifying each download's SHA-256.
 #               Without it, the tools are taken from $ROLLCALL_TOOLS_DIR, then from PATH.
+#   --only F    check only fixture F: minimal, widget, or old-mbedtls (which runs only when
+#               named here; CI runs it in its own job, grype-expected-cves).
 #
 # Either way, a tool whose reported version is not the pinned one is refused.
 #
@@ -17,13 +20,22 @@
 #   ROLLCALL_TOOLS_DIR  where the scanners live (default .cache/tools)
 #   ROLLCALL_SMOKE_OUT  output directory, emptied first (default .cache/smoke)
 #   ROLLCALL_BIN        the rollcall binary (default: built with `cargo build -p rollcall-cli`)
+#   GRYPE_DB_CACHE_DIR  grype's database directory (default .cache/grype-db)
 #
-# For each fixture (minimal, widget) in crates/rollcall-core/tests/data/:
+# For each fixture: minimal and widget (crates/rollcall-core/tests/data/*.model.json), and,
+# with --only old-mbedtls, the real Zephyr v4.2.0 build
+# fixtures/zephyr-old-mbedtls/old-mbedtls/mbedtls (generated with its west list and the seed
+# --identifier-db crates/rollcall-core/db/identifiers.yaml):
 #   1. rollcall generate with the golden timestamp, byte-compared with the committed golden,
 #      then rollcall validate --schema.
 #   2. grype: exits 0, no WARN/ERROR in its log, catalogues one package per node except
 #      `operating-system` components (see the note at the grype check); for
-#      minimal, no matches.
+#      minimal, no matches; for old-mbedtls, every CVE in
+#      crates/rollcall-core/tests/data/old-mbedtls-expected-cves.txt is
+#      reported for mbedtls (more is fine: the database grows), and grype searched by both
+#      cpe:2.3:a:arm:mbed_tls:3.6.4 (the build's own cpe) and
+#      cpe:2.3:a:trustedfirmware:mbed_tls:3.6.4 (the database's, a syft:cpe23 additional CPE):
+#      NVD files 3.6.4's CVEs under both vendors.
 #   3. osv-scanner: exits 0, prints nothing on stderr, scans one package per component that
 #      has a purl or cpe; for minimal, no package has a vulnerability.
 # Prints a PASS/FAIL table; exits 1 if anything failed, 2 on a setup error.
@@ -35,6 +47,12 @@ GRYPE_VERSION=0.119.0
 OSV_SCANNER_VERSION=2.6.0
 GOLDEN_TIMESTAMP=2026-01-02T03:04:05Z
 FIXTURES=(minimal widget)
+ALL_FIXTURES=(minimal widget old-mbedtls)
+OLD_MBEDTLS_VARIANT=fixtures/zephyr-old-mbedtls/old-mbedtls
+OLD_MBEDTLS_EXPECTED=crates/rollcall-core/tests/data/old-mbedtls-expected-cves.txt
+OLD_MBEDTLS_CPES=('cpe:2.3:a:trustedfirmware:mbed_tls:3.6.4:*:*:*:*:*:*:*'
+    'cpe:2.3:a:arm:mbed_tls:3.6.4:*:*:*:*:*:*:*')
+IDENTIFIER_DB=crates/rollcall-core/db/identifiers.yaml
 
 # SHA-256 of the grype release tarballs.
 grype_sha256() {
@@ -64,18 +82,31 @@ die() {
 }
 
 install=0
-for arg in "$@"; do
-    case "$arg" in
+only=""
+while [[ $# -gt 0 ]]; do
+    case "$1" in
         --install) install=1 ;;
+        --only)
+            [[ $# -ge 2 ]] || die "--only needs a fixture name"
+            only="$2"
+            shift
+            ;;
         -h | --help)
             sed -n '2,/^set -euo/p' "$0" | sed '$d' | sed 's/^# \{0,1\}//'
             exit 0
             ;;
-        *) die "unknown argument: $arg" ;;
+        *) die "unknown argument: $1" ;;
     esac
+    shift
 done
+if [[ -n "$only" ]]; then
+    case " ${ALL_FIXTURES[*]} " in
+        *" $only "*) FIXTURES=("$only") ;;
+        *) die "unknown fixture for --only: $only (one of: ${ALL_FIXTURES[*]})" ;;
+    esac
+fi
 
-for tool in curl jq cmp tar; do
+for tool in curl jq cmp tar comm; do
     command -v "$tool" >/dev/null 2>&1 || die "$tool is required"
 done
 
@@ -181,6 +212,7 @@ rm -rf "$OUT"
 mkdir -p "$OUT"
 
 echo "grype $GRYPE_VERSION: $GRYPE"
+"$GRYPE" db status 2>&1 | sed 's/^/  grype db: /' || true
 echo "osv-scanner $OSV_SCANNER_VERSION: $OSV_SCANNER"
 echo "rollcall: $ROLLCALL"
 echo "output: $OUT"
@@ -208,10 +240,17 @@ check() {
 
 for f in "${FIXTURES[@]}"; do
     sbom="$OUT/$f.cdx.json"
-    golden="crates/rollcall-core/tests/golden/$f.cdx.json"
+    if [[ "$f" == old-mbedtls ]]; then
+        golden="crates/rollcall-core/tests/golden/zephyr/$f.cdx.json"
+        input=(--zephyr "$OLD_MBEDTLS_VARIANT/mbedtls" --west-list "$OLD_MBEDTLS_VARIANT/west-list.txt"
+            --identifier-db "$IDENTIFIER_DB")
+    else
+        golden="crates/rollcall-core/tests/golden/$f.cdx.json"
+        input=(--model "crates/rollcall-core/tests/data/$f.model.json")
+    fi
 
     # 1. Generate, compare with the golden, validate.
-    if "$ROLLCALL" generate --model "crates/rollcall-core/tests/data/$f.model.json" \
+    if "$ROLLCALL" generate "${input[@]}" \
         --timestamp "$GOLDEN_TIMESTAMP" -o "$sbom" 2>"$OUT/$f.generate.stderr"; then
         record "$f" "rollcall generate" PASS "exit 0"
     else
@@ -257,6 +296,31 @@ for f in "${FIXTURES[@]}"; do
         matches="$(jq '.matches | length' "$OUT/$f.grype.json" 2>/dev/null || echo error)"
         check "$f" "grype zero matches" "matches=$matches" test "$matches" = 0
     fi
+    if [[ "$f" == old-mbedtls ]]; then
+        jq -r '[.matches[] | select(.artifact.name == "mbedtls") | .vulnerability.id] | unique | .[]' \
+            "$OUT/$f.grype.json" >"$OUT/$f.reported-cves.txt" 2>/dev/null || true
+        grep -Ev '^[[:space:]]*(#|$)' "$OLD_MBEDTLS_EXPECTED" | sort -u >"$OUT/$f.expected-cves.txt"
+        missing="$(comm -23 "$OUT/$f.expected-cves.txt" <(sort -u "$OUT/$f.reported-cves.txt") | tr '\n' ' ')"
+        reported="$(wc -l <"$OUT/$f.reported-cves.txt" | tr -d ' ')"
+        expected="$(wc -l <"$OUT/$f.expected-cves.txt" | tr -d ' ')"
+        detail="reported=$reported expected=$expected missing=[${missing% }]"
+        if [[ -z "$missing" && "$expected" -gt 0 ]]; then
+            record "$f" "grype expected CVEs" PASS "$detail"
+        else
+            record "$f" "grype expected CVEs" FAIL "$detail"
+        fi
+        for cpe in "${OLD_MBEDTLS_CPES[@]}"; do
+            searched="$(jq -r --arg cpe "$cpe" \
+                '[.matches[] | select(.artifact.name == "mbedtls") | .matchDetails[].searchedBy.cpes[]? | select(. == $cpe)] | length' \
+                "$OUT/$f.grype.json" 2>/dev/null || echo 0)"
+            vendor="$(cut -d: -f4 <<<"$cpe")"
+            if [[ "${searched:-0}" -gt 0 ]]; then
+                record "$f" "grype searched $vendor cpe" PASS "$cpe ($searched match detail(s))"
+            else
+                record "$f" "grype searched $vendor cpe" FAIL "$cpe (no match detail searched it)"
+            fi
+        done
+    fi
 
     # 3. osv-scanner.
     rc=0
@@ -276,11 +340,11 @@ for f in "${FIXTURES[@]}"; do
     fi
 done
 
-printf '%-8s  %-30s  %-6s  %s\n' FIXTURE CHECK RESULT DETAIL
-printf '%-8s  %-30s  %-6s  %s\n' -------- ------------------------------ ------ ------
+printf '%-11s  %-30s  %-6s  %s\n' FIXTURE CHECK RESULT DETAIL
+printf '%-11s  %-30s  %-6s  %s\n' ----------- ------------------------------ ------ ------
 for row in "${ROWS[@]}"; do
     IFS='|' read -r fixture name result detail <<<"$row"
-    printf '%-8s  %-30s  %-6s  %s\n' "$fixture" "$name" "$result" "$detail"
+    printf '%-11s  %-30s  %-6s  %s\n' "$fixture" "$name" "$result" "$detail"
 done
 echo
 if [[ "$failed" -ne 0 ]]; then

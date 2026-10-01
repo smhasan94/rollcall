@@ -98,6 +98,20 @@ pub enum ValidationError {
         /// The node's ref.
         bom_ref: BomRef,
     },
+    /// A component lists its primary CPE among its additional CPEs.
+    #[error("additional CPE {cpe} at {path} is the primary CPE")]
+    AdditionalCpeIsPrimary {
+        /// The component.
+        path: NodePath,
+        /// The repeated CPE.
+        cpe: String,
+    },
+    /// A component has additional CPEs but no primary CPE.
+    #[error("additional CPEs at {path} without a primary CPE")]
+    AdditionalCpeWithoutPrimary {
+        /// The component.
+        path: NodePath,
+    },
     /// Two distinct paths derive the same `bom-ref`.
     #[error("bom-ref {bom_ref} derived for both {first} and {second}")]
     BomRefCollision {
@@ -131,9 +145,17 @@ pub struct Component {
     /// The component's package URL.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub purl: Option<Purl>,
-    /// The component's CPE name.
+    /// The component's CPE name: the primary one.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub cpe: Option<Cpe>,
+    /// Further CPE names for the same component, sorted: the other NVD vendor:product pairs
+    /// its vulnerabilities are filed under (e.g. `arm:mbed_tls` beside
+    /// `trustedfirmware:mbed_tls`), and identifiers a source gave that lost to `cpe`. Never
+    /// contains `cpe`, and empty when `cpe` is `None` ([`Product::validate`]). Merging two
+    /// components unites their additional CPEs, but two different primary `cpe`s are still a
+    /// merge conflict: neither is demoted to an additional CPE.
+    #[serde(default, skip_serializing_if = "BTreeSet::is_empty")]
+    pub additional_cpes: BTreeSet<Cpe>,
     /// Content hashes, at most one per algorithm.
     #[serde(default, skip_serializing_if = "BTreeSet::is_empty")]
     pub hashes: BTreeSet<Hash>,
@@ -410,6 +432,7 @@ impl Component {
             supplier: None,
             purl: None,
             cpe: None,
+            additional_cpes: BTreeSet::new(),
             hashes: BTreeSet::new(),
             licence: None,
             evidence: EvidenceSet::new(),
@@ -468,7 +491,12 @@ impl Component {
         same_identity(path, "kind", &self.kind, &other.kind)?;
         same_identity(path, "name", &self.name, &other.name)?;
         same_identity(path, "version", &self.version, &other.version)?;
+        let additional = other.additional_cpes.clone();
         merge_facts!(path, self, other);
+        self.additional_cpes.extend(additional);
+        if let Some(cpe) = &self.cpe {
+            self.additional_cpes.remove(cpe);
+        }
         for child in other.components {
             insert_or_merge_component(&mut self.components, child, path)?;
         }
@@ -655,8 +683,9 @@ impl Product {
     /// Checks the invariants the type system does not: the schema tag; names and versions
     /// that are non-empty, not whitespace-only and free of control characters; no two
     /// siblings with the same identity; at most one digest per hash algorithm per node; every
-    /// dependency ref resolves; no node depends on itself; and no two distinct paths derive
-    /// the same `bom-ref`.
+    /// dependency ref resolves; no node depends on itself; a component's additional CPEs
+    /// need a primary CPE and never repeat it; and no two distinct paths derive the same
+    /// `bom-ref`.
     pub fn validate(&self) -> Result<(), ValidationError> {
         match self.schema {
             Schema::V1 => {}
@@ -696,6 +725,20 @@ impl Product {
                     NodeRef::Component(c) => adjacent_duplicate(&c.components, Component::key)
                         .map(PathSegment::of_component),
                 };
+            if let NodeRef::Component(c) = node {
+                match &c.cpe {
+                    None if !c.additional_cpes.is_empty() => {
+                        return Err(ValidationError::AdditionalCpeWithoutPrimary { path });
+                    }
+                    Some(cpe) if c.additional_cpes.contains(cpe) => {
+                        return Err(ValidationError::AdditionalCpeIsPrimary {
+                            path,
+                            cpe: cpe.as_str().to_owned(),
+                        });
+                    }
+                    _ => {}
+                }
+            }
             if let Some(segment) = duplicate_child {
                 return Err(ValidationError::DuplicateSibling {
                     path: path.child(segment),
@@ -1067,6 +1110,48 @@ mod tests {
             product.validate(),
             Err(ValidationError::DanglingDependency { .. })
         ));
+    }
+
+    #[test]
+    fn additional_cpes_need_a_primary_never_repeat_it_and_merge_as_a_union() {
+        let tf = Cpe::new("cpe:2.3:a:trustedfirmware:mbed_tls:3.6.4:*:*:*:*:*:*:*").unwrap();
+        let arm = Cpe::new("cpe:2.3:a:arm:mbed_tls:3.6.4:*:*:*:*:*:*:*").unwrap();
+        let with = |component: Component| {
+            let mut product = Product::new("widget").unwrap();
+            let mut image = app();
+            image.components.insert(component);
+            product.images.insert(image);
+            product
+        };
+        // Without a primary.
+        let mut c = lib("mbedtls", "3.6.4");
+        c.additional_cpes.insert(arm.clone());
+        assert!(matches!(
+            with(c.clone()).validate(),
+            Err(ValidationError::AdditionalCpeWithoutPrimary { .. })
+        ));
+        // Repeating the primary.
+        c.cpe = Some(arm.clone());
+        let err = with(c.clone()).validate().unwrap_err();
+        assert!(
+            matches!(&err, ValidationError::AdditionalCpeIsPrimary { cpe, .. } if *cpe == arm.as_str()),
+            "{err}"
+        );
+        // A primary and a different additional CPE: valid.
+        c.cpe = Some(tf.clone());
+        with(c.clone()).validate().unwrap();
+        // Merging: the additional sets are united, never holding the primary.
+        let mut a = lib("mbedtls", "3.6.4");
+        a.cpe = Some(tf.clone());
+        let mut b = lib("mbedtls", "3.6.4");
+        b.cpe = Some(tf.clone());
+        b.additional_cpes.insert(arm.clone());
+        a.merge(b).unwrap();
+        assert_eq!(a.additional_cpes, BTreeSet::from([arm.clone()]));
+        let mut b = lib("mbedtls", "3.6.4");
+        b.additional_cpes.insert(tf.clone());
+        a.merge(b).unwrap();
+        assert_eq!(a.additional_cpes, BTreeSet::from([arm]));
     }
 
     fn blob() -> Image {

@@ -54,6 +54,8 @@ jobs:
       - uses: Swatinem/rust-cache@v2
       - run: cargo build --workspace --locked
       - run: cargo test --workspace --locked
+      # Offline checks of the identifier-database version-table generator.
+      - run: python3 scripts/version-tables.py --self-test
 
   deny:
     runs-on: ubuntu-latest
@@ -113,4 +115,34 @@ jobs:
           path: |
             .cache/smoke-attempt-1
             .cache/smoke-attempt-2
+          if-no-files-found: warn
+
+  # grype (pinned, SHA-256-verified) on the old-mbedTLS Zephyr build, enriched with the seed
+  # identifier database must report every CVE in its expected list
+  # (crates/rollcall-core/tests/data/old-mbedtls-expected-cves.txt) for the real Zephyr v4.2.0
+  # build in fixtures/zephyr-old-mbedtls/. Needs the network.
+  grype-expected-cves:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # Keep in sync with rust-toolchain.toml.
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: "1.91.1"
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo build -p rollcall-cli --locked
+      # One retry, as in the smoke job; each attempt keeps its own logs.
+      - name: grype expected CVEs (old mbedTLS)
+        run: |
+          ROLLCALL_SMOKE_OUT=.cache/grype-cves-attempt-1 scripts/smoke-scan.sh --install --only old-mbedtls || {
+            echo "grype expected-CVE check failed; retrying once"
+            ROLLCALL_SMOKE_OUT=.cache/grype-cves-attempt-2 scripts/smoke-scan.sh --install --only old-mbedtls
+          }
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: grype-expected-cves
+          path: |
+            .cache/grype-cves-attempt-1
+            .cache/grype-cves-attempt-2
           if-no-files-found: warn

@@ -24,6 +24,11 @@ pub(super) const EVIDENCE_SOURCE: &str = "rollcall:evidence-source";
 pub(super) const EVIDENCE_PROPERTY: &str = "rollcall:evidence";
 /// Property marking a `blob` image's contents as not analysed.
 pub(super) const OPAQUE_PROPERTY: &str = "rollcall:opaque";
+/// Property carrying one of a component's additional CPEs, under the name syft and grype
+/// read (grype matches on these as well as on `cpe`; it ignores `evidence.identity`).
+pub(super) const ADDITIONAL_CPE: &str = "syft:cpe23";
+/// No additional CPEs: products and images have none.
+static NO_CPES: BTreeSet<Cpe> = BTreeSet::new();
 /// The value of [`OPAQUE_PROPERTY`].
 pub(super) const OPAQUE_NOTE: &str = "contents not analysed; hashes computed from the file";
 
@@ -43,6 +48,7 @@ struct Facts<'a> {
     supplier: Option<&'a model::Supplier>,
     purl: Option<&'a Purl>,
     cpe: Option<&'a Cpe>,
+    additional_cpes: &'a BTreeSet<Cpe>,
     hashes: &'a BTreeSet<model::Hash>,
     licence: Option<&'a License>,
     evidence: &'a EvidenceSet,
@@ -56,6 +62,7 @@ impl<'a> Facts<'a> {
             supplier: p.supplier.as_ref(),
             purl: p.purl.as_ref(),
             cpe: p.cpe.as_ref(),
+            additional_cpes: &NO_CPES,
             hashes: &p.hashes,
             licence: p.licence.as_ref(),
             evidence: &p.evidence,
@@ -69,6 +76,7 @@ impl<'a> Facts<'a> {
             supplier: i.supplier.as_ref(),
             purl: i.purl.as_ref(),
             cpe: i.cpe.as_ref(),
+            additional_cpes: &NO_CPES,
             hashes: &i.hashes,
             licence: i.licence.as_ref(),
             evidence: &i.evidence,
@@ -82,6 +90,7 @@ impl<'a> Facts<'a> {
             supplier: c.supplier.as_ref(),
             purl: c.purl.as_ref(),
             cpe: c.cpe.as_ref(),
+            additional_cpes: &c.additional_cpes,
             hashes: &c.hashes,
             licence: c.licence.as_ref(),
             evidence: &c.evidence,
@@ -119,6 +128,10 @@ impl<'a> Facts<'a> {
                 value: serde_json::to_string(entry)?,
             });
         }
+        properties.extend(self.additional_cpes.iter().map(|cpe| Property {
+            name: ADDITIONAL_CPE,
+            value: cpe.as_str().to_owned(),
+        }));
         properties.sort();
         properties.dedup();
 
@@ -160,27 +173,22 @@ impl<'a> Facts<'a> {
     /// Supplier evidence has no CycloneDX evidence field and is not emitted (its source still
     /// appears as a `rollcall:evidence-source` property).
     fn evidence(&self) -> Evidence {
-        let identity = IDENTITY_FIELDS
-            .iter()
-            .filter_map(|&field| {
-                let methods: Vec<Method> = self
-                    .evidence
-                    .iter()
-                    .filter(|e| e.field == field)
-                    .map(|e| Method {
-                        technique: e.technique,
-                        confidence: e.confidence.as_f64(),
-                        value: e.value.clone(),
-                    })
-                    .collect();
-                (!methods.is_empty()).then(|| Identity {
+        let mut identity = Vec::new();
+        for field in IDENTITY_FIELDS {
+            if field == EvidenceField::Cpe && !self.additional_cpes.is_empty() {
+                identity.extend(self.cpe_identities());
+                continue;
+            }
+            let methods = self.methods(field, |_| true);
+            if !methods.is_empty() {
+                identity.push(Identity {
                     field,
-                    confidence: self.evidence.confidence_for(field).as_f64(),
+                    confidence: Some(self.evidence.confidence_for(field).as_f64()),
                     concluded_value: self.concluded(field),
                     methods,
-                })
-            })
-            .collect();
+                });
+            }
+        }
 
         let occurrences: BTreeSet<&model::Occurrence> = self
             .evidence
@@ -208,6 +216,51 @@ impl<'a> Facts<'a> {
             occurrences,
             licenses,
         }
+    }
+}
+
+impl Facts<'_> {
+    /// `methods[]` for the evidence of `field` whose value passes `keep`, in set order.
+    fn methods(&self, field: EvidenceField, keep: impl Fn(&str) -> bool) -> Vec<Method> {
+        self.evidence
+            .iter()
+            .filter(|e| e.field == field && keep(&e.value))
+            .map(|e| Method {
+                technique: e.technique,
+                confidence: e.confidence.as_f64(),
+                value: e.value.clone(),
+            })
+            .collect()
+    }
+
+    /// The `cpe` identity entries of a node with additional CPEs: the primary CPE's (with
+    /// every cpe observation that is not an additional CPE), then one per additional CPE in
+    /// sorted order (with the observations of that value). Each entry's confidence is the
+    /// highest of its methods, omitted when it has none.
+    fn cpe_identities(&self) -> Vec<Identity> {
+        let field = EvidenceField::Cpe;
+        let highest = |methods: &[Method]| methods.iter().map(|m| m.confidence).reduce(f64::max);
+        let is_additional = |v: &str| self.additional_cpes.iter().any(|c| c.as_str() == v);
+        let mut out = Vec::new();
+        let primary = self.methods(field, |v| !is_additional(v));
+        if !primary.is_empty() || self.cpe.is_some() {
+            out.push(Identity {
+                field,
+                confidence: highest(&primary),
+                concluded_value: self.concluded(field),
+                methods: primary,
+            });
+        }
+        for cpe in self.additional_cpes {
+            let methods = self.methods(field, |v| v == cpe.as_str());
+            out.push(Identity {
+                field,
+                confidence: highest(&methods),
+                concluded_value: Some(cpe.as_str().to_owned()),
+                methods,
+            });
+        }
+        out
     }
 }
 

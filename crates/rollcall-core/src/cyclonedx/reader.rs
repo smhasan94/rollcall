@@ -14,6 +14,9 @@
 //!   `library` is read as an image of type [`ImageType::Library`]; it warns unless its
 //!   `rollcall:image-kind` is `blob` (rollcall writes static-archive blobs as `library`);
 //! - evidence that is not in `rollcall:evidence` properties is dropped;
+//! - `syft:cpe23` properties are a component's additional CPEs; on a product or image, on a
+//!   component without a `cpe`, or when the value is not a CPE 2.3 name, they are dropped
+//!   (one repeating the `cpe` is ignored silently);
 //! - components nested under `metadata.component` are dropped, and so is every dependency
 //!   edge to or from one of them or to or from a `services[]` entry.
 //!
@@ -29,7 +32,7 @@ use serde::Deserialize;
 use serde::de::{IgnoredAny, IntoDeserializer};
 use serde_json::Value;
 
-use super::writer::{EVIDENCE_PROPERTY, IMAGE_KIND};
+use super::writer::{ADDITIONAL_CPE, EVIDENCE_PROPERTY, IMAGE_KIND};
 use crate::model::{
     BomRef, Component, ComponentKind, Cpe, Evidence, EvidenceSet, Hash, HashAlgorithm, IdError,
     Image, ImageKind, ImageType, License, MergeError, NodePath, PathSegment, Product, Purl,
@@ -269,6 +272,49 @@ impl Reader {
         }
     }
 
+    /// A component's additional CPEs from its `syft:cpe23` properties. Lenient, as for other
+    /// foreign input: a value that is not a CPE 2.3 name is dropped with a warning, the primary
+    /// CPE repeated is ignored, and without a primary CPE all are dropped with a warning.
+    fn additional_cpes(
+        &mut self,
+        raw: &RawComponent,
+        primary: Option<&Cpe>,
+        at: &str,
+    ) -> std::collections::BTreeSet<Cpe> {
+        let mut out = std::collections::BTreeSet::new();
+        for property in raw.properties.iter().filter(|p| p.name == ADDITIONAL_CPE) {
+            let value = property.value.as_deref().unwrap_or("");
+            match Cpe::new(value) {
+                Ok(cpe) if Some(&cpe) == primary => {}
+                Ok(cpe) => {
+                    out.insert(cpe);
+                }
+                Err(e) => self.warn(
+                    at,
+                    format!("{ADDITIONAL_CPE} value {value:?} is not a CPE ({e}); dropped"),
+                ),
+            }
+        }
+        if primary.is_none() && !out.is_empty() {
+            self.warn(
+                at,
+                format!("{ADDITIONAL_CPE} properties without a cpe; dropped"),
+            );
+            out.clear();
+        }
+        out
+    }
+
+    /// Products and images hold no additional CPEs: warns when the document gives some.
+    fn drop_additional_cpes(&mut self, raw: &RawComponent, at: &str) {
+        if raw.properties.iter().any(|p| p.name == ADDITIONAL_CPE) {
+            self.warn(
+                at,
+                format!("{ADDITIONAL_CPE} properties on a product or image are not read; dropped"),
+            );
+        }
+    }
+
     fn facts(&mut self, raw: &RawComponent, at: &str) -> Result<Facts, ReadError> {
         let id = |source: IdError| ReadError::Id {
             at: at.to_owned(),
@@ -404,7 +450,9 @@ impl Reader {
         let path = parent.child(PathSegment::of_component(&component));
         let at = path.to_string();
         self.bind(raw, &path)?;
-        apply_facts!(component, self.facts(raw, &at)?);
+        let facts = self.facts(raw, &at)?;
+        component.additional_cpes = self.additional_cpes(raw, facts.cpe.as_ref(), &at);
+        apply_facts!(component, facts);
         for child in &raw.components {
             let child = self.component(child, &path)?;
             component.add_component(child)?;
@@ -477,7 +525,9 @@ impl Reader {
         let path = root.child(PathSegment::of_image(&image));
         let at = path.to_string();
         self.bind(raw, &path)?;
-        apply_facts!(image, self.facts(raw, &at)?);
+        let facts = self.facts(raw, &at)?;
+        self.drop_additional_cpes(raw, &at);
+        apply_facts!(image, facts);
         for child in &raw.components {
             let child = self.component(child, &path)?;
             image.add_component(child)?;
@@ -556,7 +606,9 @@ pub fn read(document: &Value) -> Result<Read, ReadError> {
     let root = product.path();
     let at = root.to_string();
     reader.bind(root_raw, &root)?;
-    apply_facts!(product, reader.facts(root_raw, &at)?);
+    let facts = reader.facts(root_raw, &at)?;
+    reader.drop_additional_cpes(root_raw, &at);
+    apply_facts!(product, facts);
     if !root_raw.components.is_empty() {
         reader.warn(
             &at,

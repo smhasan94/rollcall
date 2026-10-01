@@ -1,8 +1,10 @@
 name: Regenerate Zephyr fixtures
 
-# Rebuilds fixtures/zephyr from the pinned Zephyr release on a clean runner (see
-# docs/fixtures.md). The uploaded `zephyr-fixtures` artifact is the canonical fixture set: it is
-# downloaded and committed by hand, never pushed by this workflow.
+# Rebuilds the Zephyr fixtures from their pinned releases on a clean runner (see
+# docs/fixtures.md), one job per pin set: fixtures/zephyr (artifact `zephyr-fixtures`) and
+# fixtures/zephyr-old-mbedtls (artifact `zephyr-old-mbedtls-fixtures`). The uploaded artifacts
+# are the canonical fixture sets: they are downloaded and committed by hand, never pushed by
+# this workflow.
 
 on:
   workflow_dispatch:
@@ -32,6 +34,20 @@ jobs:
     timeout-minutes: 90
     permissions:
       contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - set: main
+            out: fixtures/zephyr
+            variant_args: ""
+            artifact: zephyr-fixtures
+          - set: old-mbedtls
+            out: fixtures/zephyr-old-mbedtls
+            variant_args: "--variant old-mbedtls"
+            artifact: zephyr-old-mbedtls-fixtures
+    env:
+      FIXTURES_OUT: ${{ matrix.out }}
     steps:
       - uses: actions/checkout@v4
 
@@ -52,15 +68,19 @@ jobs:
       - name: Keep a copy of the committed fixtures
         run: |
           mkdir -p "$RUNNER_TEMP/committed"
-          if [[ -d fixtures/zephyr ]]; then
-            cp -R fixtures/zephyr "$RUNNER_TEMP/committed/zephyr"
+          if [[ -d "$FIXTURES_OUT" ]]; then
+            cp -R "$FIXTURES_OUT" "$RUNNER_TEMP/committed/tree"
           fi
 
       - name: Regenerate fixtures
         env:
           CHECK_STABLE: ${{ github.event_name != 'workflow_dispatch' || inputs.check_stable }}
+          VARIANT_ARGS: ${{ matrix.variant_args }}
         run: |
           args=()
+          # Word-split on purpose: "--variant old-mbedtls" is two arguments.
+          # shellcheck disable=SC2206
+          [[ -z "$VARIANT_ARGS" ]] || args+=($VARIANT_ARGS)
           if [[ "$CHECK_STABLE" == true ]]; then
             args+=(--check-stable)
           fi
@@ -73,17 +93,17 @@ jobs:
         run: |
           mkdir -p regen-reports
           report=regen-reports/compare-committed.txt
-          if [[ ! -d "$RUNNER_TEMP/committed/zephyr" ]]; then
+          if [[ ! -d "$RUNNER_TEMP/committed/tree" ]]; then
             echo "No committed fixtures to compare with." | tee "$report"
             echo "No committed fixtures to compare with." >>"$GITHUB_STEP_SUMMARY"
             exit 0
           fi
           rc=0
-          scripts/regen-fixtures.sh compare "$RUNNER_TEMP/committed/zephyr" fixtures/zephyr \
+          scripts/regen-fixtures.sh compare "$RUNNER_TEMP/committed/tree" "$FIXTURES_OUT" \
             >"$report" 2>&1 || rc=$?
           cat "$report"
           {
-            echo "### Regenerated fixtures vs committed fixtures"
+            echo "### Regenerated $FIXTURES_OUT vs committed"
             echo
             if [[ "$rc" -eq 0 ]]; then
               echo "**PASS**: matches the committed fixtures (apart from the masked fields)."
@@ -107,14 +127,14 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: zephyr-fixtures
-          path: fixtures/zephyr
+          name: ${{ matrix.artifact }}
+          path: ${{ matrix.out }}
           if-no-files-found: error
           include-hidden-files: true
 
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: zephyr-fixtures-reports
+          name: ${{ matrix.artifact }}-reports
           path: regen-reports
           if-no-files-found: warn

@@ -1,8 +1,10 @@
 //! Pure mapping from parsed Zephyr inputs to the model. No I/O happens here.
 //!
 //! See the *Mapping* section of the [module docs](super) for what goes where. Where the
-//! identifier database and `modules-deps.spdx` disagree, only a differing purl is a warning;
-//! a differing cpe or supplier is kept as evidence without one.
+//! identifier database and `modules-deps.spdx` disagree, `modules-deps.spdx` wins and a
+//! differing purl or cpe is a warning (not for a purl naming the same GitHub repository, nor
+//! for an SPDX cpe that is one of the database's `cpe_aliases`); the database's cpe then
+//! becomes an additional CPE, as do its `cpe_aliases`. A differing supplier is kept as evidence without a warning.
 
 use std::collections::{BTreeMap, BTreeSet};
 use std::path::{Path, PathBuf};
@@ -145,6 +147,35 @@ fn supplier_name(actor: Option<&SpdxActor>) -> Option<&str> {
     actor
         .filter(|a| matches!(a.kind, SpdxActorKind::Organization | SpdxActorKind::Person))
         .map(|a| a.name.as_str())
+}
+
+/// The GitHub repository a purl names, lower-cased: `pkg:github/<owner>/<repo>`, or any purl
+/// whose `vcs_url` qualifier is a GitHub repository (`git+https://github.com/<owner>/<repo>`,
+/// optionally with `@<ref>`).
+fn github_repository(purl: &Purl) -> Option<(String, String)> {
+    let parsed: PackageUrl<'_> = purl.as_str().parse().ok()?;
+    if parsed.ty() == "github" {
+        let owner = parsed.namespace()?;
+        return Some((owner.to_lowercase(), parsed.name().to_lowercase()));
+    }
+    let vcs_url = parsed
+        .qualifiers()
+        .iter()
+        .find(|(k, _)| k.as_ref() == "vcs_url")
+        .map(|(_, v)| v.as_ref().to_owned())?;
+    let url = vcs_url.strip_prefix("git+").unwrap_or(&vcs_url);
+    // `https://github.com/o/r@ref`: the ref follows the last `@` after the host.
+    let url = match url.rfind('@') {
+        Some(at) if url[..at].matches('/').count() >= 4 => &url[..at],
+        _ => url,
+    };
+    let (owner, repo) = github_repo(url)?;
+    Some((owner.to_lowercase(), repo.to_lowercase()))
+}
+
+/// Whether two purls name the same GitHub repository (see [`github_repository`]).
+fn same_repository(a: &Purl, b: &Purl) -> bool {
+    matches!((github_repository(a), github_repository(b)), (Some(x), Some(y)) if x == y)
 }
 
 /// A purl pinned to the exact revision: `pkg:github/<owner>/<repo>@<rev>` for GitHub, else
@@ -1120,7 +1151,11 @@ impl<'a> Mapper<'a> {
                 .insert(fact(EvidenceField::Purl, purl.as_str()).map_err(&err)?);
             match &component.purl {
                 None => component.purl = Some(purl.clone()),
-                Some(spdx) if spdx != purl => self.warn(
+                // Two spellings of the same upstream repository (e.g. Zephyr's
+                // `pkg:github/mbed-tls/mbedtls@v4.1.0` and the database's
+                // `pkg:generic/mbedtls@4.1.0?vcs_url=git+https://github.com/Mbed-TLS/mbedtls`):
+                // the difference is in the evidence above, not worth a warning.
+                Some(spdx) if spdx != purl && !same_repository(spdx, purl) => self.warn(
                     db_name.clone(),
                     format!(
                         "module {name}: {db_name} purl {purl} differs from {MODULES_DEPS_SPDX} purl {spdx}; using {spdx}"
@@ -1133,8 +1168,36 @@ impl<'a> Mapper<'a> {
             component
                 .evidence
                 .insert(fact(EvidenceField::Cpe, cpe.as_str()).map_err(&err)?);
-            if component.cpe.is_none() {
-                component.cpe = Some(cpe.clone());
+            match &component.cpe {
+                None => component.cpe = Some(cpe.clone()),
+                Some(spdx) if spdx != cpe => {
+                    // An SPDX CPE that is one of the database's aliases is a known other
+                    // vendor:product for the same project: no warning.
+                    if !identity.cpe_aliases.contains(spdx) {
+                        self.warn(
+                            db_name.clone(),
+                            format!(
+                                "module {name}: {db_name} cpe {cpe} differs from {MODULES_DEPS_SPDX} cpe {spdx}; using {spdx}, with {cpe} as an additional CPE"
+                            ),
+                        );
+                    }
+                    component.additional_cpes.insert(cpe.clone());
+                }
+                Some(_) => {}
+            }
+        }
+        // Other vendor:products the upstream's vulnerabilities are filed under. Only beside a
+        // primary CPE: the model keeps no additional CPEs without one.
+        for alias in &identity.cpe_aliases {
+            component
+                .evidence
+                .insert(fact(EvidenceField::Cpe, alias.as_str()).map_err(&err)?);
+            if component
+                .cpe
+                .as_ref()
+                .is_some_and(|primary| primary != alias)
+            {
+                component.additional_cpes.insert(alias.clone());
             }
         }
         if let Some(supplier) = &identity.supplier {
@@ -1948,6 +2011,138 @@ SPDXID: SPDXRef-hal-nordic-deps
         assert_eq!(mbedtls.supplier.as_ref().unwrap().name(), "arm");
     }
 
+    /// No CPE from SPDX: the database's `cpe` is the primary CPE and each of its
+    /// `cpe_aliases` an additional one, all with `identifier-db` evidence and no warning.
+    #[test]
+    fn identifier_db_cpe_is_primary_and_aliases_additional_when_spdx_has_none() {
+        let db = format!(
+            "schema: 1\nmodules:\n{}",
+            db_entry(
+                "hal_nordic",
+                "pkg:generic/nrfx@{version}",
+                "cpe:2.3:a:nordicsemi:nrfx:{version}:*:*:*:*:*:*:*",
+                "Nordic Semiconductor ASA",
+                REV_B,
+                "3.2.1"
+            )
+            .replace(
+                "    version_rule:",
+                "    cpe_aliases: ['cpe:2.3:a:nordic:nrfx:{version}:*:*:*:*:*:*:*', 'cpe:2.3:a:nordicsemi:nrfx:{version}:*:*:*:*:*:*:*']\n    version_rule:"
+            ),
+        );
+        // The second alias repeats the cpe: rejected at load.
+        assert!(crate::identify::load_str("identifiers.yaml", &db).is_err());
+        let db = db.replace(", 'cpe:2.3:a:nordicsemi:nrfx:{version}:*:*:*:*:*:*:*'", "");
+        let out = ingest_with_db(&Sample::default(), &db);
+        let nordic = component(&out.product, "hal_nordic");
+        assert_eq!(
+            nordic.cpe.as_ref().map(|c| c.as_str()),
+            Some("cpe:2.3:a:nordicsemi:nrfx:3.2.1:*:*:*:*:*:*:*")
+        );
+        assert_eq!(
+            nordic
+                .additional_cpes
+                .iter()
+                .map(|c| c.as_str())
+                .collect::<Vec<_>>(),
+            ["cpe:2.3:a:nordic:nrfx:3.2.1:*:*:*:*:*:*:*"]
+        );
+        let db_cpes: Vec<String> = values(nordic, EvidenceField::Cpe)
+            .into_iter()
+            .filter(|(source, _)| source == IDENTIFIER_DB)
+            .map(|(_, v)| v)
+            .collect();
+        assert_eq!(db_cpes.len(), 2, "{db_cpes:?}");
+        assert!(
+            !out.warnings.iter().any(|w| w.message.contains("cpe")),
+            "{:?}",
+            out.warnings
+        );
+    }
+
+    #[test]
+    fn same_repository_matches_github_purls_and_vcs_urls_case_insensitively() {
+        let p = |s: &str| Purl::new(s).unwrap();
+        let generic =
+            p("pkg:generic/mbedtls@3.6.4?vcs_url=git%2Bhttps://github.com/Mbed-TLS/mbedtls");
+        assert!(same_repository(
+            &p("pkg:github/Mbed-TLS/mbedtls@v3.6.4"),
+            &generic
+        ));
+        assert!(same_repository(
+            &generic,
+            &p("pkg:github/mbed-tls/MBEDTLS@v4.1.0")
+        ));
+        // A vcs_url with a ref, or a .git suffix, names the same repository.
+        assert!(same_repository(
+            &p("pkg:generic/x@1?vcs_url=git%2Bhttps://github.com/Mbed-TLS/mbedtls.git%40v3.6.4"),
+            &generic
+        ));
+        // Different repositories, or nothing to compare.
+        for other in [
+            "pkg:github/ARMmbed/mbedtls@v3.2.1",
+            "pkg:github/Mbed-TLS/TF-PSA-Crypto@v1.1.0",
+            "pkg:generic/mbedtls@3.6.4",
+            "pkg:generic/mbedtls@3.6.4?vcs_url=git%2Bhttps://example.org/Mbed-TLS/mbedtls",
+            "pkg:cargo/mbedtls@3.6.4",
+        ] {
+            assert!(!same_repository(&p(other), &generic), "{other}");
+        }
+    }
+
+    /// The SPDX cpe is one of the database's aliases and the SPDX purl names the same
+    /// repository as the database's: both differences are evidence only, with no warning; the
+    /// database's cpe is still an additional CPE.
+    #[test]
+    fn spdx_cpe_alias_and_same_repository_purl_do_not_warn() {
+        let db = format!(
+            "schema: 1\nmodules:\n{}",
+            db_entry(
+                "mbedtls",
+                "'pkg:generic/mbedtls@{version}?vcs_url=git+https://github.com/Mbed-TLS/mbedtls'",
+                "cpe:2.3:a:trustedfirmware:mbed_tls:{version}:*:*:*:*:*:*:*",
+                "arm",
+                REV_A,
+                "4.1.0"
+            )
+            .replace(
+                "    version_rule:",
+                "    cpe_aliases: ['cpe:2.3:a:arm:mbed_tls:{version}:*:*:*:*:*:*:*']\n    version_rule:"
+            ),
+        );
+        let out = ingest_with_db(&Sample::default(), &db);
+        let mbedtls = component(&out.product, "mbedtls");
+        assert_eq!(
+            mbedtls.cpe.as_ref().unwrap().as_str(),
+            "cpe:2.3:a:arm:mbed_tls:4.1.0:*:*:*:*:*:*:*"
+        );
+        assert_eq!(
+            mbedtls
+                .additional_cpes
+                .iter()
+                .map(|c| c.as_str())
+                .collect::<Vec<_>>(),
+            ["cpe:2.3:a:trustedfirmware:mbed_tls:4.1.0:*:*:*:*:*:*:*"]
+        );
+        assert_eq!(
+            mbedtls.purl.as_ref().unwrap().as_str(),
+            "pkg:github/mbed-tls/mbedtls@v4.1.0"
+        );
+        // Both database values are kept as evidence.
+        assert!(
+            values(mbedtls, EvidenceField::Purl)
+                .iter()
+                .any(|(src, v)| src == IDENTIFIER_DB && v.starts_with("pkg:generic/mbedtls@4.1.0"))
+        );
+        let differs: Vec<String> = out
+            .warnings
+            .iter()
+            .map(ToString::to_string)
+            .filter(|w| w.contains("differs"))
+            .collect();
+        assert!(differs.is_empty(), "{differs:?}");
+    }
+
     #[test]
     fn identifier_db_supplier_is_asserted_regardless_of_version_rule() {
         // A file_regex rule with no sources: Low, so no version, purl or cpe, and the version
@@ -2012,6 +2207,15 @@ SPDXID: SPDXRef-hal-nordic-deps
             "cpe:2.3:a:arm:mbed_tls:4.1.0:*:*:*:*:*:*:*"
         );
         assert_eq!(mbedtls.supplier.as_ref().unwrap().name(), "arm");
+        // The database's differing cpe is an additional CPE, so scanners still see it.
+        assert_eq!(
+            mbedtls
+                .additional_cpes
+                .iter()
+                .map(|c| c.as_str())
+                .collect::<Vec<_>>(),
+            ["cpe:2.3:a:armmbed:mbedtls:3.2.1:*:*:*:*:*:*:*"]
+        );
         // The database's facts are kept as evidence.
         assert!(values(mbedtls, EvidenceField::Purl).contains(&(
             IDENTIFIER_DB.into(),
@@ -2026,6 +2230,7 @@ SPDXID: SPDXRef-hal-nordic-deps
             warnings,
             [
                 "identifiers.yaml: module hal_nordic is not in identifiers.yaml; stub entry printed",
+                "identifiers.yaml: module mbedtls: identifiers.yaml cpe cpe:2.3:a:armmbed:mbedtls:3.2.1:*:*:*:*:*:*:* differs from spdx/modules-deps.spdx cpe cpe:2.3:a:arm:mbed_tls:4.1.0:*:*:*:*:*:*:*; using cpe:2.3:a:arm:mbed_tls:4.1.0:*:*:*:*:*:*:*, with cpe:2.3:a:armmbed:mbedtls:3.2.1:*:*:*:*:*:*:* as an additional CPE",
                 "identifiers.yaml: module mbedtls: identifiers.yaml purl pkg:github/armmbed/mbedtls@v3.2.1 differs from spdx/modules-deps.spdx purl pkg:github/mbed-tls/mbedtls@v4.1.0; using pkg:github/mbed-tls/mbedtls@v4.1.0",
             ]
         );

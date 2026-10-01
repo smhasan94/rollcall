@@ -1,0 +1,67 @@
+modules:
+- name: cmsis
+  path: /zephyrproject/modules/hal/cmsis
+  remote: https://github.com/zephyrproject-rtos/cmsis
+  revision: 512cc7e895e8491696b61f7ba8066b4a182569b8
+- name: cmsis_6
+  path: /zephyrproject/modules/hal/cmsis_6
+  remote: https://github.com/zephyrproject-rtos/CMSIS_6
+  revision: 06d952b6713a2ca41c9224a62075e4059402a151
+- name: hal_nordic
+  path: /zephyrproject/modules/hal/nordic
+  remote: https://github.com/zephyrproject-rtos/hal_nordic
+  revision: 9587b1dcb83d24ab74e89837843a5f7d573f7059
+- name: mbedtls
+  path: /zephyrproject/modules/crypto/mbedtls
+  remote: https://github.com/zephyrproject-rtos/mbedtls
+  revision: 85440ef5fffa95d0e9971e9163719189cf34d979
+  security:
+    external-references:
+    - cpe:2.3:a:arm:mbed_tls:3.6.4:*:*:*:*:*:*:*
+    - pkg:github/Mbed-TLS/mbedtls@v3.6.4
+- name: mcuboot
+  path: /zephyrproject/bootloader/mcuboot
+  remote: https://github.com/zephyrproject-rtos/mcuboot
+  revision: 4eba8087fa606db801455f14d185255bc8c49467
+west:
+  manifest: /zephyrproject/zephyr/west.yml
+  projects:
+  - path: /zephyrproject/zephyr
+    remote: https://github.com/zephyrproject-rtos/zephyr
+    revision: 413b789deb391d3a37d06b463288a5fe765ee57e
+    tags:
+    - v4.2.0
+  - name: cmsis
+    path: /zephyrproject/modules/hal/cmsis
+    remote: https://github.com/zephyrproject-rtos/cmsis
+    revision: 512cc7e895e8491696b61f7ba8066b4a182569b8
+  - name: cmsis_6
+    path: /zephyrproject/modules/hal/cmsis_6
+    remote: https://github.com/zephyrproject-rtos/CMSIS_6
+    revision: 06d952b6713a2ca41c9224a62075e4059402a151
+  - name: hal_nordic
+    path: /zephyrproject/modules/hal/nordic
+    remote: https://github.com/zephyrproject-rtos/hal_nordic
+    revision: 9587b1dcb83d24ab74e89837843a5f7d573f7059
+  - name: mbedtls
+    path: /zephyrproject/modules/crypto/mbedtls
+    remote: https://github.com/zephyrproject-rtos/mbedtls
+    revision: 85440ef5fffa95d0e9971e9163719189cf34d979
+    security:
+      external-references:
+      - cpe:2.3:a:arm:mbed_tls:3.6.4:*:*:*:*:*:*:*
+      - pkg:github/Mbed-TLS/mbedtls@v3.6.4
+  - name: mcuboot
+    path: /zephyrproject/bootloader/mcuboot
+    remote: https://github.com/zephyrproject-rtos/mcuboot
+    revision: 4eba8087fa606db801455f14d185255bc8c49467
+workspace:
+  dirty: false
+  extra: false
+  'off': false
+zephyr:
+  path: /zephyrproject/zephyr
+  remote: https://github.com/zephyrproject-rtos/zephyr
+  revision: 413b789deb391d3a37d06b463288a5fe765ee57e
+  tags:
+  - v4.2.0

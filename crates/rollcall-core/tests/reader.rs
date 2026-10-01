@@ -445,3 +445,217 @@ fn foreign_library_blob_image_reads_without_warning() {
         ImageType::Firmware
     );
 }
+
+/// A product whose mbedtls carries a primary CPE, one additional CPE, and cpe evidence for
+/// both values.
+fn product_with_additional_cpe() -> Product {
+    use rollcall_core::model::{
+        Component, ComponentKind, Confidence, Cpe, Evidence, EvidenceField, Image, Technique,
+    };
+    let primary = "cpe:2.3:a:trustedfirmware:mbed_tls:3.6.4:*:*:*:*:*:*:*";
+    let additional = "cpe:2.3:a:arm:mbed_tls:3.6.4:*:*:*:*:*:*:*";
+    let mut mbedtls = Component::new(ComponentKind::Library, "mbedtls")
+        .unwrap()
+        .with_version("3.6.4");
+    mbedtls.cpe = Some(Cpe::new(primary).unwrap());
+    mbedtls
+        .additional_cpes
+        .insert(Cpe::new(additional).unwrap());
+    for (value, bp) in [(primary, 9000), (additional, 8000)] {
+        mbedtls.evidence.insert(
+            Evidence::new(
+                EvidenceField::Cpe,
+                Technique::ManifestAnalysis,
+                "identifier-db",
+                value,
+                Confidence::new(bp).unwrap(),
+            )
+            .unwrap(),
+        );
+    }
+    let mut image = Image::new(ImageKind::Application, "app").unwrap();
+    image.components.insert(mbedtls);
+    let mut product = Product::new("widget").unwrap();
+    product.images.insert(image);
+    product
+}
+
+/// The `mbedtls` component object of a rendered document.
+fn mbedtls_of(doc: &Value) -> &Value {
+    &doc["components"][0]["components"][0]
+}
+
+#[test]
+fn additional_cpes_are_written_as_syft_properties_and_identity_and_read_back() {
+    let product = product_with_additional_cpe();
+    let text = render(&product);
+    assert_eq!(render(&product), text, "deterministic");
+    let doc: Value = serde_json::from_str(&text).unwrap();
+    cyclonedx::validate_cyclonedx_1_6(&doc).unwrap();
+    let mbedtls = mbedtls_of(&doc);
+    assert_eq!(
+        mbedtls["cpe"],
+        "cpe:2.3:a:trustedfirmware:mbed_tls:3.6.4:*:*:*:*:*:*:*"
+    );
+    // grype reads syft:cpe23 properties.
+    let syft: Vec<&Value> = mbedtls["properties"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .filter(|p| p["name"] == "syft:cpe23")
+        .collect();
+    assert_eq!(
+        syft,
+        [&json!({"name": "syft:cpe23", "value": "cpe:2.3:a:arm:mbed_tls:3.6.4:*:*:*:*:*:*:*"})]
+    );
+    // evidence.identity: the primary CPE's entry, then one per additional CPE, each with the
+    // observations of its own value.
+    let cpe_identity: Vec<&Value> = mbedtls["evidence"]["identity"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .filter(|i| i["field"] == "cpe")
+        .collect();
+    assert_eq!(
+        cpe_identity,
+        [
+            &json!({
+                "field": "cpe",
+                "confidence": 0.9,
+                "concludedValue": "cpe:2.3:a:trustedfirmware:mbed_tls:3.6.4:*:*:*:*:*:*:*",
+                "methods": [{"technique": "manifest-analysis", "confidence": 0.9,
+                    "value": "cpe:2.3:a:trustedfirmware:mbed_tls:3.6.4:*:*:*:*:*:*:*"}]
+            }),
+            &json!({
+                "field": "cpe",
+                "confidence": 0.8,
+                "concludedValue": "cpe:2.3:a:arm:mbed_tls:3.6.4:*:*:*:*:*:*:*",
+                "methods": [{"technique": "manifest-analysis", "confidence": 0.8,
+                    "value": "cpe:2.3:a:arm:mbed_tls:3.6.4:*:*:*:*:*:*:*"}]
+            }),
+        ]
+    );
+    assert_round_trips("additional cpe", &product);
+    // The model's JSON form keeps them too.
+    let json = product.to_json().unwrap();
+    assert!(json.contains("\"additional_cpes\""), "{json}");
+    assert_eq!(Product::from_json(&json).unwrap(), product);
+}
+
+#[test]
+fn malformed_additional_cpes_error_or_warn_never_panic() {
+    let text = render(&product_with_additional_cpe());
+    let base: Value = serde_json::from_str(&text).unwrap();
+    let set_syft = |doc: &mut Value, value: Value| {
+        for p in doc["components"][0]["components"][0]["properties"]
+            .as_array_mut()
+            .unwrap()
+        {
+            if p["name"] == "syft:cpe23" {
+                p["value"] = value.clone();
+            }
+        }
+    };
+    // Not a CPE, empty, or not a string: dropped with a warning naming the component; the
+    // rest of the component is read.
+    for bad in [
+        json!("not a cpe"),
+        json!(""),
+        json!(null),
+        json!("cpe:2.3:a:x"),
+    ] {
+        let mut doc = base.clone();
+        set_syft(&mut doc, bad.clone());
+        let read = cyclonedx::read_str(&doc.to_string()).unwrap_or_else(|e| panic!("{bad}: {e}"));
+        let mbedtls = read
+            .product
+            .images
+            .iter()
+            .next()
+            .unwrap()
+            .components
+            .iter()
+            .next()
+            .unwrap();
+        assert!(mbedtls.additional_cpes.is_empty(), "{bad}");
+        assert!(mbedtls.cpe.is_some(), "{bad}");
+        assert!(
+            read.warnings.iter().any(|w| w.location.contains("mbedtls")
+                && w.message.starts_with("syft:cpe23 value")
+                && w.message.ends_with("; dropped")),
+            "{bad}: {:?}",
+            read.warnings
+        );
+    }
+    // On an image the value is not parsed: a malformed one gives the same warning as any.
+    let mut doc = base.clone();
+    doc["components"][0]["properties"]
+        .as_array_mut()
+        .unwrap()
+        .push(json!({"name": "syft:cpe23", "value": "garbage"}));
+    let read = cyclonedx::read_str(&doc.to_string()).unwrap();
+    assert!(
+        read.warnings.iter().any(|w| w
+            .message
+            .starts_with("syft:cpe23 properties on a product or image are not read")),
+        "{:?}",
+        read.warnings
+    );
+    // The primary repeated as a property: ignored without a warning.
+    let mut doc = base.clone();
+    set_syft(
+        &mut doc,
+        json!("cpe:2.3:a:trustedfirmware:mbed_tls:3.6.4:*:*:*:*:*:*:*"),
+    );
+    let read = cyclonedx::read_str(&doc.to_string()).unwrap();
+    let mbedtls = read
+        .product
+        .images
+        .iter()
+        .next()
+        .unwrap()
+        .components
+        .iter()
+        .next()
+        .unwrap();
+    assert!(mbedtls.additional_cpes.is_empty());
+    // On a component without a cpe: dropped with a warning.
+    let mut doc = base.clone();
+    doc["components"][0]["components"][0]
+        .as_object_mut()
+        .unwrap()
+        .remove("cpe");
+    let read = cyclonedx::read_str(&doc.to_string()).unwrap();
+    let mbedtls = read
+        .product
+        .images
+        .iter()
+        .next()
+        .unwrap()
+        .components
+        .iter()
+        .next()
+        .unwrap();
+    assert!(mbedtls.additional_cpes.is_empty());
+    assert!(
+        read.warnings
+            .iter()
+            .any(|w| w.message == "syft:cpe23 properties without a cpe; dropped"),
+        "{:?}",
+        read.warnings
+    );
+    // On an image: dropped with a warning.
+    let mut doc = base.clone();
+    doc["components"][0]["properties"]
+        .as_array_mut()
+        .unwrap()
+        .push(json!({"name": "syft:cpe23", "value": "cpe:2.3:a:arm:mbed_tls:3.6.4:*:*:*:*:*:*:*"}));
+    let read = cyclonedx::read_str(&doc.to_string()).unwrap();
+    assert!(
+        read.warnings.iter().any(|w| w
+            .message
+            .starts_with("syft:cpe23 properties on a product or image are not read")),
+        "{:?}",
+        read.warnings
+    );
+}

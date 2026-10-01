@@ -45,10 +45,11 @@
 //! | `name`, `version` | `name`, `version` |
 //! | `supplier` | `supplier.name`, `supplier.url[]` (sorted) |
 //! | `purl`, `cpe` | `purl`, `cpe` |
+//! | [`Component::additional_cpes`](crate::model::Component::additional_cpes) | one property `syft:cpe23` per CPE (the name syft and grype read; grype ignores `evidence.identity`), and one more `evidence.identity[]` entry each (below) |
 //! | `hashes` | `hashes[]` of `{alg, content}`, sorted by algorithm |
 //! | `licence` | `licenses: [{expression}]` |
 //! | [`Product::dependencies`] | `dependencies[]`: one entry per node in walk order (product, each image, its components depth-first); `dependsOn` is that node's edges, sorted, or `[]` when it has none. Containment is not turned into edges. |
-//! | `name`/`version`/`purl`/`cpe`/`hash` evidence | `evidence.identity[]`, one entry per field present, in that order: `confidence` = the highest for the field; `concludedValue` = the node's stored value (omitted for `hash` and when the node has none); `methods[]` = one `{technique, confidence, value}` per [`Evidence`](crate::model::Evidence), in set order |
+//! | `name`/`version`/`purl`/`cpe`/`hash` evidence | `evidence.identity[]`, one entry per field present, in that order: `confidence` = the highest for the field; `concludedValue` = the node's stored value (omitted for `hash` and when the node has none); `methods[]` = one `{technique, confidence, value}` per [`Evidence`](crate::model::Evidence), in set order. A component with additional CPEs has one `cpe` entry per CPE instead: the primary's first (`concludedValue` = `cpe`, methods = the cpe observations that are not additional CPEs), then each additional CPE in sorted order (`concludedValue` = that CPE, methods = its observations); each entry's `confidence` is its highest method's, omitted when it has none |
 //! | evidence `occurrence` | `evidence.occurrences[]` of `{location, line}` for the node (not per identity entry), de-duplicated and sorted |
 //! | `licence` evidence | `evidence.licenses`: `[{expression}]` when there is one distinct value and it is a valid SPDX expression, else `[{license: {name}}…]` sorted (CycloneDX has no slot for several expressions) |
 //! | evidence `source` | property `rollcall:evidence-source`, one per distinct source |
