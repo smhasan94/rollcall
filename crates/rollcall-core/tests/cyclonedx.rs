@@ -135,13 +135,26 @@ fn every_committed_golden_validates_against_schema_1_6() {
     seen.sort();
     assert_eq!(
         seen,
-        ["blobs.cdx.json", "minimal.cdx.json", "widget.cdx.json"]
+        [
+            "blobs.cdx.json",
+            "clean.cdx.json",
+            "minimal.cdx.json",
+            "widget.cdx.json"
+        ]
     );
 }
 
 #[test]
 fn minimal_fixture_matches_golden() {
     check_golden("minimal.cdx.json", &render(&load_fixture("minimal")));
+}
+
+/// The hand-written clean model (every node with supplier, version, identifier and hashes;
+/// every node reachable from the product), which passes the `cisa-2026` and `cra` validation
+/// profiles with zero warnings (`tests/validate.rs`).
+#[test]
+fn clean_fixture_matches_golden() {
+    check_golden("clean.cdx.json", &render(&load_fixture("clean")));
 }
 
 #[test]

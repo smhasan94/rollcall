@@ -201,12 +201,22 @@ pub struct VexArgs {
 
 /// Arguments of `rollcall validate`.
 #[derive(Debug, Args)]
+#[command(group = ArgGroup::new("checks").required(true).multiple(true))]
 pub struct ValidateArgs {
     /// The document to validate
     #[arg(value_name = "FILE")]
     pub file: PathBuf,
-    /// Check the document against the vendored CycloneDX 1.6 JSON schema (required for now;
-    /// rollcall's own rules will be a separate check)
-    #[arg(long, required = true)]
+    /// Check the document against the vendored CycloneDX 1.6 JSON schema
+    #[arg(long, group = "checks")]
     pub schema: bool,
+    /// Check the document against a regulator profile: cisa-2026 (CISA 2026 SBOM minimum
+    /// elements), cra (EU Cyber Resilience Act), all (both), or the path of a profile YAML
+    /// file (any value containing a path separator or ending in .yaml or .yml). Combine with
+    /// --schema to run both
+    #[arg(long, value_name = "NAME|PATH", group = "checks")]
+    pub profile: Option<String>,
+    /// Print one JSON object (schema violations and profile findings) on stdout instead of
+    /// text, for CI
+    #[arg(long)]
+    pub json: bool,
 }

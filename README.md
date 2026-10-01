@@ -14,7 +14,8 @@ build (the MCUboot bootloader and the application) into one product. `rollcall m
 combines separately generated SBOMs, and opaque binary blobs listed in a `--blob-manifest`,
 into one product hierarchy. `rollcall generate --model` renders a rollcall model (the
 internal `rollcall-model/1` JSON form) the same way; and `rollcall validate --schema` checks a
-document against the official CycloneDX 1.6 JSON schema. `rollcall vex` triages grype or
+document against the official CycloneDX 1.6 JSON schema, and `--profile` against the CISA 2026
+and EU CRA SBOM profiles. `rollcall vex` triages grype or
 osv-scanner findings for an SBOM with VEX rules and Kconfig evidence (see [VEX rules](#vex-rules)).
 `scan` and `assay` are not implemented yet; they print `not implemented` and exit 64. The 0.0.1 releases of `rollcall`,
 `rollcall-core`, `rollcall-cli` and `rollcall-assay` on crates.io and `rollcall` on PyPI are
@@ -60,6 +61,9 @@ rollcall generate --model product.model.json --timestamp 2026-01-02T03:04:05Z \
 
 # Check a document against the vendored CycloneDX 1.6 JSON schema.
 rollcall validate --schema product.cdx.json
+
+# ...and against the CISA 2026 and CRA profiles (docs/validate.md); --json for CI.
+rollcall validate --schema --profile all product.cdx.json
 
 # A sysbuild build (MCUboot + application) as one product, in one step...
 rollcall generate --zephyr build --sysbuild --west-list west-list.txt -o product.cdx.json
@@ -147,8 +151,25 @@ merge conflict (exit 65). The extensions:
 | `.hex`, `.bin`, `.elf`  | `firmware`       |
 | anything else           | `firmware`       |
 
-`validate` prints `<file>: valid CycloneDX 1.6` on success, or `<file>: <n> schema
-violation(s)` followed by one `  <JSON pointer>: <message>` line per violation, sorted.
+`validate` needs `--schema`, `--profile`, or both.
+
+- `--schema` prints `<file>: valid CycloneDX 1.6` on success. On failure it prints
+  `<file>: <n> schema violation(s)` followed by one `  <JSON pointer>: <message>` line per
+  violation, sorted.
+- `--profile cisa-2026|cra|all|PATH` checks the document against regulator profiles: the
+  CISA 2026 SBOM minimum elements, and the EU Cyber Resilience Act with BSI TR-03183-2. It
+  checks:
+  - supplier, name, version, a purl or cpe, and a hash on every component;
+  - a timestamp, an author or tool, and a root component on the document;
+  - a dependency graph that reaches every component from the root;
+  - for CRA only, a complete list of top-level dependencies, with each image represented.
+
+  Each failed check is reported with the component's `bom-ref`, the fix, and the clause it
+  encodes.
+- `--json` prints one JSON object for CI.
+
+The profiles are YAML data in `crates/rollcall-core/profiles/`. See
+[`docs/validate.md`](docs/validate.md) for the checks, output formats and citations.
 
 ### Zephyr ingestion
 
@@ -314,11 +335,11 @@ such as Zephyr is typed is decided at ingestion. osv-scanner is unaffected.
 | Code | Meaning                                                                  |
 |------|--------------------------------------------------------------------------|
 | 0    | Success (including `--help`, `--version`)                                |
-| 1    | `validate`: the document has schema violations                           |
-| 64   | Usage error (bad arguments, bad `--timestamp`, `--serial-number` or `--product`, `merge --blob-manifest` without inputs or `--product`, a `vex --kconfig` that names no image of the product, names one twice, or omits `IMAGE=` for a multi-image product), or subcommand/format not implemented |
-| 65   | Input is malformed: not JSON, not UTF-8, too deeply nested, or an invalid model; or a Zephyr input (SPDX, `west list`, `.config`, `build_info.yml`) or the `--identifier-db` file is malformed, or `--zephyr` names a sysbuild top-level directory without `--sysbuild` (or an image directory with it); or a `merge` input is not a readable CycloneDX 1.6 document, the inputs conflict (including different product names or versions without `--product`), or the blob manifest is malformed; or a `vex` input (SBOM, model, `--kconfig`, findings, rules) is malformed, with `file:line:column` for rules |
-| 66   | Input file missing or unreadable (including a directory), including a required Zephyr input, the `--west-list` or `--identifier-db` file, a `merge` input, the blob manifest or a blob it lists, or a `vex` input |
-| 70   | Internal error (`vex`: the report cannot be serialised)                  |
+| 1    | `validate`: the document has schema violations or error-severity profile findings |
+| 64   | Usage error (bad arguments, `validate` without `--schema` or `--profile` or with an unknown profile name, bad `--timestamp`, `--serial-number` or `--product`, `merge --blob-manifest` without inputs or `--product`, a `vex --kconfig` that names no image of the product, names one twice, or omits `IMAGE=` for a multi-image product), or subcommand/format not implemented |
+| 65   | Input is malformed: not JSON, not UTF-8, too deeply nested, or an invalid model; or a Zephyr input (SPDX, `west list`, `.config`, `build_info.yml`) or the `--identifier-db` file is malformed, or `--zephyr` names a sysbuild top-level directory without `--sysbuild` (or an image directory with it); or a `merge` input is not a readable CycloneDX 1.6 document, the inputs conflict (including different product names or versions without `--product`), or the blob manifest is malformed; or a `vex` input (SBOM, model, `--kconfig`, findings, rules) is malformed, with `file:line:column` for rules; or a `validate --profile` file is malformed |
+| 66   | Input file missing or unreadable (including a directory), including a required Zephyr input, the `--west-list` or `--identifier-db` file, a `merge` input, the blob manifest or a blob it lists, a `vex` input, or a `validate --profile` file |
+| 70   | Internal error (`vex`, `validate --json`: the report cannot be serialised) |
 | 74   | Output cannot be written                                                 |
 
 ## CycloneDX schema

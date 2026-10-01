@@ -1,0 +1,285 @@
+{
+  "bomFormat": "CycloneDX",
+  "components": [
+    {
+      "bom-ref": "image:911161f57a3714ad122b6ea305d680fd",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0"
+        },
+        {
+          "alg": "SHA-512",
+          "content": "b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "Apache-2.0"
+        }
+      ],
+      "name": "mcuboot",
+      "properties": [
+        {
+          "name": "rollcall:image-kind",
+          "value": "bootloader"
+        }
+      ],
+      "purl": "pkg:github/mcu-tools/mcuboot@v2.1.0",
+      "supplier": {
+        "name": "MCUboot project",
+        "url": [
+          "https://www.mcuboot.com"
+        ]
+      },
+      "type": "firmware",
+      "version": "2.1.0"
+    },
+    {
+      "bom-ref": "image:613cff03dcdbf6304ca51767e2ff80b3",
+      "components": [
+        {
+          "bom-ref": "component:929a445c0e3c76a5f601071900b671b9",
+          "licenses": [
+            {
+              "expression": "BSD-3-Clause"
+            }
+          ],
+          "name": "littlefs",
+          "purl": "pkg:github/littlefs-project/littlefs@v2.9.0",
+          "type": "library",
+          "version": "2.9.0"
+        },
+        {
+          "bom-ref": "component:490ab4fe086503c17e430dc3eabb2df9",
+          "cpe": "cpe:2.3:a:arm:mbed_tls:3.6.4:*:*:*:*:*:*:*",
+          "licenses": [
+            {
+              "expression": "Apache-2.0 OR GPL-2.0-or-later"
+            }
+          ],
+          "name": "mbedtls",
+          "purl": "pkg:github/mbed-tls/mbedtls@v3.6.4",
+          "type": "library",
+          "version": "3.6.4"
+        },
+        {
+          "bom-ref": "component:e7da5136d5eaf78baff59bb4945f97f9",
+          "cpe": "cpe:2.3:o:zephyrproject:zephyr:4.2.0:*:*:*:*:*:*:*",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0"
+            },
+            {
+              "alg": "SHA-512",
+              "content": "f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1"
+            }
+          ],
+          "licenses": [
+            {
+              "expression": "Apache-2.0"
+            }
+          ],
+          "name": "zephyr",
+          "purl": "pkg:github/zephyrproject-rtos/zephyr@v4.2.0",
+          "supplier": {
+            "name": "Zephyr Project",
+            "url": [
+              "https://www.zephyrproject.org"
+            ]
+          },
+          "type": "operating-system",
+          "version": "4.2.0"
+        }
+      ],
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0"
+        },
+        {
+          "alg": "SHA-512",
+          "content": "c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "LicenseRef-proprietary"
+        }
+      ],
+      "name": "sensor-app",
+      "properties": [
+        {
+          "name": "rollcall:image-kind",
+          "value": "application"
+        }
+      ],
+      "purl": "pkg:generic/example-devices/sensor-app@1.0.0",
+      "supplier": {
+        "name": "Example Devices Ltd",
+        "url": [
+          "https://devices.example"
+        ]
+      },
+      "type": "firmware",
+      "version": "1.0.0"
+    },
+    {
+      "bom-ref": "image:840c2251d4a3fcaa4c8d9ec6dd5d2501",
+      "components": [
+        {
+          "bom-ref": "component:e66735306088ef37e3383a98a12c4958",
+          "cpe": "cpe:2.3:a:nordicsemi:softdevice_controller:6.0.0:*:*:*:*:*:*:*",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "8080808080808080808080808080808080808080808080808080808080808080"
+            },
+            {
+              "alg": "SHA-512",
+              "content": "81818181818181818181818181818181818181818181818181818181818181818181818181818181818181818181818181818181818181818181818181818181"
+            }
+          ],
+          "licenses": [
+            {
+              "expression": "LicenseRef-Nordic-5-Clause"
+            }
+          ],
+          "name": "sdc",
+          "supplier": {
+            "name": "Nordic Semiconductor ASA",
+            "url": [
+              "https://www.nordicsemi.com"
+            ]
+          },
+          "type": "firmware",
+          "version": "6.0.0"
+        }
+      ],
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "9090909090909090909090909090909090909090909090909090909090909090"
+        },
+        {
+          "alg": "SHA-512",
+          "content": "91919191919191919191919191919191919191919191919191919191919191919191919191919191919191919191919191919191919191919191919191919191"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "LicenseRef-Nordic-5-Clause"
+        }
+      ],
+      "name": "radio-fw",
+      "properties": [
+        {
+          "name": "rollcall:image-kind",
+          "value": "blob"
+        },
+        {
+          "name": "rollcall:opaque",
+          "value": "contents not analysed; hashes computed from the file"
+        }
+      ],
+      "purl": "pkg:generic/nordic/radio-fw@6.0.0",
+      "supplier": {
+        "name": "Nordic Semiconductor ASA",
+        "url": [
+          "https://www.nordicsemi.com"
+        ]
+      },
+      "type": "firmware",
+      "version": "6.0.0"
+    }
+  ],
+  "dependencies": [
+    {
+      "dependsOn": [
+        "image:613cff03dcdbf6304ca51767e2ff80b3",
+        "image:840c2251d4a3fcaa4c8d9ec6dd5d2501",
+        "image:911161f57a3714ad122b6ea305d680fd"
+      ],
+      "ref": "product:ee193673a5716110c2e95bc112363dcb"
+    },
+    {
+      "dependsOn": [],
+      "ref": "image:911161f57a3714ad122b6ea305d680fd"
+    },
+    {
+      "dependsOn": [
+        "component:490ab4fe086503c17e430dc3eabb2df9",
+        "component:929a445c0e3c76a5f601071900b671b9",
+        "component:e7da5136d5eaf78baff59bb4945f97f9"
+      ],
+      "ref": "image:613cff03dcdbf6304ca51767e2ff80b3"
+    },
+    {
+      "dependsOn": [],
+      "ref": "component:929a445c0e3c76a5f601071900b671b9"
+    },
+    {
+      "dependsOn": [],
+      "ref": "component:490ab4fe086503c17e430dc3eabb2df9"
+    },
+    {
+      "dependsOn": [],
+      "ref": "component:e7da5136d5eaf78baff59bb4945f97f9"
+    },
+    {
+      "dependsOn": [
+        "component:e66735306088ef37e3383a98a12c4958"
+      ],
+      "ref": "image:840c2251d4a3fcaa4c8d9ec6dd5d2501"
+    },
+    {
+      "dependsOn": [],
+      "ref": "component:e66735306088ef37e3383a98a12c4958"
+    }
+  ],
+  "metadata": {
+    "component": {
+      "bom-ref": "product:ee193673a5716110c2e95bc112363dcb",
+      "cpe": "cpe:2.3:o:example_devices:sensor-node:1.0.0:*:*:*:*:*:*:*",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+        },
+        {
+          "alg": "SHA-512",
+          "content": "a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "LicenseRef-proprietary"
+        }
+      ],
+      "name": "sensor-node",
+      "purl": "pkg:generic/example-devices/sensor-node@1.0.0",
+      "supplier": {
+        "name": "Example Devices Ltd",
+        "url": [
+          "https://devices.example"
+        ]
+      },
+      "type": "firmware",
+      "version": "1.0.0"
+    },
+    "timestamp": "2026-01-02T03:04:05Z",
+    "tools": {
+      "components": [
+        {
+          "name": "rollcall",
+          "type": "application",
+          "version": "0.0.1"
+        }
+      ]
+    }
+  },
+  "serialNumber": "urn:uuid:82cd501a-0158-83c7-ba5e-fc4da43d15ed",
+  "specVersion": "1.6",
+  "version": 1
+}

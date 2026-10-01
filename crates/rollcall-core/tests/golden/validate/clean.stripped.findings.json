@@ -1,0 +1,123 @@
+{
+  "profiles": [
+    "cisa-2026",
+    "cra"
+  ],
+  "checks_run": 12,
+  "errors": 4,
+  "warnings": 0,
+  "findings": [
+    {
+      "profiles": [
+        "cisa-2026",
+        "cra"
+      ],
+      "check": "component.supplier",
+      "severity": "error",
+      "ref": "component:929a445c0e3c76a5f601071900b671b9",
+      "path": "/components/1/components/0",
+      "name": "littlefs",
+      "version": "2.9.0",
+      "message": "no supplier (manufacturer.name and supplier.name missing)",
+      "fix": "set manufacturer.name or supplier.name to the organisation that supplies this component",
+      "citations": [
+        {
+          "profile": "cisa-2026",
+          "document": "CISA, NSA, FBI et al., 2026 Minimum Elements for a Software Bill of Materials (SBOM), version 2.1, July 29, 2026",
+          "url": "https://www.cisa.gov/resources-tools/resources/2026-minimum-elements-software-bill-materials-sbom",
+          "clause": "Data Fields, Component Data: Component Producer (p. 10)"
+        },
+        {
+          "profile": "cra",
+          "document": "BSI TR-03183-2, Cyber Resilience Requirements for Manufacturers and Products, Part 2: Software Bill of Materials (SBOM), version 2.1.0, 2025-08-20",
+          "url": "https://www.bsi.bund.de/SharedDocs/Downloads/EN/BSI/Publications/TechGuidelines/TR03183/BSI-TR-03183-2_v2_1_0.pdf",
+          "clause": "section 5.2.2, Table 3: Component creator (lenient: name accepted, see profile header)"
+        }
+      ]
+    },
+    {
+      "profiles": [
+        "cisa-2026",
+        "cra"
+      ],
+      "check": "component.hash",
+      "severity": "error",
+      "ref": "component:929a445c0e3c76a5f601071900b671b9",
+      "path": "/components/1/components/0",
+      "name": "littlefs",
+      "version": "2.9.0",
+      "message": "no hash",
+      "fix": "add hashes[] with a SHA-256 or SHA-384 or SHA-512 or SHA3-256 or SHA3-384 or SHA3-512 digest of the component's deliverable file",
+      "citations": [
+        {
+          "profile": "cisa-2026",
+          "document": "CISA, NSA, FBI et al., 2026 Minimum Elements for a Software Bill of Materials (SBOM), version 2.1, July 29, 2026",
+          "url": "https://www.cisa.gov/resources-tools/resources/2026-minimum-elements-software-bill-materials-sbom",
+          "clause": "Data Fields, Component Data: Component Hash Value and Component Hash Algorithm (p. 11)"
+        },
+        {
+          "profile": "cra",
+          "document": "BSI TR-03183-2, Cyber Resilience Requirements for Manufacturers and Products, Part 2: Software Bill of Materials (SBOM), version 2.1.0, 2025-08-20",
+          "url": "https://www.bsi.bund.de/SharedDocs/Downloads/EN/BSI/Publications/TechGuidelines/TR03183/BSI-TR-03183-2_v2_1_0.pdf",
+          "clause": "section 5.2.2, Table 3: Hash value of the deployable component (lenient: SHA-256 and up accepted, BSI asks for SHA-512; see profile header)"
+        }
+      ]
+    },
+    {
+      "profiles": [
+        "cisa-2026",
+        "cra"
+      ],
+      "check": "component.supplier",
+      "severity": "error",
+      "ref": "component:490ab4fe086503c17e430dc3eabb2df9",
+      "path": "/components/1/components/1",
+      "name": "mbedtls",
+      "version": "3.6.4",
+      "message": "no supplier (manufacturer.name and supplier.name missing)",
+      "fix": "set manufacturer.name or supplier.name to the organisation that supplies this component",
+      "citations": [
+        {
+          "profile": "cisa-2026",
+          "document": "CISA, NSA, FBI et al., 2026 Minimum Elements for a Software Bill of Materials (SBOM), version 2.1, July 29, 2026",
+          "url": "https://www.cisa.gov/resources-tools/resources/2026-minimum-elements-software-bill-materials-sbom",
+          "clause": "Data Fields, Component Data: Component Producer (p. 10)"
+        },
+        {
+          "profile": "cra",
+          "document": "BSI TR-03183-2, Cyber Resilience Requirements for Manufacturers and Products, Part 2: Software Bill of Materials (SBOM), version 2.1.0, 2025-08-20",
+          "url": "https://www.bsi.bund.de/SharedDocs/Downloads/EN/BSI/Publications/TechGuidelines/TR03183/BSI-TR-03183-2_v2_1_0.pdf",
+          "clause": "section 5.2.2, Table 3: Component creator (lenient: name accepted, see profile header)"
+        }
+      ]
+    },
+    {
+      "profiles": [
+        "cisa-2026",
+        "cra"
+      ],
+      "check": "component.hash",
+      "severity": "error",
+      "ref": "component:490ab4fe086503c17e430dc3eabb2df9",
+      "path": "/components/1/components/1",
+      "name": "mbedtls",
+      "version": "3.6.4",
+      "message": "no hash",
+      "fix": "add hashes[] with a SHA-256 or SHA-384 or SHA-512 or SHA3-256 or SHA3-384 or SHA3-512 digest of the component's deliverable file",
+      "citations": [
+        {
+          "profile": "cisa-2026",
+          "document": "CISA, NSA, FBI et al., 2026 Minimum Elements for a Software Bill of Materials (SBOM), version 2.1, July 29, 2026",
+          "url": "https://www.cisa.gov/resources-tools/resources/2026-minimum-elements-software-bill-materials-sbom",
+          "clause": "Data Fields, Component Data: Component Hash Value and Component Hash Algorithm (p. 11)"
+        },
+        {
+          "profile": "cra",
+          "document": "BSI TR-03183-2, Cyber Resilience Requirements for Manufacturers and Products, Part 2: Software Bill of Materials (SBOM), version 2.1.0, 2025-08-20",
+          "url": "https://www.bsi.bund.de/SharedDocs/Downloads/EN/BSI/Publications/TechGuidelines/TR03183/BSI-TR-03183-2_v2_1_0.pdf",
+          "clause": "section 5.2.2, Table 3: Hash value of the deployable component (lenient: SHA-256 and up accepted, BSI asks for SHA-512; see profile header)"
+        }
+      ]
+    }
+  ]
+}

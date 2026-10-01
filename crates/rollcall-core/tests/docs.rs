@@ -267,3 +267,67 @@ fn identifiers_doc_lists_every_seeded_module() {
         }
     }
 }
+
+const VALIDATE_DOCS: &str = include_str!("../../../docs/validate.md");
+
+/// `docs/validate.md` cites, for every check of every built-in profile, the source document
+/// and the clause the profile encodes, and describes every check in the catalogue.
+#[test]
+fn validate_docs_cite_source_and_clause_for_every_profile_check() {
+    let profiles = rollcall_core::validate::builtin_profiles();
+    assert!(!profiles.is_empty());
+    for profile in &profiles {
+        let heading = format!("`{}`", profile.id);
+        assert!(VALIDATE_DOCS.contains(&heading), "no section for {heading}");
+        for source in &profile.sources {
+            assert!(
+                VALIDATE_DOCS.contains(&source.document),
+                "{}: source {:?} not cited",
+                profile.id,
+                source.document
+            );
+            if let Some(url) = &source.url {
+                assert!(
+                    VALIDATE_DOCS.contains(url.as_str()),
+                    "{}: {url}",
+                    profile.id
+                );
+            }
+        }
+        for check in &profile.checks {
+            // One table row per check: `| `id` | clause |`.
+            let row = format!("| `{}` | {} |", check.id, check.cite.clause);
+            assert!(
+                VALIDATE_DOCS.lines().any(|l| l.starts_with(&row)),
+                "{}: no citation row starting {row:?}",
+                profile.id
+            );
+        }
+    }
+    for check in rollcall_core::validate::CHECKS {
+        assert!(
+            VALIDATE_DOCS.contains(&format!("### `{}`", check.id)),
+            "check {} not described",
+            check.id
+        );
+    }
+}
+
+const VALIDATE_MODULE_DOCS: &str = include_str!("../src/validate/mod.rs");
+
+#[test]
+fn validate_module_docs_have_required_sections() {
+    for heading in [
+        "//! # Checks",
+        "//! # Profiles",
+        "//! # Report",
+        "//! # Determinism",
+    ] {
+        assert!(
+            VALIDATE_MODULE_DOCS
+                .lines()
+                .any(|l| l.trim_end() == heading),
+            "missing section {heading:?} in validate/mod.rs"
+        );
+    }
+}

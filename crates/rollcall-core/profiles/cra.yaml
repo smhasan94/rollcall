@@ -1,0 +1,69 @@
+# The EU Cyber Resilience Act's SBOM obligation, as rollcall checks it. The Regulation itself
+# asks for an SBOM "covering at the very least the top-level dependencies" (Annex I, Part II,
+# point (1)) and leaves its format and elements to an implementing act (Article 13(24)); the
+# per-field checks cite BSI TR-03183-2, the CRA-aligned technical guideline. Loaded by
+# `rollcall validate --profile cra`; docs/validate.md explains each check and citation.
+#
+# Passing this profile means passing rollcall's CRA-oriented checks. It is NOT a claim of full
+# conformance with every cited BSI TR-03183-2 clause. Known points where the checks are
+# deliberately looser than BSI (decided; see docs/validate.md):
+#   - component.hash accepts SHA-256/384/512 and SHA3-256/384/512; BSI asks for SHA-512.
+#   - document.author and component.supplier accept a name; BSI asks for the creator's email
+#     address or URL.
+#   - component.identifier requires a purl or cpe on every component (rollcall's own
+#     requirement); BSI asks for other identifiers only "if it exists".
+# Clauses marked "(inference)" or "(to confirm)" are interpretations of the Regulation.
+format: rollcall-profile/1
+id: cra
+title: "EU Cyber Resilience Act (Regulation (EU) 2024/2847), Annex I Part II: rollcall's CRA-oriented checks, not a full conformance assessment"
+sources:
+  - key: cra
+    document: "Regulation (EU) 2024/2847 of the European Parliament and of the Council of 23 October 2024 (Cyber Resilience Act), OJ L, 2024/2847, 20.11.2024"
+    url: https://eur-lex.europa.eu/eli/reg/2024/2847/oj
+  - key: bsi
+    document: "BSI TR-03183-2, Cyber Resilience Requirements for Manufacturers and Products, Part 2: Software Bill of Materials (SBOM), version 2.1.0, 2025-08-20"
+    url: https://www.bsi.bund.de/SharedDocs/Downloads/EN/BSI/Publications/TechGuidelines/TR03183/BSI-TR-03183-2_v2_1_0.pdf
+  - key: rollcall
+    document: "rollcall CRA-oriented requirement (SHA-118), documented in docs/validate.md; not a clause of the Regulation or of BSI TR-03183-2"
+    url: https://github.com/smhasan94/rollcall/blob/main/docs/validate.md
+checks:
+  - id: document.timestamp
+    severity: error
+    cite: { source: bsi, clause: "section 5.2.1, Table 2: Timestamp" }
+  - id: document.author
+    severity: error
+    cite: { source: bsi, clause: "section 5.2.1, Table 2: Creator of the SBOM (lenient: name accepted, see profile header)" }
+    params: { accept: [authors, manufacturer, tools] }
+  - id: document.root
+    severity: error
+    cite: { source: cra, clause: "Annex I, Part II, point (1): the top-level dependencies of the product (inference: the product is the root)" }
+  - id: component.name
+    severity: error
+    cite: { source: bsi, clause: "section 5.2.2, Table 3: Component name" }
+  - id: component.version
+    severity: error
+    cite: { source: bsi, clause: "section 5.2.2, Table 3: Component version" }
+  - id: component.supplier
+    severity: error
+    cite: { source: bsi, clause: "section 5.2.2, Table 3: Component creator (lenient: name accepted, see profile header)" }
+    params: { accept: [supplier, manufacturer] }
+  - id: component.identifier
+    severity: error
+    cite: { source: rollcall, clause: "every component has a unique identifier, PURL or CPE (related: BSI TR-03183-2 section 5.2.4, Table 5, Other unique identifiers, required there only if it exists)" }
+  - id: component.hash
+    severity: error
+    cite: { source: bsi, clause: "section 5.2.2, Table 3: Hash value of the deployable component (lenient: SHA-256 and up accepted, BSI asks for SHA-512; see profile header)" }
+    params: { algorithms: [SHA-256, SHA-384, SHA-512, SHA3-256, SHA3-384, SHA3-512] }
+  - id: graph.refs-resolve
+    severity: error
+    cite: { source: bsi, clause: "section 5.2.2, Table 3: Dependencies on other components" }
+  - id: graph.reachable
+    severity: error
+    cite: { source: bsi, clause: "section 5.1: Level of detail; section 5.2.2, Table 3: Dependencies on other components" }
+    params: { nesting_is_dependency: true }
+  - id: graph.top-level-complete
+    severity: error
+    cite: { source: cra, clause: "Annex I, Part II, point (1): an SBOM covering at the very least the top-level dependencies of the product" }
+  - id: image.represented
+    severity: error
+    cite: { source: cra, clause: "Annex I, Part II, point (1) and Article 3, point (39): the components contained in the product (to confirm)" }
