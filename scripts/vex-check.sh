@@ -64,7 +64,7 @@ KCONFIG=fixtures/zephyr/tls/http_server/zephyr/.config
 REAL_VARIANT=fixtures/zephyr-old-mbedtls/old-mbedtls
 REAL_RULES=$DATA/vex/zephyr-old-mbedtls.rules.yml
 REAL_EXPECTED=CVE-2026-34873
-IDENTIFIER_DB=crates/rollcall-core/db/identifiers.yaml
+IDENTIFIER_DB=crates/rollcall-identifiers/db/identifiers.yaml
 
 # SHA-256 of the grype release tarballs (as in scripts/smoke-scan.sh).
 grype_sha256() {
