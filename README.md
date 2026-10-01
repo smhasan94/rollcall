@@ -28,6 +28,7 @@ placeholders that reserve the names.
 | `rollcall-core`  | Component-graph model and ingestion.                           |
 | `rollcall-cli`   | The `rollcall` binary.                                         |
 | `rollcall-assay` | Cryptographic inventory (CycloneDX CBOM), run as `rollcall assay`. |
+| `rollcall-identifiers` | The identifier database (data only), versioned on its own (`db_version`). |
 | `rollcall`       | Name-reservation placeholder; no code.                         |
 
 `python/` holds the placeholder for the `pip install rollcall` wrapper.
@@ -42,6 +43,7 @@ placeholders that reserve the names.
 | `rollcall vex`      | Emit VEX statements for an SBOM                                          |
 | `rollcall scan`     | Scan an SBOM for known vulnerabilities                                   |
 | `rollcall assay`    | Produce a CycloneDX CBOM (cryptographic inventory) for a build           |
+| `rollcall identifiers` | Inspect and lint the identifier database                              |
 
 ## Usage
 
@@ -78,6 +80,11 @@ rollcall generate --zephyr build/app --west-list west-list.txt -o app.cdx.json
 rollcall generate --zephyr build/mcuboot --west-list west-list.txt -o mcuboot.cdx.json
 rollcall merge app.cdx.json mcuboot.cdx.json --product app -o product.cdx.json
 
+# Resolve each module to its upstream purl and CPE with the identifier database, and lint it.
+rollcall generate --zephyr build --sysbuild --west-list west-list.txt --identify -o product.cdx.json
+rollcall --version
+rollcall identifiers lint
+
 # Add opaque binary blobs (radio firmware, vendor libraries) from a manifest.
 rollcall merge product.cdx.json --blob-manifest blobs.yaml --product widget@1.2.0 -o widget.cdx.json
 ```
@@ -88,8 +95,8 @@ always produce byte-identical output; changing only `--timestamp` changes only t
 `rollcall_core::cyclonedx` module docs (`cargo doc -p rollcall-core --open`).
 
 Exactly one of `--model` and `--zephyr` is required; `--west-list`, `--include-sdk`,
-`--sysbuild`, `--product` and `--identifier-db` only go with `--zephyr`, and `--workspace`
-needs both `--identifier-db` and `--west-list`.
+`--sysbuild`, `--product`, `--identifier-db` and `--identify` only go with `--zephyr`, and
+`--workspace` needs `--west-list` and one of `--identifier-db` or `--identify`.
 
 `--product NAME[@VERSION]` puts the generated images under that product exactly as
 `merge --product` does (same parsing: split at the last `@`, so `@scope/widget@1.0.0`), and
@@ -209,9 +216,11 @@ Every fact carries evidence naming the file and line it came from. The full mapp
 
 ### Identifier database
 
-`--identifier-db FILE` resolves each module to its *upstream* project: the version of the
-fork revision the build used, and from it the upstream purl, cpe and supplier that
-vulnerability scanners match. It is optional; without it the output is unchanged.
+`--identify` resolves each module to its *upstream* project with the active identifier
+database (see *Database versions* below): the version of the fork revision the build used,
+and from it the upstream purl, cpe and supplier that vulnerability scanners match.
+`--identifier-db FILE` does the same with that file, as does the global `--identifiers PATH`.
+Resolution is optional; without any of these the output is unchanged.
 
 ```yaml
 schema: 1
@@ -235,7 +244,8 @@ modules:
 `git_tag` matches the revision itself, or a tag pointing at it; `file_regex` searches a
 file in the module's sources. Both need the module sources, found with `--workspace DIR`
 (the west workspace: each module is at `DIR/<west list path>`, so `--workspace` requires
-`--west-list`, and `--identifier-db`; without either it is a usage error, exit 64).
+`--west-list`, and `--identifier-db` or `--identify`; without either it is a usage error,
+exit 64).
 Quote revisions and versions, which YAML could otherwise read as numbers (`'2.0'`, or a
 commit such as `1e753266…`). The database is checked when it
 is loaded: a malformed entry, an unknown key, or a purl or cpe template that does not render
@@ -255,13 +265,85 @@ prints a stub entry for each such module to stderr, ready to paste under `module
 the `""` blanks and `<vendor>`/`<product>` (or delete the lines marked optional). The exit
 code stays 0.
 
-rollcall carries a seed database in `crates/rollcall-core/db/identifiers.yaml` covering 33
-common Zephyr modules, each fork revision pinned by Zephyr v4.2.0 to v4.4.2 mapped to its
-upstream version (`pkg:generic` purls; CPEs only from the NVD CPE dictionary). Its
-conventions and how the versions are derived are in [docs/identifiers.md](docs/identifiers.md).
-Next to it, `crates/rollcall-core/db/subsystems.yaml` maps Zephyr subsystems to their Kconfig
-symbols and source paths, checked against the pinned Zephyr tree by
-`scripts/verify-subsystems.sh`; see [docs/subsystems.md](docs/subsystems.md).
+rollcall carries a seed database, `crates/rollcall-identifiers/db/identifiers.yaml`,
+covering 33 common Zephyr modules, each fork revision pinned by Zephyr v4.2.0 to v4.4.2
+mapped to its upstream version (`pkg:generic` purls; CPEs only from the NVD CPE dictionary).
+Its conventions and how the versions are derived are in
+[docs/identifiers.md](docs/identifiers.md); how to add a module is in
+[CONTRIBUTING.md](CONTRIBUTING.md). Separately, `crates/rollcall-core/db/subsystems.yaml`
+maps Zephyr subsystems to their Kconfig symbols and source paths, checked against the pinned
+Zephyr tree by `scripts/verify-subsystems.sh`; it ships only with rollcall (see
+[docs/subsystems.md](docs/subsystems.md)).
+
+#### Database versions
+
+The identifier database is its own artifact: the `rollcall-identifiers` crate, whose version
+is the database's `db_version` (`db_version: '1.0.0'` in the YAML). A new database is a new
+release of that crate, or the tarball `scripts/package-identifiers.sh` builds, not a new
+rollcall. The active database is, in order:
+
+1. `--identifiers PATH` (global; read by `generate` and `--version` only), or
+   `generate --identifier-db FILE`;
+2. `$ROLLCALL_IDENTIFIERS`;
+3. the newest compatible database in the cache directory that is newer than the embedded
+   one: `<cache>/rollcall/identifiers/<db_version>/identifiers.yaml`, where `<cache>` is
+   `$ROLLCALL_CACHE_DIR`, else `$XDG_CACHE_HOME`, else `~/.cache` (`%LOCALAPPDATA%` on
+   Windows);
+4. the database embedded in rollcall.
+
+A PATH may be the YAML file or a directory holding `identifiers.yaml`, or the word
+`embedded` (`--identifiers embedded`, `ROLLCALL_IDENTIFIERS=embedded`), which pins the
+embedded database and ignores the cache; a file called `embedded` is `./embedded`. rollcall
+accepts a
+`db_version` of at least 1.0.0 with major version 1: a MINOR bump adds modules, a PATCH bump
+fixes entries, and a MAJOR bump (a schema change) needs a newer rollcall. An explicit
+database outside that range is an error (exit 65); a database with no `db_version` (your own,
+built from stub entries) is used as is. Cache entries outside the range, older than the
+embedded database, malformed, or whose `db_version` is not their directory name are skipped
+with a warning.
+
+The cache is trusted only as far as its permissions: on Unix, a cache root, entry directory
+or `identifiers.yaml` writable by group or others (any of mode `0o022`) is skipped with a
+warning, as is a symlink that leads out of the cache root, since whoever can write there
+could change your SBOMs. Dotfiles, plain files and directories whose names are not versions
+are ignored silently, and a relative `$ROLLCALL_CACHE_DIR` or `$XDG_CACHE_HOME` is ignored.
+To rule the cache out entirely, pin the embedded database with `--identifiers embedded`.
+
+Installing a release without upgrading rollcall (distribution of the release tarballs:
+see [issue #16](https://github.com/smhasan94/rollcall/issues/16)):
+
+```sh
+mkdir -p ~/.cache/rollcall/identifiers
+tar -xzf rollcall-identifiers-1.1.0.tar.gz -C ~/.cache/rollcall/identifiers
+rollcall --version
+# rollcall 0.0.1
+# identifiers 1.1.0 (cache /home/me/.cache/rollcall/identifiers/1.1.0/identifiers.yaml)
+# identifiers 1.0.0 (embedded, minimum 1.0.0)
+```
+
+`rollcall --version` prints the active database (when it is not the embedded one) and the
+embedded one, side by side (`-V` with a subcommand, e.g. `rollcall --version vex`, prints the
+version and ignores the subcommand). `generate` names a database picked up from the cache in
+a note on stderr.
+
+Whenever modules are resolved, the SBOM records which database did it, without any path, so
+the output stays byte-identical wherever the database lives: `metadata.properties`
+`rollcall:identifiers:db-version` (the `db_version`, or `unversioned`) and
+`rollcall:identifiers:source` (`embedded`, `flag`, `env` or `cache`). `merge` carries them
+over, keeping every distinct value of its inputs.
+
+`scripts/package-identifiers.sh` builds the release tarball byte-identically on every run of
+a given toolchain (python3 and its zlib build; another zlib may compress differently), and
+`scripts/check-identifiers-package.sh` checks that and that rollcall reads the tarball from a
+cache directory.
+
+`rollcall identifiers lint [PATH] [--fixtures DIR]… [--expect-version VERSION]` checks a
+database (default: the embedded one, whose `db_version` must be the `rollcall-identifiers`
+version): schema, purl and CPE syntax, duplicate and unsorted modules, `db_version`, that every
+`manual` table row resolves, and with `--fixtures` that every module of those Zephyr builds
+resolves to a purl. Findings go to stderr as `file:line: rule: message`; exit 1 on any.
+`scripts/lint-identifiers.sh` runs it on the tree's database against `fixtures/zephyr`, as
+the CI job `identifiers-lint` does.
 
 ### VEX rules
 
@@ -372,10 +454,10 @@ such as Zephyr is typed is decided at ingestion. osv-scanner is unaffected.
 | Code | Meaning                                                                  |
 |------|--------------------------------------------------------------------------|
 | 0    | Success (including `--help`, `--version`)                                |
-| 1    | `validate`: the document has schema violations or error-severity profile findings; `vex verify`: the signature does not verify |
+| 1    | `validate`: the document has schema violations or error-severity profile findings; `vex verify`: the signature does not verify; `identifiers lint`: the database has findings |
 | 64   | Usage error (bad arguments, `validate` without `--schema` or `--profile` or with an unknown profile name, bad `--timestamp`, `--serial-number` or `--product`, `merge --blob-manifest` without inputs or `--product`, a `vex --kconfig` that names no image of the product, names one twice, or omits `IMAGE=` for a multi-image product; `vex` flags that do not combine, such as `--embed` without `--format cyclonedx`, `--format cyclonedx` without `--sbom`, or `--sign` without `-o`), or subcommand/format not implemented |
-| 65   | Input is malformed: not JSON, not UTF-8, too deeply nested, or an invalid model; or a Zephyr input (SPDX, `west list`, `.config`, `build_info.yml`) or the `--identifier-db` file is malformed, or `--zephyr` names a sysbuild top-level directory without `--sysbuild` (or an image directory with it); or a `merge` input is not a readable CycloneDX 1.6 document, the inputs conflict (including different product names or versions without `--product`), or the blob manifest is malformed; or a `vex` input (SBOM, model, `--kconfig`, findings, rules, signing key, signature file) is malformed, with `file:line:column` for rules, or the SBOM cannot take the requested VEX output (no `serialNumber` for `--format cyclonedx`, a `serialNumber` that is not a lowercase `urn:uuid:` or a `version` below 1, a non-empty `vulnerabilities` for `--embed`); or a `validate --profile` file is malformed |
-| 66   | Input file missing or unreadable (including a directory), including a required Zephyr input, the `--west-list` or `--identifier-db` file, a `merge` input, the blob manifest or a blob it lists, a `vex` input, or a `validate --profile` file |
+| 65   | Input is malformed: not JSON, not UTF-8, too deeply nested, or an invalid model; or a Zephyr input (SPDX, `west list`, `.config`, `build_info.yml`) or the identifier database (`--identifier-db`, `--identifiers`, `$ROLLCALL_IDENTIFIERS`, also for `--version`) is malformed or has a `db_version` this rollcall does not accept, or `--zephyr` names a sysbuild top-level directory without `--sysbuild` (or an image directory with it); or a `merge` input is not a readable CycloneDX 1.6 document, the inputs conflict (including different product names or versions without `--product`), or the blob manifest is malformed; or a `vex` input (SBOM, model, `--kconfig`, findings, rules, signing key, signature file) is malformed, with `file:line:column` for rules, or the SBOM cannot take the requested VEX output (no `serialNumber` for `--format cyclonedx`, a `serialNumber` that is not a lowercase `urn:uuid:` or a `version` below 1, a non-empty `vulnerabilities` for `--embed`); or a `validate --profile` file is malformed |
+| 66   | Input file missing or unreadable (including a directory), including a required Zephyr input, the `--west-list` file or an explicit identifier database (`--identifier-db`, `--identifiers` or `$ROLLCALL_IDENTIFIERS`, also for `--version`), a `merge` input, the blob manifest or a blob it lists, a `vex` input, or a `validate --profile` file |
 | 69   | `vex --sign cosign` / `vex verify --cosign`: cosign is not installed, or keyless signing failed (no OIDC identity) |
 | 70   | Internal error (`vex`, `validate --json`: the report cannot be serialised) |
 | 74   | Output cannot be written                                                 |
@@ -420,8 +502,11 @@ are produced only by `scripts/regen-fixtures.sh`; the committed copy comes from 
 
 ## Publishing the placeholders
 
-Crates must be published dependencies first: `rollcall-core` and `rollcall-assay`, then
-`rollcall-cli`, then `rollcall` (or simply `cargo publish --workspace`, which orders them).
+Crates must be published dependencies first: `rollcall-identifiers`, then `rollcall-core`
+and `rollcall-assay`, then `rollcall-cli`, then `rollcall` (or simply
+`cargo publish --workspace`, which orders them). `rollcall-identifiers` is versioned on its
+own (its version is the database's `db_version`); a database-only release is
+`cargo publish -p rollcall-identifiers` plus the tarball from `scripts/package-identifiers.sh`.
 Then the PyPI placeholder:
 
 ```sh

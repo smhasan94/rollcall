@@ -659,3 +659,59 @@ fn malformed_additional_cpes_error_or_warn_never_panic() {
         read.warnings
     );
 }
+
+/// The identifier database provenance in `metadata.properties` (SHA-104) reads back exactly,
+/// and writing what was read gives the same bytes; other metadata properties are ignored.
+#[test]
+fn identifier_db_provenance_round_trips() {
+    use rollcall_core::identify::{self, DbSource};
+    let product = load_fixture("minimal");
+    let db = identify::builtin().unwrap();
+    for source in [
+        DbSource::Embedded,
+        DbSource::Flag(PathBuf::from("/abs/db.yaml")),
+        DbSource::Env(PathBuf::from("db.yaml")),
+        DbSource::Cache(PathBuf::from("/home/u/.cache/x")),
+    ] {
+        let properties = identify::provenance(&db, &source);
+        let options = WriteOptions::new(Timestamp::parse(GOLDEN_TIMESTAMP).unwrap())
+            .with_properties(properties.clone());
+        let text = cyclonedx::write(&product, &options).unwrap();
+        // Valid CycloneDX, with no path in it.
+        let value: Value = serde_json::from_str(&text).unwrap();
+        cyclonedx::validate_cyclonedx_1_6(&value).unwrap();
+        assert!(
+            !text.contains("db.yaml") && !text.contains(".cache"),
+            "{text}"
+        );
+        assert_eq!(
+            value["metadata"]["properties"],
+            json!([
+                {"name": "rollcall:identifiers:db-version", "value": rollcall_identifiers::DB_VERSION},
+                {"name": "rollcall:identifiers:source", "value": source.kind()},
+            ])
+        );
+        let read = cyclonedx::read_str(&text).unwrap();
+        assert_eq!(read.product, product);
+        assert!(read.warnings.is_empty(), "{:?}", read.warnings);
+        assert_eq!(read.metadata_properties, properties);
+        let again = WriteOptions::new(Timestamp::parse(GOLDEN_TIMESTAMP).unwrap())
+            .with_properties(read.metadata_properties);
+        assert_eq!(cyclonedx::write(&read.product, &again).unwrap(), text);
+    }
+    // Without provenance there is no metadata.properties at all (unchanged output).
+    let value: Value = serde_json::from_str(&render(&product)).unwrap();
+    assert!(value["metadata"].get("properties").is_none());
+    // Foreign or malformed metadata properties are ignored, not errors.
+    let mut doc: Value = serde_json::from_str(&render(&product)).unwrap();
+    doc["metadata"]["properties"] = json!([
+        {"name": "vendor:thing", "value": "x"},
+        {"name": "rollcall:identifiers:source"},
+        {"name": "rollcall:identifiers:db-version", "value": "9.9.9"},
+    ]);
+    let read = cyclonedx::read_str(&doc.to_string()).unwrap();
+    assert_eq!(read.metadata_properties.len(), 1);
+    assert_eq!(read.metadata_properties[0].value, "9.9.9");
+    doc["metadata"]["properties"] = json!("not a list");
+    assert!(cyclonedx::read_str(&doc.to_string()).is_err());
+}

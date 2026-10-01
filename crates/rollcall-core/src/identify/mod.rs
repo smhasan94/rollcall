@@ -10,6 +10,7 @@
 //!
 //! ```yaml
 //! schema: 1
+//! db_version: '1.0.0'                     # optional here; required by the lint and the cache
 //! modules:
 //!   mbedtls:                              # the west module name, [A-Za-z0-9_.+-]+
 //!     upstream:
@@ -70,15 +71,27 @@
 //! `modules:` mapping, prefilled from the module's URL and revision, whose blanks (`""`,
 //! `<vendor>`, `<product>`) the user fills in. Later queries for the same module carry no
 //! stub, so one resolver gives one warning per module however many images use it.
+//!
+//! # Versions, sources and lint
+//!
+//! The seed database lives in the `rollcall-identifiers` crate, whose version is the
+//! database's `db_version`, so it is released (and picked up) without a rollcall release.
+//! [`version`] holds the pin ([`MIN_DB_VERSION`], [`SUPPORTED_DB_MAJOR`]); [`source`] selects
+//! the active database (explicit path, `$ROLLCALL_IDENTIFIERS`, the cache directory, or the
+//! embedded one) and loads it next to the embedded one; [`lint`] is
+//! `rollcall identifiers lint`.
 
 pub mod cpe;
 pub mod db;
+pub mod lint;
 pub mod resolver;
 pub mod rules;
 #[cfg(test)]
 mod seed;
+pub mod source;
 pub mod stub;
 pub mod template;
+pub mod version;
 
 use std::collections::BTreeMap;
 use std::fmt;
@@ -89,18 +102,29 @@ use serde::de::{self, Deserializer, MapAccess, Visitor};
 pub use db::{LoadError, load, load_str};
 pub use resolver::{Identity, Outcome, Query, Resolver};
 pub use rules::{Derived, FsTree, SourceTree, derive_version};
+pub use source::{
+    DbSource, LoadedDbs, PROP_DB_VERSION, PROP_SOURCE, PROVENANCE_PROPERTIES, SourceError,
+    provenance, select,
+};
 pub use stub::{Stub, stub};
 pub use template::{CpeTemplate, Pattern, PurlTemplate, RelPath};
+pub use version::{
+    DbVersion, DbVersionError, Incompatible, MIN_DB_VERSION, SUPPORTED_DB_MAJOR, check_compatible,
+};
 
-/// The seed database shipped with rollcall.
-const BUILTIN: &str = include_str!("../../db/identifiers.yaml");
+/// The seed database shipped with rollcall: the `rollcall-identifiers` crate's
+/// `db/identifiers.yaml`, embedded at build time.
+pub(crate) const BUILTIN: &str = rollcall_identifiers::IDENTIFIERS_YAML;
 /// The name the seed database is cited by.
-pub const BUILTIN_NAME: &str = "identifiers.yaml";
+pub const BUILTIN_NAME: &str = rollcall_identifiers::FILE_NAME;
+/// The embedded database's `db_version` (the `rollcall-identifiers` crate version).
+pub const BUILTIN_DB_VERSION: &str = rollcall_identifiers::DB_VERSION;
 
 /// A loaded identifier database.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct IdentifierDb {
     pub(crate) schema: u32,
+    pub(crate) db_version: Option<DbVersion>,
     pub(crate) modules: BTreeMap<String, Entry>,
     pub(crate) name: String,
 }
@@ -114,6 +138,11 @@ impl IdentifierDb {
     /// The schema version (always 1).
     pub fn schema(&self) -> u32 {
         self.schema
+    }
+
+    /// The database's release (`db_version`), if it declares one.
+    pub fn db_version(&self) -> Option<&DbVersion> {
+        self.db_version.as_ref()
     }
 
     /// The entry for `module`, if listed.
@@ -272,7 +301,7 @@ impl Level {
     }
 }
 
-/// The seed database shipped with rollcall (`db/identifiers.yaml`).
+/// The seed database shipped with rollcall (the `rollcall-identifiers` crate).
 pub fn builtin() -> Result<IdentifierDb, LoadError> {
     load_str(BUILTIN_NAME, BUILTIN)
 }

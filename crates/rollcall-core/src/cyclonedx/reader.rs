@@ -32,6 +32,7 @@ use serde::Deserialize;
 use serde::de::{IgnoredAny, IntoDeserializer};
 use serde_json::Value;
 
+use super::document::Property;
 use super::writer::{ADDITIONAL_CPE, EVIDENCE_PROPERTY, IMAGE_KIND};
 use crate::model::{
     BomRef, Component, ComponentKind, Cpe, Evidence, EvidenceSet, Hash, HashAlgorithm, IdError,
@@ -51,6 +52,10 @@ pub struct Read {
     /// rollcall derives its own refs from paths ([`BomRef::derive`]); this table maps them
     /// back to the document's, which may differ for documents rollcall did not write.
     pub refs: BTreeMap<String, NodePath>,
+    /// The document-level `metadata.properties` rollcall itself writes (the identifier
+    /// database provenance, [`crate::identify::PROVENANCE_PROPERTIES`]), sorted, so that
+    /// `merge` can carry them over. Any other metadata property is ignored.
+    pub metadata_properties: Vec<Property>,
 }
 
 /// Why a CycloneDX document could not be read into the model.
@@ -142,6 +147,8 @@ struct RawService {
 struct RawMetadata {
     #[serde(default)]
     component: Option<RawComponent>,
+    #[serde(default)]
+    properties: Vec<RawProperty>,
 }
 
 #[derive(Deserialize)]
@@ -663,10 +670,27 @@ pub fn read(document: &Value) -> Result<Read, ReadError> {
         }
     }
     product.validate()?;
+    let mut metadata_properties: Vec<Property> = bom
+        .metadata
+        .iter()
+        .flat_map(|m| &m.properties)
+        .filter_map(|p| {
+            let name = crate::identify::PROVENANCE_PROPERTIES
+                .into_iter()
+                .find(|known| *known == p.name)?;
+            Some(Property {
+                name,
+                value: p.value.clone()?,
+            })
+        })
+        .collect();
+    metadata_properties.sort();
+    metadata_properties.dedup();
     Ok(Read {
         product,
         warnings: reader.warnings,
         refs: reader.refs,
+        metadata_properties,
     })
 }
 

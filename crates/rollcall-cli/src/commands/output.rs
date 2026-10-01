@@ -3,20 +3,23 @@
 use std::io::Write;
 use std::path::Path;
 
-use rollcall_core::cyclonedx::{self, SerialNumber, Timestamp, WriteError, WriteOptions};
+use rollcall_core::cyclonedx::{self, Property, SerialNumber, Timestamp, WriteError, WriteOptions};
 use rollcall_core::model::Product;
 
 use crate::cli::{EXIT_DATAERR, EXIT_IOERR};
 
-/// Renders `product` as CycloneDX 1.6 JSON and writes it to `output` (atomically) or stdout.
-/// On failure, returns the exit code and the message to print.
+/// Renders `product` as CycloneDX 1.6 JSON, with `properties` as `metadata.properties`, and
+/// writes it to `output` (atomically) or stdout. On failure, returns the exit code and the
+/// message to print.
 pub fn write_document(
     product: &Product,
+    properties: Vec<Property>,
     timestamp: Option<Timestamp>,
     serial_number: Option<SerialNumber>,
     output: Option<&Path>,
 ) -> Result<(), (u8, String)> {
-    let mut options = WriteOptions::new(timestamp.unwrap_or_else(Timestamp::now));
+    let mut options =
+        WriteOptions::new(timestamp.unwrap_or_else(Timestamp::now)).with_properties(properties);
     if let Some(serial) = serial_number {
         options = options.with_serial_number(serial);
     }

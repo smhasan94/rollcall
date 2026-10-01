@@ -1,0 +1,21 @@
+# Hand-written model fixture for the identifier-database lint and version tests (SHA-104),
+# not from a real build; see tests/data/README.md. Valid schema 1 text, but db_version 2.0.0 is another major version.
+schema: 1
+db_version: '2.0.0'
+modules:
+  alpha:
+    upstream:
+      name: Alpha
+    purl: 'pkg:generic/alpha@{version}'
+    version_rule:
+      kind: manual
+      table:
+        'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa': '1.0.0'
+  beta:
+    upstream:
+      name: Beta
+    purl: 'pkg:generic/beta@{version}'
+    version_rule:
+      kind: manual
+      table:
+        'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb': '1.0.0'

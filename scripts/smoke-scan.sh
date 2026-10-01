@@ -25,7 +25,7 @@
 # For each fixture: minimal and widget (crates/rollcall-core/tests/data/*.model.json), and,
 # with --only old-mbedtls, the real Zephyr v4.2.0 build
 # fixtures/zephyr-old-mbedtls/old-mbedtls/mbedtls (generated with its west list and the seed
-# --identifier-db crates/rollcall-core/db/identifiers.yaml):
+# --identifier-db crates/rollcall-identifiers/db/identifiers.yaml):
 #   1. rollcall generate with the golden timestamp, byte-compared with the committed golden,
 #      then rollcall validate --schema.
 #   2. grype: exits 0, no WARN/ERROR in its log, catalogues one package per node except
@@ -52,7 +52,7 @@ OLD_MBEDTLS_VARIANT=fixtures/zephyr-old-mbedtls/old-mbedtls
 OLD_MBEDTLS_EXPECTED=crates/rollcall-core/tests/data/old-mbedtls-expected-cves.txt
 OLD_MBEDTLS_CPES=('cpe:2.3:a:trustedfirmware:mbed_tls:3.6.4:*:*:*:*:*:*:*'
     'cpe:2.3:a:arm:mbed_tls:3.6.4:*:*:*:*:*:*:*')
-IDENTIFIER_DB=crates/rollcall-core/db/identifiers.yaml
+IDENTIFIER_DB=crates/rollcall-identifiers/db/identifiers.yaml
 
 # SHA-256 of the grype release tarballs.
 grype_sha256() {

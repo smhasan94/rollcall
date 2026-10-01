@@ -1,0 +1,19 @@
+[package]
+name = "rollcall-identifiers"
+description = "rollcall's identifier database: Zephyr module -> upstream project, purl, CPE and version"
+# The crate version IS the database's `db_version` (db/identifiers.yaml); it is not the
+# workspace version, so the database can be released without a rollcall release.
+# `rollcall identifiers lint` fails when the two differ.
+version = "1.0.0"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+readme = "README.md"
+authors.workspace = true
+keywords = ["sbom", "purl", "cpe", "zephyr", "firmware"]
+categories = ["development-tools"]
+include = ["db/**", "src/**", "README.md"]
+
+[lints]
+workspace = true

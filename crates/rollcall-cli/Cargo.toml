@@ -19,6 +19,7 @@ path = "src/main.rs"
 clap.workspace = true
 rollcall-core.workspace = true
 rollcall-assay.workspace = true
+rollcall-identifiers.workspace = true
 serde_json.workspace = true
 tempfile.workspace = true
 

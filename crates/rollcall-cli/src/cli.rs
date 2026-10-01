@@ -5,6 +5,7 @@ use std::str::FromStr;
 
 use clap::{ArgGroup, Args, Parser, Subcommand, ValueEnum};
 use rollcall_core::cyclonedx::{SerialNumber, Timestamp};
+use rollcall_core::identify::DbVersion;
 use rollcall_core::merge::ProductSpec;
 
 /// Exit code when a document fails validation.
@@ -24,16 +25,32 @@ pub const EXIT_UNAVAILABLE: u8 = 69;
 pub const EXIT_IOERR: u8 = 74;
 
 /// Top-level `rollcall` command line.
+///
+/// `--version` is rollcall's own flag rather than clap's, because it also reports the
+/// identifier databases, which depend on the environment and the cache directory.
 #[derive(Debug, Parser)]
 #[command(
     name = "rollcall",
-    version,
-    about = "CRA-grade CycloneDX SBOMs from firmware build metadata"
+    about = "CRA-grade CycloneDX SBOMs from firmware build metadata",
+    disable_version_flag = true,
+    arg_required_else_help = true
 )]
 pub struct Cli {
+    /// Print version, and the active and embedded identifier database versions (any
+    /// subcommand given with it is ignored)
+    #[arg(short = 'V', long)]
+    pub version: bool,
+    /// Identifier database for `generate` and `--version` (no other command reads it): a YAML
+    /// file, a directory holding identifiers.yaml, or `embedded` to pin the embedded one.
+    /// Without it: $ROLLCALL_IDENTIFIERS (same forms), else the newest compatible database
+    /// under CACHE/rollcall/identifiers/DB_VERSION/ (CACHE: $ROLLCALL_CACHE_DIR,
+    /// $XDG_CACHE_HOME or ~/.cache), else the embedded one. With `generate --zephyr` it also
+    /// turns module resolution on
+    #[arg(long, global = true, value_name = "PATH")]
+    pub identifiers: Option<PathBuf>,
     /// The subcommand to run.
     #[command(subcommand)]
-    pub command: Command,
+    pub command: Option<Command>,
 }
 
 /// The `rollcall` subcommands.
@@ -51,6 +68,8 @@ pub enum Command {
     Scan,
     /// Produce a CycloneDX CBOM (cryptographic inventory) for a build
     Assay,
+    /// Inspect and lint the identifier database
+    Identifiers(IdentifiersArgs),
 }
 
 impl Command {
@@ -63,6 +82,7 @@ impl Command {
             Command::Vex(_) => "vex",
             Command::Scan => "scan",
             Command::Assay => "assay",
+            Command::Identifiers(_) => "identifiers",
         }
     }
 }
@@ -79,6 +99,7 @@ pub enum Format {
 /// Arguments of `rollcall generate`.
 #[derive(Debug, Args)]
 #[command(group = ArgGroup::new("input").required(true).multiple(false))]
+#[command(group = ArgGroup::new("db").multiple(false))]
 pub struct GenerateArgs {
     /// The rollcall model (`rollcall-model/1` JSON) to render
     #[arg(long, value_name = "FILE", group = "input")]
@@ -119,12 +140,18 @@ pub struct GenerateArgs {
         long,
         value_name = "FILE",
         requires = "zephyr",
-        conflicts_with = "model"
+        conflicts_with = "model",
+        group = "db"
     )]
     pub identifier_db: Option<PathBuf>,
-    /// The west workspace (topdir), so --identifier-db rules can read module sources at their
-    /// `west list` path. Requires both --identifier-db and --west-list
-    #[arg(long, value_name = "DIR", requires_all = ["identifier_db", "west_list"])]
+    /// Resolve modules with the active identifier database (with --zephyr): --identifiers,
+    /// else $ROLLCALL_IDENTIFIERS, else the newest compatible database in the cache directory
+    /// that is newer than the embedded one, else the embedded one (see `rollcall --version`)
+    #[arg(long, requires = "zephyr", conflicts_with = "model", group = "db")]
+    pub identify: bool,
+    /// The west workspace (topdir), so identifier database rules can read module sources at
+    /// their `west list` path. Requires --identifier-db or --identify, and --west-list
+    #[arg(long, value_name = "DIR", requires_all = ["db", "west_list"])]
     pub workspace: Option<PathBuf>,
     /// Output format
     #[arg(long, value_enum, default_value_t = Format::Cyclonedx)]
@@ -333,4 +360,40 @@ pub struct ValidateArgs {
     /// text, for CI
     #[arg(long)]
     pub json: bool,
+}
+
+/// Arguments of `rollcall identifiers`.
+#[derive(Debug, Args)]
+pub struct IdentifiersArgs {
+    /// What to do.
+    #[command(subcommand)]
+    pub command: IdentifiersCommand,
+}
+
+/// The `rollcall identifiers` subcommands.
+#[derive(Debug, Subcommand)]
+pub enum IdentifiersCommand {
+    /// Check an identifier database: schema, purl and CPE syntax, duplicate and unsorted
+    /// modules, db_version, that every manual-table row resolves, and (with --fixtures) that
+    /// it resolves every module of real Zephyr builds. Exit 1 on any finding
+    Lint(LintArgs),
+}
+
+/// Arguments of `rollcall identifiers lint`.
+#[derive(Debug, Args)]
+pub struct LintArgs {
+    /// The database: a YAML file, or a directory holding identifiers.yaml. Defaults to the
+    /// embedded database, whose db_version must then be the rollcall-identifiers version (the
+    /// global --identifiers is not used here)
+    #[arg(value_name = "PATH")]
+    pub path: Option<PathBuf>,
+    /// Zephyr fixture builds to resolve: DIR, or each subdirectory of DIR, holding
+    /// build_info.yml and west-list.txt (e.g. fixtures/zephyr). Every module must get a purl
+    /// from the database. Repeatable
+    #[arg(long, value_name = "DIR")]
+    pub fixtures: Vec<PathBuf>,
+    /// The db_version the database must declare (e.g. the rollcall-identifiers crate
+    /// version)
+    #[arg(long, value_name = "VERSION", value_parser = DbVersion::from_str)]
+    pub expect_version: Option<DbVersion>,
 }

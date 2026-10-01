@@ -33,7 +33,7 @@
 //! | `spdx/modules-deps.spdx` | no (warning) | upstream module version, purl, cpe, supplier; which modules Zephyr depends on |
 //! | `zephyr/.config` | no (warning) | `CONFIG_ZEPHYR_<MODULE>_MODULE=y` name evidence; the SDK version |
 //! | `--west-list FILE` | no (warning) | module revisions and URLs from `west list -f "{name} {path} {revision} {url}"` |
-//! | `--identifier-db FILE` | no | each module's upstream version, purl, cpe and supplier, from an [identifier database](crate::identify) |
+//! | `--identifier-db FILE` (or `--identify`: the active database, [`identify::select`]) | no | each module's upstream version, purl, cpe and supplier, from an [identifier database](crate::identify) |
 //! | `--workspace DIR` | no | the west workspace, so `file_regex` and `git_tag` rules can read a module's sources at `DIR/<west list path>` |
 //!
 //! `spdx/` is written by `west spdx` after a build configured with
@@ -562,6 +562,25 @@ pub fn ingest(options: &IngestOptions) -> Result<Ingest, ZephyrError> {
     let db = load_identifier_db(options)?;
     let mut resolver = db.as_ref().map(Resolver::new);
     ingest_image(options, resolver.as_mut())
+}
+
+/// [`ingest`] resolving modules with `db`, an identifier database already loaded (for example
+/// the active one of [`identify::select`]), instead of loading
+/// [`IngestOptions::identifier_db`]. That path, if given, still locates errors in the
+/// database's values. With `db` `None` this is exactly [`ingest`].
+pub fn ingest_with_db(
+    options: &IngestOptions,
+    db: Option<&IdentifierDb>,
+) -> Result<Ingest, ZephyrError> {
+    let Some(db) = db else {
+        return ingest(options);
+    };
+    let mut resolver = Resolver::new(db);
+    if options.sysbuild {
+        sysbuild::ingest_images(options, Some(&mut resolver))
+    } else {
+        ingest_image(options, Some(&mut resolver))
+    }
 }
 
 /// Reads, parses and maps one image build directory, resolving modules with `resolver`.

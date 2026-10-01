@@ -11,7 +11,7 @@ use std::path::{Path, PathBuf};
 use serde::Deserialize;
 use serde::de::{self, Deserializer, MapAccess, Visitor};
 
-use super::{Entry, IdentifierDb, VersionRule};
+use super::{DbVersion, Entry, IdentifierDb, VersionRule};
 use crate::model::check_iri_reference_chars;
 
 /// The schema version this rollcall reads.
@@ -100,6 +100,10 @@ impl fmt::Display for Located<'_> {
 #[serde(deny_unknown_fields)]
 struct RawDb {
     schema: u32,
+    /// Checked after parsing ([`parse_db_version`]): an error raised while deserialising a
+    /// top-level field is located at the start of the document, not at the field.
+    #[serde(default)]
+    db_version: Option<String>,
     modules: Modules,
 }
 
@@ -212,6 +216,11 @@ fn parse(path: &Path, name: &str, text: &str) -> Result<IdentifierDb, LoadError>
             found: raw.schema,
         });
     }
+    let db_version = raw
+        .db_version
+        .as_deref()
+        .map(|text_version| parse_db_version(path, text, text_version))
+        .transpose()?;
     for (module, entry) in &raw.modules.0 {
         validate(entry).map_err(|reason| LoadError::Invalid {
             path: path.to_owned(),
@@ -221,8 +230,27 @@ fn parse(path: &Path, name: &str, text: &str) -> Result<IdentifierDb, LoadError>
     }
     Ok(IdentifierDb {
         schema: raw.schema,
+        db_version,
         modules: raw.modules.0,
         name: name.to_owned(),
+    })
+}
+
+/// `db_version` as a [`DbVersion`], or an error located at the top-level `db_version:` line.
+fn parse_db_version(path: &Path, text: &str, value: &str) -> Result<DbVersion, LoadError> {
+    value.parse().map_err(|e: super::DbVersionError| {
+        // The top-level `db_version:` line, and the column where its value starts.
+        let found = text.lines().enumerate().find_map(|(n, l)| {
+            let rest = l.strip_prefix("db_version:")?;
+            let value_at = l.len() - rest.trim_start().len();
+            Some((to_u32(n + 1), to_u32(l[..value_at].chars().count() + 1)))
+        });
+        LoadError::Yaml {
+            path: path.to_owned(),
+            line: found.map(|(line, _)| line),
+            column: found.map(|(_, column)| column),
+            message: format!("db_version: {e}"),
+        }
     })
 }
 
@@ -310,9 +338,35 @@ modules:
         let db = load_str("identifiers.yaml", GOOD).unwrap();
         assert_eq!(db.name(), "identifiers.yaml");
         assert_eq!(db.schema(), 1);
+        assert_eq!(db.db_version(), None);
         let entry = db.get("a").unwrap();
         assert_eq!(entry.purl.as_str(), "pkg:generic/a@{version}");
         assert_eq!(entry.version_rule.kind(), "manual");
+    }
+
+    #[test]
+    fn db_version_is_read_and_optional() {
+        let text = GOOD.replace("schema: 1\n", "schema: 1\ndb_version: '1.2.0'\n");
+        let db = load_str("identifiers.yaml", &text).unwrap();
+        assert_eq!(
+            db.db_version().map(ToString::to_string).as_deref(),
+            Some("1.2.0")
+        );
+        // A bad one is located at its line.
+        let e = load_str("identifiers.yaml", &text.replace("'1.2.0'", "'1.2'")).unwrap_err();
+        assert_eq!(yaml_location(&e), (Some(2), Some(13)), "{e}");
+        // The column is where the value really starts.
+        let e = load_str(
+            "identifiers.yaml",
+            &text.replace("db_version: '1.2.0'", "db_version:    '1.2'"),
+        )
+        .unwrap_err();
+        assert_eq!(yaml_location(&e), (Some(2), Some(16)), "{e}");
+        assert!(
+            e.to_string()
+                .starts_with("identifiers.yaml:2:16: db_version: \"1.2\" is not a semver version"),
+            "{e}"
+        );
     }
 
     #[test]
@@ -457,6 +511,26 @@ modules:
                 "schema 2".into(),
                 "schema: 2\nmodules: {}\n".into(),
                 "unsupported schema 2",
+            ),
+            (
+                "db_version not semver".into(),
+                "schema: 1\ndb_version: 'one'\nmodules: {}\n".into(),
+                "is not a semver version",
+            ),
+            (
+                "db_version as float".into(),
+                "schema: 1\ndb_version: 1.0\nmodules: {}\n".into(),
+                "db_version",
+            ),
+            (
+                "db_version as list".into(),
+                "schema: 1\ndb_version: [1]\nmodules: {}\n".into(),
+                "db_version",
+            ),
+            (
+                "db_version with v prefix".into(),
+                "schema: 1\ndb_version: 'v1.0.0'\nmodules: {}\n".into(),
+                "is not a semver version",
             ),
             (
                 "unknown top-level field".into(),

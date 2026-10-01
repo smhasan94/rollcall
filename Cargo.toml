@@ -4,6 +4,7 @@ members = [
     "crates/rollcall-core",
     "crates/rollcall-cli",
     "crates/rollcall-assay",
+    "crates/rollcall-identifiers",
     "crates/rollcall",
 ]
 
@@ -38,6 +39,8 @@ regex = "1.13"
 semver = "1.0"
 rollcall-core = { path = "crates/rollcall-core", version = "0.0.1" }
 rollcall-assay = { path = "crates/rollcall-assay", version = "0.0.1" }
+# Versioned on its own: its version is the identifier database's db_version.
+rollcall-identifiers = { path = "crates/rollcall-identifiers", version = "1.0.0" }
 
 [workspace.lints.rust]
 unsafe_code = "forbid"

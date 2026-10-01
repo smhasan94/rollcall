@@ -1,4 +1,4 @@
-//! Checks on the seed database (`db/identifiers.yaml`) against the Zephyr manifests it covers.
+//! Checks on the seed database (`crates/rollcall-identifiers/db/identifiers.yaml`) against the Zephyr manifests it covers.
 //!
 //! `tests/data/zephyr-manifest-pins.txt` lists every project pinned by Zephyr v4.2.0 to
 //! v4.4.2; it is written only by `scripts/regen-version-tables.sh`, together with the generated
@@ -238,6 +238,8 @@ mod tests {
     #[test]
     fn seed_cpes_are_exactly_the_nvd_listed_pairs() {
         let db = builtin().unwrap();
+        // A module without a cpe says why and when it was checked (any ISO date).
+        let dated = regex::Regex::new(r"# No cpe: .*Checked \d{4}-\d{2}-\d{2}\.").unwrap();
         let listed: BTreeMap<&str, &str> = NVD_LISTED.into_iter().collect();
         for (module, entry) in db.modules() {
             match (listed.get(module), &entry.cpe) {
@@ -253,8 +255,8 @@ mod tests {
                     // The reason is recorded next to the entry.
                     let block = module_block(module);
                     assert!(
-                        block.contains("# No cpe: ") && block.contains("Checked 2026-10-01"),
-                        "{module} has no cpe and no reason:\n{block}"
+                        dated.is_match(&block),
+                        "{module} has no cpe and no dated reason:\n{block}"
                     );
                 }
                 (Some(_), None) => panic!("{module} is NVD-listed but has no cpe"),
