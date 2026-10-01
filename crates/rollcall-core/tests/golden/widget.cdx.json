@@ -69,6 +69,10 @@
           },
           "properties": [
             {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"version\",\"technique\":\"manifest-analysis\",\"source\":\"mcuboot-sysbuild\",\"value\":\"3.6.0\",\"confidence\":8000}"
+            },
+            {
               "name": "rollcall:evidence-source",
               "value": "mcuboot-sysbuild"
             }
@@ -146,6 +150,14 @@
           },
           "properties": [
             {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"licence\",\"technique\":\"source-code-analysis\",\"source\":\"west-list\",\"value\":\"Apache-2.0 OR GPL-2.0-or-later\",\"confidence\":6000}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"purl\",\"technique\":\"manifest-analysis\",\"source\":\"west-spdx\",\"occurrence\":{\"location\":\"build/spdx/app.spdx\",\"line\":120},\"value\":\"pkg:github/Mbed-TLS/mbedtls@v3.6.0\",\"confidence\":9000}"
+            },
+            {
               "name": "rollcall:evidence-source",
               "value": "west-list"
             },
@@ -190,6 +202,10 @@
               },
               "properties": [
                 {
+                  "name": "rollcall:evidence",
+                  "value": "{\"field\":\"name\",\"technique\":\"manifest-analysis\",\"source\":\"west-spdx\",\"value\":\"kernel\",\"confidence\":9000}"
+                },
+                {
                   "name": "rollcall:evidence-source",
                   "value": "west-spdx"
                 }
@@ -207,6 +223,10 @@
         {
           "name": "rollcall:image-kind",
           "value": "blob"
+        },
+        {
+          "name": "rollcall:opaque",
+          "value": "contents not analysed; hashes computed from the file"
         }
       ],
       "components": [

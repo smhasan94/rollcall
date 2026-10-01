@@ -8,15 +8,23 @@ use super::document::{
 };
 use super::{SerialNumber, WriteError, WriteOptions};
 use crate::model::{
-    self, BomRef, Cpe, EvidenceField, EvidenceSet, License, NodePath, PathSegment, Product, Purl,
+    self, BomRef, Cpe, EvidenceField, EvidenceSet, ImageKind, License, NodePath, PathSegment,
+    Product, Purl,
 };
 
 /// CycloneDX component type used for the product and for every image.
 const FIRMWARE: &str = "firmware";
 /// Property carrying an image's [`ImageKind`](crate::model::ImageKind).
-const IMAGE_KIND: &str = "rollcall:image-kind";
+pub(super) const IMAGE_KIND: &str = "rollcall:image-kind";
 /// Property carrying the name of an input that contributed evidence.
-const EVIDENCE_SOURCE: &str = "rollcall:evidence-source";
+pub(super) const EVIDENCE_SOURCE: &str = "rollcall:evidence-source";
+/// Property carrying one [`Evidence`](crate::model::Evidence) entry, losslessly, as compact
+/// JSON in the model's form.
+pub(super) const EVIDENCE_PROPERTY: &str = "rollcall:evidence";
+/// Property marking a `blob` image's contents as not analysed.
+pub(super) const OPAQUE_PROPERTY: &str = "rollcall:opaque";
+/// The value of [`OPAQUE_PROPERTY`].
+pub(super) const OPAQUE_NOTE: &str = "contents not analysed; hashes computed from the file";
 
 /// The identity fields that map to `evidence.identity[]`, in output order.
 const IDENTITY_FIELDS: [EvidenceField; 5] = [
@@ -91,23 +99,30 @@ impl<'a> Facts<'a> {
     }
 
     /// The CycloneDX component for this node, without nested components. `properties` are
-    /// extra node-specific properties; evidence sources are added here and all are sorted.
+    /// extra node-specific properties; evidence sources and one `rollcall:evidence` property
+    /// per evidence entry are added here, and all are sorted.
     fn to_component(
         &self,
         kind: &'static str,
         bom_ref: &BomRef,
         mut properties: Vec<Property>,
-    ) -> Component {
+    ) -> Result<Component, serde_json::Error> {
         let sources: BTreeSet<&str> = self.evidence.iter().map(|e| e.source()).collect();
         properties.extend(sources.into_iter().map(|source| Property {
             name: EVIDENCE_SOURCE,
             value: source.to_owned(),
         }));
+        for entry in self.evidence.iter() {
+            properties.push(Property {
+                name: EVIDENCE_PROPERTY,
+                value: serde_json::to_string(entry)?,
+            });
+        }
         properties.sort();
         properties.dedup();
 
         let evidence = self.evidence();
-        Component {
+        Ok(Component {
             kind,
             bom_ref: bom_ref.as_str().to_owned(),
             name: self.name.to_owned(),
@@ -137,7 +152,7 @@ impl<'a> Facts<'a> {
             evidence: (!evidence.is_empty()).then_some(evidence),
             properties,
             components: Vec::new(),
-        }
+        })
     }
 
     /// `evidence`: identity per field, de-duplicated occurrences and licence evidence.
@@ -217,15 +232,15 @@ fn licence_evidence(values: BTreeSet<&str>) -> Vec<LicenseChoice> {
 
 /// A component and, recursively, its subcomponents. `path` is the component's own path,
 /// derived exactly as [`Product::walk`] derives it.
-fn component(c: &model::Component, path: &NodePath) -> Component {
+fn component(c: &model::Component, path: &NodePath) -> Result<Component, serde_json::Error> {
     let mut out =
-        Facts::of_component(c).to_component(c.kind.as_str(), &BomRef::derive(path), vec![]);
+        Facts::of_component(c).to_component(c.kind.as_str(), &BomRef::derive(path), vec![])?;
     out.components = c
         .components
         .iter()
         .map(|child| component(child, &path.child(PathSegment::of_component(child))))
-        .collect();
-    out
+        .collect::<Result<_, _>>()?;
+    Ok(out)
 }
 
 /// Maps a validated product to a CycloneDX 1.6 document.
@@ -239,28 +254,39 @@ pub(super) fn to_document(product: &Product, options: &WriteOptions) -> Result<B
     let root = product.path();
     // The root carries its own facts only: osv-scanner ignores components nested under
     // `metadata.component`, so the images go to the top-level `components`.
-    let root_component =
-        Facts::of_product(product).to_component(FIRMWARE, &BomRef::derive(&root), vec![]);
+    let root_component = Facts::of_product(product)
+        .to_component(FIRMWARE, &BomRef::derive(&root), vec![])
+        .map_err(WriteError::Json)?;
 
     let components = product
         .images
         .iter()
         .map(|image| {
             let path = root.child(PathSegment::of_image(image));
-            let kind = vec![Property {
+            let mut properties = vec![Property {
                 name: IMAGE_KIND,
                 value: image.kind.as_str().to_owned(),
             }];
-            let mut out =
-                Facts::of_image(image).to_component(FIRMWARE, &BomRef::derive(&path), kind);
+            if image.kind == ImageKind::Blob {
+                properties.push(Property {
+                    name: OPAQUE_PROPERTY,
+                    value: OPAQUE_NOTE.to_owned(),
+                });
+            }
+            let mut out = Facts::of_image(image).to_component(
+                FIRMWARE,
+                &BomRef::derive(&path),
+                properties,
+            )?;
             out.components = image
                 .components
                 .iter()
                 .map(|c| component(c, &path.child(PathSegment::of_component(c))))
-                .collect();
-            out
+                .collect::<Result<_, _>>()?;
+            Ok(out)
         })
-        .collect();
+        .collect::<Result<_, serde_json::Error>>()
+        .map_err(WriteError::Json)?;
 
     let edges: &BTreeMap<BomRef, BTreeSet<BomRef>> = &product.dependencies;
     let dependencies = product

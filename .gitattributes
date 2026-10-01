@@ -8,3 +8,7 @@
 fixtures/zephyr/** -text linguist-generated=true
 *.elf binary
 fixtures/zephyr/**/*.map -diff
+
+# Hand-written blob test data: tests pin the SHA-256 of these files, so checkout must never
+# convert line endings.
+crates/rollcall-core/tests/data/blobs/** -text

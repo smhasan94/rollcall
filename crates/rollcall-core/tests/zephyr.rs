@@ -14,6 +14,7 @@ use std::path::{Path, PathBuf};
 
 use common::GOLDEN_TIMESTAMP;
 use rollcall_core::cyclonedx::{self, Timestamp, WriteOptions, validate_cyclonedx_1_6};
+use rollcall_core::merge::{self, ProductSpec};
 use rollcall_core::model::{ComponentKind, ImageKind, Product};
 use rollcall_core::zephyr::{
     self, BuildInfoError, Ingest, IngestOptions, KconfigError, SpdxError, WestListError,
@@ -217,6 +218,317 @@ fn baseline_include_sdk_matches_golden() {
 }
 
 #[test]
+fn baseline_mcuboot_matches_golden() {
+    let out = ingest_fixture("baseline", "mcuboot", true, false);
+    check_golden("baseline.mcuboot.cdx.json", &render(&out.product));
+    check_golden(
+        "baseline.mcuboot.model.json",
+        &out.product.to_json().unwrap(),
+    );
+}
+
+fn sysbuild_options(variant: &str, west_list: bool, sdk: bool) -> IngestOptions {
+    let mut options = IngestOptions::new(fixtures_root().join(variant))
+        .with_sysbuild(true)
+        .with_include_sdk(sdk);
+    if west_list {
+        options = options.with_west_list(west_list_path(variant));
+    }
+    options
+}
+
+#[test]
+fn baseline_sysbuild_matches_golden() {
+    let out = zephyr::ingest(&sysbuild_options("baseline", true, false)).unwrap();
+    let text = render(&out.product);
+    assert_schema_valid("baseline sysbuild", &text);
+    check_golden("baseline.sysbuild.cdx.json", &text);
+    check_golden(
+        "baseline.sysbuild.model.json",
+        &out.product.to_json().unwrap(),
+    );
+}
+
+#[test]
+fn mcuboot_build_is_bootloader_image_named_mcuboot() {
+    for (variant, image) in MCUBOOT_BUILDS {
+        let out = ingest_fixture(variant, image, true, false);
+        let product = &out.product;
+        assert_eq!(product.name, "mcuboot", "{variant}");
+        assert_eq!(product.version, None);
+        assert_eq!(product.images.len(), 1);
+        let boot = product.images.first().unwrap();
+        assert_eq!(
+            (boot.kind, boot.name.as_str(), boot.version.as_deref()),
+            (ImageKind::Bootloader, "mcuboot", None),
+            "{variant}"
+        );
+        let sources: BTreeSet<&str> = boot.evidence.iter().map(|e| e.source()).collect();
+        assert!(
+            sources.contains("build-info") && sources.contains("kconfig"),
+            "{variant}: {sources:?}"
+        );
+        let kconfig = boot
+            .evidence
+            .iter()
+            .find(|e| e.source() == "kconfig")
+            .unwrap();
+        assert_eq!(kconfig.value, "CONFIG_MCUBOOT");
+        assert_eq!(
+            kconfig.occurrence.as_ref().map(|o| o.location()),
+            Some("zephyr/.config")
+        );
+        // The Zephyr kernel and the mcuboot module are components of the bootloader image.
+        assert!(boot.components.iter().any(|c| c.name == "zephyr"));
+        assert!(boot.components.iter().any(|c| c.name == "mcuboot"));
+    }
+    // Application builds stay application images named after the application.
+    for (variant, image) in APP_BUILDS {
+        let out = ingest_fixture(variant, image, true, false);
+        let app = out.product.images.first().unwrap();
+        assert_eq!(
+            (app.kind, app.name.as_str()),
+            (ImageKind::Application, image)
+        );
+    }
+}
+
+#[test]
+fn mcuboot_without_config_is_recognised_by_source_dir() {
+    let dir = copy_build_to_tempdir("baseline", "mcuboot");
+    fs::remove_file(dir.path().join("zephyr/.config")).unwrap();
+    let out = ingest_dir(dir.path(), true).unwrap();
+    let boot = out.product.images.first().unwrap();
+    assert_eq!(
+        (boot.kind, boot.name.as_str()),
+        (ImageKind::Bootloader, "mcuboot")
+    );
+    let sources: BTreeSet<&str> = boot.evidence.iter().map(|e| e.source()).collect();
+    assert!(
+        sources.contains("build-info") && !sources.contains("kconfig"),
+        "{sources:?}"
+    );
+    // An application whose .config says CONFIG_MCUBOOT is not set stays an application.
+    let dir = copy_build_to_tempdir("baseline", "mcuboot");
+    let config = dir.path().join("zephyr/.config");
+    let text = fs::read_to_string(&config)
+        .unwrap()
+        .replace("CONFIG_MCUBOOT=y", "# CONFIG_MCUBOOT is not set");
+    fs::write(&config, text).unwrap();
+    let out = ingest_dir(dir.path(), true).unwrap();
+    assert_eq!(
+        out.product.images.first().unwrap().kind,
+        ImageKind::Application
+    );
+}
+
+#[test]
+fn sysbuild_ingest_equals_merge_of_image_ingests() {
+    for ((variant, app), (_, boot)) in APP_BUILDS.into_iter().zip(MCUBOOT_BUILDS) {
+        for (west_list, sdk) in [(true, false), (false, true)] {
+            let sysbuild = zephyr::ingest(&sysbuild_options(variant, west_list, sdk))
+                .unwrap_or_else(|e| panic!("{variant}: {e}"));
+            let app_ingest = ingest_fixture(variant, app, west_list, sdk);
+            let boot_ingest = ingest_fixture(variant, boot, west_list, sdk);
+            let spec: ProductSpec = app.parse().unwrap();
+            let manual =
+                merge::merge(vec![app_ingest.product, boot_ingest.product], Some(&spec)).unwrap();
+            assert_eq!(sysbuild.product, manual, "{variant}");
+            assert_eq!(render(&sysbuild.product), render(&manual), "{variant}");
+            assert_eq!(sysbuild.product.name, app);
+            assert_eq!(sysbuild.product.images.len(), 2);
+            // Warnings are each image's, prefixed with the image name.
+            let expected: Vec<String> =
+                [(boot, &boot_ingest.warnings), (app, &app_ingest.warnings)]
+                    .into_iter()
+                    .flat_map(|(name, ws)| ws.iter().map(move |w| format!("{name}: {w}")))
+                    .collect();
+            let mut expected = expected;
+            expected.sort();
+            let mut actual: Vec<String> =
+                sysbuild.warnings.iter().map(ToString::to_string).collect();
+            actual.sort();
+            assert_eq!(actual, expected, "{variant}");
+        }
+    }
+}
+
+#[test]
+fn sysbuild_discovery_reads_images_from_top_level_build_info() {
+    for ((variant, app), (_, boot)) in APP_BUILDS.into_iter().zip(MCUBOOT_BUILDS) {
+        let images = zephyr::discover(&fixtures_root().join(variant)).unwrap();
+        let names: Vec<(&str, bool)> = images
+            .iter()
+            .map(|i| (i.name.as_str(), i.is_main()))
+            .collect();
+        let mut expected = vec![(app, true), (boot, false)];
+        expected.sort();
+        assert_eq!(names, expected, "{variant}");
+    }
+    // An image build directory is not a sysbuild one.
+    let err = zephyr::discover(&build_dir("baseline", "with_mcuboot")).unwrap_err();
+    assert!(matches!(err, ZephyrError::NotASysbuild { .. }), "{err}");
+    let err = zephyr::ingest(
+        &IngestOptions::new(build_dir("baseline", "with_mcuboot")).with_sysbuild(true),
+    )
+    .unwrap_err();
+    assert!(matches!(err, ZephyrError::NotASysbuild { .. }), "{err}");
+
+    // Malformed sysbuild metadata errors, naming the file, never panicking.
+    let cases = [
+        (
+            "no MAIN",
+            "cmake:\n  application:\n    source-dir: /x/share/sysbuild\n  images:\n   - name: mcuboot\n     type: BOOTLOADER\n",
+        ),
+        (
+            "empty images",
+            "cmake:\n  application:\n    source-dir: /x/share/sysbuild\n  images: []\n",
+        ),
+        (
+            "traversal",
+            "cmake:\n  application:\n    source-dir: /x/share/sysbuild\n  images:\n   - name: ../etc\n     type: MAIN\n",
+        ),
+        ("not yaml", "cmake: [\n"),
+        ("empty", ""),
+    ];
+    for (what, text) in cases {
+        let dir = tempfile::tempdir().unwrap();
+        fs::write(dir.path().join("build_info.yml"), text).unwrap();
+        let result = std::panic::catch_unwind(|| zephyr::discover(dir.path()))
+            .unwrap_or_else(|_| panic!("{what}: panicked"));
+        let err = result.unwrap_err();
+        assert!(err.to_string().contains("build_info.yml"), "{what}: {err}");
+    }
+    // A listed image directory that is missing is a read error.
+    let dir = tempfile::tempdir().unwrap();
+    fs::write(
+        dir.path().join("build_info.yml"),
+        "cmake:\n  application:\n    source-dir: /x/share/sysbuild\n  images:\n   - name: app\n     type: MAIN\n",
+    )
+    .unwrap();
+    let err = zephyr::ingest(&IngestOptions::new(dir.path()).with_sysbuild(true)).unwrap_err();
+    assert!(err.is_read_error(), "{err}");
+}
+
+/// Copies the inputs (not the binaries) of the fixture image build `variant/image` into `to`.
+fn copy_inputs_into(variant: &str, image: &str, to: &Path) {
+    let from = build_dir(variant, image);
+    for rel in [
+        "build_info.yml",
+        "spdx/app.spdx",
+        "spdx/build.spdx",
+        "spdx/modules-deps.spdx",
+        "spdx/zephyr.spdx",
+        "zephyr/.config",
+    ] {
+        let dest = to.join(rel);
+        fs::create_dir_all(dest.parent().unwrap()).unwrap();
+        fs::copy(from.join(rel), &dest).unwrap_or_else(|e| panic!("{rel}: {e}"));
+    }
+}
+
+/// A sysbuild top-level `build_info.yml` listing `images` as `(name, type)`.
+fn sysbuild_build_info(images: &[(&str, &str)]) -> String {
+    let mut text =
+        String::from("cmake:\n  application:\n    source-dir: /x/share/sysbuild\n  images:\n");
+    for (name, kind) in images {
+        text.push_str(&format!("   - name: '{name}'\n     type: '{kind}'\n"));
+    }
+    text
+}
+
+#[test]
+fn sysbuild_two_images_with_the_same_identity_are_an_error() {
+    // An NCS-style `s1_image`: a second MCUboot build, so both become `bootloader:mcuboot`.
+    // Built in a temporary directory from copies of the baseline fixture; `fixtures/` is
+    // never touched.
+    let top = tempfile::tempdir().unwrap();
+    fs::write(
+        top.path().join("build_info.yml"),
+        sysbuild_build_info(&[
+            ("with_mcuboot", "MAIN"),
+            ("mcuboot", "BOOTLOADER"),
+            ("s1_image", "BOOTLOADER"),
+        ]),
+    )
+    .unwrap();
+    copy_inputs_into("baseline", "with_mcuboot", &top.path().join("with_mcuboot"));
+    copy_inputs_into("baseline", "mcuboot", &top.path().join("mcuboot"));
+    copy_inputs_into("baseline", "mcuboot", &top.path().join("s1_image"));
+
+    let err = zephyr::ingest(&IngestOptions::new(top.path()).with_sysbuild(true)).unwrap_err();
+    match &err {
+        ZephyrError::DuplicateImage {
+            path,
+            image,
+            first,
+            second,
+        } => {
+            assert_eq!(path, &top.path().join("build_info.yml"));
+            assert!(image.starts_with("bootloader:mcuboot"), "{image}");
+            assert_eq!(first, &top.path().join("mcuboot"));
+            assert_eq!(second, &top.path().join("s1_image"));
+        }
+        other => panic!("expected DuplicateImage, got {other}"),
+    }
+    assert!(!err.is_read_error());
+    let message = err.to_string();
+    for needle in [
+        "build_info.yml",
+        "mcuboot",
+        "s1_image",
+        "bootloader:mcuboot",
+    ] {
+        assert!(message.contains(needle), "{message:?} lacks {needle:?}");
+    }
+
+    // Without the second bootloader the same layout ingests.
+    fs::write(
+        top.path().join("build_info.yml"),
+        sysbuild_build_info(&[("with_mcuboot", "MAIN"), ("mcuboot", "BOOTLOADER")]),
+    )
+    .unwrap();
+    let ok = zephyr::ingest(&IngestOptions::new(top.path()).with_sysbuild(true)).unwrap();
+    assert_eq!(ok.product.images.len(), 2);
+}
+
+#[test]
+fn sysbuild_repeated_or_unsafe_image_names_are_errors() {
+    // The same name listed twice is an error, not silently dropped.
+    let dir = tempfile::tempdir().unwrap();
+    fs::write(
+        dir.path().join("build_info.yml"),
+        sysbuild_build_info(&[("app", "MAIN"), ("mcuboot", "BOOTLOADER"), ("app", "MAIN")]),
+    )
+    .unwrap();
+    let err = zephyr::discover(dir.path()).unwrap_err();
+    match &err {
+        ZephyrError::DuplicateImageName { path, name } => {
+            assert_eq!(path, &dir.path().join("build_info.yml"));
+            assert_eq!(name, "app");
+        }
+        other => panic!("expected DuplicateImageName, got {other}"),
+    }
+    assert!(err.to_string().contains("\"app\" twice"), "{err}");
+
+    // Names that are not exactly one plain directory component.
+    for name in ["C:", "a:b", "..", ".", "a/b", "/abs", "a\\b", ""] {
+        fs::write(
+            dir.path().join("build_info.yml"),
+            sysbuild_build_info(&[(name, "MAIN")]),
+        )
+        .unwrap();
+        let result = std::panic::catch_unwind(|| zephyr::discover(dir.path()))
+            .unwrap_or_else(|_| panic!("{name:?}: panicked"));
+        let err = result.unwrap_err();
+        assert!(
+            matches!(&err, ZephyrError::InvalidImageName { name: n, .. } if n == name),
+            "{name:?}: {err}"
+        );
+    }
+}
+
+#[test]
 fn ingesting_twice_is_byte_identical() {
     for (variant, image) in APP_BUILDS {
         let a = ingest_fixture(variant, image, true, true);
@@ -246,7 +558,11 @@ fn every_committed_zephyr_golden_validates_against_schema_1_6() {
         [
             "baseline.cdx.json",
             "baseline.include-sdk.cdx.json",
+            "baseline.mcuboot.cdx.json",
+            "baseline.mcuboot.model.json",
             "baseline.model.json",
+            "baseline.sysbuild.cdx.json",
+            "baseline.sysbuild.model.json",
             "bt.cdx.json",
             "bt.model.json",
             "tls.cdx.json",

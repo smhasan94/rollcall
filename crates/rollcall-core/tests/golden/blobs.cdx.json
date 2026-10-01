@@ -1,0 +1,301 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.6",
+  "serialNumber": "urn:uuid:c8b3157e-2ea3-815d-9e19-da6a23b918cc",
+  "version": 1,
+  "metadata": {
+    "timestamp": "2026-01-02T03:04:05Z",
+    "tools": {
+      "components": [
+        {
+          "type": "application",
+          "name": "rollcall",
+          "version": "0.0.1"
+        }
+      ]
+    },
+    "component": {
+      "type": "firmware",
+      "bom-ref": "product:125ed3bbbd0b373a6dc19ed32f485e51",
+      "name": "blobs-demo",
+      "version": "1.0.0"
+    }
+  },
+  "components": [
+    {
+      "type": "firmware",
+      "bom-ref": "image:4e2950b4e2f76422443048196f305245",
+      "name": "libphy",
+      "version": "5.2.1",
+      "supplier": {
+        "name": "Espressif Systems"
+      },
+      "purl": "pkg:generic/espressif/libphy@5.2.1",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "40a0cdacd5afb8e813d7e72396cf1faf2ea3fe52d306216aed61de44fe35d977"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "Apache-2.0"
+        }
+      ],
+      "evidence": {
+        "identity": [
+          {
+            "field": "name",
+            "confidence": 0.9,
+            "concludedValue": "libphy",
+            "methods": [
+              {
+                "technique": "manifest-analysis",
+                "confidence": 0.9,
+                "value": "libphy"
+              },
+              {
+                "technique": "filename",
+                "confidence": 0.7,
+                "value": "libphy"
+              }
+            ]
+          },
+          {
+            "field": "version",
+            "confidence": 0.9,
+            "concludedValue": "5.2.1",
+            "methods": [
+              {
+                "technique": "manifest-analysis",
+                "confidence": 0.9,
+                "value": "5.2.1"
+              }
+            ]
+          },
+          {
+            "field": "purl",
+            "confidence": 0.9,
+            "concludedValue": "pkg:generic/espressif/libphy@5.2.1",
+            "methods": [
+              {
+                "technique": "manifest-analysis",
+                "confidence": 0.9,
+                "value": "pkg:generic/espressif/libphy@5.2.1"
+              }
+            ]
+          },
+          {
+            "field": "hash",
+            "confidence": 1.0,
+            "methods": [
+              {
+                "technique": "binary-analysis",
+                "confidence": 1.0,
+                "value": "40a0cdacd5afb8e813d7e72396cf1faf2ea3fe52d306216aed61de44fe35d977"
+              }
+            ]
+          }
+        ],
+        "occurrences": [
+          {
+            "location": "blobs.yaml"
+          },
+          {
+            "location": "libphy.a"
+          }
+        ],
+        "licenses": [
+          {
+            "expression": "Apache-2.0"
+          }
+        ]
+      },
+      "properties": [
+        {
+          "name": "rollcall:evidence",
+          "value": "{\"field\":\"hash\",\"technique\":\"binary-analysis\",\"source\":\"blob-file\",\"occurrence\":{\"location\":\"libphy.a\"},\"value\":\"40a0cdacd5afb8e813d7e72396cf1faf2ea3fe52d306216aed61de44fe35d977\",\"confidence\":10000}"
+        },
+        {
+          "name": "rollcall:evidence",
+          "value": "{\"field\":\"licence\",\"technique\":\"manifest-analysis\",\"source\":\"blob-manifest\",\"occurrence\":{\"location\":\"blobs.yaml\"},\"value\":\"Apache-2.0\",\"confidence\":9000}"
+        },
+        {
+          "name": "rollcall:evidence",
+          "value": "{\"field\":\"name\",\"technique\":\"filename\",\"source\":\"blob-recogniser\",\"occurrence\":{\"location\":\"libphy.a\"},\"value\":\"libphy\",\"confidence\":7000}"
+        },
+        {
+          "name": "rollcall:evidence",
+          "value": "{\"field\":\"name\",\"technique\":\"manifest-analysis\",\"source\":\"blob-manifest\",\"occurrence\":{\"location\":\"blobs.yaml\"},\"value\":\"libphy\",\"confidence\":9000}"
+        },
+        {
+          "name": "rollcall:evidence",
+          "value": "{\"field\":\"purl\",\"technique\":\"manifest-analysis\",\"source\":\"blob-manifest\",\"occurrence\":{\"location\":\"blobs.yaml\"},\"value\":\"pkg:generic/espressif/libphy@5.2.1\",\"confidence\":9000}"
+        },
+        {
+          "name": "rollcall:evidence",
+          "value": "{\"field\":\"supplier\",\"technique\":\"filename\",\"source\":\"blob-recogniser\",\"occurrence\":{\"location\":\"libphy.a\"},\"value\":\"Espressif Systems\",\"confidence\":7000}"
+        },
+        {
+          "name": "rollcall:evidence",
+          "value": "{\"field\":\"supplier\",\"technique\":\"manifest-analysis\",\"source\":\"blob-manifest\",\"occurrence\":{\"location\":\"blobs.yaml\"},\"value\":\"Espressif Systems\",\"confidence\":9000}"
+        },
+        {
+          "name": "rollcall:evidence",
+          "value": "{\"field\":\"version\",\"technique\":\"manifest-analysis\",\"source\":\"blob-manifest\",\"occurrence\":{\"location\":\"blobs.yaml\"},\"value\":\"5.2.1\",\"confidence\":9000}"
+        },
+        {
+          "name": "rollcall:evidence-source",
+          "value": "blob-file"
+        },
+        {
+          "name": "rollcall:evidence-source",
+          "value": "blob-manifest"
+        },
+        {
+          "name": "rollcall:evidence-source",
+          "value": "blob-recogniser"
+        },
+        {
+          "name": "rollcall:image-kind",
+          "value": "blob"
+        },
+        {
+          "name": "rollcall:opaque",
+          "value": "contents not analysed; hashes computed from the file"
+        }
+      ]
+    },
+    {
+      "type": "firmware",
+      "bom-ref": "image:7c3595fcc41645fe961735eb6eeab222",
+      "name": "s140_nrf52_softdevice",
+      "version": "7.3.0",
+      "supplier": {
+        "name": "Nordic Semiconductor ASA"
+      },
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "3051d54d0d3116c3818e01bbc6c8ad9d7023a1dad799f97392e440fd5a546fa6"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "LicenseRef-Nordic-5-Clause"
+        }
+      ],
+      "evidence": {
+        "identity": [
+          {
+            "field": "name",
+            "confidence": 0.7,
+            "concludedValue": "s140_nrf52_softdevice",
+            "methods": [
+              {
+                "technique": "filename",
+                "confidence": 0.7,
+                "value": "s140_nrf52_softdevice"
+              }
+            ]
+          },
+          {
+            "field": "version",
+            "confidence": 0.7,
+            "concludedValue": "7.3.0",
+            "methods": [
+              {
+                "technique": "filename",
+                "confidence": 0.7,
+                "value": "7.3.0"
+              }
+            ]
+          },
+          {
+            "field": "hash",
+            "confidence": 1.0,
+            "methods": [
+              {
+                "technique": "binary-analysis",
+                "confidence": 1.0,
+                "value": "3051d54d0d3116c3818e01bbc6c8ad9d7023a1dad799f97392e440fd5a546fa6"
+              }
+            ]
+          }
+        ],
+        "occurrences": [
+          {
+            "location": "blobs.yaml"
+          },
+          {
+            "location": "s140_nrf52_7.3.0_softdevice.hex"
+          }
+        ],
+        "licenses": [
+          {
+            "expression": "LicenseRef-Nordic-5-Clause"
+          }
+        ]
+      },
+      "properties": [
+        {
+          "name": "rollcall:evidence",
+          "value": "{\"field\":\"hash\",\"technique\":\"binary-analysis\",\"source\":\"blob-file\",\"occurrence\":{\"location\":\"s140_nrf52_7.3.0_softdevice.hex\"},\"value\":\"3051d54d0d3116c3818e01bbc6c8ad9d7023a1dad799f97392e440fd5a546fa6\",\"confidence\":10000}"
+        },
+        {
+          "name": "rollcall:evidence",
+          "value": "{\"field\":\"licence\",\"technique\":\"manifest-analysis\",\"source\":\"blob-manifest\",\"occurrence\":{\"location\":\"blobs.yaml\"},\"value\":\"LicenseRef-Nordic-5-Clause\",\"confidence\":9000}"
+        },
+        {
+          "name": "rollcall:evidence",
+          "value": "{\"field\":\"name\",\"technique\":\"filename\",\"source\":\"blob-recogniser\",\"occurrence\":{\"location\":\"s140_nrf52_7.3.0_softdevice.hex\"},\"value\":\"s140_nrf52_softdevice\",\"confidence\":7000}"
+        },
+        {
+          "name": "rollcall:evidence",
+          "value": "{\"field\":\"supplier\",\"technique\":\"filename\",\"source\":\"blob-recogniser\",\"occurrence\":{\"location\":\"s140_nrf52_7.3.0_softdevice.hex\"},\"value\":\"Nordic Semiconductor ASA\",\"confidence\":7000}"
+        },
+        {
+          "name": "rollcall:evidence",
+          "value": "{\"field\":\"version\",\"technique\":\"filename\",\"source\":\"blob-recogniser\",\"occurrence\":{\"location\":\"s140_nrf52_7.3.0_softdevice.hex\"},\"value\":\"7.3.0\",\"confidence\":7000}"
+        },
+        {
+          "name": "rollcall:evidence-source",
+          "value": "blob-file"
+        },
+        {
+          "name": "rollcall:evidence-source",
+          "value": "blob-manifest"
+        },
+        {
+          "name": "rollcall:evidence-source",
+          "value": "blob-recogniser"
+        },
+        {
+          "name": "rollcall:image-kind",
+          "value": "blob"
+        },
+        {
+          "name": "rollcall:opaque",
+          "value": "contents not analysed; hashes computed from the file"
+        }
+      ]
+    }
+  ],
+  "dependencies": [
+    {
+      "ref": "product:125ed3bbbd0b373a6dc19ed32f485e51",
+      "dependsOn": [
+        "image:4e2950b4e2f76422443048196f305245",
+        "image:7c3595fcc41645fe961735eb6eeab222"
+      ]
+    },
+    {
+      "ref": "image:4e2950b4e2f76422443048196f305245",
+      "dependsOn": []
+    },
+    {
+      "ref": "image:7c3595fcc41645fe961735eb6eeab222",
+      "dependsOn": []
+    }
+  ]
+}

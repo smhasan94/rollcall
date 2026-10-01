@@ -37,11 +37,22 @@
 //! `spdx/` is written by `west spdx` after a build configured with
 //! `west spdx --init`; `west list` output has to be captured separately.
 //!
+//! With [`IngestOptions::sysbuild`] the directory is instead the sysbuild top-level build
+//! directory. [`discover`] reads the images from its `build_info.yml` (`cmake.images[]`:
+//! `name` is the image's subdirectory, `type` `MAIN` marks the application); `domains.yaml` is
+//! not read, because its `build_dir`s are absolute build-machine paths. Each image directory
+//! is ingested as above (the `--west-list` file and `--include-sdk` apply to every image, and
+//! each warning's location is prefixed with `<image>: `), and the products are merged with
+//! [`merge::merge`](crate::merge::merge) under a product named after the `MAIN` image's
+//! application, exactly as `rollcall merge --product <app>` would merge separately generated
+//! documents.
+//!
 //! # Mapping
 //!
 //! | Input | Model |
 //! |-------|-------|
 //! | last component of `cmake.application.source-dir` | [`Product`] name, and the name of its one `application` image |
+//! | `CONFIG_MCUBOOT=y` in `zephyr/.config` (without a `.config`: `cmake.application.source-dir` ending in `mcuboot/boot/zephyr`) | an MCUboot build: product `mcuboot` and one unversioned `bootloader` image named `mcuboot`, with `kconfig` name evidence at the symbol's line and `build-info` name evidence when the source directory is MCUboot's |
 //! | `app-sources` `PackageLicenseConcluded` | the image's `licence` |
 //! | `zephyr.spdx` package `zephyr` | component `operating-system` `zephyr`: `version` = `PackageVersion` (else `cmake.zephyr.version`), `purl`/`cpe` from `ExternalRef`, `licence`, `supplier`; the commit-pinned `pkg:github/…@<sha>` from `PackageDownloadLocation` is `purl` evidence |
 //! | each `zephyr.spdx` `<module>-sources` package (this decides which modules exist) | exactly one `library` component named after the module, `version` = the git revision (its `west list` row first, else SPDX) |
@@ -78,17 +89,19 @@ pub mod build_info;
 pub mod kconfig;
 mod map;
 pub mod spdx;
+mod sysbuild;
 pub mod west_list;
 
-use std::fmt;
 use std::io;
 use std::path::{Path, PathBuf};
 
 use crate::model::{ModelError, Product};
 
+pub use crate::warning::Warning;
 pub use build_info::{BuildInfo, BuildInfoError};
 pub use kconfig::{Kconfig, KconfigError};
 pub use spdx::{SpdxDocument, SpdxError};
+pub use sysbuild::{SysbuildImage, discover, ingest_sysbuild};
 pub use west_list::{WestList, WestListError};
 
 /// What to ingest.
@@ -100,6 +113,9 @@ pub struct IngestOptions {
     pub west_list: Option<PathBuf>,
     /// Whether to add the SDK / toolchain as a component.
     pub include_sdk: bool,
+    /// Whether `build_dir` is a sysbuild top-level build directory whose images (found from
+    /// its `build_info.yml`) are ingested and merged into one product.
+    pub sysbuild: bool,
 }
 
 impl IngestOptions {
@@ -109,6 +125,7 @@ impl IngestOptions {
             build_dir: build_dir.into(),
             west_list: None,
             include_sdk: false,
+            sysbuild: false,
         }
     }
 
@@ -123,29 +140,11 @@ impl IngestOptions {
         self.include_sdk = include_sdk;
         self
     }
-}
 
-/// A non-fatal problem with the inputs.
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
-pub struct Warning {
-    /// The input it is about, e.g. `spdx/app.spdx` or `spdx/zephyr.spdx:1210`.
-    pub location: String,
-    /// What is wrong and what rollcall did about it.
-    pub message: String,
-}
-
-impl Warning {
-    fn new(location: impl Into<String>, message: impl Into<String>) -> Self {
-        Self {
-            location: location.into(),
-            message: message.into(),
-        }
-    }
-}
-
-impl fmt::Display for Warning {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}: {}", self.location, self.message)
+    /// Treats (or not) the build directory as a sysbuild top-level directory.
+    pub fn with_sysbuild(mut self, sysbuild: bool) -> Self {
+        self.sysbuild = sysbuild;
+        self
     }
 }
 
@@ -252,7 +251,7 @@ pub enum ZephyrError {
     },
     /// The directory is a sysbuild top-level build, not an image build.
     #[error(
-        "{}: this is a sysbuild top-level build directory; pass an image build directory instead{}",
+        "{}: this is a sysbuild top-level build directory; pass an image build directory instead{}, or pass --sysbuild",
         path.display(),
         main_image.as_ref().map(|m| format!(" (the main image is in {m}/)")).unwrap_or_default()
     )]
@@ -261,6 +260,66 @@ pub enum ZephyrError {
         path: PathBuf,
         /// The `MAIN` image's directory name, if listed.
         main_image: Option<String>,
+    },
+    /// `--sysbuild` was given but the directory's `build_info.yml` is an image build's.
+    #[error("{}: not a sysbuild top-level build directory (no cmake.images); omit --sysbuild", path.display())]
+    NotASysbuild {
+        /// Its `build_info.yml`.
+        path: PathBuf,
+    },
+    /// The sysbuild `build_info.yml` lists no images.
+    #[error("{}: cmake.images lists no images", path.display())]
+    NoImages {
+        /// Its `build_info.yml`.
+        path: PathBuf,
+    },
+    /// The sysbuild `build_info.yml` lists no image of type `MAIN`.
+    #[error("{}: cmake.images has no image of type MAIN", path.display())]
+    NoMainImage {
+        /// Its `build_info.yml`.
+        path: PathBuf,
+    },
+    /// A sysbuild image name cannot be used as a build subdirectory name.
+    #[error("{}: image name {name:?} is not a plain directory name", path.display())]
+    InvalidImageName {
+        /// Its `build_info.yml`.
+        path: PathBuf,
+        /// The rejected name.
+        name: String,
+    },
+    /// The sysbuild `build_info.yml` lists two images with the same name.
+    #[error("{}: cmake.images lists image {name:?} twice", path.display())]
+    DuplicateImageName {
+        /// Its `build_info.yml`.
+        path: PathBuf,
+        /// The repeated name.
+        name: String,
+    },
+    /// Two sysbuild images ingest to the same image identity (kind, name, version), so they
+    /// cannot be told apart in one product.
+    #[error(
+        "{}: images {} and {} both ingest to the image {image}; rollcall cannot tell them apart",
+        path.display(),
+        first.display(),
+        second.display()
+    )]
+    DuplicateImage {
+        /// The top-level `build_info.yml`.
+        path: PathBuf,
+        /// The shared identity, `kind:name[@version]`.
+        image: String,
+        /// The first image build directory.
+        first: PathBuf,
+        /// The second image build directory.
+        second: PathBuf,
+    },
+    /// The images of a sysbuild build could not be merged into one product.
+    #[error("{}: {source}", path.display())]
+    Merge {
+        /// The sysbuild top-level directory.
+        path: PathBuf,
+        /// Why (boxed to keep the error small).
+        source: Box<crate::merge::Error>,
     },
     /// `spdx/zephyr.spdx` has no `zephyr` package.
     #[error("{}: no package named zephyr (SPDXID SPDXRef-zephyr-sources)", path.display())]
@@ -428,8 +487,13 @@ pub fn load(options: &IngestOptions) -> Result<ZephyrBuild, ZephyrError> {
     })
 }
 
-/// Reads, parses and maps one Zephyr image build directory.
+/// Reads, parses and maps one Zephyr image build directory, or, with
+/// [`IngestOptions::sysbuild`], every image of a sysbuild top-level build directory merged
+/// into one product ([`ingest_sysbuild`]).
 pub fn ingest(options: &IngestOptions) -> Result<Ingest, ZephyrError> {
+    if options.sysbuild {
+        return ingest_sysbuild(options);
+    }
     let build = load(options)?;
     map::to_product(&build, options)
 }

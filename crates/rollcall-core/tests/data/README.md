@@ -13,3 +13,17 @@ output produced by `scripts/regen-fixtures.sh`).
 Every file here must parse with `Product::from_json`. Every `*.model.json` is rendered and
 schema-validated by `every_fixture_output_validates_against_schema_1_6`, so adding a fixture
 here adds it to that test automatically.
+
+## `blobs/` — hand-written blob test data
+
+The files under `blobs/` are **hand-written** test inputs for the blob manifest
+(`rollcall merge --blob-manifest`). None of them comes from a real build; the "binaries" are
+a few bytes of text standing in for vendor files, so their SHA-256s can be pinned in tests.
+`.gitattributes` marks them `-text` so checkout never changes a byte.
+
+| File | What it is | Used by |
+|------|------------|---------|
+| `blobs.yaml` | A manifest with two entries: the fake SoftDevice (name, version and supplier left to the built-in recogniser, licence given) and `libphy.a` (every key given, `license` spelling). | `tests/blob.rs` (golden `tests/golden/blobs.cdx.json`), `rollcall-cli` `tests/merge.rs` |
+| `s140_nrf52_7.3.0_softdevice.hex` | A fake Nordic SoftDevice: four Intel-HEX-shaped text lines, not a real image. Its SHA-256 (`sha256sum`) is pinned in `fake_softdevice_hash_matches_sha256sum`. | same |
+| `libphy.a` | A fake Espressif PHY library: an `!<arch>` line and a note. | same |
+| `bad-*.yaml` | Malformed manifests: missing `path`, unknown key, missing blob file, duplicate entry, truncated YAML, invalid licence, unrecognised file with no name. | `tests/blob.rs` (`malformed_manifest_and_missing_file_error_never_panic`) |
