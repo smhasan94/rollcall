@@ -169,3 +169,37 @@ fn help_and_version_exit_zero() {
             .stderr(predicate::str::is_empty());
     }
 }
+
+#[test]
+fn readme_generate_section_documents_product_flag() {
+    let path = concat!(env!("CARGO_MANIFEST_DIR"), "/../../README.md");
+    let readme = std::fs::read_to_string(path).expect("read README.md");
+    let usage = readme
+        .split_once("## Usage")
+        .and_then(|(_, rest)| rest.split_once("```sh"))
+        .and_then(|(_, rest)| rest.split_once("```"))
+        .map(|(block, _)| block)
+        .expect("README has a ## Usage sh block");
+    assert!(
+        usage.lines().any(|line| line.contains("rollcall generate")
+            && line.contains("--sysbuild")
+            && line.contains("--product")),
+        "Usage block has no `generate … --sysbuild --product` example:\n{usage}"
+    );
+    let after_usage = readme
+        .split_once("## Usage")
+        .map(|(_, rest)| rest)
+        .expect("README has a ## Usage section");
+    let generate_section = after_usage
+        .split_once("### Merging")
+        .map(|(section, _)| section)
+        .expect("README has a ### Merging section after ## Usage");
+    assert!(
+        generate_section
+            .split("\n\n")
+            .any(|paragraph| paragraph.contains("`--product NAME[@VERSION]`")
+                && paragraph.contains("--sysbuild")
+                && paragraph.contains("merge --product")),
+        "the generate flags do not document `--product NAME[@VERSION]`"
+    );
+}

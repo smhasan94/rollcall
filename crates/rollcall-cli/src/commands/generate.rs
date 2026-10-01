@@ -3,6 +3,7 @@
 
 use std::io::Write;
 
+use rollcall_core::merge::{self, ProductSpec};
 use rollcall_core::model::Product;
 use rollcall_core::zephyr::{self, IngestOptions, UnknownModule, Warning};
 
@@ -30,6 +31,13 @@ pub fn run(args: GenerateArgs) -> u8 {
             return code;
         }
     };
+    let product = match apply_product(product, args.product.as_ref()) {
+        Ok(product) => product,
+        Err((code, message)) => {
+            eprintln!("rollcall generate: {message}");
+            return code;
+        }
+    };
     match write_document(
         &product,
         args.timestamp,
@@ -42,6 +50,17 @@ pub fn run(args: GenerateArgs) -> u8 {
             code
         }
     }
+}
+
+/// With `--product`, puts `product` under the spec exactly as `merge --product` does, so the
+/// output is byte-identical to `generate` followed by `merge --product`. Without it, returns
+/// `product` unchanged.
+fn apply_product(product: Product, spec: Option<&ProductSpec>) -> Result<Product, (u8, String)> {
+    let Some(spec) = spec else {
+        return Ok(product);
+    };
+    merge::merge(vec![product], Some(spec))
+        .map_err(|e| (EXIT_DATAERR, format!("cannot apply --product {spec}: {e}")))
 }
 
 /// What `--model` or `--zephyr` gave.
