@@ -133,7 +133,10 @@ fn every_committed_golden_validates_against_schema_1_6() {
         }
     }
     seen.sort();
-    assert_eq!(seen, ["minimal.cdx.json", "widget.cdx.json"]);
+    assert_eq!(
+        seen,
+        ["blobs.cdx.json", "minimal.cdx.json", "widget.cdx.json"]
+    );
 }
 
 #[test]
@@ -407,6 +410,28 @@ fn dependencies_cover_every_node_with_sorted_edges() {
     assert_eq!(leaves, product_node_count(&load_fixture("widget")) - 3);
 }
 
+/// The `rollcall:evidence` properties the writer emits for `evidence`: one per entry, the
+/// entry as compact JSON, sorted by value (properties sort by name, then value).
+fn evidence_properties<'a>(evidence: impl IntoIterator<Item = &'a Evidence>) -> Vec<Value> {
+    let mut values: Vec<String> = evidence
+        .into_iter()
+        .map(|e| serde_json::to_string(e).unwrap())
+        .collect();
+    values.sort();
+    values
+        .into_iter()
+        .map(|value| json!({"name": "rollcall:evidence", "value": value}))
+        .collect()
+}
+
+/// The properties of `c` with this name.
+fn properties_named<'a>(c: &'a Value, name: &str) -> Vec<&'a Value> {
+    c["properties"]
+        .as_array()
+        .map(|ps| ps.iter().filter(|p| p["name"] == name).collect())
+        .unwrap_or_default()
+}
+
 fn product_node_count(product: &Product) -> usize {
     product.walk().count()
 }
@@ -564,8 +589,35 @@ fn evidence_maps_identity_occurrences_licenses_and_sources() {
     );
     // Supplier evidence is not emitted as evidence, but its source is listed.
     assert!(!evidence.to_string().contains("Arm"));
+    let mbedtls = evidence_product()
+        .images
+        .first()
+        .unwrap()
+        .components
+        .iter()
+        .find(|c| c.name == "mbedtls")
+        .unwrap()
+        .clone();
+    let mut expected = evidence_properties(mbedtls.evidence.iter());
+    assert_eq!(expected.len(), mbedtls.evidence.len());
+    expected.extend(
+        [
+            "build-dir",
+            "nvd-map",
+            "supplier-db",
+            "west-list",
+            "west-spdx",
+        ]
+        .map(|v| json!({"name": "rollcall:evidence-source", "value": v})),
+    );
+    assert_eq!(c["properties"], Value::Array(expected));
     assert_eq!(
-        c["properties"],
+        Value::Array(
+            properties_named(c, "rollcall:evidence-source")
+                .into_iter()
+                .cloned()
+                .collect()
+        ),
         json!([
             {"name": "rollcall:evidence-source", "value": "build-dir"},
             {"name": "rollcall:evidence-source", "value": "nvd-map"},
@@ -599,10 +651,19 @@ fn evidence_maps_identity_occurrences_licenses_and_sources() {
             "occurrences": [{"location": "build/spdx/app.spdx", "line": 12}]
         })
     );
-    assert_eq!(
-        littlefs["properties"],
-        json!([{"name": "rollcall:evidence-source", "value": "west-spdx"}])
-    );
+    let minimal_littlefs = load_fixture("minimal")
+        .images
+        .first()
+        .unwrap()
+        .components
+        .iter()
+        .find(|c| c.name == "littlefs")
+        .unwrap()
+        .clone();
+    let mut expected = evidence_properties(minimal_littlefs.evidence.iter());
+    assert_eq!(expected.len(), 1);
+    expected.push(json!({"name": "rollcall:evidence-source", "value": "west-spdx"}));
+    assert_eq!(littlefs["properties"], Value::Array(expected));
 }
 
 /// A product in which every node level sets every fact.
@@ -719,14 +780,13 @@ fn every_fact_is_mapped() {
             c["properties"]
         );
     }
-    // Properties sort by (name, value): the evidence source before the image kind.
-    assert_eq!(
-        find(&doc, "img")["properties"],
-        json!([
-            {"name": "rollcall:evidence-source", "value": "img-src"},
-            {"name": "rollcall:image-kind", "value": "bootloader"}
-        ])
-    );
+    // Properties sort by (name, value): each evidence entry, the evidence source, then the
+    // image kind.
+    let img = product.images.first().unwrap();
+    let mut expected = evidence_properties(img.evidence.iter());
+    expected.push(json!({"name": "rollcall:evidence-source", "value": "img-src"}));
+    expected.push(json!({"name": "rollcall:image-kind", "value": "bootloader"}));
+    assert_eq!(find(&doc, "img")["properties"], Value::Array(expected));
     // Structure and dependencies.
     assert_eq!(doc["components"][0]["name"], "img");
     assert_eq!(doc["components"][0]["components"][0]["name"], "comp");

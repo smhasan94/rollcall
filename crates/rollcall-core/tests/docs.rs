@@ -63,6 +63,8 @@ fn cyclonedx_docs_have_mapping_section() {
         "metadata.component",
         "rollcall:image-kind",
         "rollcall:evidence-source",
+        "rollcall:evidence`",
+        "rollcall:opaque",
         "dependencies",
         "evidence.identity",
         "evidence.occurrences",

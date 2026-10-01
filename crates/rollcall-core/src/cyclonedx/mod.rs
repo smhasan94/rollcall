@@ -1,7 +1,10 @@
-//! CycloneDX 1.6 JSON output and schema validation.
+//! CycloneDX 1.6 JSON output, input and schema validation.
 //!
 //! [`write()`] turns a [`Product`] into a CycloneDX 1.6 JSON document; [`to_document`] gives the
-//! same document as a value. [`validate_cyclonedx_1_6`] checks any JSON value against the
+//! same document as a value. [`read()`] (and [`read_str`], [`read_bytes`]) turns a document
+//! back into a [`Product`]; for documents rollcall wrote it is lossless,
+//! `read(write(p)) == p`, which is what lets `rollcall merge` combine separately generated
+//! documents. [`validate_cyclonedx_1_6`] checks any JSON value against the
 //! official CycloneDX 1.6 JSON schema, vendored verbatim under `schema/cyclonedx/` and compiled
 //! into the crate, so validation works offline.
 //!
@@ -48,6 +51,8 @@
 //! | evidence `occurrence` | `evidence.occurrences[]` of `{location, line}` for the node (not per identity entry), de-duplicated and sorted |
 //! | `licence` evidence | `evidence.licenses`: `[{expression}]` when there is one distinct value and it is a valid SPDX expression, else `[{license: {name}}…]` sorted (CycloneDX has no slot for several expressions) |
 //! | evidence `source` | property `rollcall:evidence-source`, one per distinct source |
+//! | each [`Evidence`](crate::model::Evidence) entry, whole | property `rollcall:evidence`, value = the entry as compact JSON in the model's form (`{"field":…,"technique":…,"source":…,"occurrence":…,"value":…,"confidence":9000}`); [`read()`] rebuilds the evidence from these alone |
+//! | [`ImageKind::Blob`](crate::model::ImageKind::Blob) image | property `rollcall:opaque` = `contents not analysed; hashes computed from the file` |
 //! | [`Confidence`](crate::model::Confidence) | a number from [`Confidence::as_f64`](crate::model::Confidence::as_f64), e.g. 9500 bp → `0.95` |
 //!
 //! Properties sort by (name, value). Empty arrays and an empty `evidence` object are omitted,
@@ -64,12 +69,15 @@
 //!
 //! # Not represented
 //!
-//! - `supplier` evidence: CycloneDX 1.6 has no evidence field for the supplier. The entry's
-//!   source is still listed as a `rollcall:evidence-source` property.
+//! In CycloneDX's own fields (every one of these is still carried, losslessly, by the
+//! `rollcall:evidence` properties):
+//!
+//! - `supplier` evidence: CycloneDX 1.6 has no evidence field for the supplier.
 //! - Which source reported which identity method: `methods[]` has no source field, so sources
 //!   are listed per node, not per method.
 //! - Which evidence entry an occurrence belongs to: occurrences are node-level in CycloneDX.
-//! - The internal schema tag (`rollcall-model/1`).
+//!
+//! Not at all: the internal schema tag (`rollcall-model/1`), which is always the same.
 //!
 //! # Known scanner behaviour
 //!
@@ -81,6 +89,7 @@
 //! ingestion. osv-scanner is unaffected.
 
 mod document;
+mod reader;
 mod schema;
 mod serial;
 mod timestamp;
@@ -90,6 +99,7 @@ pub use document::{
     Bom, Component, Dependency, Evidence, Hash, Identity, LicenseChoice, Metadata, Method,
     NamedLicense, Occurrence, Property, Supplier, Tool, Tools,
 };
+pub use reader::{Read, ReadError, read, read_bytes, read_str};
 pub use schema::{
     BOM_1_6_SCHEMA, BOM_1_6_SCHEMA_SHA256, JSF_0_82_SCHEMA, JSF_0_82_SCHEMA_SHA256, SPDX_SCHEMA,
     SPDX_SCHEMA_SHA256, SchemaViolation, validate_cyclonedx_1_6,

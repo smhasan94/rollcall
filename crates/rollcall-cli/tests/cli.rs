@@ -128,11 +128,6 @@ fn validate_without_file_is_usage_error_exit_64() {
 }
 
 #[test]
-fn merge_exits_64_not_implemented() {
-    assert_not_implemented("merge");
-}
-
-#[test]
 fn vex_exits_64_not_implemented() {
     assert_not_implemented("vex");
 }

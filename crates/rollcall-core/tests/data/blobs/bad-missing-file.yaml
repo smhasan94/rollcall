@@ -1,0 +1,3 @@
+blobs:
+  - path: missing-file.bin
+    name: ghost

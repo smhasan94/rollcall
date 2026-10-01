@@ -425,3 +425,197 @@ fn generate_zephyr_t2_west_list_keeps_one_zephyr_and_warns_on_unmatched_row() {
         .count();
     assert_eq!(libraries, 6);
 }
+
+/// `(variant, application image)` paired with the bootloader image of the same variant.
+const MCUBOOT_BUILDS: [(&str, &str); 3] = [
+    ("baseline", "mcuboot"),
+    ("bt", "mcuboot"),
+    ("tls", "mcuboot"),
+];
+
+#[test]
+fn generate_sysbuild_equals_manual_generate_plus_merge_bytes() {
+    let dir = tempfile::tempdir().unwrap();
+    for ((variant, app), (_, boot)) in APP_BUILDS.into_iter().zip(MCUBOOT_BUILDS) {
+        for extra in [&["--west-list"][..], &["--include-sdk"][..]] {
+            let with = |cmd: &mut Command| {
+                if extra == ["--west-list"] {
+                    cmd.arg("--west-list").arg(west_list(variant));
+                } else {
+                    cmd.arg("--include-sdk");
+                }
+            };
+            let mut manual_inputs = Vec::new();
+            for image in [app, boot] {
+                let path = dir.path().join(format!("{variant}-{image}.cdx.json"));
+                let mut cmd = rollcall();
+                cmd.arg("generate")
+                    .arg("--zephyr")
+                    .arg(fixture_build(variant, image))
+                    .args(["--timestamp", GOLDEN_TIMESTAMP, "-o"])
+                    .arg(&path);
+                with(&mut cmd);
+                cmd.assert().code(0);
+                manual_inputs.push(path);
+            }
+            let manual = rollcall()
+                .arg("merge")
+                .args(&manual_inputs)
+                .args(["--product", app, "--timestamp", GOLDEN_TIMESTAMP])
+                .output()
+                .unwrap();
+            assert_eq!(manual.status.code(), Some(0));
+
+            let mut cmd = rollcall();
+            cmd.arg("generate")
+                .arg("--zephyr")
+                .arg(fixtures_root().join(variant))
+                .args(["--sysbuild", "--timestamp", GOLDEN_TIMESTAMP]);
+            with(&mut cmd);
+            let sysbuild = cmd.output().unwrap();
+            assert_eq!(sysbuild.status.code(), Some(0), "{}", stderr_of(&sysbuild));
+            assert!(
+                sysbuild.stdout == manual.stdout,
+                "{variant} {extra:?}: --sysbuild differs from generate + merge"
+            );
+        }
+    }
+    // The baseline one is the committed golden document.
+    let out = generate_zephyr(
+        &fixtures_root().join("baseline"),
+        &[
+            "--sysbuild",
+            "--west-list",
+            west_list("baseline").to_str().unwrap(),
+            "--timestamp",
+            GOLDEN_TIMESTAMP,
+        ],
+    );
+    assert_eq!(out.status.code(), Some(0));
+    assert!(out.stdout == golden("baseline.sysbuild").as_bytes());
+}
+
+#[test]
+fn generate_sysbuild_warnings_name_the_image() {
+    let out = generate_zephyr(
+        &fixtures_root().join("baseline"),
+        &["--sysbuild", "--timestamp", GOLDEN_TIMESTAMP],
+    );
+    assert_eq!(out.status.code(), Some(0));
+    let stderr = stderr_of(&out);
+    for image in ["with_mcuboot", "mcuboot"] {
+        assert!(
+            stderr.contains(&format!("rollcall generate: warning: {image}: west list")),
+            "{stderr}"
+        );
+    }
+}
+
+#[test]
+fn generate_sysbuild_on_image_dir_exit_65() {
+    let dir = fixture_build("baseline", "with_mcuboot");
+    let out = generate_zephyr(&dir, &["--sysbuild"]);
+    assert_fails(
+        &out,
+        65,
+        &dir.join("build_info.yml"),
+        &["not a sysbuild top-level build directory"],
+    );
+    // --sysbuild needs --zephyr.
+    let model = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("../rollcall-core/tests/data/minimal.model.json");
+    let out = rollcall()
+        .arg("generate")
+        .arg("--model")
+        .arg(&model)
+        .arg("--sysbuild")
+        .output()
+        .unwrap();
+    assert_eq!(out.status.code(), Some(64));
+    // A sysbuild directory whose image directory is missing is a missing input.
+    let tmp = tempfile::tempdir().unwrap();
+    fs::copy(
+        fixtures_root().join("baseline/build_info.yml"),
+        tmp.path().join("build_info.yml"),
+    )
+    .unwrap();
+    let out = generate_zephyr(tmp.path(), &["--sysbuild"]);
+    assert_eq!(out.status.code(), Some(66), "{}", stderr_of(&out));
+    assert!(out.stdout.is_empty());
+}
+
+#[test]
+fn generate_sysbuild_two_images_with_the_same_identity_exit_65_names_both_dirs() {
+    // A second MCUboot build (`s1_image`) next to `mcuboot`: both become `bootloader:mcuboot`.
+    // Laid out in a temporary directory from copies; `fixtures/` is never touched.
+    let top = tempfile::tempdir().unwrap();
+    fs::write(
+        top.path().join("build_info.yml"),
+        "cmake:\n  application:\n    source-dir: /x/share/sysbuild\n  images:\n   \
+         - name: with_mcuboot\n     type: MAIN\n   - name: mcuboot\n     type: BOOTLOADER\n   \
+         - name: s1_image\n     type: BOOTLOADER\n",
+    )
+    .unwrap();
+    for (image, from) in [
+        ("with_mcuboot", "with_mcuboot"),
+        ("mcuboot", "mcuboot"),
+        ("s1_image", "mcuboot"),
+    ] {
+        let from = fixture_build("baseline", from);
+        let to = top.path().join(image);
+        for rel in [
+            "build_info.yml",
+            "spdx/app.spdx",
+            "spdx/build.spdx",
+            "spdx/modules-deps.spdx",
+            "spdx/zephyr.spdx",
+            "zephyr/.config",
+        ] {
+            fs::create_dir_all(to.join(rel).parent().unwrap()).unwrap();
+            fs::copy(from.join(rel), to.join(rel)).unwrap();
+        }
+    }
+    let out = generate_zephyr(top.path(), &["--sysbuild"]);
+    assert_fails(
+        &out,
+        65,
+        &top.path().join("build_info.yml"),
+        &[
+            &top.path().join("mcuboot").display().to_string(),
+            &top.path().join("s1_image").display().to_string(),
+            "bootloader:mcuboot",
+        ],
+    );
+}
+
+#[test]
+fn generate_zephyr_mcuboot_dir_yields_bootloader_image_named_mcuboot() {
+    for (variant, image) in MCUBOOT_BUILDS {
+        let out = generate_zephyr(
+            &fixture_build(variant, image),
+            &["--west-list", west_list(variant).to_str().unwrap()],
+        );
+        assert_eq!(out.status.code(), Some(0), "{}", stderr_of(&out));
+        let doc: Value = serde_json::from_slice(&out.stdout).unwrap();
+        assert_eq!(doc["metadata"]["component"]["name"], "mcuboot");
+        let images = doc["components"].as_array().unwrap();
+        assert_eq!(images.len(), 1);
+        assert_eq!(images[0]["name"], "mcuboot");
+        assert!(images[0].get("version").is_none());
+        assert!(
+            images[0]["properties"].as_array().unwrap().contains(
+                &serde_json::json!({"name": "rollcall:image-kind", "value": "bootloader"})
+            )
+        );
+    }
+    let out = generate_zephyr(
+        &fixture_build("baseline", "mcuboot"),
+        &[
+            "--west-list",
+            west_list("baseline").to_str().unwrap(),
+            "--timestamp",
+            GOLDEN_TIMESTAMP,
+        ],
+    );
+    assert!(out.stdout == golden("baseline.mcuboot").as_bytes());
+}

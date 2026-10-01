@@ -83,6 +83,10 @@
           },
           "properties": [
             {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"version\",\"technique\":\"manifest-analysis\",\"source\":\"west-spdx\",\"occurrence\":{\"location\":\"build/spdx/app.spdx\",\"line\":12},\"value\":\"2.9.0\",\"confidence\":9500}"
+            },
+            {
               "name": "rollcall:evidence-source",
               "value": "west-spdx"
             }

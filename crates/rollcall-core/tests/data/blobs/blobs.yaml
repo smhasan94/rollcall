@@ -1,0 +1,13 @@
+# Hand-written test manifest (not a real build artefact). See ../README.md.
+blobs:
+  # Name, version and supplier come from the built-in SoftDevice recogniser; the manifest
+  # adds the licence.
+  - path: s140_nrf52_7.3.0_softdevice.hex
+    licence: LicenseRef-Nordic-5-Clause
+  # Everything given explicitly; the recogniser agrees on the supplier.
+  - name: libphy
+    version: 5.2.1
+    supplier: Espressif Systems
+    path: libphy.a
+    license: Apache-2.0
+    purl: pkg:generic/espressif/libphy@5.2.1

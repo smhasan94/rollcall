@@ -5,6 +5,7 @@ use std::str::FromStr;
 
 use clap::{ArgGroup, Args, Parser, Subcommand, ValueEnum};
 use rollcall_core::cyclonedx::{SerialNumber, Timestamp};
+use rollcall_core::merge::ProductSpec;
 
 /// Exit code when a document fails validation.
 pub const EXIT_INVALID: u8 = 1;
@@ -38,7 +39,7 @@ pub enum Command {
     /// Validate an SBOM against the CycloneDX schema and rollcall's rules
     Validate(ValidateArgs),
     /// Merge bootloader, application and blob SBOMs into one product hierarchy
-    Merge,
+    Merge(MergeArgs),
     /// Emit VEX statements for an SBOM
     Vex,
     /// Scan an SBOM for known vulnerabilities
@@ -53,7 +54,7 @@ impl Command {
         match self {
             Command::Generate(_) => "generate",
             Command::Validate(_) => "validate",
-            Command::Merge => "merge",
+            Command::Merge(_) => "merge",
             Command::Vex => "vex",
             Command::Scan => "scan",
             Command::Assay => "assay",
@@ -92,6 +93,10 @@ pub struct GenerateArgs {
     /// Add the SDK/toolchain as a component (with --zephyr)
     #[arg(long, requires = "zephyr", conflicts_with = "model")]
     pub include_sdk: bool,
+    /// --zephyr names a sysbuild top-level build directory: ingest every image it lists
+    /// (e.g. MCUboot and the application) and merge them into one product
+    #[arg(long, requires = "zephyr", conflicts_with = "model")]
+    pub sysbuild: bool,
     /// Output format
     #[arg(long, value_enum, default_value_t = Format::Cyclonedx)]
     pub format: Format,
@@ -101,6 +106,33 @@ pub struct GenerateArgs {
     pub timestamp: Option<Timestamp>,
     /// Serial number: urn:uuid: followed by a lowercase UUID. Defaults to one derived from
     /// the model's content
+    #[arg(long, value_name = "URN", value_parser = SerialNumber::from_str)]
+    pub serial_number: Option<SerialNumber>,
+    /// Write the document here instead of to stdout
+    #[arg(short, long, value_name = "FILE")]
+    pub output: Option<PathBuf>,
+}
+
+/// Arguments of `rollcall merge`.
+#[derive(Debug, Args)]
+pub struct MergeArgs {
+    /// CycloneDX 1.6 documents to merge (e.g. from `rollcall generate`)
+    #[arg(value_name = "FILE", required_unless_present = "blob_manifest")]
+    pub inputs: Vec<PathBuf>,
+    /// Put every input's images under this product (NAME, or NAME@VERSION, split at the
+    /// last @). Without it the inputs must name the same product and version
+    #[arg(long, value_name = "NAME[@VERSION]", value_parser = ProductSpec::from_str)]
+    pub product: Option<ProductSpec>,
+    /// YAML manifest of opaque binary blobs (name, version, supplier, path, licence, purl) to
+    /// add as blob images, hashed with SHA-256
+    #[arg(long, value_name = "FILE")]
+    pub blob_manifest: Option<PathBuf>,
+    /// Document timestamp, RFC 3339 (e.g. 2026-01-02T03:04:05Z); normalised to UTC.
+    /// Defaults to the current time
+    #[arg(long, value_name = "RFC3339", value_parser = Timestamp::from_str)]
+    pub timestamp: Option<Timestamp>,
+    /// Serial number: urn:uuid: followed by a lowercase UUID. Defaults to one derived from
+    /// the merged model's content
     #[arg(long, value_name = "URN", value_parser = SerialNumber::from_str)]
     pub serial_number: Option<SerialNumber>,
     /// Write the document here instead of to stdout

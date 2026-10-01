@@ -7,6 +7,7 @@ use std::path::{Path, PathBuf};
 
 use packageurl::PackageUrl;
 
+use super::kconfig::{KconfigEntry, KconfigValue};
 use super::spdx::{
     SpdxActor, SpdxActorKind, SpdxDocument, SpdxPackage, assertion, parse_download_location,
     spdx_id_stem,
@@ -41,6 +42,14 @@ const LICENCE_ANALYZED: u16 = 8000;
 const LICENCE_NOT_ANALYZED: u16 = 5000;
 const KCONFIG_NAME: u16 = 6000;
 const BUILD_INFO_FACT: u16 = 8000;
+const KCONFIG_MCUBOOT: u16 = 9000;
+
+/// The name of an MCUboot build's product and bootloader image.
+const MCUBOOT: &str = "mcuboot";
+/// The Kconfig symbol only an MCUboot build sets.
+const MCUBOOT_SYMBOL: &str = "CONFIG_MCUBOOT";
+/// The tail of MCUboot's Zephyr application source directory.
+const MCUBOOT_SOURCE_DIR: &str = "mcuboot/boot/zephyr";
 
 /// The SPDXID of the Zephyr package in `zephyr.spdx`, and of Zephyr in `modules-deps.spdx`.
 const ZEPHYR_SOURCES_ID: &str = "SPDXRef-zephyr-sources";
@@ -260,6 +269,45 @@ fn zephyr_dependency_stems(deps: &SpdxDocument) -> BTreeSet<&str> {
         .collect()
 }
 
+/// Whether `source_dir` is MCUboot's Zephyr application directory (`…/mcuboot/boot/zephyr`).
+fn is_mcuboot_source_dir(source_dir: &str) -> bool {
+    let dir = source_dir.replace('\\', "/");
+    let dir = dir.trim_end_matches('/');
+    dir == MCUBOOT_SOURCE_DIR || dir.ends_with(&format!("/{MCUBOOT_SOURCE_DIR}"))
+}
+
+/// `cmake.application.source-dir`, if present.
+fn source_dir(build: &ZephyrBuild) -> Option<&str> {
+    build
+        .build_info
+        .cmake
+        .as_ref()?
+        .application
+        .as_ref()?
+        .source_dir
+        .as_deref()
+}
+
+/// The line `CONFIG_MCUBOOT=y` is on, if the build's `.config` sets it.
+fn mcuboot_symbol_line(build: &ZephyrBuild) -> Option<u32> {
+    match build.config.as_ref()?.symbols.get(MCUBOOT_SYMBOL)? {
+        KconfigEntry {
+            value: KconfigValue::Bool(true),
+            line,
+        } => Some(*line),
+        _ => None,
+    }
+}
+
+/// Whether the build is an MCUboot bootloader build: its `.config` sets `CONFIG_MCUBOOT=y`
+/// or, when there is no `.config`, its application source directory is MCUboot's.
+pub(super) fn is_mcuboot(build: &ZephyrBuild) -> bool {
+    match &build.config {
+        Some(_) => mcuboot_symbol_line(build).is_some(),
+        None => source_dir(build).is_some_and(is_mcuboot_source_dir),
+    }
+}
+
 /// Maps a loaded build into a product.
 pub(super) fn to_product(
     build: &ZephyrBuild,
@@ -315,22 +363,62 @@ impl<'a> Mapper<'a> {
                     key: "cmake.application.source-dir",
                 },
             })?;
+        let mcuboot = is_mcuboot(build);
+        let (name, kind) = if mcuboot {
+            (MCUBOOT, ImageKind::Bootloader)
+        } else {
+            (app_name, ImageKind::Application)
+        };
         self.origin
-            .insert(app_name.to_owned(), paths.build_info.clone());
+            .insert(name.to_owned(), paths.build_info.clone());
 
-        let name_evidence = evidence(
-            EvidenceField::Name,
-            BUILD_INFO,
-            app_name,
-            BUILD_INFO_FACT,
-            Some(BUILD_INFO_YML),
-            None,
-        )
-        .map_err(&build_info_err)?;
-        let mut product = Product::new(app_name).map_err(&build_info_err)?;
-        product.evidence.insert(name_evidence.clone());
-        let mut image = Image::new(ImageKind::Application, app_name).map_err(&build_info_err)?;
-        image.evidence.insert(name_evidence);
+        let mut name_evidence = Vec::new();
+        if mcuboot {
+            if let Some(line) = mcuboot_symbol_line(build) {
+                name_evidence.push(
+                    evidence(
+                        EvidenceField::Name,
+                        KCONFIG,
+                        MCUBOOT_SYMBOL,
+                        KCONFIG_MCUBOOT,
+                        Some(CONFIG),
+                        Some(line),
+                    )
+                    .map_err(Self::model_error(&paths.config))?,
+                );
+            }
+            if source_dir(build).is_some_and(is_mcuboot_source_dir) {
+                name_evidence.push(
+                    evidence(
+                        EvidenceField::Name,
+                        BUILD_INFO,
+                        MCUBOOT,
+                        BUILD_INFO_FACT,
+                        Some(BUILD_INFO_YML),
+                        None,
+                    )
+                    .map_err(&build_info_err)?,
+                );
+            }
+        } else {
+            name_evidence.push(
+                evidence(
+                    EvidenceField::Name,
+                    BUILD_INFO,
+                    app_name,
+                    BUILD_INFO_FACT,
+                    Some(BUILD_INFO_YML),
+                    None,
+                )
+                .map_err(&build_info_err)?,
+            );
+        }
+        let mut product = Product::new(name).map_err(&build_info_err)?;
+        let mut image = Image::new(kind, name).map_err(&build_info_err)?;
+        for entry in name_evidence {
+            product.evidence.insert(entry.clone());
+            image.evidence.insert(entry);
+        }
         self.app_licence(&mut image)?;
 
         let modules = collect_modules(build);

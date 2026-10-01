@@ -27,7 +27,8 @@ fn main() -> ExitCode {
     let code = match cli.command {
         Command::Generate(args) => commands::generate::run(args),
         Command::Validate(args) => commands::validate::run(args),
-        other @ (Command::Merge | Command::Vex | Command::Scan | Command::Assay) => {
+        Command::Merge(args) => commands::merge::run(args),
+        other @ (Command::Vex | Command::Scan | Command::Assay) => {
             eprintln!("rollcall {}: not implemented", other.name());
             EXIT_USAGE
         }

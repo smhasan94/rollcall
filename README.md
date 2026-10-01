@@ -9,13 +9,15 @@ crypto-inventory module ships as `rollcall assay` and emits a CycloneDX 1.6 CBOM
 
 Early development. `rollcall generate --zephyr <build-dir>` ingests a Zephyr image build
 directory (`west spdx` documents, `west list` output, Kconfig `.config`, `build_info.yml`) and
-writes a CycloneDX 1.6 JSON SBOM; `rollcall generate --model` renders a rollcall model (the
+writes a CycloneDX 1.6 JSON SBOM; with `--sysbuild` it ingests every image of a sysbuild
+build (the MCUboot bootloader and the application) into one product. `rollcall merge`
+combines separately generated SBOMs, and opaque binary blobs listed in a `--blob-manifest`,
+into one product hierarchy. `rollcall generate --model` renders a rollcall model (the
 internal `rollcall-model/1` JSON form) the same way; and `rollcall validate --schema` checks a
-document against the official CycloneDX 1.6 JSON schema. Merging the MCUboot bootloader into
-the same product is not implemented yet, and neither are `merge`, `vex`, `scan` and `assay`,
-which print `not implemented` and exit 64. The 0.0.1 releases of `rollcall`, `rollcall-core`,
-`rollcall-cli` and `rollcall-assay` on crates.io and `rollcall` on PyPI are placeholders that
-reserve the names.
+document against the official CycloneDX 1.6 JSON schema. `vex`, `scan` and `assay` are not
+implemented yet; they print `not implemented` and exit 64. The 0.0.1 releases of `rollcall`,
+`rollcall-core`, `rollcall-cli` and `rollcall-assay` on crates.io and `rollcall` on PyPI are
+placeholders that reserve the names.
 
 ## Workspace layout
 
@@ -57,6 +59,18 @@ rollcall generate --model product.model.json --timestamp 2026-01-02T03:04:05Z \
 
 # Check a document against the vendored CycloneDX 1.6 JSON schema.
 rollcall validate --schema product.cdx.json
+
+# A sysbuild build (MCUboot + application) as one product, in one step...
+rollcall generate --zephyr build --sysbuild --west-list west-list.txt -o product.cdx.json
+
+# ...or by hand: generate each image, then merge them under one product. The result is
+# byte-identical to --sysbuild when --product names the application.
+rollcall generate --zephyr build/app --west-list west-list.txt -o app.cdx.json
+rollcall generate --zephyr build/mcuboot --west-list west-list.txt -o mcuboot.cdx.json
+rollcall merge app.cdx.json mcuboot.cdx.json --product app -o product.cdx.json
+
+# Add opaque binary blobs (radio firmware, vendor libraries) from a manifest.
+rollcall merge product.cdx.json --blob-manifest blobs.yaml --product widget@1.2.0 -o widget.cdx.json
 ```
 
 `generate --format spdx` is reserved and not implemented yet. The same model and options
@@ -64,8 +78,43 @@ always produce byte-identical output; changing only `--timestamp` changes only t
 `timestamp` line. How each model field maps to CycloneDX is documented in the
 `rollcall_core::cyclonedx` module docs (`cargo doc -p rollcall-core --open`).
 
-Exactly one of `--model` and `--zephyr` is required; `--west-list` and `--include-sdk` only
-go with `--zephyr`.
+Exactly one of `--model` and `--zephyr` is required; `--west-list`, `--include-sdk` and
+`--sysbuild` only go with `--zephyr`.
+
+### Merging
+
+`rollcall merge FILE… [--product NAME[@VERSION]] [--blob-manifest FILE]` reads CycloneDX 1.6
+documents (losslessly for documents rollcall wrote) and merges them. Each input's images
+become images of the merged product; images and components with the same identity (kind,
+name, version) at the same place are deduplicated, with their evidence merged, and a fact
+the inputs disagree about is an error (exit 65). With `--product`, every input's images are
+moved under that product: it replaces each input's root, so the roots' own facts (supplier,
+purl, cpe, hashes, licence) and evidence are dropped. `NAME[@VERSION]` is split at the last
+`@`, so a scoped name needs an explicit version (`--product @scope/widget@1.0.0`;
+`--product @scope/widget` is rejected). Without `--product` the inputs must name the same
+product and version, and a conflict names both files. Merging a document with itself gives
+the same document. `--timestamp`, `--serial-number` and `-o` work as for `generate`.
+
+A blob manifest lists files relative to the manifest's directory; relative paths may use
+`..` to reach outside it, and absolute paths are accepted too. Each path must name a regular
+file (a directory, FIFO or device is refused, exit 66):
+
+```yaml
+blobs:
+  - path: s140_nrf52_7.3.0_softdevice.hex   # name, version, supplier recognised
+    licence: LicenseRef-Nordic-5-Clause
+  - name: radio-fw
+    version: 2.1.0
+    supplier: Example Radio Ltd
+    path: radio/radio-fw.bin
+    purl: pkg:generic/example/radio-fw@2.1.0
+```
+
+Each entry becomes a `blob` image with the file's SHA-256, the supplier, and the property
+`rollcall:opaque` = `contents not analysed; hashes computed from the file`. Built-in
+recognisers fill a missing name, version or supplier for Nordic SoftDevices
+(`s<nnn>_nrf5<n>_<M.m.p>_softdevice.hex`) and common Espressif, Nordic and Silicon Labs HAL
+libraries; licences are never guessed. Without input documents, `--product` is required.
 
 `validate` prints `<file>: valid CycloneDX 1.6` on success, or `<file>: <n> schema
 violation(s)` followed by one `  <JSON pointer>: <message>` line per violation, sorted.
@@ -74,7 +123,12 @@ violation(s)` followed by one `  <JSON pointer>: <message>` line per violation, 
 
 Pass the *image* build directory, the one holding `build_info.yml` and `spdx/` (with
 sysbuild that is `build/<app>/`, not `build/`; the top-level directory is refused with a
-message naming the image directory to use). Run `west spdx --init -d <build>` before the
+message naming the image directory to use), or the sysbuild top-level directory with
+`--sysbuild`, which reads the image list from its `build_info.yml` (`domains.yaml` is not
+used), ingests every image (`--west-list` and `--include-sdk` apply to each) and merges them
+under a product named after the `MAIN` application. Warnings are prefixed with the image
+name. Two images that ingest to the same image (e.g. a second MCUboot build next to
+`mcuboot`, both `bootloader:mcuboot`) are an error naming both directories (exit 65). Run `west spdx --init -d <build>` before the
 build and `west spdx -d <build>` after it to create `spdx/`.
 
 - Required: `build_info.yml` and `spdx/zephyr.spdx`.
@@ -82,7 +136,8 @@ build and `west spdx -d <build>` after it to create `spdx/`.
   exit code stays 0): `spdx/app.spdx`, `spdx/build.spdx`, `spdx/modules-deps.spdx`,
   `zephyr/.config`, and the `--west-list` file. A `--west-list` file that is named but
   missing is an error.
-- The application is the product and its one `application` image. Zephyr is an
+- The application is the product and its one `application` image. An MCUboot build
+  (`CONFIG_MCUBOOT=y`) is instead a `bootloader` image named `mcuboot`. Zephyr is an
   `operating-system` component versioned by its release (e.g. `4.4.2`), with the commit it
   was built from recorded as `pkg:github/zephyrproject-rtos/zephyr@<sha>` purl evidence.
 - Every west module appears exactly once as a `library` component whose version is the git
@@ -113,9 +168,9 @@ such as Zephyr is typed is decided at ingestion. osv-scanner is unaffected.
 |------|--------------------------------------------------------------------------|
 | 0    | Success (including `--help`, `--version`)                                |
 | 1    | `validate`: the document has schema violations                           |
-| 64   | Usage error (bad arguments, bad `--timestamp` or `--serial-number`), or subcommand/format not implemented |
-| 65   | Input is malformed: not JSON, not UTF-8, too deeply nested, or an invalid model; or a Zephyr input (SPDX, `west list`, `.config`, `build_info.yml`) is malformed, or `--zephyr` names a sysbuild top-level directory |
-| 66   | Input file missing or unreadable (including a directory), including a required Zephyr input or the `--west-list` file |
+| 64   | Usage error (bad arguments, bad `--timestamp`, `--serial-number` or `--product`, `merge --blob-manifest` without inputs or `--product`), or subcommand/format not implemented |
+| 65   | Input is malformed: not JSON, not UTF-8, too deeply nested, or an invalid model; or a Zephyr input (SPDX, `west list`, `.config`, `build_info.yml`) is malformed, or `--zephyr` names a sysbuild top-level directory without `--sysbuild` (or an image directory with it); or a `merge` input is not a readable CycloneDX 1.6 document, the inputs conflict (including different product names or versions without `--product`), or the blob manifest is malformed |
+| 66   | Input file missing or unreadable (including a directory), including a required Zephyr input, the `--west-list` file, a `merge` input, the blob manifest or a blob it lists |
 | 74   | Output cannot be written                                                 |
 
 ## CycloneDX schema

@@ -1,0 +1,4 @@
+blobs:
+  - name: x
+    path: libphy.a
+    vendor: nobody
