@@ -229,6 +229,9 @@ the `""` blanks and `<vendor>`/`<product>` (or delete the lines marked optional)
 code stays 0.
 
 rollcall carries a small seed database in `crates/rollcall-core/db/identifiers.yaml`.
+Next to it, `crates/rollcall-core/db/subsystems.yaml` maps Zephyr subsystems to their Kconfig
+symbols and source paths, checked against the pinned Zephyr tree by
+`scripts/verify-subsystems.sh`; see [docs/subsystems.md](docs/subsystems.md).
 
 ### VEX rules
 
