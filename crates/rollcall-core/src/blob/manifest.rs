@@ -8,7 +8,11 @@
 //!     path: s140_nrf52_7.3.0_softdevice.hex  # required, relative to the manifest file
 //!     licence: LicenseRef-Nordic-5-Clause    # optional SPDX expression (or `license`)
 //!     purl: pkg:generic/s140_nrf52_softdevice@7.3.0  # optional
+//!     kind: firmware                   # optional: firmware | library (the CycloneDX type)
 //! ```
+//!
+//! `kind` is the blob's CycloneDX component type, not its `rollcall:image-kind` (which is
+//! always `blob`). Any other value is a [`BlobError::Yaml`].
 //!
 //! Unknown keys are rejected, so a misspelt key is an error rather than a silently missing
 //! fact.
@@ -16,6 +20,7 @@
 use serde::Deserialize;
 
 use super::BlobError;
+use crate::model::ImageType;
 
 /// A parsed blob manifest.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -39,6 +44,8 @@ pub struct BlobEntry {
     pub licence: Option<String>,
     /// The package URL, if given.
     pub purl: Option<String>,
+    /// The CycloneDX component type (`kind: firmware | library`), if given.
+    pub kind: Option<ImageType>,
 }
 
 #[derive(Deserialize)]
@@ -63,6 +70,8 @@ struct RawEntry {
     licence: Option<String>,
     #[serde(default)]
     purl: Option<String>,
+    #[serde(default)]
+    kind: Option<ImageType>,
 }
 
 /// An optional string that, when present, must not be empty.
@@ -101,7 +110,38 @@ pub fn parse(text: &str) -> Result<BlobManifest, BlobError> {
             path,
             licence: non_empty(entry.licence, index, "licence")?,
             purl: non_empty(entry.purl, index, "purl")?,
+            kind: entry.kind,
         });
     }
     Ok(BlobManifest { blobs })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn parse_reads_kind_library_and_firmware() {
+        let manifest = parse(
+            "blobs:\n  - name: a\n    path: a.bin\n    kind: library\n  \
+             - name: b\n    path: b.a\n    kind: firmware\n  - name: c\n    path: c.hex\n",
+        )
+        .unwrap();
+        let kinds: Vec<Option<ImageType>> = manifest.blobs.iter().map(|b| b.kind).collect();
+        assert_eq!(
+            kinds,
+            [Some(ImageType::Library), Some(ImageType::Firmware), None]
+        );
+    }
+
+    #[test]
+    fn parse_rejects_bogus_kind() {
+        for kind in ["bogus", "Library", "''", "1", "[library]", "{a: 1}", "blob"] {
+            let text = format!("blobs:\n  - name: a\n    path: a.bin\n    kind: {kind}\n");
+            let err = parse(&text).unwrap_err();
+            assert!(matches!(err, BlobError::Yaml(_)), "{kind}: {err}");
+        }
+        let err = parse("blobs:\n  - name: a\n    path: a.bin\n    kind: bogus\n").unwrap_err();
+        assert!(err.to_string().contains("bogus"), "{err}");
+    }
 }

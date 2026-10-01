@@ -1,7 +1,7 @@
 {
   "bomFormat": "CycloneDX",
   "specVersion": "1.6",
-  "serialNumber": "urn:uuid:c8b3157e-2ea3-815d-9e19-da6a23b918cc",
+  "serialNumber": "urn:uuid:94da9273-be3a-8fe8-acf9-37eab9a9e75c",
   "version": 1,
   "metadata": {
     "timestamp": "2026-01-02T03:04:05Z",
@@ -23,7 +23,7 @@
   },
   "components": [
     {
-      "type": "firmware",
+      "type": "library",
       "bom-ref": "image:4e2950b4e2f76422443048196f305245",
       "name": "libphy",
       "version": "5.2.1",

@@ -35,7 +35,8 @@
 //! | — | `metadata.timestamp`: [`WriteOptions::timestamp`] |
 //! | — | `metadata.tools.components[0]`: `{type: application, name: rollcall, version}` |
 //! | [`Product`] | `metadata.component`, `type` `firmware`; no nested `components` (osv-scanner ignores components under the root) |
-//! | [`Product::images`], each [`Image`](crate::model::Image) | a top-level `components[]` entry, `type` `firmware` |
+//! | [`Product::images`], each [`Image`](crate::model::Image) | a top-level `components[]` entry, `type` = [`Image::image_type`](crate::model::Image::image_type) |
+//! | [`Image::image_type`](crate::model::Image::image_type) | `type` `firmware` ([`ImageType::Firmware`](crate::model::ImageType::Firmware), the default) \| `library` ([`ImageType::Library`](crate::model::ImageType::Library), e.g. a static-archive blob such as `libphy.a`) |
 //! | [`Image::kind`](crate::model::Image::kind) | property `rollcall:image-kind` = `bootloader` \| `application` \| `blob` |
 //! | [`Image::components`](crate::model::Image::components) | that image entry's nested `components` |
 //! | [`Component`](crate::model::Component) | a nested `components[]` entry, `type` = [`ComponentKind::as_str`](crate::model::ComponentKind::as_str) |

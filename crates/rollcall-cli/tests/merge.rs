@@ -344,6 +344,10 @@ fn merge_blob_manifest_emits_hash_supplier_and_opaque_property() {
     );
     assert_eq!(softdevice["supplier"]["name"], "Nordic Semiconductor ASA");
     assert_eq!(softdevice["version"], "7.3.0");
+    // A SoftDevice `.hex` is firmware; the static archive libphy.a is a library.
+    assert_eq!(softdevice["type"], "firmware");
+    let libphy = blobs.iter().find(|b| b["name"] == "libphy").unwrap();
+    assert_eq!(libphy["type"], "library");
     for blob in &blobs {
         assert_eq!(property(blob, "rollcall:opaque"), [OPAQUE_NOTE]);
         assert_eq!(blob["hashes"][0]["alg"], "SHA-256");
@@ -412,6 +416,66 @@ fn merge_bad_inputs_exit_with_the_right_code_never_panic() {
     for spec in ["", "@1.0", "name@"] {
         assert_fails(&merge(&[&missing, &"--product", &spec]), 64, &["--product"]);
     }
+}
+
+#[test]
+fn merge_blob_manifest_invalid_kind_exits_65() {
+    // The committed bad manifest (`kind: bogus`) is a manifest error, exit 65.
+    let bad_manifest = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("../rollcall-core/tests/data/blobs/bad-kind.yaml");
+    let out = merge(&[&"--blob-manifest", &bad_manifest, &"--product", &"p"]);
+    assert_fails(&out, 65, &["bad-kind.yaml", "bogus"]);
+
+    // A valid `kind` overrides the extension: `kind: library` on a `.bin`.
+    let dir = tempfile::tempdir().unwrap();
+    fs::write(dir.path().join("radio.bin"), b"radio").unwrap();
+    let manifest = dir.path().join("m.yaml");
+    fs::write(
+        &manifest,
+        "blobs:\n  - name: radio\n    version: '1'\n    supplier: V\n    path: radio.bin\n    \
+         kind: library\n",
+    )
+    .unwrap();
+    let out = merge(&[&"--blob-manifest", &manifest, &"--product", &"p@1"]);
+    assert_eq!(stdout_json(&out)["components"][0]["type"], "library");
+}
+
+#[test]
+fn merge_blob_type_conflict_exits_65() {
+    // An SBOM holding libphy forced to `kind: firmware`, merged with a manifest that leaves
+    // libphy's type to the recogniser (`library`): the types conflict, exit 65.
+    let dir = tempfile::tempdir().unwrap();
+    let data = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../rollcall-core/tests/data/blobs");
+    fs::copy(data.join("libphy.a"), dir.path().join("libphy.a")).unwrap();
+    let entry = "blobs:\n  - name: libphy\n    version: 5.2.1\n    supplier: Espressif Systems\n    \
+                 path: libphy.a\n";
+    let firmware_manifest = dir.path().join("firmware.yaml");
+    fs::write(&firmware_manifest, format!("{entry}    kind: firmware\n")).unwrap();
+    let plain_manifest = dir.path().join("plain.yaml");
+    fs::write(&plain_manifest, entry).unwrap();
+
+    let out = merge(&[
+        &"--blob-manifest",
+        &firmware_manifest,
+        &"--product",
+        &"radio-pack@1",
+        &"--timestamp",
+        &GOLDEN_TIMESTAMP,
+    ]);
+    assert_eq!(stdout_json(&out)["components"][0]["type"], "firmware");
+    let sbom = dir.path().join("firmware.cdx.json");
+    fs::write(&sbom, &out.stdout).unwrap();
+
+    let out = merge(&[&sbom, &"--blob-manifest", &plain_manifest]);
+    assert_fails(
+        &out,
+        65,
+        &[
+            "conflicting type",
+            "blob:libphy@5.2.1",
+            r#"existing "firmware", incoming "library""#,
+        ],
+    );
 }
 
 #[test]

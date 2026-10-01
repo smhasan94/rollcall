@@ -3,6 +3,11 @@
 //! These are heuristics. A blob manifest's own values always win; a recogniser only fills a
 //! name, version or supplier the manifest leaves out, with `filename` evidence at a lower
 //! confidence. Licences are never inferred.
+//!
+//! A recogniser also knows the blob's CycloneDX type (a SoftDevice is `firmware`, a vendor
+//! library `library`); for files no recogniser knows, [`type_from_extension`] guesses it.
+
+use crate::model::ImageType;
 
 /// What a recogniser knows about a file.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -13,6 +18,8 @@ pub struct Recognised {
     pub version: Option<String>,
     /// The vendor.
     pub supplier: &'static str,
+    /// The CycloneDX component type.
+    pub image_type: ImageType,
 }
 
 const NORDIC: &str = "Nordic Semiconductor ASA";
@@ -61,6 +68,7 @@ fn softdevice(file_name: &str) -> Option<Recognised> {
         name: format!("{variant}_{family}_softdevice"),
         version: Some(version.to_owned()),
         supplier: NORDIC,
+        image_type: ImageType::Firmware,
     })
 }
 
@@ -76,6 +84,7 @@ fn library(file_name: &str) -> Option<Recognised> {
             name: stem.to_owned(),
             version: None,
             supplier,
+            image_type: ImageType::Library,
         })
     })
 }
@@ -83,6 +92,21 @@ fn library(file_name: &str) -> Option<Recognised> {
 /// Recognises a well-known vendor binary by its file name (not a path).
 pub fn recognise(file_name: &str) -> Option<Recognised> {
     softdevice(file_name).or_else(|| library(file_name))
+}
+
+/// The CycloneDX type a file name's extension suggests, compared case-insensitively:
+/// `.a`, `.lib` and `.o` are `library`; `.hex`, `.bin` and `.elf` are `firmware`; anything
+/// else (including no extension) is `None`.
+pub fn type_from_extension(file_name: &str) -> Option<ImageType> {
+    let (stem, extension) = file_name.rsplit_once('.')?;
+    if stem.is_empty() {
+        return None;
+    }
+    match extension.to_ascii_lowercase().as_str() {
+        "a" | "lib" | "o" => Some(ImageType::Library),
+        "hex" | "bin" | "elf" => Some(ImageType::Firmware),
+        _ => None,
+    }
 }
 
 #[cfg(test)]
@@ -124,6 +148,53 @@ mod tests {
         }
         for file in ["libphy.so", "libphyx.a", ".a", "libc.a", "libbt"] {
             assert_eq!(recognise(file), None, "{file}");
+        }
+    }
+
+    #[test]
+    fn recognisers_supply_image_type() {
+        let r = recognise("s140_nrf52_7.3.0_softdevice.hex").unwrap();
+        assert_eq!(r.image_type, ImageType::Firmware);
+        for file in ["libphy.a", "libbtdm_app.a", "librail_efr32xg21.a"] {
+            assert_eq!(recognise(file).unwrap().image_type, ImageType::Library);
+        }
+    }
+
+    #[test]
+    fn extension_maps_to_image_type() {
+        for file in ["x.a", "x.lib", "x.o", "X.A", "x.LIB", "dir.v1.O"] {
+            assert_eq!(
+                type_from_extension(file),
+                Some(ImageType::Library),
+                "{file}"
+            );
+        }
+        for file in [
+            "x.hex",
+            "x.bin",
+            "x.elf",
+            "X.HEX",
+            "x.Bin",
+            "zephyr.signed.ELF",
+        ] {
+            assert_eq!(
+                type_from_extension(file),
+                Some(ImageType::Firmware),
+                "{file}"
+            );
+        }
+        for file in [
+            "",
+            "x",
+            "x.",
+            ".a",
+            ".hex",
+            "x.so",
+            "x.a.gz",
+            "x.bin~",
+            "caf\u{e9}.\u{c9}LF",
+        ] {
+            assert_eq!(type_from_extension(file), None, "{file:?}");
         }
     }
 }

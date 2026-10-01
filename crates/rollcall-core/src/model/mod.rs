@@ -11,7 +11,9 @@
 //!   the dependency edges between nodes.
 //! - An [`Image`] is one firmware image in the product. Its [`ImageKind`] is `bootloader`
 //!   (e.g. MCUboot), `application` (e.g. the Zephyr application) or `blob` (an opaque binary
-//!   such as radio firmware).
+//!   such as radio firmware). Its [`ImageType`] is the CycloneDX component type, `firmware`
+//!   (the default) or `library` (e.g. a static archive linked into an image); it is a fact,
+//!   not part of the identity.
 //! - A [`Component`] is something built into an image, typed with a CycloneDX 1.6
 //!   [`ComponentKind`]. Components can contain subcomponents to any depth (e.g. the Zephyr
 //!   kernel package broken down into subsystems).
@@ -149,7 +151,7 @@ pub use confidence::Confidence;
 pub use evidence::{Evidence, EvidenceField, EvidenceKey, EvidenceSet, Occurrence, Technique};
 pub use graph::{Component, Image, MergeError, NodeRef, Product, Schema, ValidationError};
 pub use ids::{
-    ComponentKind, Cpe, Hash, HashAlgorithm, IdError, ImageKind, License, Purl, Supplier,
+    ComponentKind, Cpe, Hash, HashAlgorithm, IdError, ImageKind, ImageType, License, Purl, Supplier,
 };
 pub use json::{ModelError, to_canonical_json};
 

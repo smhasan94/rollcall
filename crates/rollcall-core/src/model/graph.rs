@@ -9,7 +9,7 @@ use super::bom_ref::{BomRef, NodePath, PathSegment};
 use super::confidence::Confidence;
 use super::evidence::{EvidenceField, EvidenceSet};
 use super::ids::{
-    ComponentKind, Cpe, Hash, HashAlgorithm, IdError, ImageKind, License, Purl, Supplier,
+    ComponentKind, Cpe, Hash, HashAlgorithm, IdError, ImageKind, ImageType, License, Purl, Supplier,
 };
 
 /// The internal JSON form's schema tag. Serialises as the constant `"rollcall-model/1"`;
@@ -162,6 +162,14 @@ pub struct Image {
     /// The image version, if known. Part of the identity; never empty when present.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub version: Option<String>,
+    /// The image's CycloneDX component type. Not part of the identity. Omitted from the
+    /// JSON form when it is the default, [`ImageType::Firmware`].
+    #[serde(
+        rename = "type",
+        default,
+        skip_serializing_if = "ImageType::is_firmware"
+    )]
+    pub image_type: ImageType,
     /// Who supplied the image.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub supplier: Option<Supplier>,
@@ -336,6 +344,26 @@ fn same_identity<T: PartialEq + fmt::Debug>(
     }
 }
 
+/// Checks a required (never missing) non-identity fact is equal on both sides of a merge.
+/// The conflict shows each value's user-facing form ([`fmt::Display`]).
+fn same_fact<T: PartialEq + fmt::Display>(
+    path: &NodePath,
+    field: &str,
+    existing: &T,
+    incoming: &T,
+) -> Result<(), MergeError> {
+    if existing == incoming {
+        Ok(())
+    } else {
+        Err(conflict(
+            path,
+            field,
+            existing.to_string(),
+            incoming.to_string(),
+        ))
+    }
+}
+
 /// Merges the non-identity facts shared by every node level.
 macro_rules! merge_facts {
     ($path:expr, $target:expr, $incoming:expr) => {{
@@ -456,6 +484,7 @@ impl Image {
             kind,
             name: name.to_owned(),
             version: None,
+            image_type: ImageType::Firmware,
             supplier: None,
             purl: None,
             cpe: None,
@@ -498,6 +527,9 @@ impl Image {
         same_identity(path, "kind", &self.kind, &other.kind)?;
         same_identity(path, "name", &self.name, &other.name)?;
         same_identity(path, "version", &self.version, &other.version)?;
+        // The type is a required fact, not part of the identity: both sides always have
+        // one, so a disagreement is a conflict rather than a fill.
+        same_fact(path, "type", &self.image_type, &other.image_type)?;
         merge_facts!(path, self, other);
         for child in other.components {
             insert_or_merge_component(&mut self.components, child, path)?;
@@ -1191,6 +1223,65 @@ mod tests {
         target.merge(other).unwrap();
         assert_eq!(target.components.len(), 2);
         assert!(target.licence.is_some());
+    }
+
+    #[test]
+    fn image_type_defaults_to_firmware_and_is_omitted_from_json() {
+        let image = blob();
+        assert_eq!(image.image_type, ImageType::Firmware);
+        assert_eq!(ImageType::default(), ImageType::Firmware);
+        let json = serde_json::to_value(&image).unwrap();
+        assert!(json.get("type").is_none(), "{json}");
+
+        let mut library = blob();
+        library.image_type = ImageType::Library;
+        let json = serde_json::to_value(&library).unwrap();
+        assert_eq!(json["type"], "library");
+        let back: Image = serde_json::from_value(json).unwrap();
+        assert_eq!(back, library);
+        // The type is not part of the identity.
+        assert_eq!(library.key(), blob().key());
+        assert_eq!(ImageType::Library.to_string(), "library");
+        assert_eq!(ImageType::Firmware.as_str(), "firmware");
+        // An unknown type is a deserialisation error, not a panic.
+        let mut bad = serde_json::to_value(&library).unwrap();
+        bad["type"] = serde_json::json!("spaceship");
+        assert!(serde_json::from_value::<Image>(bad).is_err());
+    }
+
+    #[test]
+    fn merging_images_with_different_types_conflicts() {
+        let mut target = blob();
+        let before = target.clone();
+        let mut incoming = blob();
+        incoming.image_type = ImageType::Library;
+        let err = target.merge(incoming).unwrap_err();
+        let message = err.to_string();
+        let MergeError::Conflict {
+            field,
+            existing,
+            incoming,
+            ..
+        } = err;
+        assert_eq!(field, "type");
+        assert_eq!(
+            (existing.as_str(), incoming.as_str()),
+            ("firmware", "library")
+        );
+        assert!(
+            message.contains(r#"conflicting type"#)
+                && message.contains(r#"existing "firmware", incoming "library""#),
+            "{message}"
+        );
+        assert_eq!(target, before);
+
+        // Equal types merge.
+        let mut library = blob();
+        library.image_type = ImageType::Library;
+        let mut same = blob();
+        same.image_type = ImageType::Library;
+        library.merge(same).unwrap();
+        assert_eq!(library.image_type, ImageType::Library);
     }
 
     #[test]

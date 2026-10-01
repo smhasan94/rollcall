@@ -5,10 +5,10 @@ mod common;
 
 use std::path::{Path, PathBuf};
 
-use common::{GOLDEN_TIMESTAMP, arb_entries, build, fixture_names, load_fixture};
+use common::{GOLDEN_TIMESTAMP, arb_entries, blob_product, build, fixture_names, load_fixture};
 use proptest::prelude::*;
 use rollcall_core::cyclonedx::{self, ReadError, Timestamp, WriteOptions};
-use rollcall_core::model::{ImageKind, Product};
+use rollcall_core::model::{ImageKind, ImageType, Product};
 use rollcall_core::zephyr::{self, IngestOptions};
 use serde_json::{Value, json};
 
@@ -395,4 +395,53 @@ fn dependency_on_service_or_dropped_nested_component_is_dropped_with_warning() {
             "{dependencies}: {err}"
         );
     }
+}
+
+#[test]
+fn blobs_golden_reads_back_identically_with_no_warnings() {
+    // The committed golden, read from disk (not re-rendered), holds a `library` blob.
+    let path = Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/golden/blobs.cdx.json");
+    let text = std::fs::read_to_string(&path).unwrap();
+    let read = cyclonedx::read_str(&text).unwrap();
+    assert!(read.warnings.is_empty(), "{:?}", read.warnings);
+    assert_eq!(read.product, blob_product());
+    let libphy = read
+        .product
+        .images
+        .iter()
+        .find(|i| i.name == "libphy")
+        .unwrap();
+    assert_eq!(libphy.image_type, ImageType::Library);
+    assert_eq!(libphy.kind, ImageKind::Blob);
+    // Writing what was read gives the golden's bytes again.
+    assert_eq!(render(&read.product), text);
+}
+
+#[test]
+fn foreign_library_blob_image_reads_without_warning() {
+    // A foreign `library` whose image kind is `blob` reads as a library blob, silently.
+    let mut doc = foreign_with_image_type("library");
+    doc["components"][0]["properties"] = json!([{"name": "rollcall:image-kind", "value": "blob"}]);
+    let read = cyclonedx::read(&doc).unwrap();
+    assert!(read.warnings.is_empty(), "{:?}", read.warnings);
+    let image = read.product.images.first().unwrap();
+    assert_eq!(image.kind, ImageKind::Blob);
+    assert_eq!(image.image_type, ImageType::Library);
+
+    // A `library` with another image kind still warns, and keeps its type.
+    let read = cyclonedx::read(&foreign_with_image_type("library")).unwrap();
+    assert_eq!(read.warnings.len(), 1, "{:?}", read.warnings);
+    let image = read.product.images.first().unwrap();
+    assert_eq!(image.kind, ImageKind::Application);
+    assert_eq!(image.image_type, ImageType::Library);
+
+    // A non-library, non-image type with kind `blob` still warns and reads as firmware.
+    let mut doc = foreign_with_image_type("framework");
+    doc["components"][0]["properties"] = json!([{"name": "rollcall:image-kind", "value": "blob"}]);
+    let read = cyclonedx::read(&doc).unwrap();
+    assert_eq!(read.warnings.len(), 1, "{:?}", read.warnings);
+    assert_eq!(
+        read.product.images.first().unwrap().image_type,
+        ImageType::Firmware
+    );
 }
