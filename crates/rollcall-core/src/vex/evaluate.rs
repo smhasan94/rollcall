@@ -648,11 +648,11 @@ mod tests {
             .unwrap()
             .with_version("3.7.0");
         zephyr
-            .add_component(Component::new(ComponentKind::Library, "net").unwrap())
+            .add_component(Component::new(ComponentKind::Library, "shell").unwrap())
             .unwrap();
         app.add_component(mbedtls).unwrap();
         app.add_component(zephyr).unwrap();
-        app.add_component(Component::new(ComponentKind::Library, "net").unwrap())
+        app.add_component(Component::new(ComponentKind::Library, "shell").unwrap())
             .unwrap();
         product.add_image(app).unwrap();
         product
@@ -922,7 +922,7 @@ mod tests {
     fn subsystem_rule_is_active_and_does_not_warn() {
         let r = run(
             &[finding("CVE-1")],
-            "  - {id: sub, match: {subsystem: net}, status: affected}\n",
+            "  - {id: sub, match: {subsystem: shell}, status: affected}\n",
         );
         assert!(r.warnings.is_empty(), "{:?}", r.warnings);
         // mbedtls is not a nested `net` subcomponent: no rule matched it.
@@ -933,11 +933,11 @@ mod tests {
     fn subsystem_matches_nested_only() {
         let mut f = finding("CVE-1");
         f.purl = None;
-        f.name = "net".to_owned();
+        f.name = "shell".to_owned();
         f.version = None;
         let r = run(
             &[f],
-            "  - {id: sub, match: {subsystem: net}, status: affected}\n",
+            "  - {id: sub, match: {subsystem: shell}, status: affected}\n",
         );
         // Joined to both `net` components; the rule applies only to the nested one.
         assert_eq!(r.statements.len(), 1, "{r:?}");

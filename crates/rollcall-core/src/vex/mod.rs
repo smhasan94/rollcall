@@ -40,6 +40,9 @@
 //! compared case-sensitively with the canonical purl, so write it in canonical form (see
 //! [`PurlPattern`]).
 //!
+//! `match.subsystem` must name an entry of the built-in subsystem table
+//! ([`crate::subsystems::builtin`]); any other name (e.g. a misspelt `bluetooth_host`) is a
+//! [`RuleError`] at the rule's line, never a rule that silently matches nothing.
 //! `match.subsystem` matches a nested subcomponent by name: the subsystems Zephyr ingestion
 //! splits out of the `zephyr` component (`bluetooth-host`, `ip-stack`, …; see
 //! `docs/subsystems.md`). A rule naming a subsystem the SBOM does not contain matches

@@ -404,7 +404,9 @@ rules:
 - **Not yet evidenced from the CLI:** `cargo_feature_off` and `symbol_not_linked` conditions
   always need evidence (the finding stays unresolved) because `rollcall vex` cannot yet
   supply Cargo features or the linked-symbol list.
-- **Subsystems:** `match.subsystem` matches a nested subcomponent by name: a subsystem split
+- **Subsystems:** `match.subsystem` must name an entry of the subsystem table
+  (`crates/rollcall-core/db/subsystems.yaml`); any other name is a rules error at the rule's
+  line (exit 65). It matches a nested subcomponent by name: a subsystem split
   out of the `zephyr` component (see `docs/subsystems.md`). It applies only to findings joined
   to that subcomponent (by its subpath purl such as
   `pkg:github/zephyrproject-rtos/zephyr@v4.4.2#subsys/bluetooth/host`, its cpe, or its name and

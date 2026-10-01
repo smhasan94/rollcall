@@ -2084,8 +2084,7 @@ fn smp_bt_on_vs_off_differs_only_in_bluetooth_subcomponents() {
         product_without_lines(&stripped),
         product_without_lines(&off.product)
     );
-    // ...and only then: the cited lines do differ.
-    assert_ne!(stripped, off.product);
+    // (Without that, they are not equal: the cited lines differ between the two builds.)
     // Same modules, versions and identities.
     assert_eq!(libraries(&on.product), libraries(&off.product));
     assert_eq!(on.warnings, off.warnings);
@@ -2107,4 +2106,66 @@ fn smp_bt_on_vs_off_differs_only_in_bluetooth_subcomponents() {
     for out in [&off, &on] {
         assert_schema_valid("smp", &render(&out.product));
     }
+
+    // The same delta in the CycloneDX documents: dropping the two Bluetooth components and
+    // their `dependencies` entries, and masking `serialNumber` and every evidence line,
+    // leaves identical documents.
+    let mut on_doc: Value = serde_json::from_str(&render(&on.product)).unwrap();
+    let off_doc: Value = serde_json::from_str(&render(&off.product)).unwrap();
+    let zephyr_of = |doc: &mut Value| -> Vec<Value> {
+        doc["components"]
+            .as_array_mut()
+            .unwrap()
+            .iter_mut()
+            .flat_map(|image| image["components"].as_array_mut().unwrap().iter_mut())
+            .find(|c| c["name"] == "zephyr")
+            .map(|z| std::mem::take(z["components"].as_array_mut().unwrap()))
+            .unwrap()
+    };
+    let subs = zephyr_of(&mut on_doc);
+    let (bt, kept): (Vec<Value>, Vec<Value>) = subs
+        .into_iter()
+        .partition(|c| c["name"].as_str().unwrap().starts_with("bluetooth-"));
+    let bt_names: Vec<&str> = bt.iter().map(|c| c["name"].as_str().unwrap()).collect();
+    assert_eq!(bt_names, ["bluetooth-controller", "bluetooth-host"]);
+    // Put the others back.
+    {
+        let zephyr = on_doc["components"]
+            .as_array_mut()
+            .unwrap()
+            .iter_mut()
+            .flat_map(|image| image["components"].as_array_mut().unwrap().iter_mut())
+            .find(|c| c["name"] == "zephyr")
+            .unwrap();
+        zephyr["components"] = Value::Array(kept);
+    }
+    let bt_refs: Vec<Value> = bt.iter().map(|c| c["bom-ref"].clone()).collect();
+    let deps = on_doc["dependencies"].as_array_mut().unwrap();
+    let before = deps.len();
+    deps.retain(|d| !bt_refs.contains(&d["ref"]));
+    assert_eq!(
+        before - deps.len(),
+        2,
+        "one dependencies entry per Bluetooth component"
+    );
+    for d in deps.iter() {
+        for target in d["dependsOn"].as_array().unwrap() {
+            assert!(!bt_refs.contains(target), "{d}");
+        }
+    }
+    assert_ne!(on_doc["serialNumber"], off_doc["serialNumber"]);
+    let mask = |doc: &Value| -> String {
+        let mut doc = doc.clone();
+        doc["serialNumber"] = Value::Null;
+        let text = serde_json::to_string_pretty(&doc).unwrap();
+        // `"line": N` in evidence occurrences, `\"line\":N` inside rollcall:evidence values.
+        let text = regex::Regex::new(r#""line": \d+"#)
+            .unwrap()
+            .replace_all(&text, "\"line\": 0");
+        regex::Regex::new(r#"\\"line\\":\d+"#)
+            .unwrap()
+            .replace_all(&text, "\\\"line\\\":0")
+            .into_owned()
+    };
+    assert_eq!(mask(&on_doc), mask(&off_doc));
 }

@@ -142,7 +142,15 @@ not be mixed with other variants.
 | `smp-bt`     | the same                                | the same, plus `-DCONFIG_BT=y -DCONFIG_BT_PERIPHERAL=y -DCONFIG_MCUMGR_TRANSPORT_BT=y` | `smp_svr` | as `smp-serial`, plus `CONFIG_BT=y`, `CONFIG_MCUMGR_TRANSPORT_BT=y` |
 
 The sample compiles `src/bluetooth.c` only with `CONFIG_MCUMGR_TRANSPORT_BT`, and `main.c`
-guards its Bluetooth code with `#ifdef`, so the two builds differ only by Bluetooth.
+guards its Bluetooth code with `#ifdef`, so the two builds differ only by Bluetooth. Turning
+Bluetooth on also turns on what it selects: besides the `CONFIG_BT_*` symbols, `smp-bt`'s
+`.config` has `CONFIG_ENTROPY_GENERATOR`, `CONFIG_ENTROPY_NRF5_RNG`, `CONFIG_UUID` and
+`CONFIG_SOC_FLASH_NRF_RADIO_SYNC_TICKER` (instead of `..._SYNC_NONE`) set, among others
+(`CONFIG_CSPRNG_ENABLED`, `CONFIG_MCUMGR_TRANSPORT_BT_PERM_RW`). They do not show in the SBOM
+only because no entry of the subsystem table (`crates/rollcall-core/db/subsystems.yaml`)
+covers them; a future table entry for, say, entropy drivers would add a subcomponent to the
+BT-on build and so change the delta `smp_bt_on_vs_off_differs_only_in_bluetooth_subcomponents`
+(`crates/rollcall-core/tests/zephyr.rs`) asserts.
 
 ```sh
 scripts/regen-fixtures.sh --variant smp-serial --variant smp-bt --check-stable
@@ -232,8 +240,9 @@ only; that step always succeeds) and uploads `fixtures/zephyr` as the `zephyr-fi
 artifact. A second job of the same workflow builds the old-mbedTLS tree (`--variant
 old-mbedtls`) and uploads it as `zephyr-old-mbedtls-fixtures`, downloaded the same way into
 `fixtures/zephyr-old-mbedtls`; a third builds the smp tree (`--variant smp-serial --variant
-smp-bt`) and uploads it as `zephyr-smp-fixtures`, for `fixtures/zephyr-smp`. It runs on pull requests that change the script or the workflow,
-and on demand; the artifact of either kind of run is canonical. On demand:
+smp-bt`) and uploads it as `zephyr-smp-fixtures`, for `fixtures/zephyr-smp`. It runs on pull
+requests that change the script or the workflow, and on demand; the artifact of either kind of
+run is canonical. On demand:
 
 ```sh
 gh workflow run regen-fixtures.yml --ref <branch>

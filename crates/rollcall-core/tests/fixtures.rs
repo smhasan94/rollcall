@@ -112,8 +112,9 @@ fn trees() -> Vec<Tree> {
             let set = SETS
                 .into_iter()
                 .find(|s| s.zephyr_tag == tag && s.project_filter == filter)
-                .or_else(|| SETS.into_iter().find(|s| s.zephyr_tag == tag))
-                .unwrap_or_else(|| panic!("no fixture set pins Zephyr {tag:?}"));
+                .unwrap_or_else(|| {
+                    panic!("no fixture set pins Zephyr {tag:?} with project filter {filter:?}")
+                });
             vec![Tree {
                 root: probe.root,
                 set,

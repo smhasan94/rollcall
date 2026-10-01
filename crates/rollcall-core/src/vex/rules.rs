@@ -513,6 +513,22 @@ fn exact_name(value: Option<String>, what: &str) -> Result<Option<String>, Strin
     }
 }
 
+/// A `match.subsystem` must name an entry of the built-in subsystem table
+/// ([`crate::subsystems::builtin`]): a misspelt name would otherwise match nothing, silently.
+fn check_subsystem(id: &str, name: &str) -> Result<(), String> {
+    let table = crate::subsystems::builtin()
+        .map_err(|e| format!("rule `{id}`: match.subsystem cannot be checked: {e}"))?;
+    if table.get(name).is_some() {
+        return Ok(());
+    }
+    let known: Vec<&str> = table.subsystems.iter().map(|s| s.name.as_str()).collect();
+    Err(format!(
+        "rule `{id}`: match.subsystem {name:?} is not a subsystem in {} (known: {})",
+        crate::subsystems::BUILTIN_NAME,
+        known.join(", ")
+    ))
+}
+
 impl RawRule {
     /// The per-rule checks the types do not express.
     fn check(self) -> Result<Rule, String> {
@@ -523,6 +539,9 @@ impl RawRule {
         let m = self.target;
         let name = exact_name(m.name, "match.name")?;
         let subsystem = exact_name(m.subsystem, "match.subsystem")?;
+        if let Some(name) = &subsystem {
+            check_subsystem(&id, name)?;
+        }
         let purl = match m.purl {
             Some(p) => Some(PurlPattern::new(&p).map_err(|e| format!("match.purl: {e}"))?),
             None => None,
@@ -1118,6 +1137,30 @@ rules:
         );
         assert!(Justification::CodeNotPresent.agrees_with(Justification::VulnerableCodeNotPresent));
         assert!(!j.agrees_with(Justification::VulnerableCodeNotPresent));
+    }
+
+    #[test]
+    fn unknown_subsystem_rejected_at_its_rule() {
+        // A misspelt name (underscore for hyphen) would never match: rejected, at the rule.
+        let e = err(&one_rule(
+            "match: {subsystem: bluetooth_host}\nstatus: affected\n",
+        ));
+        assert_eq!(e.line, Some(3), "{e}");
+        assert!(
+            e.message.contains(
+                "match.subsystem \"bluetooth_host\" is not a subsystem in subsystems.yaml"
+            ),
+            "{e}"
+        );
+        assert!(e.message.contains("bluetooth-host"), "{e}");
+        // Every table name is accepted.
+        for s in crate::subsystems::builtin().unwrap().subsystems {
+            let text = one_rule(&format!(
+                "match: {{subsystem: {}}}\nstatus: affected\n",
+                s.name
+            ));
+            assert!(parse_rules(&text, "rules.yml").is_ok(), "{}", s.name);
+        }
     }
 
     #[test]

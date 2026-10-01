@@ -42,18 +42,6 @@ use crate::model::{
 use crate::warning::Warning;
 
 pub use manifest::{BlobEntry, BlobManifest};
-
-impl BlobIngest {
-    /// The blob images, in manifest order.
-    pub fn images(&self) -> impl Iterator<Item = &Image> {
-        self.blobs.iter().map(|b| &b.image)
-    }
-
-    /// The blob images without their owners, in manifest order.
-    pub fn into_images(self) -> Vec<Image> {
-        self.blobs.into_iter().map(|b| b.image).collect()
-    }
-}
 pub use recognise::{Recognised, recognise, type_from_extension};
 
 /// Evidence source for values read from the manifest.
@@ -157,6 +145,18 @@ pub struct BlobIngest {
     /// Entries missing a version or supplier, in manifest order, each located `blobs[N]`
     /// (the caller names the manifest file).
     pub warnings: Vec<Warning>,
+}
+
+impl BlobIngest {
+    /// The blob images, in manifest order.
+    pub fn images(&self) -> impl Iterator<Item = &Image> {
+        self.blobs.iter().map(|b| &b.image)
+    }
+
+    /// The blob images without their owners, in manifest order.
+    pub fn into_images(self) -> Vec<Image> {
+        self.blobs.into_iter().map(|b| b.image).collect()
+    }
 }
 
 /// The SHA-256 of a file, read in chunks, as lowercase hex.
