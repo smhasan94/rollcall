@@ -881,6 +881,7 @@ dependencies = [
  "jsonschema",
  "packageurl",
  "proptest",
+ "regex",
  "serde",
  "serde_json",
  "sha2",

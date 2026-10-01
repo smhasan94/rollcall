@@ -5,6 +5,7 @@ use std::collections::BTreeMap;
 use std::path::{Component, Path, PathBuf};
 
 use super::{Ingest, IngestOptions, Warning, ZephyrError, build_info, read_text};
+use crate::identify::Resolver;
 use crate::merge::{self, ProductSpec};
 
 /// One image of a sysbuild build, from the top-level `build_info.yml`'s `cmake.images[]`.
@@ -94,11 +95,25 @@ pub fn discover(top_dir: &Path) -> Result<Vec<SysbuildImage>, ZephyrError> {
 /// Two images that ingest to the same image identity (kind, name and version, e.g. two
 /// MCUboot builds that both become `bootloader:mcuboot`) are an error naming both image
 /// directories, never silently merged into one node.
+///
+/// With [`IngestOptions::identifier_db`], one resolver serves every image, so a module the
+/// database does not list is warned about (and stubbed) once, in the first image, by name,
+/// that uses it.
 pub fn ingest_sysbuild(options: &IngestOptions) -> Result<Ingest, ZephyrError> {
+    let db = super::load_identifier_db(options)?;
+    let mut resolver = db.as_ref().map(Resolver::new);
+    ingest_images(options, resolver.as_mut())
+}
+
+fn ingest_images(
+    options: &IngestOptions,
+    mut resolver: Option<&mut Resolver<'_>>,
+) -> Result<Ingest, ZephyrError> {
     let top = &options.build_dir;
     let images = discover(top)?;
     let mut products = Vec::with_capacity(images.len());
     let mut warnings = Vec::new();
+    let mut unknown_modules = Vec::new();
     let mut main_name = None;
     // Each ingested image's identity and the image build directory it came from.
     let mut seen: BTreeMap<(crate::model::ImageKind, String, Option<String>), PathBuf> =
@@ -109,8 +124,10 @@ pub fn ingest_sysbuild(options: &IngestOptions) -> Result<Ingest, ZephyrError> {
             west_list: options.west_list.clone(),
             include_sdk: options.include_sdk,
             sysbuild: false,
+            identifier_db: options.identifier_db.clone(),
+            workspace: options.workspace.clone(),
         };
-        let ingest = super::ingest(&image_options)?;
+        let ingest = super::ingest_image(&image_options, resolver.as_deref_mut())?;
         for ingested in &ingest.product.images {
             let (kind, name, version) = ingested.key();
             let key = (kind, name.to_owned(), version.map(str::to_owned));
@@ -137,8 +154,10 @@ pub fn ingest_sysbuild(options: &IngestOptions) -> Result<Ingest, ZephyrError> {
                 .into_iter()
                 .map(|w| Warning::new(format!("{}: {}", image.name, w.location), w.message)),
         );
+        unknown_modules.extend(ingest.unknown_modules);
         products.push(ingest.product);
     }
+    unknown_modules.sort();
     let path = top.join("build_info.yml");
     let Some(name) = main_name else {
         return Err(ZephyrError::NoMainImage { path });
@@ -151,5 +170,9 @@ pub fn ingest_sysbuild(options: &IngestOptions) -> Result<Ingest, ZephyrError> {
         path: top.clone(),
         source: Box::new(source),
     })?;
-    Ok(Ingest { product, warnings })
+    Ok(Ingest {
+        product,
+        warnings,
+        unknown_modules,
+    })
 }

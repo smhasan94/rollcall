@@ -152,3 +152,5 @@ pub use ids::{
     ComponentKind, Cpe, Hash, HashAlgorithm, IdError, ImageKind, License, Purl, Supplier,
 };
 pub use json::{ModelError, to_canonical_json};
+
+pub(crate) use ids::check_iri_reference_chars;

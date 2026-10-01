@@ -27,3 +27,14 @@ a few bytes of text standing in for vendor files, so their SHA-256s can be pinne
 | `s140_nrf52_7.3.0_softdevice.hex` | A fake Nordic SoftDevice: four Intel-HEX-shaped text lines, not a real image. Its SHA-256 (`sha256sum`) is pinned in `fake_softdevice_hash_matches_sha256sum`. | same |
 | `libphy.a` | A fake Espressif PHY library: an `!<arch>` line and a note. | same |
 | `bad-*.yaml` | Malformed manifests: missing `path`, unknown key, missing blob file, duplicate entry, truncated YAML, invalid licence, unrecognised file with no name. | `tests/blob.rs` (`malformed_manifest_and_missing_file_error_never_panic`) |
+
+## `identifiers-stub.yaml` — hand-written identifier database
+
+A **hand-written** identifier database (`rollcall generate --identifier-db`), not real-build
+output. It maps `cmsis` (a `git_tag` rule), `mbedtls` and `tf-psa-crypto` (`manual` rules
+keyed by the revisions in `fixtures/zephyr/*/west-list.txt`), and deliberately leaves out the
+fixtures' other modules (`cmsis_6`, `hal_nordic`, `mcuboot`).
+
+| File | What it is | Used by |
+|------|------------|---------|
+| `identifiers-stub.yaml` | Three entries; the fixtures' other three modules are unmapped on purpose. | `tests/identify.rs` (every fixture module resolves or is reported unknown exactly once), `rollcall-cli` `tests/generate_zephyr.rs` (`--identifier-db`) |

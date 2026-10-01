@@ -97,6 +97,20 @@ pub struct GenerateArgs {
     /// (e.g. MCUboot and the application) and merge them into one product
     #[arg(long, requires = "zephyr", conflicts_with = "model")]
     pub sysbuild: bool,
+    /// Identifier database (YAML) mapping modules to upstream purl, cpe, supplier and
+    /// version (with --zephyr). Modules it does not list are warned about once each, and a
+    /// stub entry for each is printed to stderr
+    #[arg(
+        long,
+        value_name = "FILE",
+        requires = "zephyr",
+        conflicts_with = "model"
+    )]
+    pub identifier_db: Option<PathBuf>,
+    /// The west workspace (topdir), so --identifier-db rules can read module sources at their
+    /// `west list` path. Requires both --identifier-db and --west-list
+    #[arg(long, value_name = "DIR", requires_all = ["identifier_db", "west_list"])]
+    pub workspace: Option<PathBuf>,
     /// Output format
     #[arg(long, value_enum, default_value_t = Format::Cyclonedx)]
     pub format: Format,
