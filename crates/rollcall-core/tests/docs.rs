@@ -133,3 +133,35 @@ fn zephyr_docs_have_mapping_and_warnings_sections() {
         assert!(warnings.contains(term), "Warnings section lacks {term:?}");
     }
 }
+
+const SUBSYSTEMS_DOCS: &str = include_str!("../src/subsystems/mod.rs");
+const SUBSYSTEMS_GUIDE: &str = include_str!("../../../docs/subsystems.md");
+
+#[test]
+fn subsystems_docs_have_schema_and_lint_sections() {
+    for heading in ["//! # Schema", "//! # Lint rules", "//! # Determinism"] {
+        assert!(
+            SUBSYSTEMS_DOCS.lines().any(|l| l.trim_end() == heading),
+            "missing section {heading:?} in subsystems/mod.rs"
+        );
+    }
+    for term in [
+        "cve-history",
+        "size",
+        "upstream-library",
+        "scanners",
+        "unknown-symbol",
+        "unknown-source",
+        "pin-mismatch",
+        "scripts/verify-subsystems.sh",
+    ] {
+        assert!(
+            SUBSYSTEMS_DOCS.contains(term),
+            "subsystems/mod.rs lacks {term:?}"
+        );
+        assert!(
+            SUBSYSTEMS_GUIDE.contains(term),
+            "docs/subsystems.md lacks {term:?}"
+        );
+    }
+}

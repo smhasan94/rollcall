@@ -1,0 +1,183 @@
+# rollcall subsystem table: Zephyr subsystem -> enabling Kconfig symbols -> source paths.
+#
+# Hand-maintained (not a build fixture). The schema and lint rules are documented in the
+# rollcall_core::subsystems module docs and docs/subsystems.md. Every symbol and path is
+# checked against the pinned Zephyr tree below by scripts/verify-subsystems.sh (the
+# `subsystems` CI job). CVE IDs cited for Zephyr code are listed in that tree's
+# doc/security/vulnerabilities.rst; "size" means the sources hold more than 2,000 lines of C
+# at the pinned revision.
+format: rollcall-subsystems/1
+zephyr:
+  tag: v4.4.2
+  commit: dccb09599635bdff17633fa7e9dab014b91dce90
+subsystems:
+  - name: bluetooth-controller
+    description: Bluetooth LE controller (Zephyr's open-source link layer)
+    symbols: [CONFIG_BT_LL_SW_SPLIT]
+    sources: [subsys/bluetooth/controller]
+    reasons: [cve-history, size]
+    rationale: >-
+      The link layer parses untrusted over-the-air PDUs and has its own CVE history
+      (CVE-2021-3430, CVE-2021-3431, CVE-2021-3432, CVE-2021-3433, CVE-2024-4785,
+      CVE-2025-12890); about 100,000 lines of C.
+
+  - name: bluetooth-host
+    description: Bluetooth LE host (HCI host layer, GAP, GATT, L2CAP, SMP, services)
+    symbols: [CONFIG_BT_HCI_HOST]
+    sources:
+      - subsys/bluetooth/common
+      - subsys/bluetooth/crypto
+      - subsys/bluetooth/host
+      - subsys/bluetooth/lib
+      - subsys/bluetooth/services
+    reasons: [cve-history, size]
+    rationale: >-
+      The most frequently affected part of Zephyr (CVE-2020-10066, CVE-2021-3434,
+      CVE-2022-2993, CVE-2023-5055, CVE-2024-3077, CVE-2025-10458, among many); a scanner or
+      VEX statement has to be able to name it on its own. About 128,000 lines of C.
+
+  - name: crypto-drivers
+    description: Hardware crypto driver API and drivers
+    symbols: [CONFIG_CRYPTO]
+    sources: [drivers/crypto]
+    reasons: [cve-history, size]
+    rationale: >-
+      Handles key material and has its own CVE history (CVE-2023-5139, CVE-2026-0849); about
+      12,800 lines of C.
+
+  - name: dfu
+    description: Device firmware update (image manager and the MCUmgr image management group)
+    symbols: [CONFIG_IMG_MANAGER, CONFIG_MCUMGR_GRP_IMG]
+    sources: [subsys/dfu, subsys/mgmt/mcumgr/grp/img_mgmt]
+    reasons: [size]
+    rationale: >-
+      Writes untrusted firmware images to flash, so it is on the update attack surface that the
+      CRA singles out; about 4,000 lines of C.
+
+  - name: fatfs
+    description: FAT file system (Zephyr glue for the ELM FatFs library)
+    symbols: [CONFIG_FAT_FILESYSTEM_ELM]
+    sources: [modules/fatfs, subsys/fs/fat_fs.c]
+    module: fatfs
+    reasons: [cve-history, upstream-library]
+    rationale: >-
+      The glue has had its own CVE (CVE-2020-13598), and the FatFs library is a separately
+      versioned upstream project.
+
+  - name: filesystem
+    description: Virtual file system layer, file system shell, ext2, FUSE client and access, virtiofs and FCB
+    symbols: [CONFIG_FILE_SYSTEM]
+    sources: [subsys/fs]
+    reasons: [cve-history, size]
+    rationale: >-
+      Has its own CVE history (CVE-2023-4260, CVE-2023-6881); about 11,800 lines of C.
+
+  - name: ip-stack
+    description: IPv4/IPv6 stack (IP, ICMP, TCP, UDP, 6LoWPAN, packet buffers)
+    symbols: [CONFIG_NET_IP]
+    sources: [subsys/net/ip]
+    reasons: [cve-history, size]
+    rationale: >-
+      Parses untrusted network traffic and has its own CVE history (CVE-2021-3323,
+      CVE-2022-1841, CVE-2023-7060, CVE-2025-12899, CVE-2026-5590); about 38,000 lines of C.
+
+  - name: json
+    description: Zephyr's JSON library (Zephyr has no cJSON; this is its own encoder/decoder)
+    symbols: [CONFIG_JSON_LIBRARY]
+    sources: [lib/utils/json.c]
+    reasons: [cve-history, size]
+    rationale: >-
+      Decodes untrusted payloads and has its own CVE (CVE-2021-3510); about 2,200 lines of C.
+
+  - name: littlefs
+    description: littlefs file system (Zephyr glue for the littlefs library)
+    symbols: [CONFIG_FILE_SYSTEM_LITTLEFS]
+    sources: [modules/littlefs, subsys/fs/littlefs_fs.c]
+    module: littlefs
+    reasons: [upstream-library]
+    rationale: >-
+      littlefs is a separately versioned upstream project that scanners track on its own; the
+      Zephyr glue (the file system driver and the CRC hook) is compiled only with it.
+
+  - name: logging
+    description: Logging subsystem (log core, formatting, backends)
+    symbols: [CONFIG_LOG]
+    sources: [subsys/logging]
+    reasons: [size]
+    rationale: >-
+      Present in almost every image and about 10,000 lines of C; keeping it inside the kernel
+      component would hide a large part of what was compiled in.
+
+  - name: mbedtls-integration
+    description: Zephyr integration of Mbed TLS (configuration, entropy and init glue)
+    symbols: [CONFIG_MBEDTLS]
+    sources: [modules/mbedtls]
+    module: mbedtls
+    reasons: [upstream-library]
+    rationale: >-
+      Mbed TLS is a separately versioned upstream project that scanners track on its own (its
+      CVEs belong to the library, not to this glue); the glue's configuration decides which of
+      it is built.
+
+  - name: mcumgr
+    description: MCUmgr device management (SMP transport and command groups)
+    symbols: [CONFIG_MCUMGR]
+    sources: [subsys/mgmt/mcumgr]
+    reasons: [size]
+    rationale: >-
+      A remote management interface that accepts commands from the network or a serial line;
+      about 13,000 lines of C.
+
+  - name: networking-core
+    description: Networking core outside the IP stack (connection manager, L2s, sockets, protocol libraries)
+    symbols: [CONFIG_NETWORKING]
+    sources: [subsys/net/conn_mgr, subsys/net/l2, subsys/net/lib, subsys/net/pkt_filter]
+    reasons: [cve-history, size]
+    rationale: >-
+      The protocol libraries have a long CVE history (MQTT CVE-2020-10062, CoAP CVE-2020-10063,
+      DNS CVE-2025-1673, HTTP server CVE-2024-10395); about 152,000 lines of C.
+
+  - name: power-management
+    description: System and device power management
+    symbols: [CONFIG_PM, CONFIG_PM_DEVICE]
+    sources: [subsys/pm]
+    reasons: [size]
+    rationale: >-
+      About 2,600 lines of C that run in every idle path when enabled; separable so an SBOM
+      shows whether it was compiled in.
+
+  - name: settings
+    description: Settings subsystem (persistent key-value storage and backends)
+    symbols: [CONFIG_SETTINGS]
+    sources: [subsys/settings]
+    reasons: [cve-history, size]
+    rationale: >-
+      Stores secrets such as Bluetooth bonds and has its own CVE history (CVE-2020-13599,
+      CVE-2023-6749); about 4,300 lines of C.
+
+  - name: shell
+    description: Shell subsystem (core, backends and built-in command modules)
+    symbols: [CONFIG_SHELL]
+    sources: [subsys/shell]
+    reasons: [cve-history, size]
+    rationale: >-
+      An interactive command interface with its own CVE history (CVE-2017-14202,
+      CVE-2020-10023); about 10,000 lines of C.
+
+  - name: tls-sockets
+    description: TLS/DTLS sockets and the TLS credentials store
+    symbols: [CONFIG_NET_SOCKETS_SOCKOPT_TLS, CONFIG_TLS_CREDENTIALS]
+    sources: [subsys/net/lib/sockets/sockets_tls.c, subsys/net/lib/tls_credentials]
+    reasons: [size]
+    rationale: >-
+      The boundary between the network and Mbed TLS that holds certificates and keys; about
+      6,400 lines of C.
+
+  - name: usb-device
+    description: USB device stack (legacy and next-generation) and device classes
+    symbols: [CONFIG_USB_DEVICE_STACK, CONFIG_USB_DEVICE_STACK_NEXT]
+    sources: [subsys/usb/common, subsys/usb/device, subsys/usb/device_next]
+    reasons: [cve-history, size]
+    rationale: >-
+      Parses untrusted host requests and has its own CVE history (CVE-2020-10019,
+      CVE-2021-3625, CVE-2021-3835, CVE-2021-3861, CVE-2023-4265); about 28,600 lines of C.

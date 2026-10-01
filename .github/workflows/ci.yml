@@ -64,6 +64,28 @@ jobs:
           command: check
           arguments: --all-features --locked
 
+  # crates/rollcall-core/db/subsystems.yaml against the pinned Zephyr tree (every source path
+  # and Kconfig symbol real, `size` claims backed). Needs the network on a cache miss.
+  subsystems:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # Keep in sync with rust-toolchain.toml.
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: "1.91.1"
+      - uses: Swatinem/rust-cache@v2
+      - name: Read the Zephyr pin
+        id: pin
+        run: echo "commit=$(python3 -c 'import json; print(json.load(open("fixtures/zephyr/MANIFEST.json"))["zephyr"]["commit"])')" >> "$GITHUB_OUTPUT"
+      - uses: actions/cache@v4
+        with:
+          path: .cache/zephyr-workspace/zephyr
+          key: zephyr-tree-${{ steps.pin.outputs.commit }}
+      # On a cache miss the script clones the pinned tag (retrying the clone once).
+      - name: Verify the subsystem table
+        run: scripts/verify-subsystems.sh
+
   # grype and osv-scanner (pinned, SHA-256-verified) must load the generated CycloneDX
   # documents without warnings, and find nothing in the minimal fixture. Needs the network.
   smoke:
