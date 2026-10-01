@@ -2,8 +2,10 @@
 
 How rollcall names a Zephyr module's upstream project so that vulnerability scanners can match
 it: the purl and CPE conventions of the seed identifier database
-(`crates/rollcall-core/db/identifiers.yaml`, passed with `rollcall generate --identifier-db`),
-and how each module's upstream version is derived from the fork commit Zephyr pins.
+(`crates/rollcall-identifiers/db/identifiers.yaml`, embedded in rollcall and used by
+`rollcall generate --identify`, or passed as a file with `--identifier-db`), and how each
+module's upstream version is derived from the fork commit Zephyr pins. How the database is
+versioned and released, and how to add a module, are in [CONTRIBUTING.md](../CONTRIBUTING.md).
 
 A Zephyr module is built from a fork (`zephyrproject-rtos/mbedtls` at a commit), but
 scanners know the *upstream* project and release. The component keeps the fork commit as its

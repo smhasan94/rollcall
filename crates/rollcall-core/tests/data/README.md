@@ -41,6 +41,21 @@ fixtures' other modules (`cmsis_6`, `hal_nordic`, `mcuboot`).
 |------|------------|---------|
 | `identifiers-stub.yaml` | Three entries; the fixtures' other three modules are unmapped on purpose. | `tests/identify.rs` (every fixture module resolves or is reported unknown exactly once), `rollcall-cli` `tests/generate_zephyr.rs` (`--identifier-db`) |
 
+## `identifiers/` — hand-written identifier databases for the lint and version pin (SHA-104)
+
+**Hand-written** model databases, not real-build output, each `identifiers/<case>/identifiers.yaml`
+(the directory form `--identifiers DIR` and `rollcall identifiers lint DIR` accept). Each has
+two or three tiny modules (`alpha`, `beta`) and exactly one problem, named in its header
+comment.
+
+| Case | What is wrong | Used by |
+|------|---------------|---------|
+| `bad-purl` | `beta`'s purl `pkg:github/foo` has no `{version}` (line 17) | `tests/identify_lint.rs` (`bad_purl_reports_path_line_and_reason`), `rollcall-cli` `tests/identifiers.rs` (`lint_bad_purl_exits_1_with_message`) |
+| `bad-cpe` | `beta`'s cpe has too few fields | `tests/identify_lint.rs` (`bad_cpe_reports_reason`) |
+| `duplicate-name` | `alpha` is listed twice (lines 6 and 22) | `tests/identify_lint.rs` (`duplicate_name_reports_both_lines`), `rollcall-cli` `tests/identifiers.rs` (`lint_duplicate_exits_1_naming_both_lines`) |
+| `too-old` | valid, but `db_version` 0.9.0 is below the minimum 1.0.0 | `tests/identify_source.rs`, `tests/identify_lint.rs`, `rollcall-cli` `tests/identifiers.rs` (`too_old_explicit_db_is_exit_65`) |
+| `schema-2` | valid schema-1 text, but `db_version` 2.0.0 is another major version | same (`schema_major_2_explicit_db_is_exit_65`) |
+
 ## `old-*.model.json`, `findings/`, `vex/` — VEX evaluator test data (SHA-111)
 
 | File | What it is | Used by |

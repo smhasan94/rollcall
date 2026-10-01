@@ -105,7 +105,7 @@ pub fn ingest_sysbuild(options: &IngestOptions) -> Result<Ingest, ZephyrError> {
     ingest_images(options, resolver.as_mut())
 }
 
-fn ingest_images(
+pub(super) fn ingest_images(
     options: &IngestOptions,
     mut resolver: Option<&mut Resolver<'_>>,
 ) -> Result<Ingest, ZephyrError> {

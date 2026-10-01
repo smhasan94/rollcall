@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Regenerates the fork revision -> upstream version rows of the identifier database
-# (crates/rollcall-core/db/identifiers.yaml) and the manifest pin list
+# (crates/rollcall-identifiers/db/identifiers.yaml) and the manifest pin list
 # (crates/rollcall-core/tests/data/zephyr-manifest-pins.txt) for the Zephyr releases below,
 # then re-runs the identifier tests.
 #
@@ -44,12 +44,12 @@ done
 
 python3 scripts/version-tables.py \
     --manifests "$MANIFESTS" \
-    --db crates/rollcall-core/db/identifiers.yaml \
+    --db crates/rollcall-identifiers/db/identifiers.yaml \
     --pins crates/rollcall-core/tests/data/zephyr-manifest-pins.txt \
     --cache "$CACHE"
 
 cargo test -p rollcall-core --lib identify::
 cargo test -p rollcall-core --test identify
 
-git status --short -- crates/rollcall-core/db crates/rollcall-core/tests/data/zephyr-manifest-pins.txt
-git diff --stat -- crates/rollcall-core/db crates/rollcall-core/tests/data/zephyr-manifest-pins.txt
+git status --short -- crates/rollcall-identifiers/db crates/rollcall-core/tests/data/zephyr-manifest-pins.txt
+git diff --stat -- crates/rollcall-identifiers/db crates/rollcall-core/tests/data/zephyr-manifest-pins.txt

@@ -2,8 +2,10 @@
 
 `crates/rollcall-core/db/subsystems.yaml` maps each Zephyr subsystem that rollcall reports as
 its own component to the Kconfig symbols that enable it and the source paths that implement it.
-It ships next to the identifier database (`crates/rollcall-core/db/identifiers.yaml`) and is
-compiled into rollcall. It is hand-maintained; it is not a build fixture.
+It is compiled into rollcall and ships only with it: unlike the identifier database
+(`crates/rollcall-identifiers/db/identifiers.yaml`, released on its own with a `db_version`),
+it describes the pinned Zephyr tree, so it changes with rollcall's Zephyr pin. It is
+hand-maintained; it is not a build fixture.
 
 The loader and lint are `rollcall_core::subsystems`; its module docs are the reference.
 

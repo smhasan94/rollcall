@@ -967,11 +967,11 @@ fn missing_optional_files_warn_and_still_validate() {
     assert_eq!(libraries(&out.product), west_list_modules("tls"));
 }
 
-// --- The seed identifier database (`db/identifiers.yaml`) on the fixtures ---------------------
+// --- The seed identifier database (crates/rollcall-identifiers) on the fixtures ------------
 
 /// The seed identifier database shipped with rollcall.
 fn seed_db_path() -> PathBuf {
-    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("db/identifiers.yaml")
+    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../rollcall-identifiers/db/identifiers.yaml")
 }
 
 /// Values of `field` evidence from the identifier database.
@@ -1206,6 +1206,15 @@ fn old_mbedtls_fixture_resolves_mbedtls_3_6_4_with_both_cpes() {
 #[test]
 fn old_mbedtls_fixture_matches_golden() {
     let out = ingest_old_mbedtls();
-    check_golden("old-mbedtls.cdx.json", &render(&out.product));
+    // As `rollcall generate --identifier-db <seed>` writes it: with the database's
+    // provenance in `metadata.properties`.
+    let db = rollcall_core::identify::load(&seed_db_path()).unwrap();
+    let source = rollcall_core::identify::DbSource::Flag(seed_db_path());
+    let options = WriteOptions::new(Timestamp::parse(GOLDEN_TIMESTAMP).unwrap())
+        .with_properties(rollcall_core::identify::provenance(&db, &source));
+    check_golden(
+        "old-mbedtls.cdx.json",
+        &cyclonedx::write(&out.product, &options).unwrap(),
+    );
     check_golden("old-mbedtls.model.json", &out.product.to_json().unwrap());
 }

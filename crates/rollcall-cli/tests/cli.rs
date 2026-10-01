@@ -4,7 +4,7 @@ use assert_cmd::Command;
 use predicates::prelude::*;
 
 /// Every subcommand with its one-line `--help` description.
-const SUBCOMMANDS: [(&str, &str); 6] = [
+const SUBCOMMANDS: [(&str, &str); 7] = [
     (
         "generate",
         "Generate a CycloneDX SBOM from firmware build metadata",
@@ -23,6 +23,7 @@ const SUBCOMMANDS: [(&str, &str); 6] = [
         "assay",
         "Produce a CycloneDX CBOM (cryptographic inventory) for a build",
     ),
+    ("identifiers", "Inspect and lint the identifier database"),
 ];
 
 fn rollcall() -> Command {
@@ -55,7 +56,7 @@ fn help_lists_every_subcommand_with_description() {
         );
     }
 
-    // The "Commands:" section lists exactly our six subcommands plus clap's own `help`.
+    // The "Commands:" section lists exactly our seven subcommands plus clap's own `help`.
     let listed: Vec<&str> = stdout
         .lines()
         .skip_while(|l| l.trim_end() != "Commands:")
@@ -79,11 +80,28 @@ fn subcommand_help_exits_zero() {
 fn version_prints_workspace_version() {
     let v = workspace_version();
     assert_eq!(v, env!("CARGO_PKG_VERSION"));
-    rollcall()
+    // Line 1 is the tool version, as before; the identifier database lines follow (see
+    // tests/identifiers.rs).
+    let cache = tempfile::tempdir().expect("tempdir");
+    let output = rollcall()
+        .env("ROLLCALL_CACHE_DIR", cache.path())
+        .env_remove("ROLLCALL_IDENTIFIERS")
         .arg("--version")
-        .assert()
-        .success()
-        .stdout(format!("rollcall {v}\n"));
+        .output()
+        .expect("run rollcall");
+    assert!(output.status.success());
+    let stdout = String::from_utf8(output.stdout).expect("utf-8 version");
+    assert_eq!(
+        stdout.lines().next(),
+        Some(format!("rollcall {v}").as_str())
+    );
+    assert!(
+        stdout
+            .lines()
+            .skip(1)
+            .all(|l| l.starts_with("identifiers ")),
+        "{stdout}"
+    );
 }
 
 fn assert_not_implemented(sub: &str) {

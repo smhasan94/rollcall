@@ -42,6 +42,9 @@ pub struct Metadata {
     pub tools: Tools,
     /// The product.
     pub component: Component,
+    /// Document-level properties ([`WriteOptions::properties`](super::WriteOptions)), sorted.
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub properties: Vec<Property>,
 }
 
 /// `metadata.tools`, in the 1.5+ object form.

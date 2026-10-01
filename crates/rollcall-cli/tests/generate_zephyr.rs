@@ -1063,7 +1063,7 @@ fn old_mbedtls_fixture_cli_output_matches_golden() {
         .join("../../fixtures/zephyr-old-mbedtls/old-mbedtls");
     let dir = variant.join("mbedtls");
     let west_list = variant.join("west-list.txt");
-    let db = core.join("db/identifiers.yaml");
+    let db = core.join("../rollcall-identifiers/db/identifiers.yaml");
     let out = generate_zephyr(
         &dir,
         &[
@@ -1111,7 +1111,8 @@ fn old_mbedtls_fixture_cli_output_matches_golden() {
 /// different cpe is still a warning, once per image.
 #[test]
 fn sysbuild_tls_with_seed_db_warns_only_about_genuinely_different_identifiers() {
-    let db = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../rollcall-core/db/identifiers.yaml");
+    let db = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("../rollcall-identifiers/db/identifiers.yaml");
     let west_list = west_list("tls");
     let out = generate_zephyr(
         &fixtures_root().join("tls"),

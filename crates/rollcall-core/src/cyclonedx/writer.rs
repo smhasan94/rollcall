@@ -369,6 +369,12 @@ pub(super) fn to_document(product: &Product, options: &WriteOptions) -> Result<B
                 }],
             },
             component: root_component,
+            properties: {
+                let mut properties = options.properties.clone();
+                properties.sort();
+                properties.dedup();
+                properties
+            },
         },
         components,
         dependencies,

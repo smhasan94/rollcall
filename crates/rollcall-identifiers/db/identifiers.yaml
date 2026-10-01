@@ -16,7 +16,11 @@
 #   scripts/regen-version-tables.sh (Zephyr v4.2.0 to v4.4.2); hand-curated rows go outside
 #   the markers and cite their source. Revisions and versions are quoted so a hex revision is
 #   never read as a number.
+# - db_version: this database's release, semver, always equal to the version of the
+#   rollcall-identifiers crate (crates/rollcall-identifiers/Cargo.toml). Bump MINOR to add a
+#   module, PATCH to fix an entry, MAJOR only with a schema change; see CONTRIBUTING.md.
 schema: 1
+db_version: '1.0.0'
 modules:
   cjson:
     upstream:

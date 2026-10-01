@@ -34,6 +34,7 @@
 //! | — | `serialNumber`: [`WriteOptions::serial_number`], else [`SerialNumber::derive`] |
 //! | — | `metadata.timestamp`: [`WriteOptions::timestamp`] |
 //! | — | `metadata.tools.components[0]`: `{type: application, name: rollcall, version}` |
+//! | — | `metadata.properties`: [`WriteOptions::properties`], sorted and deduplicated, e.g. which identifier database resolved the modules (`rollcall:identifiers:db-version`, `rollcall:identifiers:source`); omitted when empty |
 //! | [`Product`] | `metadata.component`, `type` `firmware`; no nested `components` (osv-scanner ignores components under the root) |
 //! | [`Product::images`], each [`Image`](crate::model::Image) | a top-level `components[]` entry, `type` = [`Image::image_type`](crate::model::Image::image_type) |
 //! | [`Image::image_type`](crate::model::Image::image_type) | `type` `firmware` ([`ImageType::Firmware`](crate::model::ImageType::Firmware), the default) \| `library` ([`ImageType::Library`](crate::model::ImageType::Library), e.g. a static-archive blob such as `libphy.a`) |
@@ -118,6 +119,9 @@ pub struct WriteOptions {
     pub timestamp: Timestamp,
     /// Written to `serialNumber`; when `None`, [`SerialNumber::derive`] is used.
     pub serial_number: Option<SerialNumber>,
+    /// Written to `metadata.properties` (sorted, duplicates dropped). Not part of the model,
+    /// so the derived serial number does not depend on them.
+    pub properties: Vec<Property>,
 }
 
 impl WriteOptions {
@@ -126,7 +130,14 @@ impl WriteOptions {
         Self {
             timestamp,
             serial_number: None,
+            properties: Vec::new(),
         }
+    }
+
+    /// Adds document-level `metadata.properties`.
+    pub fn with_properties(mut self, properties: impl IntoIterator<Item = Property>) -> Self {
+        self.properties.extend(properties);
+        self
     }
 
     /// Uses `serial_number` verbatim instead of deriving one.

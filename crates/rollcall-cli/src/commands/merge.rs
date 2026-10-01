@@ -5,7 +5,7 @@ use std::io::Write;
 use std::path::{Path, PathBuf};
 
 use rollcall_core::blob;
-use rollcall_core::cyclonedx;
+use rollcall_core::cyclonedx::{self, Property};
 use rollcall_core::merge;
 use rollcall_core::model::Product;
 use rollcall_core::warning::Warning;
@@ -16,8 +16,9 @@ use crate::cli::{EXIT_DATAERR, EXIT_NOINPUT, EXIT_USAGE, MergeArgs};
 /// Runs `rollcall merge`, returning the exit code.
 pub fn run(args: MergeArgs) -> u8 {
     match merged_product(&args) {
-        Ok(product) => match write_document(
+        Ok((product, properties)) => match write_document(
             &product,
+            properties,
             args.timestamp,
             args.serial_number,
             args.output.as_deref(),
@@ -46,14 +47,15 @@ fn print_warnings(file: &Path, warnings: &[Warning]) {
     }
 }
 
-/// Reads one input document.
-fn read_input(path: &Path) -> Result<Product, (u8, String)> {
+/// Reads one input document: its product and the document properties rollcall carries over
+/// (the identifier database provenance).
+fn read_input(path: &Path) -> Result<(Product, Vec<Property>), (u8, String)> {
     let bytes =
         std::fs::read(path).map_err(|e| (EXIT_NOINPUT, format!("{}: {e}", path.display())))?;
     let read = cyclonedx::read_bytes(&bytes)
         .map_err(|e| (EXIT_DATAERR, format!("{}: {e}", path.display())))?;
     print_warnings(path, &read.warnings);
-    Ok(read.product)
+    Ok((read.product, read.metadata_properties))
 }
 
 /// Without `--product`, every input must name the same product and version as the first;
@@ -89,12 +91,19 @@ fn check_same_product(inputs: &[(PathBuf, Product)]) -> Result<(), (u8, String)>
     Ok(())
 }
 
-/// Reads every input and the blob manifest and merges them.
-fn merged_product(args: &MergeArgs) -> Result<Product, (u8, String)> {
+/// Reads every input and the blob manifest and merges them. The merged document keeps every
+/// distinct provenance property of the inputs (so inputs resolved with different databases
+/// say so), sorted.
+fn merged_product(args: &MergeArgs) -> Result<(Product, Vec<Property>), (u8, String)> {
     let mut inputs = Vec::with_capacity(args.inputs.len());
+    let mut properties = Vec::new();
     for path in &args.inputs {
-        inputs.push((path.clone(), read_input(path)?));
+        let (product, props) = read_input(path)?;
+        properties.extend(props);
+        inputs.push((path.clone(), product));
     }
+    properties.sort();
+    properties.dedup();
     if args.product.is_none() {
         if inputs.is_empty() {
             return Err((
@@ -139,5 +148,5 @@ fn merged_product(args: &MergeArgs) -> Result<Product, (u8, String)> {
         merge::add_blobs(&mut product, blobs)
             .map_err(|e| (EXIT_DATAERR, format!("{manifest}: {e}")))?;
     }
-    Ok(product)
+    Ok((product, properties))
 }

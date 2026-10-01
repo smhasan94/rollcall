@@ -2,7 +2,9 @@
 //! CycloneDX 1.6 JSON.
 
 use std::io::Write;
+use std::path::Path;
 
+use rollcall_core::identify::{self, DbSource, LoadedDbs};
 use rollcall_core::merge::{self, ProductSpec};
 use rollcall_core::model::Product;
 use rollcall_core::zephyr::{self, IngestOptions, UnknownModule, Warning};
@@ -10,20 +12,28 @@ use rollcall_core::zephyr::{self, IngestOptions, UnknownModule, Warning};
 use super::output::write_document;
 use crate::cli::{EXIT_DATAERR, EXIT_NOINPUT, EXIT_USAGE, Format, GenerateArgs};
 
-/// Runs `rollcall generate`, returning the exit code.
-pub fn run(args: GenerateArgs) -> u8 {
+/// Runs `rollcall generate`, returning the exit code. `identifiers` is the global
+/// `--identifiers` path.
+pub fn run(args: GenerateArgs, identifiers: Option<&Path>) -> u8 {
     if args.format == Format::Spdx {
         eprintln!("rollcall generate --format spdx: not implemented");
         return EXIT_USAGE;
     }
-    let product = match load_product(&args) {
+    let dbs = match select_db(&args, identifiers) {
+        Ok(dbs) => dbs,
+        Err((code, message)) => {
+            eprintln!("rollcall generate: {message}");
+            return code;
+        }
+    };
+    let product = match load_product(&args, dbs.as_ref()) {
         Ok(Loaded {
             product,
             warnings,
             unknown_modules,
         }) => {
             print_warnings(&warnings);
-            print_stubs(&args, &unknown_modules);
+            print_stubs(dbs.as_ref(), &unknown_modules);
             product
         }
         Err((code, message)) => {
@@ -38,8 +48,14 @@ pub fn run(args: GenerateArgs) -> u8 {
             return code;
         }
     };
+    // Which identifier database resolved the modules, if any (no paths: deterministic).
+    let properties = dbs
+        .as_ref()
+        .map(|d| identify::provenance(&d.active, &d.source))
+        .unwrap_or_default();
     match write_document(
         &product,
+        properties,
         args.timestamp,
         args.serial_number,
         args.output.as_deref(),
@@ -70,9 +86,50 @@ struct Loaded {
     unknown_modules: Vec<UnknownModule>,
 }
 
-/// Reads the input named by `--model` or `--zephyr`: the product, any warnings and modules
-/// missing from the identifier database, or the exit code and message to fail with.
-fn load_product(args: &GenerateArgs) -> Result<Loaded, (u8, String)> {
+/// The identifier database to resolve modules with, if module resolution is on: with
+/// `--zephyr` and any of `--identifier-db FILE` (that file), `--identify` or the global
+/// `--identifiers PATH` (the active database, [`identify::select`]). Skipped cache entries
+/// are printed as warnings, and a database picked up from the cache is named on stderr.
+fn select_db(
+    args: &GenerateArgs,
+    identifiers: Option<&Path>,
+) -> Result<Option<LoadedDbs>, (u8, String)> {
+    let wanted = args.zephyr.is_some()
+        && (args.identify || args.identifier_db.is_some() || identifiers.is_some());
+    if !wanted {
+        return Ok(None);
+    }
+    let explicit = args.identifier_db.as_deref().or(identifiers);
+    let loaded = identify::select(explicit, &|name| std::env::var_os(name)).map_err(|e| {
+        let code = if e.is_read_error() {
+            EXIT_NOINPUT
+        } else {
+            EXIT_DATAERR
+        };
+        (code, e.to_string())
+    })?;
+    let mut stderr = std::io::stderr().lock();
+    for warning in &loaded.warnings {
+        let _ = writeln!(stderr, "rollcall generate: warning: identifiers: {warning}");
+    }
+    if let DbSource::Cache(path) = &loaded.source {
+        let version = loaded
+            .active
+            .db_version()
+            .map_or_else(String::new, ToString::to_string);
+        let _ = writeln!(
+            stderr,
+            "rollcall generate: note: identifier database {version} from the cache ({})",
+            path.display()
+        );
+    }
+    Ok(Some(loaded))
+}
+
+/// Reads the input named by `--model` or `--zephyr`, resolving modules with `dbs` if given:
+/// the product, any warnings and modules missing from the identifier database, or the exit
+/// code and message to fail with.
+fn load_product(args: &GenerateArgs, dbs: Option<&LoadedDbs>) -> Result<Loaded, (u8, String)> {
     if let Some(dir) = &args.zephyr {
         let mut options = IngestOptions::new(dir)
             .with_include_sdk(args.include_sdk)
@@ -80,13 +137,16 @@ fn load_product(args: &GenerateArgs) -> Result<Loaded, (u8, String)> {
         if let Some(west_list) = &args.west_list {
             options = options.with_west_list(west_list);
         }
-        if let Some(db) = &args.identifier_db {
-            options = options.with_identifier_db(db);
+        // The database's file, if it has one, locates errors in its values.
+        if let Some(DbSource::Flag(file) | DbSource::Env(file) | DbSource::Cache(file)) =
+            dbs.map(|d| &d.source)
+        {
+            options = options.with_identifier_db(file);
         }
         if let Some(workspace) = &args.workspace {
             options = options.with_workspace(workspace);
         }
-        return match zephyr::ingest(&options) {
+        return match zephyr::ingest_with_db(&options, dbs.map(|d| &d.active)) {
             Ok(ingest) => Ok(Loaded {
                 product: ingest.product,
                 warnings: ingest.warnings,
@@ -125,16 +185,14 @@ fn print_warnings(warnings: &[Warning]) {
 
 /// After the warnings, the stub entries for modules missing from the identifier database, on
 /// stderr, ready to paste under its `modules:` mapping.
-fn print_stubs(args: &GenerateArgs, unknown: &[UnknownModule]) {
+fn print_stubs(dbs: Option<&LoadedDbs>, unknown: &[UnknownModule]) {
     if unknown.is_empty() {
         return;
     }
-    let db = args
-        .identifier_db
-        .as_deref()
-        .and_then(|p| p.file_name())
-        .map(|n| n.to_string_lossy().into_owned())
-        .unwrap_or_else(|| "the identifier database".to_owned());
+    let db = dbs.map_or_else(
+        || "the identifier database".to_owned(),
+        |d| d.active.name().to_owned(),
+    );
     let mut stderr = std::io::stderr().lock();
     let _ = writeln!(
         stderr,
@@ -143,5 +201,13 @@ fn print_stubs(args: &GenerateArgs, unknown: &[UnknownModule]) {
     );
     for module in unknown {
         let _ = write!(stderr, "{}", module.stub);
+    }
+    // The embedded database cannot be edited in place.
+    if dbs.is_some_and(|d| d.source == DbSource::Embedded) {
+        let _ = writeln!(
+            stderr,
+            "rollcall generate: the embedded database is read-only: add the entries to a copy of \
+             it and pass that with --identifiers PATH, or contribute them (CONTRIBUTING.md)"
+        );
     }
 }

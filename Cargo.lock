@@ -963,6 +963,7 @@ dependencies = [
  "predicates",
  "rollcall-assay",
  "rollcall-core",
+ "rollcall-identifiers",
  "serde_json",
  "tempfile",
  "toml",
@@ -977,6 +978,7 @@ dependencies = [
  "packageurl",
  "proptest",
  "regex",
+ "rollcall-identifiers",
  "semver",
  "serde",
  "serde_json",
@@ -986,6 +988,10 @@ dependencies = [
  "time",
  "yaml_serde",
 ]
+
+[[package]]
+name = "rollcall-identifiers"
+version = "1.0.0"
 
 [[package]]
 name = "rustc_version"

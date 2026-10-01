@@ -66,6 +66,24 @@ jobs:
           command: check
           arguments: --all-features --locked
 
+  # The identifier database lint (scripts/lint-identifiers.sh, offline): schema, purl and CPE
+  # syntax, duplicate and unsorted modules, db_version equal to the rollcall-identifiers crate
+  # version, every manual-table row resolving, and every module of the fixtures/zephyr builds
+  # resolving to a purl. Then the release tarball: packaged twice with identical SHA-256s,
+  # and read back from a cache directory. Run the same locally with
+  # `scripts/lint-identifiers.sh` and `scripts/check-identifiers-package.sh`.
+  identifiers-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # Keep in sync with rust-toolchain.toml.
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: "1.91.1"
+      - uses: Swatinem/rust-cache@v2
+      - run: scripts/lint-identifiers.sh
+      - run: scripts/check-identifiers-package.sh
+
   # crates/rollcall-core/db/subsystems.yaml against the pinned Zephyr tree (every source path
   # and Kconfig symbol real, `size` claims backed). Needs the network on a cache miss.
   subsystems:
