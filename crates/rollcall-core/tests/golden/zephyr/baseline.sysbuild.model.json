@@ -727,6 +727,96 @@
               "value": "zephyrproject",
               "confidence": 9000
             }
+          ],
+          "components": [
+            {
+              "kind": "library",
+              "name": "logging",
+              "version": "4.4.2",
+              "supplier": {
+                "name": "zephyrproject"
+              },
+              "purl": "pkg:github/zephyrproject-rtos/zephyr@v4.4.2#subsys/logging",
+              "evidence": [
+                {
+                  "field": "name",
+                  "technique": "manifest-analysis",
+                  "source": "kconfig",
+                  "occurrence": {
+                    "location": "zephyr/.config",
+                    "line": 232
+                  },
+                  "value": "CONFIG_LOG",
+                  "confidence": 6000
+                },
+                {
+                  "field": "name",
+                  "technique": "manifest-analysis",
+                  "source": "linker-map",
+                  "occurrence": {
+                    "location": "zephyr/zephyr.map",
+                    "line": 3737
+                  },
+                  "value": "zephyr/libzephyr.a(log_minimal.c.obj)",
+                  "confidence": 8000
+                },
+                {
+                  "field": "name",
+                  "technique": "manifest-analysis",
+                  "source": "west-spdx",
+                  "occurrence": {
+                    "location": "spdx/build.spdx",
+                    "line": 2610
+                  },
+                  "value": "subsys/logging/log_minimal.c",
+                  "confidence": 8000
+                }
+              ]
+            },
+            {
+              "kind": "library",
+              "name": "mbedtls-integration",
+              "version": "4.4.2",
+              "supplier": {
+                "name": "zephyrproject"
+              },
+              "purl": "pkg:github/zephyrproject-rtos/zephyr@v4.4.2#modules/mbedtls",
+              "evidence": [
+                {
+                  "field": "name",
+                  "technique": "manifest-analysis",
+                  "source": "kconfig",
+                  "occurrence": {
+                    "location": "zephyr/.config",
+                    "line": 467
+                  },
+                  "value": "CONFIG_MBEDTLS",
+                  "confidence": 6000
+                },
+                {
+                  "field": "name",
+                  "technique": "manifest-analysis",
+                  "source": "linker-map",
+                  "occurrence": {
+                    "location": "zephyr/zephyr.map",
+                    "line": 4027
+                  },
+                  "value": "modules/mbedtls/libmodules__mbedtls.a(zephyr_entropy.c.obj)",
+                  "confidence": 8000
+                },
+                {
+                  "field": "name",
+                  "technique": "manifest-analysis",
+                  "source": "west-spdx",
+                  "occurrence": {
+                    "location": "spdx/build.spdx",
+                    "line": 1945
+                  },
+                  "value": "modules/mbedtls/zephyr_entropy.c",
+                  "confidence": 8000
+                }
+              ]
+            }
           ]
         }
       ]

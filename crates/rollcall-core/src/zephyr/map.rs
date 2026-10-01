@@ -17,7 +17,8 @@ use super::spdx::{
     spdx_id_stem,
 };
 use super::west_list::WestProject;
-use super::{Ingest, IngestOptions, UnknownModule, Warning, ZephyrBuild, ZephyrError};
+use super::{Ingest, IngestOptions, Note, UnknownModule, Warning, ZephyrBuild, ZephyrError};
+use super::{objects, split};
 use crate::identify::{Level, Outcome, Query, Resolver, github_repo};
 use crate::model::{
     BomRef, Component, ComponentKind, Confidence, Cpe, Evidence, EvidenceField, IdError, Image,
@@ -57,6 +58,10 @@ const MCUBOOT_SYMBOL: &str = "CONFIG_MCUBOOT";
 /// The tail of MCUboot's Zephyr application source directory.
 const MCUBOOT_SOURCE_DIR: &str = "mcuboot/boot/zephyr";
 
+/// The Kconfig symbol of link-time optimisation, and the suffix of its partition objects.
+const LTO_SYMBOL: &str = "CONFIG_LTO";
+const LTRANS_SUFFIX: &str = ".ltrans.o";
+
 /// The SPDXID of the Zephyr package in `zephyr.spdx`, and of Zephyr in `modules-deps.spdx`.
 const ZEPHYR_SOURCES_ID: &str = "SPDXRef-zephyr-sources";
 const ZEPHYR_DEPS_ID: &str = "SPDXRef-zephyr-deps";
@@ -91,6 +96,8 @@ struct Mapper<'a> {
     workspace: Option<&'a Path>,
     /// Modules the identifier database does not list, first seen in this image.
     unknown: Vec<UnknownModule>,
+    /// Notes from the subsystem split.
+    notes: Vec<Note>,
 }
 
 fn conf(bp: u16) -> Result<Confidence, IdError> {
@@ -99,7 +106,7 @@ fn conf(bp: u16) -> Result<Confidence, IdError> {
 
 /// Builds a `manifest-analysis` evidence entry, located when the location is a valid
 /// relative path.
-fn evidence(
+pub(super) fn evidence(
     field: EvidenceField,
     source: &str,
     value: &str,
@@ -371,6 +378,7 @@ pub(super) fn to_product(
         identifier_db: options.identifier_db.as_deref(),
         workspace: options.workspace.as_deref(),
         unknown: Vec::new(),
+        notes: Vec::new(),
     };
     let product = mapper.product(options, resolver)?;
     let mut warnings = build.warnings.clone();
@@ -379,10 +387,13 @@ pub(super) fn to_product(
     warnings.extend(mapper.warnings);
     let mut unknown_modules = mapper.unknown;
     unknown_modules.sort();
+    let mut notes = mapper.notes;
+    notes.sort();
     Ok(Ingest {
         product,
         warnings,
         unknown_modules,
+        notes,
     })
 }
 
@@ -495,7 +506,19 @@ impl<'a> Mapper<'a> {
                 ),
             );
         }
-        let zephyr = self.zephyr_component(modules.zephyr_row)?;
+        let mut zephyr = self.zephyr_component(modules.zephyr_row)?;
+        // Where the Zephyr checkout is in the west workspace: its own row in a T2 workspace,
+        // else the manifest repository (Zephyr itself in a T1 workspace).
+        let zephyr_dir = modules.zephyr_row.map(|r| r.path.as_str()).or_else(|| {
+            build
+                .west_list
+                .as_ref()?
+                .projects
+                .iter()
+                .find(|p| p.is_manifest_repository())
+                .map(|p| p.path.as_str())
+        });
+        self.split_zephyr(&mut zephyr, zephyr_dir)?;
         let zephyr_segment = PathSegment::of_component(&zephyr);
         image
             .add_component(zephyr)
@@ -568,6 +591,52 @@ impl<'a> Mapper<'a> {
 
         product.validate().map_err(|e| self.validation_error(e))?;
         Ok(product)
+    }
+
+    /// Splits the `zephyr` component into its enabled, linked subsystems ([`split`]), when
+    /// both `zephyr/.config` and `zephyr/zephyr.map` are present (a missing one has already
+    /// been warned about) and the link was not link-time optimised.
+    fn split_zephyr(
+        &mut self,
+        zephyr: &mut Component,
+        zephyr_dir: Option<&str>,
+    ) -> Result<(), ZephyrError> {
+        let build = self.build;
+        let (Some(map), Some(config)) = (&build.linker_map, &build.config) else {
+            return Ok(());
+        };
+        // With LTO the map names compiler partitions (`*.ltrans.o`), not the objects the
+        // sources were compiled to, so nothing can be attributed.
+        let ltrans = map
+            .objects()
+            .any(|(id, _)| id.member.ends_with(LTRANS_SUFFIX));
+        if config.is_set(LTO_SYMBOL) || ltrans {
+            self.warn(
+                split::LINKER_MAP.to_owned(),
+                "link-time optimised map; zephyr is not split into subsystems".to_owned(),
+            );
+            return Ok(());
+        }
+        let table =
+            crate::subsystems::builtin().map_err(|source| ZephyrError::Subsystems { source })?;
+        let objects = objects::attribute(
+            map,
+            build.build_spdx.as_ref(),
+            &build.zephyr_spdx,
+            zephyr_dir,
+        );
+        let outcome = split::split(&table, config, &objects, zephyr)
+            .map_err(Self::model_error(&self.paths().linker_map))?;
+        for component in outcome.components {
+            zephyr
+                .add_component(component)
+                .map_err(|e| ZephyrError::Model {
+                    path: self.paths().linker_map.clone(),
+                    source: ModelError::Merge(e),
+                })?;
+        }
+        self.notes.extend(outcome.notes);
+        Ok(())
     }
 
     /// Names the input file a validation failure came from.
@@ -1430,6 +1499,7 @@ SPDXID: SPDXRef-hal-nordic-deps
                 .as_deref()
                 .map(|t| spdx::parse(t).unwrap()),
             config: sample.config.as_deref().map(|t| kconfig::parse(t).unwrap()),
+            linker_map: None,
             west_list: sample
                 .west_list
                 .as_deref()
@@ -1444,6 +1514,7 @@ SPDXID: SPDXRef-hal-nordic-deps
                 app_spdx: "b/spdx/app.spdx".into(),
                 modules_deps_spdx: "b/spdx/modules-deps.spdx".into(),
                 config: "b/zephyr/.config".into(),
+                linker_map: "b/zephyr/zephyr.map".into(),
                 west_list: sample.west_list.as_ref().map(|_| "w/west-list.txt".into()),
             },
             warnings: Vec::new(),

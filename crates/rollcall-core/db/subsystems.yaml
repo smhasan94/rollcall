@@ -30,6 +30,7 @@ subsystems:
       - subsys/bluetooth/host
       - subsys/bluetooth/lib
       - subsys/bluetooth/services
+    subpath: subsys/bluetooth/host
     reasons: [cve-history, size]
     rationale: >-
       The most frequently affected part of Zephyr (CVE-2020-10066, CVE-2021-3434,
@@ -177,6 +178,7 @@ subsystems:
     description: USB device stack (legacy and next-generation) and device classes
     symbols: [CONFIG_USB_DEVICE_STACK, CONFIG_USB_DEVICE_STACK_NEXT]
     sources: [subsys/usb/common, subsys/usb/device, subsys/usb/device_next]
+    subpath: subsys/usb/device
     reasons: [cve-history, size]
     rationale: >-
       Parses untrusted host requests and has its own CVE history (CVE-2020-10019,

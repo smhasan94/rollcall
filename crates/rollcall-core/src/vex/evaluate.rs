@@ -126,8 +126,8 @@ pub struct Report {
     pub statements: Vec<Statement>,
     /// The unresolved findings, in the same order.
     pub unresolved: Vec<Unresolved>,
-    /// Conflicts between rules (one per conflicting finding), rules using the reserved
-    /// `match.subsystem`, and components the input document gave no `bom-ref`.
+    /// Conflicts between rules (one per conflicting finding) and components the input
+    /// document gave no `bom-ref`.
     pub warnings: Vec<Warning>,
 }
 
@@ -292,16 +292,6 @@ fn evaluate_inner(
                 });
             }
             NodeRef::Product(_) => {}
-        }
-    }
-
-    for rule in &rules.rules {
-        if rule.target.subsystem.is_some() {
-            report.warnings.push(Warning::new(
-                format!("rule `{}`", rule.id),
-                "match.subsystem is reserved until the Zephyr subsystem split (SHA-108): no \
-                 component carries subsystem names yet, so this rule matches nothing",
-            ));
         }
     }
 
@@ -929,17 +919,14 @@ mod tests {
     }
 
     #[test]
-    fn subsystem_rule_is_reserved_and_warns() {
+    fn subsystem_rule_is_active_and_does_not_warn() {
         let r = run(
             &[finding("CVE-1")],
             "  - {id: sub, match: {subsystem: net}, status: affected}\n",
         );
-        let [w] = r.warnings.as_slice() else {
-            panic!("{r:?}")
-        };
-        assert_eq!(w.location, "rule `sub`");
-        assert!(w.message.contains("reserved"), "{w}");
-        assert!(w.message.contains("SHA-108"), "{w}");
+        assert!(r.warnings.is_empty(), "{:?}", r.warnings);
+        // mbedtls is not a nested `net` subcomponent: no rule matched it.
+        assert_eq!(only_unresolved(&r).reason, Reason::NoRule);
     }
 
     #[test]

@@ -1,7 +1,7 @@
 {
   "bomFormat": "CycloneDX",
   "specVersion": "1.6",
-  "serialNumber": "urn:uuid:bcceb535-eaac-8d1d-a2ff-5487d07e229d",
+  "serialNumber": "urn:uuid:d92cc9b9-d192-85d0-9398-d174ffa6b098",
   "version": 1,
   "metadata": {
     "timestamp": "2026-01-02T03:04:05Z",
@@ -1148,6 +1148,705 @@
               "name": "rollcall:evidence-source",
               "value": "west-spdx"
             }
+          ],
+          "components": [
+            {
+              "type": "library",
+              "bom-ref": "component:b74fc8db84844255035d82a9cd068cff",
+              "name": "filesystem",
+              "version": "4.4.2",
+              "supplier": {
+                "name": "zephyrproject"
+              },
+              "purl": "pkg:github/zephyrproject-rtos/zephyr@v4.4.2#subsys/fs",
+              "evidence": {
+                "identity": [
+                  {
+                    "field": "name",
+                    "confidence": 0.8,
+                    "concludedValue": "filesystem",
+                    "methods": [
+                      {
+                        "technique": "manifest-analysis",
+                        "confidence": 0.6,
+                        "value": "CONFIG_FILE_SYSTEM"
+                      },
+                      {
+                        "technique": "manifest-analysis",
+                        "confidence": 0.8,
+                        "value": "zephyr/subsys/fs/libsubsys__fs.a(fs.c.obj)"
+                      },
+                      {
+                        "technique": "manifest-analysis",
+                        "confidence": 0.8,
+                        "value": "subsys/fs/fs.c"
+                      }
+                    ]
+                  }
+                ],
+                "occurrences": [
+                  {
+                    "location": "spdx/build.spdx",
+                    "line": 2686
+                  },
+                  {
+                    "location": "zephyr/.config",
+                    "line": 1866
+                  },
+                  {
+                    "location": "zephyr/zephyr.map",
+                    "line": 6623
+                  }
+                ]
+              },
+              "properties": [
+                {
+                  "name": "rollcall:evidence",
+                  "value": "{\"field\":\"name\",\"technique\":\"manifest-analysis\",\"source\":\"kconfig\",\"occurrence\":{\"location\":\"zephyr/.config\",\"line\":1866},\"value\":\"CONFIG_FILE_SYSTEM\",\"confidence\":6000}"
+                },
+                {
+                  "name": "rollcall:evidence",
+                  "value": "{\"field\":\"name\",\"technique\":\"manifest-analysis\",\"source\":\"linker-map\",\"occurrence\":{\"location\":\"zephyr/zephyr.map\",\"line\":6623},\"value\":\"zephyr/subsys/fs/libsubsys__fs.a(fs.c.obj)\",\"confidence\":8000}"
+                },
+                {
+                  "name": "rollcall:evidence",
+                  "value": "{\"field\":\"name\",\"technique\":\"manifest-analysis\",\"source\":\"west-spdx\",\"occurrence\":{\"location\":\"spdx/build.spdx\",\"line\":2686},\"value\":\"subsys/fs/fs.c\",\"confidence\":8000}"
+                },
+                {
+                  "name": "rollcall:evidence-source",
+                  "value": "kconfig"
+                },
+                {
+                  "name": "rollcall:evidence-source",
+                  "value": "linker-map"
+                },
+                {
+                  "name": "rollcall:evidence-source",
+                  "value": "west-spdx"
+                }
+              ]
+            },
+            {
+              "type": "library",
+              "bom-ref": "component:cd46bf30213b0423cccee4a994aa4f3d",
+              "name": "ip-stack",
+              "version": "4.4.2",
+              "supplier": {
+                "name": "zephyrproject"
+              },
+              "purl": "pkg:github/zephyrproject-rtos/zephyr@v4.4.2#subsys/net/ip",
+              "evidence": {
+                "identity": [
+                  {
+                    "field": "name",
+                    "confidence": 0.8,
+                    "concludedValue": "ip-stack",
+                    "methods": [
+                      {
+                        "technique": "manifest-analysis",
+                        "confidence": 0.6,
+                        "value": "CONFIG_NET_IP"
+                      },
+                      {
+                        "technique": "manifest-analysis",
+                        "confidence": 0.8,
+                        "value": "zephyr/subsys/net/ip/libsubsys__net__ip.a(connection.c.obj)"
+                      },
+                      {
+                        "technique": "manifest-analysis",
+                        "confidence": 0.8,
+                        "value": "subsys/net/ip/connection.c"
+                      }
+                    ]
+                  }
+                ],
+                "occurrences": [
+                  {
+                    "location": "spdx/build.spdx",
+                    "line": 2835
+                  },
+                  {
+                    "location": "zephyr/.config",
+                    "line": 2115
+                  },
+                  {
+                    "location": "zephyr/zephyr.map",
+                    "line": 7513
+                  }
+                ]
+              },
+              "properties": [
+                {
+                  "name": "rollcall:evidence",
+                  "value": "{\"field\":\"name\",\"technique\":\"manifest-analysis\",\"source\":\"kconfig\",\"occurrence\":{\"location\":\"zephyr/.config\",\"line\":2115},\"value\":\"CONFIG_NET_IP\",\"confidence\":6000}"
+                },
+                {
+                  "name": "rollcall:evidence",
+                  "value": "{\"field\":\"name\",\"technique\":\"manifest-analysis\",\"source\":\"linker-map\",\"occurrence\":{\"location\":\"zephyr/zephyr.map\",\"line\":7513},\"value\":\"zephyr/subsys/net/ip/libsubsys__net__ip.a(connection.c.obj)\",\"confidence\":8000}"
+                },
+                {
+                  "name": "rollcall:evidence",
+                  "value": "{\"field\":\"name\",\"technique\":\"manifest-analysis\",\"source\":\"west-spdx\",\"occurrence\":{\"location\":\"spdx/build.spdx\",\"line\":2835},\"value\":\"subsys/net/ip/connection.c\",\"confidence\":8000}"
+                },
+                {
+                  "name": "rollcall:evidence-source",
+                  "value": "kconfig"
+                },
+                {
+                  "name": "rollcall:evidence-source",
+                  "value": "linker-map"
+                },
+                {
+                  "name": "rollcall:evidence-source",
+                  "value": "west-spdx"
+                }
+              ]
+            },
+            {
+              "type": "library",
+              "bom-ref": "component:658da2abb29b8cb2fd11db92b5e7d0ab",
+              "name": "json",
+              "version": "4.4.2",
+              "supplier": {
+                "name": "zephyrproject"
+              },
+              "purl": "pkg:github/zephyrproject-rtos/zephyr@v4.4.2#lib/utils/json.c",
+              "evidence": {
+                "identity": [
+                  {
+                    "field": "name",
+                    "confidence": 0.8,
+                    "concludedValue": "json",
+                    "methods": [
+                      {
+                        "technique": "manifest-analysis",
+                        "confidence": 0.6,
+                        "value": "CONFIG_JSON_LIBRARY"
+                      },
+                      {
+                        "technique": "manifest-analysis",
+                        "confidence": 0.8,
+                        "value": "zephyr/libzephyr.a(json.c.obj)"
+                      },
+                      {
+                        "technique": "manifest-analysis",
+                        "confidence": 0.8,
+                        "value": "lib/utils/json.c"
+                      }
+                    ]
+                  }
+                ],
+                "occurrences": [
+                  {
+                    "location": "spdx/build.spdx",
+                    "line": 3338
+                  },
+                  {
+                    "location": "zephyr/.config",
+                    "line": 1788
+                  },
+                  {
+                    "location": "zephyr/zephyr.map",
+                    "line": 6123
+                  }
+                ]
+              },
+              "properties": [
+                {
+                  "name": "rollcall:evidence",
+                  "value": "{\"field\":\"name\",\"technique\":\"manifest-analysis\",\"source\":\"kconfig\",\"occurrence\":{\"location\":\"zephyr/.config\",\"line\":1788},\"value\":\"CONFIG_JSON_LIBRARY\",\"confidence\":6000}"
+                },
+                {
+                  "name": "rollcall:evidence",
+                  "value": "{\"field\":\"name\",\"technique\":\"manifest-analysis\",\"source\":\"linker-map\",\"occurrence\":{\"location\":\"zephyr/zephyr.map\",\"line\":6123},\"value\":\"zephyr/libzephyr.a(json.c.obj)\",\"confidence\":8000}"
+                },
+                {
+                  "name": "rollcall:evidence",
+                  "value": "{\"field\":\"name\",\"technique\":\"manifest-analysis\",\"source\":\"west-spdx\",\"occurrence\":{\"location\":\"spdx/build.spdx\",\"line\":3338},\"value\":\"lib/utils/json.c\",\"confidence\":8000}"
+                },
+                {
+                  "name": "rollcall:evidence-source",
+                  "value": "kconfig"
+                },
+                {
+                  "name": "rollcall:evidence-source",
+                  "value": "linker-map"
+                },
+                {
+                  "name": "rollcall:evidence-source",
+                  "value": "west-spdx"
+                }
+              ]
+            },
+            {
+              "type": "library",
+              "bom-ref": "component:8ce33c3a35cc0608dadd988c14548fb7",
+              "name": "logging",
+              "version": "4.4.2",
+              "supplier": {
+                "name": "zephyrproject"
+              },
+              "purl": "pkg:github/zephyrproject-rtos/zephyr@v4.4.2#subsys/logging",
+              "evidence": {
+                "identity": [
+                  {
+                    "field": "name",
+                    "confidence": 0.8,
+                    "concludedValue": "logging",
+                    "methods": [
+                      {
+                        "technique": "manifest-analysis",
+                        "confidence": 0.6,
+                        "value": "CONFIG_LOG"
+                      },
+                      {
+                        "technique": "manifest-analysis",
+                        "confidence": 0.8,
+                        "value": "zephyr/libzephyr.a(log_core.c.obj)"
+                      },
+                      {
+                        "technique": "manifest-analysis",
+                        "confidence": 0.8,
+                        "value": "subsys/logging/log_core.c"
+                      }
+                    ]
+                  }
+                ],
+                "occurrences": [
+                  {
+                    "location": "spdx/build.spdx",
+                    "line": 3342
+                  },
+                  {
+                    "location": "zephyr/.config",
+                    "line": 149
+                  },
+                  {
+                    "location": "zephyr/zephyr.map",
+                    "line": 6150
+                  }
+                ]
+              },
+              "properties": [
+                {
+                  "name": "rollcall:evidence",
+                  "value": "{\"field\":\"name\",\"technique\":\"manifest-analysis\",\"source\":\"kconfig\",\"occurrence\":{\"location\":\"zephyr/.config\",\"line\":149},\"value\":\"CONFIG_LOG\",\"confidence\":6000}"
+                },
+                {
+                  "name": "rollcall:evidence",
+                  "value": "{\"field\":\"name\",\"technique\":\"manifest-analysis\",\"source\":\"linker-map\",\"occurrence\":{\"location\":\"zephyr/zephyr.map\",\"line\":6150},\"value\":\"zephyr/libzephyr.a(log_core.c.obj)\",\"confidence\":8000}"
+                },
+                {
+                  "name": "rollcall:evidence",
+                  "value": "{\"field\":\"name\",\"technique\":\"manifest-analysis\",\"source\":\"west-spdx\",\"occurrence\":{\"location\":\"spdx/build.spdx\",\"line\":3342},\"value\":\"subsys/logging/log_core.c\",\"confidence\":8000}"
+                },
+                {
+                  "name": "rollcall:evidence-source",
+                  "value": "kconfig"
+                },
+                {
+                  "name": "rollcall:evidence-source",
+                  "value": "linker-map"
+                },
+                {
+                  "name": "rollcall:evidence-source",
+                  "value": "west-spdx"
+                }
+              ]
+            },
+            {
+              "type": "library",
+              "bom-ref": "component:7a36b8089dddda73ca4677fa4692a4d4",
+              "name": "mbedtls-integration",
+              "version": "4.4.2",
+              "supplier": {
+                "name": "zephyrproject"
+              },
+              "purl": "pkg:github/zephyrproject-rtos/zephyr@v4.4.2#modules/mbedtls",
+              "evidence": {
+                "identity": [
+                  {
+                    "field": "name",
+                    "confidence": 0.8,
+                    "concludedValue": "mbedtls-integration",
+                    "methods": [
+                      {
+                        "technique": "manifest-analysis",
+                        "confidence": 0.6,
+                        "value": "CONFIG_MBEDTLS"
+                      },
+                      {
+                        "technique": "manifest-analysis",
+                        "confidence": 0.8,
+                        "value": "modules/mbedtls/libmodules__mbedtls.a(zephyr_entropy.c.obj)"
+                      },
+                      {
+                        "technique": "manifest-analysis",
+                        "confidence": 0.8,
+                        "value": "modules/mbedtls/zephyr_entropy.c"
+                      }
+                    ]
+                  }
+                ],
+                "occurrences": [
+                  {
+                    "location": "spdx/build.spdx",
+                    "line": 2293
+                  },
+                  {
+                    "location": "zephyr/.config",
+                    "line": 388
+                  },
+                  {
+                    "location": "zephyr/zephyr.map",
+                    "line": 8341
+                  }
+                ]
+              },
+              "properties": [
+                {
+                  "name": "rollcall:evidence",
+                  "value": "{\"field\":\"name\",\"technique\":\"manifest-analysis\",\"source\":\"kconfig\",\"occurrence\":{\"location\":\"zephyr/.config\",\"line\":388},\"value\":\"CONFIG_MBEDTLS\",\"confidence\":6000}"
+                },
+                {
+                  "name": "rollcall:evidence",
+                  "value": "{\"field\":\"name\",\"technique\":\"manifest-analysis\",\"source\":\"linker-map\",\"occurrence\":{\"location\":\"zephyr/zephyr.map\",\"line\":8341},\"value\":\"modules/mbedtls/libmodules__mbedtls.a(zephyr_entropy.c.obj)\",\"confidence\":8000}"
+                },
+                {
+                  "name": "rollcall:evidence",
+                  "value": "{\"field\":\"name\",\"technique\":\"manifest-analysis\",\"source\":\"west-spdx\",\"occurrence\":{\"location\":\"spdx/build.spdx\",\"line\":2293},\"value\":\"modules/mbedtls/zephyr_entropy.c\",\"confidence\":8000}"
+                },
+                {
+                  "name": "rollcall:evidence-source",
+                  "value": "kconfig"
+                },
+                {
+                  "name": "rollcall:evidence-source",
+                  "value": "linker-map"
+                },
+                {
+                  "name": "rollcall:evidence-source",
+                  "value": "west-spdx"
+                }
+              ]
+            },
+            {
+              "type": "library",
+              "bom-ref": "component:1b237592a4edeb2ceb49f0951d0862c9",
+              "name": "networking-core",
+              "version": "4.4.2",
+              "supplier": {
+                "name": "zephyrproject"
+              },
+              "purl": "pkg:github/zephyrproject-rtos/zephyr@v4.4.2#subsys/net/conn_mgr",
+              "evidence": {
+                "identity": [
+                  {
+                    "field": "name",
+                    "confidence": 0.8,
+                    "concludedValue": "networking-core",
+                    "methods": [
+                      {
+                        "technique": "manifest-analysis",
+                        "confidence": 0.6,
+                        "value": "CONFIG_NETWORKING"
+                      },
+                      {
+                        "technique": "manifest-analysis",
+                        "confidence": 0.8,
+                        "value": "zephyr/subsys/net/conn_mgr/libsubsys__net__conn_mgr.a(conn_mgr_connectivity.c.obj)"
+                      },
+                      {
+                        "technique": "manifest-analysis",
+                        "confidence": 0.8,
+                        "value": "subsys/net/conn_mgr/conn_mgr_connectivity.c"
+                      }
+                    ]
+                  }
+                ],
+                "occurrences": [
+                  {
+                    "location": "spdx/build.spdx",
+                    "line": 2795
+                  },
+                  {
+                    "location": "zephyr/.config",
+                    "line": 2056
+                  },
+                  {
+                    "location": "zephyr/zephyr.map",
+                    "line": 7958
+                  }
+                ]
+              },
+              "properties": [
+                {
+                  "name": "rollcall:evidence",
+                  "value": "{\"field\":\"name\",\"technique\":\"manifest-analysis\",\"source\":\"kconfig\",\"occurrence\":{\"location\":\"zephyr/.config\",\"line\":2056},\"value\":\"CONFIG_NETWORKING\",\"confidence\":6000}"
+                },
+                {
+                  "name": "rollcall:evidence",
+                  "value": "{\"field\":\"name\",\"technique\":\"manifest-analysis\",\"source\":\"linker-map\",\"occurrence\":{\"location\":\"zephyr/zephyr.map\",\"line\":7958},\"value\":\"zephyr/subsys/net/conn_mgr/libsubsys__net__conn_mgr.a(conn_mgr_connectivity.c.obj)\",\"confidence\":8000}"
+                },
+                {
+                  "name": "rollcall:evidence",
+                  "value": "{\"field\":\"name\",\"technique\":\"manifest-analysis\",\"source\":\"west-spdx\",\"occurrence\":{\"location\":\"spdx/build.spdx\",\"line\":2795},\"value\":\"subsys/net/conn_mgr/conn_mgr_connectivity.c\",\"confidence\":8000}"
+                },
+                {
+                  "name": "rollcall:evidence-source",
+                  "value": "kconfig"
+                },
+                {
+                  "name": "rollcall:evidence-source",
+                  "value": "linker-map"
+                },
+                {
+                  "name": "rollcall:evidence-source",
+                  "value": "west-spdx"
+                }
+              ]
+            },
+            {
+              "type": "library",
+              "bom-ref": "component:ba427468b27b7a973f879bf1f2ac4a03",
+              "name": "shell",
+              "version": "4.4.2",
+              "supplier": {
+                "name": "zephyrproject"
+              },
+              "purl": "pkg:github/zephyrproject-rtos/zephyr@v4.4.2#subsys/shell",
+              "evidence": {
+                "identity": [
+                  {
+                    "field": "name",
+                    "confidence": 0.8,
+                    "concludedValue": "shell",
+                    "methods": [
+                      {
+                        "technique": "manifest-analysis",
+                        "confidence": 0.6,
+                        "value": "CONFIG_SHELL"
+                      },
+                      {
+                        "technique": "manifest-analysis",
+                        "confidence": 0.8,
+                        "value": "zephyr/libzephyr.a(cycles.c.obj)"
+                      },
+                      {
+                        "technique": "manifest-analysis",
+                        "confidence": 0.8,
+                        "value": "subsys/shell/modules/kernel_service/cycles.c"
+                      }
+                    ]
+                  }
+                ],
+                "occurrences": [
+                  {
+                    "location": "spdx/build.spdx",
+                    "line": 3351
+                  },
+                  {
+                    "location": "zephyr/.config",
+                    "line": 2685
+                  },
+                  {
+                    "location": "zephyr/zephyr.map",
+                    "line": 6246
+                  }
+                ]
+              },
+              "properties": [
+                {
+                  "name": "rollcall:evidence",
+                  "value": "{\"field\":\"name\",\"technique\":\"manifest-analysis\",\"source\":\"kconfig\",\"occurrence\":{\"location\":\"zephyr/.config\",\"line\":2685},\"value\":\"CONFIG_SHELL\",\"confidence\":6000}"
+                },
+                {
+                  "name": "rollcall:evidence",
+                  "value": "{\"field\":\"name\",\"technique\":\"manifest-analysis\",\"source\":\"linker-map\",\"occurrence\":{\"location\":\"zephyr/zephyr.map\",\"line\":6246},\"value\":\"zephyr/libzephyr.a(cycles.c.obj)\",\"confidence\":8000}"
+                },
+                {
+                  "name": "rollcall:evidence",
+                  "value": "{\"field\":\"name\",\"technique\":\"manifest-analysis\",\"source\":\"west-spdx\",\"occurrence\":{\"location\":\"spdx/build.spdx\",\"line\":3351},\"value\":\"subsys/shell/modules/kernel_service/cycles.c\",\"confidence\":8000}"
+                },
+                {
+                  "name": "rollcall:evidence-source",
+                  "value": "kconfig"
+                },
+                {
+                  "name": "rollcall:evidence-source",
+                  "value": "linker-map"
+                },
+                {
+                  "name": "rollcall:evidence-source",
+                  "value": "west-spdx"
+                }
+              ]
+            },
+            {
+              "type": "library",
+              "bom-ref": "component:6a92737e34472883a9e9b319a6091297",
+              "name": "tls-sockets",
+              "version": "4.4.2",
+              "supplier": {
+                "name": "zephyrproject"
+              },
+              "purl": "pkg:github/zephyrproject-rtos/zephyr@v4.4.2#subsys/net/lib/sockets/sockets_tls.c",
+              "evidence": {
+                "identity": [
+                  {
+                    "field": "name",
+                    "confidence": 0.8,
+                    "concludedValue": "tls-sockets",
+                    "methods": [
+                      {
+                        "technique": "manifest-analysis",
+                        "confidence": 0.6,
+                        "value": "CONFIG_NET_SOCKETS_SOCKOPT_TLS"
+                      },
+                      {
+                        "technique": "manifest-analysis",
+                        "confidence": 0.6,
+                        "value": "CONFIG_TLS_CREDENTIALS"
+                      },
+                      {
+                        "technique": "manifest-analysis",
+                        "confidence": 0.8,
+                        "value": "zephyr/subsys/net/libsubsys__net.a(sockets_tls.c.obj)"
+                      },
+                      {
+                        "technique": "manifest-analysis",
+                        "confidence": 0.8,
+                        "value": "subsys/net/lib/sockets/sockets_tls.c"
+                      }
+                    ]
+                  }
+                ],
+                "occurrences": [
+                  {
+                    "location": "spdx/build.spdx",
+                    "line": 2724
+                  },
+                  {
+                    "location": "zephyr/.config",
+                    "line": 2532
+                  },
+                  {
+                    "location": "zephyr/.config",
+                    "line": 2562
+                  },
+                  {
+                    "location": "zephyr/zephyr.map",
+                    "line": 6843
+                  }
+                ]
+              },
+              "properties": [
+                {
+                  "name": "rollcall:evidence",
+                  "value": "{\"field\":\"name\",\"technique\":\"manifest-analysis\",\"source\":\"kconfig\",\"occurrence\":{\"location\":\"zephyr/.config\",\"line\":2532},\"value\":\"CONFIG_NET_SOCKETS_SOCKOPT_TLS\",\"confidence\":6000}"
+                },
+                {
+                  "name": "rollcall:evidence",
+                  "value": "{\"field\":\"name\",\"technique\":\"manifest-analysis\",\"source\":\"kconfig\",\"occurrence\":{\"location\":\"zephyr/.config\",\"line\":2562},\"value\":\"CONFIG_TLS_CREDENTIALS\",\"confidence\":6000}"
+                },
+                {
+                  "name": "rollcall:evidence",
+                  "value": "{\"field\":\"name\",\"technique\":\"manifest-analysis\",\"source\":\"linker-map\",\"occurrence\":{\"location\":\"zephyr/zephyr.map\",\"line\":6843},\"value\":\"zephyr/subsys/net/libsubsys__net.a(sockets_tls.c.obj)\",\"confidence\":8000}"
+                },
+                {
+                  "name": "rollcall:evidence",
+                  "value": "{\"field\":\"name\",\"technique\":\"manifest-analysis\",\"source\":\"west-spdx\",\"occurrence\":{\"location\":\"spdx/build.spdx\",\"line\":2724},\"value\":\"subsys/net/lib/sockets/sockets_tls.c\",\"confidence\":8000}"
+                },
+                {
+                  "name": "rollcall:evidence-source",
+                  "value": "kconfig"
+                },
+                {
+                  "name": "rollcall:evidence-source",
+                  "value": "linker-map"
+                },
+                {
+                  "name": "rollcall:evidence-source",
+                  "value": "west-spdx"
+                }
+              ]
+            },
+            {
+              "type": "library",
+              "bom-ref": "component:0f83c461a4c8f4bfd3961541ae4f10d6",
+              "name": "usb-device",
+              "version": "4.4.2",
+              "supplier": {
+                "name": "zephyrproject"
+              },
+              "purl": "pkg:github/zephyrproject-rtos/zephyr@v4.4.2#subsys/usb/device",
+              "evidence": {
+                "identity": [
+                  {
+                    "field": "name",
+                    "confidence": 0.8,
+                    "concludedValue": "usb-device",
+                    "methods": [
+                      {
+                        "technique": "manifest-analysis",
+                        "confidence": 0.6,
+                        "value": "CONFIG_USB_DEVICE_STACK_NEXT"
+                      },
+                      {
+                        "technique": "manifest-analysis",
+                        "confidence": 0.8,
+                        "value": "zephyr/subsys/usb/device_next/libsubsys__usb__device_next.a(usbd_cdc_ncm.c.obj)"
+                      },
+                      {
+                        "technique": "manifest-analysis",
+                        "confidence": 0.8,
+                        "value": "subsys/usb/device_next/class/usbd_cdc_ncm.c"
+                      }
+                    ]
+                  }
+                ],
+                "occurrences": [
+                  {
+                    "location": "spdx/build.spdx",
+                    "line": 3022
+                  },
+                  {
+                    "location": "zephyr/.config",
+                    "line": 2814
+                  },
+                  {
+                    "location": "zephyr/zephyr.map",
+                    "line": 6705
+                  }
+                ]
+              },
+              "properties": [
+                {
+                  "name": "rollcall:evidence",
+                  "value": "{\"field\":\"name\",\"technique\":\"manifest-analysis\",\"source\":\"kconfig\",\"occurrence\":{\"location\":\"zephyr/.config\",\"line\":2814},\"value\":\"CONFIG_USB_DEVICE_STACK_NEXT\",\"confidence\":6000}"
+                },
+                {
+                  "name": "rollcall:evidence",
+                  "value": "{\"field\":\"name\",\"technique\":\"manifest-analysis\",\"source\":\"linker-map\",\"occurrence\":{\"location\":\"zephyr/zephyr.map\",\"line\":6705},\"value\":\"zephyr/subsys/usb/device_next/libsubsys__usb__device_next.a(usbd_cdc_ncm.c.obj)\",\"confidence\":8000}"
+                },
+                {
+                  "name": "rollcall:evidence",
+                  "value": "{\"field\":\"name\",\"technique\":\"manifest-analysis\",\"source\":\"west-spdx\",\"occurrence\":{\"location\":\"spdx/build.spdx\",\"line\":3022},\"value\":\"subsys/usb/device_next/class/usbd_cdc_ncm.c\",\"confidence\":8000}"
+                },
+                {
+                  "name": "rollcall:evidence-source",
+                  "value": "kconfig"
+                },
+                {
+                  "name": "rollcall:evidence-source",
+                  "value": "linker-map"
+                },
+                {
+                  "name": "rollcall:evidence-source",
+                  "value": "west-spdx"
+                }
+              ]
+            }
           ]
         }
       ]
@@ -1200,6 +1899,42 @@
         "component:b8c2e37d234e28525fd088021754953a",
         "component:d20c1d3543584ba8f0727df9dfefb180"
       ]
+    },
+    {
+      "ref": "component:b74fc8db84844255035d82a9cd068cff",
+      "dependsOn": []
+    },
+    {
+      "ref": "component:cd46bf30213b0423cccee4a994aa4f3d",
+      "dependsOn": []
+    },
+    {
+      "ref": "component:658da2abb29b8cb2fd11db92b5e7d0ab",
+      "dependsOn": []
+    },
+    {
+      "ref": "component:8ce33c3a35cc0608dadd988c14548fb7",
+      "dependsOn": []
+    },
+    {
+      "ref": "component:7a36b8089dddda73ca4677fa4692a4d4",
+      "dependsOn": []
+    },
+    {
+      "ref": "component:1b237592a4edeb2ceb49f0951d0862c9",
+      "dependsOn": []
+    },
+    {
+      "ref": "component:ba427468b27b7a973f879bf1f2ac4a03",
+      "dependsOn": []
+    },
+    {
+      "ref": "component:6a92737e34472883a9e9b319a6091297",
+      "dependsOn": []
+    },
+    {
+      "ref": "component:0f83c461a4c8f4bfd3961541ae4f10d6",
+      "dependsOn": []
     }
   ]
 }

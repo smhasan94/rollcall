@@ -42,6 +42,18 @@ use crate::model::{
 use crate::warning::Warning;
 
 pub use manifest::{BlobEntry, BlobManifest};
+
+impl BlobIngest {
+    /// The blob images, in manifest order.
+    pub fn images(&self) -> impl Iterator<Item = &Image> {
+        self.blobs.iter().map(|b| &b.image)
+    }
+
+    /// The blob images without their owners, in manifest order.
+    pub fn into_images(self) -> Vec<Image> {
+        self.blobs.into_iter().map(|b| b.image).collect()
+    }
+}
 pub use recognise::{Recognised, recognise, type_from_extension};
 
 /// Evidence source for values read from the manifest.
@@ -127,11 +139,21 @@ impl BlobError {
     }
 }
 
+/// One manifest entry as a `blob` image, with the image it belongs to.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct BlobImage {
+    /// The `blob` image.
+    pub image: Image,
+    /// The name of the image the manifest says it belongs to (`image:`), or `None` for the
+    /// product itself.
+    pub owner: Option<String>,
+}
+
 /// The result of [`load`].
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct BlobIngest {
-    /// One `blob` image per manifest entry, in manifest order.
-    pub images: Vec<Image>,
+    /// One blob per manifest entry, in manifest order.
+    pub blobs: Vec<BlobImage>,
     /// Entries missing a version or supplier, in manifest order, each located `blobs[N]`
     /// (the caller names the manifest file).
     pub warnings: Vec<Warning>,
@@ -170,7 +192,7 @@ pub fn load(path: &Path) -> Result<BlobIngest, BlobError> {
         path: path.to_owned(),
     })?;
     let manifest = manifest::parse(&text)?;
-    let mut images = Vec::with_capacity(manifest.blobs.len());
+    let mut blobs = Vec::with_capacity(manifest.blobs.len());
     let mut warnings = Vec::new();
     let mut seen = BTreeSet::new();
     for (index, entry) in manifest.blobs.iter().enumerate() {
@@ -183,10 +205,13 @@ pub fn load(path: &Path) -> Result<BlobIngest, BlobError> {
             };
             return Err(BlobError::Duplicate { index, name });
         }
-        images.push(image);
+        blobs.push(BlobImage {
+            image,
+            owner: entry.image.clone(),
+        });
         warnings.append(&mut entry_warnings);
     }
-    Ok(BlobIngest { images, warnings })
+    Ok(BlobIngest { blobs, warnings })
 }
 
 /// A file name as an evidence occurrence, when it is a valid relative path.

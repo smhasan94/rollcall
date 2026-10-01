@@ -8,16 +8,18 @@
 
 mod common;
 
-use std::collections::BTreeSet;
+use std::collections::{BTreeMap, BTreeSet};
 use std::fs;
 use std::path::{Path, PathBuf};
 
 use common::GOLDEN_TIMESTAMP;
 use rollcall_core::cyclonedx::{self, Timestamp, WriteOptions, validate_cyclonedx_1_6};
+use rollcall_core::linker_map::{self, LinkerMapError};
 use rollcall_core::merge::{self, ProductSpec};
 use rollcall_core::model::{Component, ComponentKind, EvidenceField, ImageKind, Product};
+use rollcall_core::subsystems;
 use rollcall_core::zephyr::{
-    self, BuildInfoError, Ingest, IngestOptions, KconfigError, SpdxError, WestListError,
+    self, BuildInfoError, Ingest, IngestOptions, Kconfig, KconfigError, SpdxError, WestListError,
     ZephyrError, build_info, kconfig, spdx, west_list,
 };
 use serde_json::Value;
@@ -114,6 +116,7 @@ fn copy_build_to_tempdir(variant: &str, image: &str) -> tempfile::TempDir {
         "spdx/modules-deps.spdx",
         "spdx/zephyr.spdx",
         "zephyr/.config",
+        "zephyr/zephyr.map",
     ] {
         let to = dir.path().join(rel);
         fs::create_dir_all(to.parent().unwrap()).unwrap();
@@ -420,6 +423,7 @@ fn copy_inputs_into(variant: &str, image: &str, to: &Path) {
         "spdx/modules-deps.spdx",
         "spdx/zephyr.spdx",
         "zephyr/.config",
+        "zephyr/zephyr.map",
     ] {
         let dest = to.join(rel);
         fs::create_dir_all(dest.parent().unwrap()).unwrap();
@@ -943,6 +947,7 @@ fn missing_optional_files_warn_and_still_validate() {
         "spdx/build.spdx",
         "spdx/modules-deps.spdx",
         "zephyr/.config",
+        "zephyr/zephyr.map",
     ] {
         fs::remove_file(dir.path().join(rel)).unwrap();
     }
@@ -955,6 +960,7 @@ fn missing_optional_files_warn_and_still_validate() {
             "spdx/build.spdx",
             "spdx/modules-deps.spdx",
             "zephyr/.config",
+            "zephyr/zephyr.map",
             "west list",
         ]
     );
@@ -1217,4 +1223,888 @@ fn old_mbedtls_fixture_matches_golden() {
         &cyclonedx::write(&out.product, &options).unwrap(),
     );
     check_golden("old-mbedtls.model.json", &out.product.to_json().unwrap());
+}
+
+// --- The subsystem split (SHA-108) ------------------------------------------------------------
+
+/// Every real build with a linker map: its directory under `fixtures/` (as the hand-audited
+/// list names it) and its path.
+fn split_builds() -> Vec<(String, PathBuf)> {
+    let mut out: Vec<(String, PathBuf)> = APP_BUILDS
+        .into_iter()
+        .chain(MCUBOOT_BUILDS)
+        .map(|(variant, image)| {
+            (
+                format!("zephyr/{variant}/{image}"),
+                build_dir(variant, image),
+            )
+        })
+        .collect();
+    for image in ["mbedtls", "mcuboot"] {
+        out.push((
+            format!("zephyr-old-mbedtls/old-mbedtls/{image}"),
+            old_mbedtls_variant_dir().join(image),
+        ));
+    }
+    for variant in ["smp-serial", "smp-bt"] {
+        for image in ["smp_svr", "mcuboot"] {
+            out.push((
+                format!("zephyr-smp/{variant}/{image}"),
+                smp_root().join(variant).join(image),
+            ));
+        }
+    }
+    out.sort();
+    out
+}
+
+/// The `zephyr` component of the product's (only) image.
+fn zephyr_component(product: &Product) -> &Component {
+    product
+        .images
+        .iter()
+        .flat_map(|i| &i.components)
+        .find(|c| c.name == "zephyr")
+        .expect("zephyr component")
+}
+
+/// The names of `zephyr`'s subcomponents, sorted.
+fn subsystem_names(product: &Product) -> Vec<String> {
+    zephyr_component(product)
+        .components
+        .iter()
+        .map(|c| c.name.clone())
+        .collect()
+}
+
+/// `tests/data/zephyr-subsystems.txt`: build → hand-audited subsystem names.
+fn hand_audited() -> BTreeMap<String, Vec<String>> {
+    let path = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/data/zephyr-subsystems.txt");
+    fs::read_to_string(path)
+        .unwrap()
+        .lines()
+        .filter(|l| !l.starts_with('#') && !l.trim().is_empty())
+        .map(|l| {
+            let (build, names) = l.split_once(':').unwrap();
+            (
+                build.to_owned(),
+                names.split_whitespace().map(str::to_owned).collect(),
+            )
+        })
+        .collect()
+}
+
+fn config_of(dir: &Path) -> Kconfig {
+    kconfig::parse(&fs::read_to_string(dir.join("zephyr/.config")).unwrap()).unwrap()
+}
+
+#[test]
+fn every_fixture_subsystem_list_matches_hand_audited_list() {
+    let audited = hand_audited();
+    let builds = split_builds();
+    assert_eq!(
+        audited.keys().cloned().collect::<Vec<_>>(),
+        builds
+            .iter()
+            .map(|(name, _)| name.clone())
+            .collect::<Vec<_>>(),
+        "the hand-audited list must cover every fixture build"
+    );
+    for (name, dir) in &builds {
+        let out = zephyr::ingest(&IngestOptions::new(dir)).unwrap();
+        let got = subsystem_names(&out.product);
+        let want = &audited[name];
+        assert_eq!(&got, want, "{name}");
+        assert_eq!(got.len(), want.len(), "{name}: count");
+        // On the fixtures nothing enabled is dropped and nothing linked is left over.
+        assert!(out.notes.is_empty(), "{name}: {:#?}", out.notes);
+    }
+    // The audited counts, spelled out.
+    let counts: BTreeMap<&str, usize> =
+        audited.iter().map(|(b, n)| (b.as_str(), n.len())).collect();
+    assert_eq!(
+        counts,
+        BTreeMap::from([
+            ("zephyr-old-mbedtls/old-mbedtls/mbedtls", 2),
+            ("zephyr-old-mbedtls/old-mbedtls/mcuboot", 2),
+            ("zephyr/baseline/mcuboot", 2),
+            ("zephyr/baseline/with_mcuboot", 0),
+            ("zephyr/bt/beacon", 3),
+            ("zephyr/bt/mcuboot", 2),
+            ("zephyr/tls/http_server", 9),
+            ("zephyr/tls/mcuboot", 2),
+            ("zephyr-smp/smp-bt/mcuboot", 2),
+            ("zephyr-smp/smp-bt/smp_svr", 5),
+            ("zephyr-smp/smp-serial/mcuboot", 2),
+            ("zephyr-smp/smp-serial/smp_svr", 3),
+        ])
+    );
+}
+
+/// The line of `text` (1-based) and the column-0 output section it is in.
+fn map_context(text: &str, line: u32) -> (String, String) {
+    let lines: Vec<&str> = text.lines().collect();
+    let index = usize::try_from(line).unwrap() - 1;
+    let header = lines
+        .iter()
+        .position(|l| *l == "Linker script and memory map")
+        .unwrap();
+    assert!(index > header, "line {line} is before the memory map");
+    let output = lines[..index]
+        .iter()
+        .rev()
+        .find(|l| !l.is_empty() && !l.starts_with(char::is_whitespace) && !l.starts_with("LOAD"))
+        .map(|l| l.split_whitespace().next().unwrap().to_owned())
+        .unwrap_or_default();
+    (lines[index].to_owned(), output)
+}
+
+/// An independent, naive check of every emitted subsystem against the raw files: its
+/// `linker-map` evidence cites a map line in an allocated output section that places the cited
+/// object with a non-zero size; its `west-spdx` evidence cites a `GENERATED_FROM` line from
+/// that object's archive to a source under one of the subsystem's table paths; its `kconfig`
+/// evidence cites a `=y` line.
+#[test]
+fn no_emitted_subsystem_lacks_linked_objects_on_any_fixture() {
+    let table = subsystems::builtin().unwrap();
+    let mut checked = 0;
+    for (name, dir) in split_builds() {
+        let out = zephyr::ingest(&IngestOptions::new(&dir)).unwrap();
+        let map = fs::read_to_string(dir.join("zephyr/zephyr.map")).unwrap();
+        let build_spdx = fs::read_to_string(dir.join("spdx/build.spdx")).unwrap();
+        let build_lines: Vec<&str> = build_spdx.lines().collect();
+        let config: Vec<String> = fs::read_to_string(dir.join("zephyr/.config"))
+            .unwrap()
+            .lines()
+            .map(str::to_owned)
+            .collect();
+        for sub in &zephyr_component(&out.product).components {
+            let entry = table.get(&sub.name).unwrap();
+            let at = |source: &str| -> Vec<(String, u32)> {
+                sub.evidence
+                    .iter()
+                    .filter(|e| e.source() == source)
+                    .map(|e| {
+                        (
+                            e.value.clone(),
+                            e.occurrence.as_ref().and_then(|o| o.line()).unwrap(),
+                        )
+                    })
+                    .collect()
+            };
+            let [(object, line)] = at("linker-map").try_into().unwrap_or_else(|v: Vec<_>| {
+                panic!("{name}: {}: linker-map evidence {v:?}", sub.name)
+            });
+            let (text, output) = map_context(&map, line);
+            assert!(
+                text.contains(&object),
+                "{name}:{line}: {text:?} lacks {object}"
+            );
+            assert!(
+                !output.starts_with(".debug") && output != ".comment" && output != "/DISCARD/",
+                "{name}:{line}: in {output}"
+            );
+            let tokens: Vec<&str> = text.split_whitespace().collect();
+            let first_hex = tokens.iter().position(|t| t.starts_with("0x")).unwrap();
+            let size =
+                u64::from_str_radix(tokens[first_hex + 1].trim_start_matches("0x"), 16).unwrap();
+            assert!(size > 0, "{name}:{line}: {text:?}");
+
+            let [(source, spdx_line)] = at("west-spdx").try_into().unwrap_or_else(|v: Vec<_>| {
+                panic!("{name}: {}: west-spdx evidence {v:?}", sub.name)
+            });
+            let relationship = build_lines[usize::try_from(spdx_line).unwrap() - 1];
+            assert!(
+                relationship.contains(" GENERATED_FROM DocumentRef-zephyr:"),
+                "{relationship}"
+            );
+            let subject = relationship.split_whitespace().nth(1).unwrap();
+            let file_name = build_lines
+                .windows(2)
+                .find(|w| w[1] == format!("SPDXID: {subject}"))
+                .map(|w| w[0].trim_start_matches("FileName: ./").to_owned())
+                .unwrap();
+            let (archive, member) = object.trim_end_matches(')').rsplit_once('(').unwrap();
+            assert_eq!(file_name, archive, "{name}: {object}");
+            assert_eq!(
+                Some(member.trim_end_matches(".obj")),
+                source.rsplit('/').next(),
+                "{name}: {object} vs {source}"
+            );
+            assert!(
+                entry
+                    .sources
+                    .iter()
+                    .any(|s| source == *s || source.starts_with(&format!("{s}/"))),
+                "{name}: {source} is not under {:?}",
+                entry.sources
+            );
+            let symbols = at("kconfig");
+            assert!(!symbols.is_empty(), "{name}: {}", sub.name);
+            for (symbol, line) in symbols {
+                assert!(entry.symbols.contains(&symbol));
+                assert_eq!(
+                    config[usize::try_from(line).unwrap() - 1],
+                    format!("{symbol}=y"),
+                    "{name}"
+                );
+            }
+            checked += 1;
+        }
+    }
+    // 34 = the sum of the hand-audited counts.
+    assert_eq!(checked, 34);
+}
+
+/// The archives of the objects the parser says are linked equal those a naive scan of the
+/// memory map finds placed with a non-zero size outside `/DISCARD/` and the debug sections.
+#[test]
+fn every_fixture_map_parses_and_links_expected_archives() {
+    for (name, dir) in split_builds() {
+        let text = fs::read_to_string(dir.join("zephyr/zephyr.map")).unwrap();
+        let map = linker_map::parse(&text).unwrap_or_else(|e| panic!("{name}: {e}"));
+        let parsed: BTreeSet<String> = map
+            .linked_objects()
+            .filter_map(|(o, _)| o.archive.clone())
+            .filter(|a| !a.starts_with('/'))
+            .collect();
+        let mut naive = BTreeSet::new();
+        let mut output = "";
+        let mut in_map = false;
+        for line in text.lines() {
+            if line == "Linker script and memory map" {
+                in_map = true;
+                continue;
+            }
+            if !in_map {
+                continue;
+            }
+            if !line.is_empty() && !line.starts_with(char::is_whitespace) {
+                if !line.starts_with("LOAD") {
+                    output = line.split_whitespace().next().unwrap_or("");
+                }
+                continue;
+            }
+            if output == "/DISCARD/"
+                || output.starts_with(".debug")
+                || [".comment", ".ARM.attributes"].contains(&output)
+            {
+                continue;
+            }
+            let tokens: Vec<&str> = line.split_whitespace().collect();
+            let Some(i) = tokens.iter().position(|t| t.starts_with("0x")) else {
+                continue;
+            };
+            let (Some(size), Some(file)) = (tokens.get(i + 1), tokens.get(i + 2)) else {
+                continue;
+            };
+            if !size.starts_with("0x") || u64::from_str_radix(&size[2..], 16).unwrap() == 0 {
+                continue;
+            }
+            if let Some((archive, _)) = file.rsplit_once('(')
+                && !archive.starts_with('/')
+            {
+                naive.insert(archive.to_owned());
+            }
+        }
+        assert!(!parsed.is_empty(), "{name}");
+        assert_eq!(parsed, naive, "{name}");
+        assert!(
+            parsed.contains("zephyr/libzephyr.a") && parsed.contains("zephyr/kernel/libkernel.a"),
+            "{name}: {parsed:?}"
+        );
+    }
+}
+
+/// The subsystems the BT-on fixture (`bt/beacon`) has and the BT-off one
+/// (`baseline/with_mcuboot`) lacks. The two are different Zephyr samples: `beacon`'s
+/// `prj.conf` sets `CONFIG_LOG=y` as well as `CONFIG_BT=y`, so `logging` is in the delta too,
+/// explained by its own symbol.
+const BT_DELTA: [&str; 3] = ["bluetooth-controller", "bluetooth-host", "logging"];
+
+#[test]
+fn bt_on_vs_bt_off_subsystem_delta_is_bluetooth_and_kconfig_explained() {
+    let table = subsystems::builtin().unwrap();
+    let on = ingest_fixture("bt", "beacon", true, false);
+    let off = ingest_fixture("baseline", "with_mcuboot", true, false);
+    let on_names: BTreeSet<String> = subsystem_names(&on.product).into_iter().collect();
+    let off_names: BTreeSet<String> = subsystem_names(&off.product).into_iter().collect();
+    let added: Vec<&str> = on_names
+        .difference(&off_names)
+        .map(String::as_str)
+        .collect();
+    let removed: Vec<&String> = off_names.difference(&on_names).collect();
+    assert_eq!(added, BT_DELTA);
+    assert!(removed.is_empty(), "{removed:?}");
+    // The Bluetooth subcomponents are in the BT-on SBOM only.
+    let bluetooth: Vec<&str> = added
+        .iter()
+        .copied()
+        .filter(|n| n.starts_with("bluetooth-"))
+        .collect();
+    assert_eq!(bluetooth, ["bluetooth-controller", "bluetooth-host"]);
+    // Every member of the delta is explained by its own table symbols differing.
+    let (on_config, off_config) = (
+        config_of(&build_dir("bt", "beacon")),
+        config_of(&build_dir("baseline", "with_mcuboot")),
+    );
+    for name in &added {
+        let entry = table.get(name).unwrap();
+        assert!(
+            entry
+                .symbols
+                .iter()
+                .any(|s| on_config.is_set(s) && !off_config.is_set(s)),
+            "{name} is not explained by {:?}",
+            entry.symbols
+        );
+    }
+    // Apart from the subcomponents, zephyr is the same component in both.
+    let (mut a, mut b) = (
+        zephyr_component(&on.product).clone(),
+        zephyr_component(&off.product).clone(),
+    );
+    a.components.clear();
+    b.components.clear();
+    assert_eq!(
+        (&a.name, &a.version, &a.purl, &a.cpe, &a.supplier),
+        (&b.name, &b.version, &b.purl, &b.cpe, &b.supplier)
+    );
+    assert_eq!(libraries(&on.product), libraries(&off.product));
+}
+
+#[test]
+fn bt_and_baseline_agree_on_every_subsystem_with_identical_kconfig() {
+    let table = subsystems::builtin().unwrap();
+    let on = subsystem_names(&ingest_fixture("bt", "beacon", false, false).product);
+    let off = subsystem_names(&ingest_fixture("baseline", "with_mcuboot", false, false).product);
+    let (on_config, off_config) = (
+        config_of(&build_dir("bt", "beacon")),
+        config_of(&build_dir("baseline", "with_mcuboot")),
+    );
+    let mut compared = 0;
+    for entry in &table.subsystems {
+        let same = entry
+            .symbols
+            .iter()
+            .all(|s| on_config.is_set(s) == off_config.is_set(s));
+        if same {
+            assert_eq!(
+                on.contains(&entry.name),
+                off.contains(&entry.name),
+                "{}",
+                entry.name
+            );
+            compared += 1;
+        }
+    }
+    assert_eq!(compared, table.subsystems.len() - BT_DELTA.len());
+}
+
+/// Blanks every memory-map line placing an input section from an archive whose path contains
+/// one of `dirs` (and the wrapped name line before it), keeping every other line where it is.
+/// Returns the blanked lines, joined back to one line each.
+fn unlink(map: &str, dirs: &[&str]) -> (String, Vec<String>) {
+    let mut lines: Vec<String> = map.lines().map(str::to_owned).collect();
+    let header = lines
+        .iter()
+        .position(|l| l == "Linker script and memory map")
+        .unwrap();
+    let mut removed = Vec::new();
+    for i in header + 1..lines.len() {
+        let hit = lines[i].contains(".a(") && dirs.iter().any(|d| lines[i].contains(d));
+        if !hit {
+            continue;
+        }
+        let tokens = lines[i].split_whitespace().count();
+        let mut joined = lines[i].trim().to_owned();
+        if tokens == 3
+            && lines[i - 1].starts_with(' ')
+            && lines[i - 1].split_whitespace().count() == 1
+        {
+            joined = format!("{} {joined}", lines[i - 1].trim());
+            lines[i - 1].clear();
+        }
+        lines[i].clear();
+        removed.push(format!(" {joined}"));
+    }
+    let mut text = lines.join("\n");
+    text.push('\n');
+    (text, removed)
+}
+
+/// A BT-off twin of `bt/beacon`, derived in a temporary directory: every `CONFIG_BT*` symbol
+/// unset in `.config` and every Bluetooth input section removed from the map's memory map
+/// (both line-for-line, so every other line number stays). The real fixtures cannot give this
+/// (no BT-off build of the beacon sample exists); with it, the whole SBOMs differ in exactly
+/// the Bluetooth subcomponents.
+#[test]
+fn bt_off_twin_differs_from_bt_on_exactly_in_the_bluetooth_subcomponents() {
+    let dir = copy_build_to_tempdir("bt", "beacon");
+    let config_path = dir.path().join("zephyr/.config");
+    let config: Vec<String> = fs::read_to_string(&config_path)
+        .unwrap()
+        .lines()
+        .map(|l| match l.split_once('=') {
+            Some((symbol, _)) if symbol.starts_with("CONFIG_BT") => {
+                format!("# {symbol} is not set")
+            }
+            _ => l.to_owned(),
+        })
+        .collect();
+    fs::write(&config_path, config.join("\n") + "\n").unwrap();
+    let map_path = dir.path().join("zephyr/zephyr.map");
+    let (map, removed) = unlink(
+        &fs::read_to_string(&map_path).unwrap(),
+        &["zephyr/subsys/bluetooth/"],
+    );
+    assert!(!removed.is_empty());
+    fs::write(&map_path, map).unwrap();
+
+    let on = ingest_dir(copy_build_to_tempdir("bt", "beacon").path(), true).unwrap();
+    let off = ingest_dir(dir.path(), true).unwrap();
+    let mut stripped = on.product.clone();
+    let mut images: Vec<_> = stripped.images.into_iter().collect();
+    let mut dropped = Vec::new();
+    for image in &mut images {
+        let mut components: Vec<Component> =
+            std::mem::take(&mut image.components).into_iter().collect();
+        for component in &mut components {
+            let subs: Vec<Component> = std::mem::take(&mut component.components)
+                .into_iter()
+                .collect();
+            for sub in subs {
+                if sub.name.starts_with("bluetooth-") {
+                    dropped.push(sub.name.clone());
+                } else {
+                    component.components.insert(sub);
+                }
+            }
+        }
+        image.components = components.into_iter().collect();
+    }
+    stripped.images = images.into_iter().collect();
+    assert_eq!(dropped, ["bluetooth-controller", "bluetooth-host"]);
+    assert_eq!(subsystem_names(&off.product), ["logging"]);
+    // The models, and the documents byte for byte, are otherwise identical.
+    assert_eq!(stripped, off.product);
+    assert_eq!(render(&stripped), render(&off.product));
+    assert_ne!(render(&on.product), render(&off.product));
+    assert_eq!(on.warnings, off.warnings);
+}
+
+/// Moves the memory-map lines of `dirs`' input sections into `Discarded input sections`, as
+/// `--gc-sections` would have left them.
+fn garbage_collect(map: &str, dirs: &[&str]) -> String {
+    let (text, removed) = unlink(map, dirs);
+    assert!(!removed.is_empty());
+    let header = "Discarded input sections\n\n";
+    let at = text.find(header).unwrap() + header.len();
+    format!("{}{}\n{}", &text[..at], removed.join("\n"), &text[at..])
+}
+
+#[test]
+fn gc_collected_subsystem_is_not_emitted_and_noted() {
+    let dir = copy_build_to_tempdir("bt", "beacon");
+    let map_path = dir.path().join("zephyr/zephyr.map");
+    let original = fs::read_to_string(&map_path).unwrap();
+    // Every bluetooth-host object garbage-collected; CONFIG_BT_HCI_HOST=y untouched.
+    fs::write(
+        &map_path,
+        garbage_collect(
+            &original,
+            &[
+                "zephyr/subsys/bluetooth/host/",
+                "zephyr/subsys/bluetooth/common/",
+            ],
+        ),
+    )
+    .unwrap();
+    let config = config_of(dir.path());
+    assert!(config.is_set("CONFIG_BT_HCI_HOST"));
+    let out = ingest_dir(dir.path(), true).unwrap();
+    assert_eq!(
+        subsystem_names(&out.product),
+        ["bluetooth-controller", "logging"]
+    );
+    let line = config.get("CONFIG_BT_HCI_HOST").unwrap().line;
+    let [note] = out.notes.as_slice() else {
+        panic!("{:#?}", out.notes)
+    };
+    assert_eq!(note.location, "zephyr/zephyr.map");
+    let prefix = format!(
+        "subsystem bluetooth-host is enabled by CONFIG_BT_HCI_HOST (zephyr/.config:{line}) but \
+         no object compiled from subsys/bluetooth/common, subsys/bluetooth/crypto, \
+         subsys/bluetooth/host, subsys/bluetooth/lib, subsys/bluetooth/services was linked ("
+    );
+    assert!(note.message.starts_with(&prefix), "{note}");
+    assert!(
+        note.message
+            .ends_with("in the map without code or data in the image); not emitted")
+    );
+    let count: usize = note.message[prefix.len()..]
+        .split_whitespace()
+        .next()
+        .unwrap()
+        .parse()
+        .unwrap();
+    assert!(count > 0, "{note}");
+    // A note, not a warning: the warnings are those of the untouched build.
+    let untouched = ingest_dir(copy_build_to_tempdir("bt", "beacon").path(), true).unwrap();
+    assert_eq!(out.warnings, untouched.warnings);
+    assert!(untouched.notes.is_empty());
+}
+
+#[test]
+fn missing_map_warns_and_zephyr_is_unsplit() {
+    let dir = copy_build_to_tempdir("bt", "beacon");
+    fs::remove_file(dir.path().join("zephyr/zephyr.map")).unwrap();
+    let out = ingest_dir(dir.path(), true).unwrap();
+    assert!(subsystem_names(&out.product).is_empty());
+    assert!(
+        out.warnings.iter().any(|w| w.to_string()
+            == "zephyr/zephyr.map: not found; zephyr is not split into subsystems")
+    );
+    assert_schema_valid("bt without map", &render(&out.product));
+}
+
+#[test]
+fn non_gnu_ld_map_warns_and_zephyr_is_unsplit() {
+    let dir = copy_build_to_tempdir("bt", "beacon");
+    // An LLVM lld map.
+    fs::write(
+        dir.path().join("zephyr/zephyr.map"),
+        "             VMA              LMA     Size Align Out     In      Symbol\n\
+                       0                0     1000     1 . = 0x1000\n",
+    )
+    .unwrap();
+    let out = ingest_dir(dir.path(), true).unwrap();
+    assert!(subsystem_names(&out.product).is_empty());
+    assert!(out.warnings.iter().any(|w| w.to_string()
+        == "zephyr/zephyr.map: not a GNU ld map file; zephyr is not split into subsystems"));
+    // So is an empty file.
+    fs::write(dir.path().join("zephyr/zephyr.map"), "").unwrap();
+    let out = ingest_dir(dir.path(), true).unwrap();
+    assert!(subsystem_names(&out.product).is_empty());
+}
+
+#[test]
+fn malformed_map_is_error_naming_file() {
+    let dir = copy_build_to_tempdir("bt", "beacon");
+    let path = dir.path().join("zephyr/zephyr.map");
+    let original = fs::read_to_string(&path).unwrap();
+    // A bad hex number in the memory map.
+    let needle = " .text.main     0x";
+    let at = original.find(needle).unwrap() + needle.len();
+    let line = original[..at].lines().count();
+    let mut bad = original.clone();
+    bad.replace_range(at..at + 2, "zz");
+    fs::write(&path, &bad).unwrap();
+    let err = ingest_dir(dir.path(), true).unwrap_err();
+    assert!(
+        matches!(
+            &err,
+            ZephyrError::LinkerMap {
+                source: LinkerMapError::BadNumber { .. },
+                ..
+            }
+        ),
+        "{err}"
+    );
+    let message = err.to_string();
+    assert!(
+        message.starts_with(&path.display().to_string()),
+        "{message}"
+    );
+    assert!(message.contains(&format!("line {line}: ")), "{message}");
+    // Not UTF-8.
+    let mut bytes = original.into_bytes();
+    bytes.extend_from_slice(b"\xff\xfe\n");
+    fs::write(&path, bytes).unwrap();
+    let err = ingest_dir(dir.path(), true).unwrap_err();
+    assert!(matches!(err, ZephyrError::NotUtf8 { .. }), "{err}");
+    assert!(err.to_string().contains("zephyr/zephyr.map"), "{err}");
+    // A directory where the map should be.
+    fs::remove_file(&path).unwrap();
+    fs::create_dir(&path).unwrap();
+    let err = ingest_dir(dir.path(), true).unwrap_err();
+    assert!(err.is_read_error(), "{err}");
+}
+
+#[test]
+fn truncated_fixture_map_never_panics() {
+    let dir = copy_build_to_tempdir("bt", "beacon");
+    let path = dir.path().join("zephyr/zephyr.map");
+    let original = fs::read_to_string(&path).unwrap();
+    for fraction in [0, 1, 3, 10, 50, 90, 99] {
+        let mut cut = original.len() * fraction / 100;
+        while !original.is_char_boundary(cut) {
+            cut -= 1;
+        }
+        fs::write(&path, &original[..cut]).unwrap();
+        // Before the memory-map header: a warning; after: a partial split. Never a panic.
+        let out = ingest_dir(dir.path(), true).unwrap();
+        let names = subsystem_names(&out.product);
+        assert!(
+            names.iter().all(|n| BT_DELTA.contains(&n.as_str())),
+            "{fraction}%: {names:?}"
+        );
+    }
+}
+
+/// One warning, about the missing `.config`, says the split is skipped too.
+#[test]
+fn map_without_config_warns_once_and_zephyr_is_unsplit() {
+    let untouched = ingest_dir(copy_build_to_tempdir("bt", "beacon").path(), true).unwrap();
+    let dir = copy_build_to_tempdir("bt", "beacon");
+    fs::remove_file(dir.path().join("zephyr/.config")).unwrap();
+    let out = ingest_dir(dir.path(), true).unwrap();
+    assert!(subsystem_names(&out.product).is_empty());
+    let mut want = vec![
+        "zephyr/.config: not found; no Kconfig module evidence or SDK version; zephyr is not \
+         split into subsystems"
+            .to_owned(),
+    ];
+    want.extend(untouched.warnings.iter().map(ToString::to_string));
+    let got: Vec<String> = out.warnings.iter().map(ToString::to_string).collect();
+    assert_eq!(got, want);
+    assert!(
+        !got.iter().any(|w| w.starts_with("zephyr/zephyr.map")),
+        "{got:#?}"
+    );
+}
+
+/// A link-time optimised build: the map names `*.ltrans.o` partitions, or `.config` sets
+/// `CONFIG_LTO=y`. One warning, and no split.
+#[test]
+fn lto_map_or_config_warns_and_zephyr_is_unsplit() {
+    const WARNING: &str =
+        "zephyr/zephyr.map: link-time optimised map; zephyr is not split into subsystems";
+    let untouched = ingest_dir(copy_build_to_tempdir("bt", "beacon").path(), true).unwrap();
+    let with_lto = |out: &Ingest| {
+        let mut want: Vec<String> = untouched.warnings.iter().map(ToString::to_string).collect();
+        want.push(WARNING.to_owned());
+        want.sort();
+        let mut got: Vec<String> = out.warnings.iter().map(ToString::to_string).collect();
+        got.sort();
+        assert_eq!(got, want);
+        assert!(subsystem_names(&out.product).is_empty());
+        assert!(out.notes.is_empty(), "{:?}", out.notes);
+    };
+    // A synthetic GNU ld map of an LTO link.
+    let dir = copy_build_to_tempdir("bt", "beacon");
+    fs::write(
+        dir.path().join("zephyr/zephyr.map"),
+        "Linker script and memory map\n\n\
+         text            0x00001000     0x2000\n \
+         .text.main     0x00001000       0x28 /tmp/ccA1b2C3.ltrans0.ltrans.o\n \
+         .text.bt_enable\n                0x00001028      0x1c8 /tmp/ccA1b2C3.ltrans1.ltrans.o\n \
+         .text.log_core 0x000011f0       0x40 zephyr/libzephyr.a(log_core.c.obj)\n",
+    )
+    .unwrap();
+    with_lto(&ingest_dir(dir.path(), true).unwrap());
+    // The real map with CONFIG_LTO=y.
+    let dir = copy_build_to_tempdir("bt", "beacon");
+    let config = dir.path().join("zephyr/.config");
+    let mut text = fs::read_to_string(&config).unwrap();
+    text.push_str("CONFIG_LTO=y\n");
+    fs::write(&config, text).unwrap();
+    with_lto(&ingest_dir(dir.path(), true).unwrap());
+}
+
+#[test]
+fn missing_build_spdx_falls_back_to_cmake_layout() {
+    let dir = copy_build_to_tempdir("tls", "http_server");
+    fs::remove_file(dir.path().join("spdx/build.spdx")).unwrap();
+    let out = ingest_dir(dir.path(), true).unwrap();
+    // Subsystems with their own library under zephyr/<dir>/ are still found. Those compiled
+    // into libzephyr.a (json, logging, shell), into a library of a parent directory
+    // (tls-sockets: zephyr/subsys/net/libsubsys__net.a) or into one outside zephyr/
+    // (mbedtls-integration: modules/mbedtls/libmodules__mbedtls.a) cannot be attributed and
+    // are dropped with notes.
+    assert_eq!(
+        subsystem_names(&out.product),
+        ["filesystem", "ip-stack", "networking-core", "usb-device"]
+    );
+    let dropped: Vec<&str> = out
+        .notes
+        .iter()
+        .filter_map(|n| n.message.strip_prefix("subsystem "))
+        .filter_map(|m| m.split_whitespace().next())
+        .collect();
+    assert_eq!(
+        dropped,
+        [
+            "json",
+            "logging",
+            "mbedtls-integration",
+            "shell",
+            "tls-sockets"
+        ]
+    );
+    // No west-spdx evidence without build.spdx.
+    for sub in &zephyr_component(&out.product).components {
+        assert!(
+            sub.evidence.iter().all(|e| e.source() != "west-spdx"),
+            "{}",
+            sub.name
+        );
+    }
+}
+
+#[test]
+fn sysbuild_notes_name_the_image() {
+    let top = tempfile::tempdir().unwrap();
+    fs::write(
+        top.path().join("build_info.yml"),
+        sysbuild_build_info(&[("beacon", "MAIN"), ("mcuboot", "BOOTLOADER")]),
+    )
+    .unwrap();
+    copy_inputs_into("bt", "beacon", &top.path().join("beacon"));
+    copy_inputs_into("bt", "mcuboot", &top.path().join("mcuboot"));
+    let map_path = top.path().join("beacon/zephyr/zephyr.map");
+    let map = fs::read_to_string(&map_path).unwrap();
+    fs::write(&map_path, garbage_collect(&map, &["libzephyr.a(log_"])).unwrap();
+    let out = zephyr::ingest(&IngestOptions::new(top.path()).with_sysbuild(true)).unwrap();
+    let [note] = out.notes.as_slice() else {
+        panic!("{:#?}", out.notes)
+    };
+    assert_eq!(note.location, "beacon: zephyr/zephyr.map");
+    assert!(
+        note.message
+            .starts_with("subsystem logging is enabled by CONFIG_LOG"),
+        "{note}"
+    );
+}
+
+// --- The real BT-on/BT-off pair: fixtures/zephyr-smp (SHA-108) --------------------------------
+
+/// `fixtures/zephyr-smp/`: the smp pin set (the main pins plus zcbor), see docs/fixtures.md.
+fn smp_root() -> PathBuf {
+    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../fixtures/zephyr-smp")
+}
+
+fn ingest_smp(variant: &str, image: &str) -> Ingest {
+    let root = smp_root().join(variant);
+    let options = IngestOptions::new(root.join(image)).with_west_list(root.join("west-list.txt"));
+    zephyr::ingest(&options).unwrap_or_else(|e| panic!("{variant}/{image}: {e}"))
+}
+
+/// `component` with every evidence occurrence's line dropped, recursively.
+fn without_lines(component: &Component) -> Component {
+    let mut out = component.clone();
+    out.evidence = rollcall_core::model::EvidenceSet::new();
+    for entry in component.evidence.iter() {
+        let mut entry = entry.clone();
+        if let Some(occurrence) = &entry.occurrence {
+            entry.occurrence =
+                Some(rollcall_core::model::Occurrence::new(occurrence.location(), None).unwrap());
+        }
+        out.evidence.insert(entry);
+    }
+    out.components = component.components.iter().map(without_lines).collect();
+    out
+}
+
+/// `product` with every evidence line dropped (see [`without_lines`]).
+fn product_without_lines(product: &Product) -> Product {
+    let mut out = product.clone();
+    out.images = product
+        .images
+        .iter()
+        .map(|image| {
+            let mut image = image.clone();
+            image.components = image.components.iter().map(without_lines).collect();
+            image
+        })
+        .collect();
+    out
+}
+
+/// The real BT-on (`smp-bt`) and BT-off (`smp-serial`) builds of the same sample. The exact
+/// delta between their SBOMs:
+///
+/// - the components: exactly `bluetooth-controller` and `bluetooth-host`, under `zephyr`
+///   (and, in CycloneDX, their two `dependencies` entries with an empty `dependsOn`, and the
+///   content-derived `serialNumber`); no module, no other subsystem and no other fact differs;
+/// - evidence line numbers: the two builds' `zephyr.spdx`, `build.spdx`, `.config` and
+///   `zephyr.map` are different files, so the lines evidence cites differ (e.g. `cmsis`'s
+///   `spdx/zephyr.spdx` lines, `logging`'s `zephyr/.config:122` vs `:135`);
+/// - nothing else: the warnings and notes are the same, and the MCUboot images' documents are
+///   byte-identical.
+#[test]
+fn smp_bt_on_vs_off_differs_only_in_bluetooth_subcomponents() {
+    let off = ingest_smp("smp-serial", "smp_svr");
+    let on = ingest_smp("smp-bt", "smp_svr");
+    assert_eq!(subsystem_names(&off.product), ["dfu", "logging", "mcumgr"]);
+    assert_eq!(
+        subsystem_names(&on.product),
+        [
+            "bluetooth-controller",
+            "bluetooth-host",
+            "dfu",
+            "logging",
+            "mcumgr"
+        ]
+    );
+    // The BT-on product without its Bluetooth subcomponents.
+    let mut stripped = on.product.clone();
+    let mut dropped = Vec::new();
+    stripped.images = stripped
+        .images
+        .iter()
+        .map(|image| {
+            let mut image = image.clone();
+            image.components = image
+                .components
+                .iter()
+                .map(|c| {
+                    let mut c = c.clone();
+                    c.components = c
+                        .components
+                        .iter()
+                        .filter(|sub| {
+                            let bt = sub.name.starts_with("bluetooth-");
+                            if bt {
+                                dropped.push(sub.name.clone());
+                            }
+                            !bt
+                        })
+                        .cloned()
+                        .collect();
+                    c
+                })
+                .collect();
+            image
+        })
+        .collect();
+    assert_eq!(dropped, ["bluetooth-controller", "bluetooth-host"]);
+    // Equal once evidence lines are set aside...
+    assert_eq!(
+        product_without_lines(&stripped),
+        product_without_lines(&off.product)
+    );
+    // ...and only then: the cited lines do differ.
+    assert_ne!(stripped, off.product);
+    // Same modules, versions and identities.
+    assert_eq!(libraries(&on.product), libraries(&off.product));
+    assert_eq!(on.warnings, off.warnings);
+    assert!(on.notes.is_empty() && off.notes.is_empty());
+    assert!(on.unknown_modules.is_empty() && off.unknown_modules.is_empty());
+    // Bluetooth adds no module: zcbor is in both (MCUmgr needs it).
+    assert!(
+        libraries(&off.product)
+            .iter()
+            .any(|(name, _)| name == "zcbor"),
+        "{:?}",
+        libraries(&off.product)
+    );
+    // The bootloader is the same image in both builds.
+    assert_eq!(
+        render(&ingest_smp("smp-serial", "mcuboot").product),
+        render(&ingest_smp("smp-bt", "mcuboot").product)
+    );
+    for out in [&off, &on] {
+        assert_schema_valid("smp", &render(&out.product));
+    }
 }

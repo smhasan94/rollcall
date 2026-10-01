@@ -9,10 +9,16 @@
 //!     licence: LicenseRef-Nordic-5-Clause    # optional SPDX expression (or `license`)
 //!     purl: pkg:generic/s140_nrf52_softdevice@7.3.0  # optional
 //!     kind: firmware                   # optional: firmware | library (the CycloneDX type)
+//!     image: beacon                    # optional: the image the blob belongs to
 //! ```
 //!
 //! `kind` is the blob's CycloneDX component type, not its `rollcall:image-kind` (which is
 //! always `blob`). Any other value is a [`BlobError::Yaml`].
+//!
+//! `image` names the image (of the merged product) the blob is linked into or flashed with,
+//! e.g. the application whose `zephyr.map` links a vendor library. The blob is then a
+//! dependency of that image rather than of the product root
+//! ([`merge::attach_blobs`](crate::merge::attach_blobs)).
 //!
 //! Unknown keys are rejected, so a misspelt key is an error rather than a silently missing
 //! fact.
@@ -46,6 +52,8 @@ pub struct BlobEntry {
     pub purl: Option<String>,
     /// The CycloneDX component type (`kind: firmware | library`), if given.
     pub kind: Option<ImageType>,
+    /// The name of the image the blob belongs to (`image:`), if given.
+    pub image: Option<String>,
 }
 
 #[derive(Deserialize)]
@@ -72,6 +80,8 @@ struct RawEntry {
     purl: Option<String>,
     #[serde(default)]
     kind: Option<ImageType>,
+    #[serde(default)]
+    image: Option<String>,
 }
 
 /// An optional string that, when present, must not be empty.
@@ -111,6 +121,7 @@ pub fn parse(text: &str) -> Result<BlobManifest, BlobError> {
             licence: non_empty(entry.licence, index, "licence")?,
             purl: non_empty(entry.purl, index, "purl")?,
             kind: entry.kind,
+            image: non_empty(entry.image, index, "image")?,
         });
     }
     Ok(BlobManifest { blobs })
@@ -132,6 +143,29 @@ mod tests {
             kinds,
             [Some(ImageType::Library), Some(ImageType::Firmware), None]
         );
+    }
+
+    #[test]
+    fn parse_reads_image_and_rejects_an_empty_one() {
+        let manifest = parse(
+            "blobs:\n  - name: a\n    path: a.a\n    image: beacon\n  - name: b\n    path: b.a\n",
+        )
+        .unwrap();
+        let images: Vec<Option<&str>> = manifest.blobs.iter().map(|b| b.image.as_deref()).collect();
+        assert_eq!(images, [Some("beacon"), None]);
+        let err = parse("blobs:\n  - name: a\n    path: a.a\n    image: ' '\n").unwrap_err();
+        assert!(
+            matches!(
+                err,
+                BlobError::EmptyField {
+                    index: 0,
+                    field: "image"
+                }
+            ),
+            "{err}"
+        );
+        let err = parse("blobs:\n  - name: a\n    path: a.a\n    image: [x]\n").unwrap_err();
+        assert!(matches!(err, BlobError::Yaml(_)), "{err}");
     }
 
     #[test]

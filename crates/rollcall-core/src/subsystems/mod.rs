@@ -20,6 +20,8 @@
 //!     symbols: [CONFIG_BT_HCI_HOST] # any of them set to y or m means compiled in
 //!     sources:                     # paths relative to the Zephyr repository root
 //!       - subsys/bluetooth/host    # a directory, or a file such as lib/utils/json.c
+//!     subpath: subsys/bluetooth/host # optional: the primary source, one of `sources`
+//!                                  # (default: the first)
 //!     module: null                 # optional: the west project whose library this wraps
 //!     cpe: null                    # optional: a CPE 2.3 or 2.2 name
 //!     reasons: [cve-history, size] # why it is its own component; at least one
@@ -60,7 +62,8 @@
 //! `rollcall-subsystems/1`; the pin has a tag and a 40-hex-digit commit; names are well-formed,
 //! unique (a duplicate name is reported with both lines) and in order; descriptions and
 //! rationales are not empty; symbols are `CONFIG_[A-Z0-9_]+`; source paths are relative,
-//! `/`-separated, with no empty, `.` or `..` segment and no trailing `/`; symbol, source and
+//! `/`-separated, with no empty, `.` or `..` segment and no trailing `/`; `subpath`, if given,
+//! is one of the entry's sources; symbol, source and
 //! reason lists are non-empty, sorted and without duplicates; no path is listed by two
 //! entries; `module` is a west project name; `cpe` is a valid CPE.
 //!
@@ -134,6 +137,9 @@ pub struct Subsystem {
     pub symbols: Vec<String>,
     /// Source paths relative to the Zephyr repository root (directories or files).
     pub sources: Vec<String>,
+    /// The primary source path, given as `subpath` (one of `sources`), when the first source
+    /// is not it (e.g. a directory the subsystem shares). See [`Subsystem::primary_source`].
+    pub subpath: Option<String>,
     /// The west project whose library this subsystem's glue wraps, if any.
     pub module: Option<String>,
     /// The subsystem's own CPE, if it has one.
@@ -172,6 +178,16 @@ impl Reason {
 impl fmt::Display for Reason {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str(self.as_str())
+    }
+}
+
+impl Subsystem {
+    /// The source path that best names the subsystem's code: `subpath` if given, else the
+    /// first source. It is the subpath of the subsystem component's purl.
+    pub fn primary_source(&self) -> Option<&str> {
+        self.subpath
+            .as_deref()
+            .or_else(|| self.sources.first().map(String::as_str))
     }
 }
 
@@ -286,6 +302,8 @@ struct RawSubsystem {
     symbols: Vec<String>,
     sources: Vec<String>,
     #[serde(default)]
+    subpath: Option<String>,
+    #[serde(default)]
     module: Option<String>,
     #[serde(default)]
     cpe: Option<String>,
@@ -396,6 +414,7 @@ fn parse(path: &Path, text: &str) -> Result<SubsystemTable, SubsystemsError> {
             description: entry.description,
             symbols: entry.symbols,
             sources: entry.sources,
+            subpath: entry.subpath,
             module: entry.module,
             cpe,
             reasons: entry.reasons,
@@ -582,6 +601,15 @@ mod tests {
                 Some(6),
             ),
             (
+                Rule::BadSubpath,
+                full(
+                    "[CONFIG_SHELL]",
+                    "[subsys/shell]",
+                    "    subpath: subsys/shell/x\n",
+                ),
+                Some(6),
+            ),
+            (
                 Rule::BadCpe,
                 full(
                     "[CONFIG_SHELL]",
@@ -637,6 +665,33 @@ mod tests {
             shown,
             "subsystems.yaml:6: shell: reasons must list at least one reason [empty-reasons]"
         );
+    }
+
+    #[test]
+    fn primary_source_is_subpath_else_first_source() {
+        let table = load_str(&table_with(SHELL)).unwrap();
+        assert_eq!(
+            table.get("shell").unwrap().primary_source(),
+            Some("subsys/shell")
+        );
+        let text = table_with(&SHELL.replace(
+            "    sources: [subsys/shell]\n",
+            "    sources: [subsys/shell, subsys/shell/backends]\n    subpath: subsys/shell/backends\n",
+        ));
+        let table = load_str(&text).unwrap();
+        assert_eq!(
+            table.get("shell").unwrap().primary_source(),
+            Some("subsys/shell/backends")
+        );
+        // The built-in table names the stack, not a directory it shares.
+        let builtin = builtin().unwrap();
+        for (name, primary) in [
+            ("bluetooth-host", "subsys/bluetooth/host"),
+            ("usb-device", "subsys/usb/device"),
+            ("bluetooth-controller", "subsys/bluetooth/controller"),
+        ] {
+            assert_eq!(builtin.get(name).unwrap().primary_source(), Some(primary));
+        }
     }
 
     #[test]

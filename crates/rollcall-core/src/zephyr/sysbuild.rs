@@ -4,7 +4,7 @@
 use std::collections::BTreeMap;
 use std::path::{Component, Path, PathBuf};
 
-use super::{Ingest, IngestOptions, Warning, ZephyrError, build_info, read_text};
+use super::{Ingest, IngestOptions, Note, Warning, ZephyrError, build_info, read_text};
 use crate::identify::Resolver;
 use crate::merge::{self, ProductSpec};
 
@@ -89,8 +89,8 @@ pub fn discover(top_dir: &Path) -> Result<Vec<SysbuildImage>, ZephyrError> {
 /// merges them under one product named after the `MAIN` image's application.
 ///
 /// The result is exactly what `rollcall merge --product <app>` gives for the images'
-/// separately ingested products. Warnings come image by image (sorted by image name), each
-/// location prefixed with `<image>: `.
+/// separately ingested products. Warnings and notes come image by image (sorted by image
+/// name), each location prefixed with `<image>: `.
 ///
 /// Two images that ingest to the same image identity (kind, name and version, e.g. two
 /// MCUboot builds that both become `bootloader:mcuboot`) are an error naming both image
@@ -113,6 +113,7 @@ pub(super) fn ingest_images(
     let images = discover(top)?;
     let mut products = Vec::with_capacity(images.len());
     let mut warnings = Vec::new();
+    let mut notes = Vec::new();
     let mut unknown_modules = Vec::new();
     let mut main_name = None;
     // Each ingested image's identity and the image build directory it came from.
@@ -154,6 +155,12 @@ pub(super) fn ingest_images(
                 .into_iter()
                 .map(|w| Warning::new(format!("{}: {}", image.name, w.location), w.message)),
         );
+        notes.extend(
+            ingest
+                .notes
+                .into_iter()
+                .map(|n| Note::new(format!("{}: {}", image.name, n.location), n.message)),
+        );
         unknown_modules.extend(ingest.unknown_modules);
         products.push(ingest.product);
     }
@@ -174,5 +181,6 @@ pub(super) fn ingest_images(
         product,
         warnings,
         unknown_modules,
+        notes,
     })
 }

@@ -534,3 +534,71 @@ fn merge_scoped_product_name_needs_an_explicit_version() {
     assert_eq!(doc["metadata"]["component"]["name"], "@scope/widget");
     assert_eq!(doc["metadata"]["component"]["version"], "1.0.0");
 }
+
+/// A manifest entry's `image:` makes the blob a dependency of that image, not of the root;
+/// an image the product does not have is exit 65 naming the manifest.
+#[test]
+fn merge_blob_manifest_image_attaches_to_named_image() {
+    let dir = tempfile::tempdir().unwrap();
+    let app = dir.path().join("app.cdx.json");
+    generate("bt", "beacon", &app);
+    let blobs = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../rollcall-core/tests/data/blobs");
+    for file in ["s140_nrf52_7.3.0_softdevice.hex", "libphy.a"] {
+        fs::copy(blobs.join(file), dir.path().join(file)).unwrap();
+    }
+    let manifest = dir.path().join("blobs.yaml");
+    fs::write(
+        &manifest,
+        "blobs:\n  - path: s140_nrf52_7.3.0_softdevice.hex\n    image: beacon\n  - path: libphy.a\n    name: libphy\n    version: 1.0.0\n    supplier: Espressif Systems\n",
+    )
+    .unwrap();
+    let out = merge(&[
+        &app,
+        &"--blob-manifest",
+        &manifest,
+        &"--timestamp",
+        &GOLDEN_TIMESTAMP,
+    ]);
+    let doc = stdout_json(&out);
+    let bom_ref = |name: &str| -> Value {
+        doc["components"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|c| c["name"] == name)
+            .unwrap()["bom-ref"]
+            .clone()
+    };
+    let depends_on = |from: &Value| -> Vec<Value> {
+        doc["dependencies"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|d| &d["ref"] == from)
+            .map(|d| d["dependsOn"].as_array().unwrap().clone())
+            .unwrap_or_default()
+    };
+    let root = doc["metadata"]["component"]["bom-ref"].clone();
+    let beacon = bom_ref("beacon");
+    let softdevice = bom_ref("s140_nrf52_softdevice");
+    let libphy = bom_ref("libphy");
+    assert!(depends_on(&beacon).contains(&softdevice));
+    assert!(!depends_on(&root).contains(&softdevice));
+    assert!(depends_on(&root).contains(&libphy));
+    assert!(!depends_on(&beacon).contains(&libphy));
+
+    fs::write(
+        &manifest,
+        "blobs:\n  - path: libphy.a\n    name: libphy\n    image: nope\n",
+    )
+    .unwrap();
+    let out = merge(&[&app, &"--blob-manifest", &manifest]);
+    assert_fails(
+        &out,
+        65,
+        &[
+            &manifest.display().to_string(),
+            "blob libphy: the product has no image named \"nope\"",
+        ],
+    );
+}

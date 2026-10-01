@@ -84,6 +84,7 @@ fn copy_build(variant: &str, image: &str) -> tempfile::TempDir {
         "spdx/modules-deps.spdx",
         "spdx/zephyr.spdx",
         "zephyr/.config",
+        "zephyr/zephyr.map",
     ] {
         let to = dir.path().join(rel);
         fs::create_dir_all(to.parent().unwrap()).unwrap();
@@ -196,6 +197,7 @@ fn generate_zephyr_warns_on_missing_optional_files_exit_0() {
         "spdx/build.spdx",
         "spdx/modules-deps.spdx",
         "zephyr/.config",
+        "zephyr/zephyr.map",
     ] {
         fs::remove_file(dir.path().join(rel)).unwrap();
     }
@@ -203,12 +205,13 @@ fn generate_zephyr_warns_on_missing_optional_files_exit_0() {
     let stderr = stderr_of(&out);
     assert_eq!(out.status.code(), Some(0), "{stderr}");
     let lines: Vec<&str> = stderr.lines().collect();
-    assert_eq!(lines.len(), 5, "{stderr}");
+    assert_eq!(lines.len(), 6, "{stderr}");
     for (line, location) in lines.iter().zip([
         "spdx/app.spdx",
         "spdx/build.spdx",
         "spdx/modules-deps.spdx",
         "zephyr/.config",
+        "zephyr/zephyr.map",
         "west list",
     ]) {
         assert!(
@@ -1148,4 +1151,111 @@ fn sysbuild_tls_with_seed_db_warns_only_about_genuinely_different_identifiers() 
         )),
         "{stderr}"
     );
+}
+
+/// `bt/beacon` with every bluetooth-host input section moved from the memory map into
+/// `Discarded input sections`, as `--gc-sections` would leave it; `.config` untouched.
+fn gc_bluetooth_host_build() -> tempfile::TempDir {
+    let dir = copy_build("bt", "beacon");
+    let path = dir.path().join("zephyr/zephyr.map");
+    let map = fs::read_to_string(&path).unwrap();
+    let mut lines: Vec<String> = map.lines().map(str::to_owned).collect();
+    let header = lines
+        .iter()
+        .position(|l| l == "Linker script and memory map")
+        .unwrap();
+    let mut moved = Vec::new();
+    for i in header + 1..lines.len() {
+        let line = lines[i].clone();
+        if !(line.contains("bluetooth/host/") || line.contains("bluetooth/common/")) {
+            continue;
+        }
+        let mut joined = line.trim().to_owned();
+        if line.split_whitespace().count() == 3 && lines[i - 1].split_whitespace().count() == 1 {
+            joined = format!("{} {joined}", lines[i - 1].trim());
+            lines[i - 1].clear();
+        }
+        lines[i].clear();
+        moved.push(format!(" {joined}"));
+    }
+    let discarded = lines
+        .iter()
+        .position(|l| l == "Discarded input sections")
+        .unwrap();
+    for (offset, line) in moved.into_iter().enumerate() {
+        lines.insert(discarded + 2 + offset, line);
+    }
+    fs::write(&path, lines.join("\n") + "\n").unwrap();
+    dir
+}
+
+#[test]
+fn generate_zephyr_verbose_prints_dropped_subsystem_note() {
+    let dir = gc_bluetooth_host_build();
+    let out = generate_zephyr(dir.path(), &["--verbose", "--timestamp", GOLDEN_TIMESTAMP]);
+    let stderr = stderr_of(&out);
+    assert_eq!(out.status.code(), Some(0), "{stderr}");
+    let notes: Vec<&str> = stderr
+        .lines()
+        .filter(|l| l.starts_with("rollcall generate: note: "))
+        .collect();
+    let [note] = notes.as_slice() else {
+        panic!("{stderr}")
+    };
+    assert!(
+        note.starts_with(
+            "rollcall generate: note: zephyr/zephyr.map: subsystem bluetooth-host is enabled by \
+             CONFIG_BT_HCI_HOST (zephyr/.config:1294) but no object compiled from"
+        ),
+        "{note}"
+    );
+    assert!(note.ends_with("; not emitted"), "{note}");
+    // Notes follow the warnings.
+    let last_warning = stderr
+        .lines()
+        .collect::<Vec<_>>()
+        .iter()
+        .rposition(|l| l.contains(": warning: "));
+    let first_note = stderr.lines().position(|l| l.contains(": note: "));
+    assert!(last_warning < first_note, "{stderr}");
+    // The document lacks bluetooth-host and keeps bluetooth-controller.
+    let doc: Value = serde_json::from_slice(&out.stdout).unwrap();
+    let zephyr = components(&doc)
+        .into_iter()
+        .find(|c| c["name"] == "zephyr")
+        .unwrap();
+    let subsystems: Vec<&str> = zephyr["components"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|c| c["name"].as_str().unwrap())
+        .collect();
+    assert_eq!(subsystems, ["bluetooth-controller", "logging"]);
+    // -v is the short form.
+    let short = generate_zephyr(dir.path(), &["-v", "--timestamp", GOLDEN_TIMESTAMP]);
+    assert_eq!(short.stderr, out.stderr);
+    assert_eq!(short.stdout, out.stdout);
+}
+
+#[test]
+fn generate_zephyr_without_verbose_prints_no_notes() {
+    let dir = gc_bluetooth_host_build();
+    let quiet = generate_zephyr(dir.path(), &["--timestamp", GOLDEN_TIMESTAMP]);
+    let verbose = generate_zephyr(dir.path(), &["--verbose", "--timestamp", GOLDEN_TIMESTAMP]);
+    assert_eq!(quiet.status.code(), Some(0));
+    let stderr = stderr_of(&quiet);
+    assert!(!stderr.contains("note:"), "{stderr}");
+    // Same document either way: notes never change the SBOM.
+    assert_eq!(quiet.stdout, verbose.stdout);
+    // --verbose needs --zephyr.
+    let model = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("../rollcall-core/tests/data/minimal.model.json");
+    let out = rollcall()
+        .arg("generate")
+        .arg("--model")
+        .arg(&model)
+        .arg("--verbose")
+        .output()
+        .unwrap();
+    assert_eq!(out.status.code(), Some(64), "{}", stderr_of(&out));
 }

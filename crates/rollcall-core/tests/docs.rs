@@ -166,6 +166,88 @@ fn subsystems_docs_have_schema_and_lint_sections() {
     }
 }
 
+/// The body of `heading` (e.g. `## The split`) in docs/subsystems.md, up to the next heading
+/// of the same or a higher level.
+fn subsystems_section(heading: &str) -> String {
+    let level = heading.split(' ').next().unwrap_or_default().len();
+    SUBSYSTEMS_GUIDE
+        .lines()
+        .skip_while(|l| l.trim_end() != heading)
+        .skip(1)
+        .take_while(|l| {
+            let hashes = l.chars().take_while(|c| *c == '#').count();
+            hashes == 0 || hashes > level
+        })
+        .collect::<Vec<_>>()
+        .join("\n")
+}
+
+/// SHA-108: docs/subsystems.md explains the split and how to add a subsystem.
+#[test]
+fn subsystems_doc_has_required_sections() {
+    let required: [(&str, &[&str]); 8] = [
+        (
+            "## The split",
+            &["Kconfig", "linker map", "--gc-sections", "phantom"],
+        ),
+        (
+            "### Inputs",
+            &[
+                "zephyr/.config",
+                "zephyr/zephyr.map",
+                "spdx/build.spdx",
+                "GENERATED_FROM",
+            ],
+        ),
+        (
+            "### Algorithm",
+            &[
+                "Enabled",
+                "linked",
+                "libzephyr.a",
+                "most specific",
+                "/DISCARD/",
+            ],
+        ),
+        (
+            "### What is emitted",
+            &[
+                "library",
+                "subpath",
+                "linker-map",
+                "kconfig",
+                "west-spdx",
+                "match.subsystem",
+            ],
+        ),
+        (
+            "### Notes and warnings",
+            &["note", "--verbose", "not emitted"],
+        ),
+        (
+            "## Adding a subsystem",
+            &[
+                "subsystems.yaml",
+                "zephyr-subsystems.txt",
+                "scripts/regen-golden.sh",
+                "scripts/verify-subsystems.sh",
+            ],
+        ),
+        ("## Blobs", &["softdevice", "image:", "blob manifest"]),
+        ("## Limitations", &["GNU ld", "lld", "-flto", "build.spdx"]),
+    ];
+    for (heading, terms) in required {
+        let body = subsystems_section(heading);
+        assert!(
+            !body.trim().is_empty(),
+            "docs/subsystems.md lacks {heading:?}"
+        );
+        for term in terms {
+            assert!(body.contains(term), "{heading:?} lacks {term:?}");
+        }
+    }
+}
+
 const IDENTIFIERS_DOC: &str = include_str!("../../../docs/identifiers.md");
 
 /// The body of `## <name>` in docs/identifiers.md.

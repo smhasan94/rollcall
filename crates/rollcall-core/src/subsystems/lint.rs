@@ -55,6 +55,8 @@ pub enum Rule {
     BadSourcePath,
     /// A source path is listed twice, in one entry or in two.
     DuplicateSource,
+    /// `subpath` is not one of the entry's `sources`.
+    BadSubpath,
     /// `module` is not a west project name (`[A-Za-z0-9_.+-]+`).
     BadModule,
     /// `cpe` is not a valid CPE.
@@ -75,7 +77,7 @@ pub enum Rule {
 
 impl Rule {
     /// Every rule.
-    pub const ALL: [Rule; 20] = [
+    pub const ALL: [Rule; 21] = [
         Rule::WrongFormat,
         Rule::BadPin,
         Rule::DuplicateName,
@@ -88,6 +90,7 @@ impl Rule {
         Rule::EmptySources,
         Rule::BadSourcePath,
         Rule::DuplicateSource,
+        Rule::BadSubpath,
         Rule::BadModule,
         Rule::BadCpe,
         Rule::EmptyReasons,
@@ -113,6 +116,7 @@ impl Rule {
             Self::EmptySources => "empty-sources",
             Self::BadSourcePath => "bad-source-path",
             Self::DuplicateSource => "duplicate-source",
+            Self::BadSubpath => "bad-subpath",
             Self::BadModule => "bad-module",
             Self::BadCpe => "bad-cpe",
             Self::EmptyReasons => "empty-reasons",
@@ -378,6 +382,17 @@ pub fn validate(table: &SubsystemTable) -> Vec<Finding> {
             }
         }
 
+        if let Some(subpath) = &s.subpath
+            && !s.sources.contains(subpath)
+        {
+            push(
+                s.line,
+                sub,
+                Rule::BadSubpath,
+                format!("subpath {subpath} must be one of the entry's sources"),
+            );
+        }
+
         if let Some(module) = &s.module
             && !is_module(module)
         {
@@ -518,6 +533,7 @@ mod tests {
             description: name.to_owned(),
             symbols: symbols.iter().map(|s| (*s).to_owned()).collect(),
             sources: sources.iter().map(|s| (*s).to_owned()).collect(),
+            subpath: None,
             module: None,
             cpe: None,
             reasons: vec![Reason::Size],

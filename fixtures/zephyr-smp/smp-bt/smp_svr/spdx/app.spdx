@@ -1,0 +1,45 @@
+SPDXVersion: SPDX-2.3
+DataLicense: CC0-1.0
+SPDXID: SPDXRef-DOCUMENT
+DocumentName: app-sources
+DocumentNamespace: http://spdx.org/spdxdocs/rollcall-smp-bt-smp_svr/app
+Creator: Tool: Zephyr SPDX builder
+Created: 2026-10-01T22:17:43Z
+
+Relationship: SPDXRef-DOCUMENT DESCRIBES SPDXRef-app-sources
+
+##### Package: app-sources
+
+PackageName: app-sources
+SPDXID: SPDXRef-app-sources
+PackageLicenseConcluded: Apache-2.0
+PackageLicenseDeclared: NOASSERTION
+PackageCopyrightText: NOASSERTION
+PrimaryPackagePurpose: SOURCE
+PackageDownloadLocation: NOASSERTION
+PackageLicenseInfoFromFiles: Apache-2.0
+FilesAnalyzed: true
+PackageVerificationCode: d030175d369346ae6f9f6076eb15ac36889df9fa
+
+FileName: ./src/bluetooth.c
+SPDXID: SPDXRef-File-bluetooth.c
+FileChecksum: SHA1: ed5c4a999ab2083ae6bccc8b7dcac45b4f8e3f24
+FileChecksum: SHA256: ab7d1fba1d37f28dd39a4433eb9ad271a9547bd5f97dd4838cf6edfbd2d32f36
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2012-2014 Wind River Systems, Inc.
+ * Copyright (c) 2020 Prevas A/S
+</text>
+
+FileName: ./src/main.c
+SPDXID: SPDXRef-File-main.c
+FileChecksum: SHA1: 3abb47e371b366582726d14f3775f2324dffd23b
+FileChecksum: SHA256: d648a1aa4efaf669d3769c71058f7ea054325bc6d6d20734e1230b6da9cf04ca
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2012-2014 Wind River Systems, Inc.
+ * Copyright (c) 2020 Prevas A/S
+</text>
+

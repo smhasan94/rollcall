@@ -1101,3 +1101,78 @@ mod render {
         assert_eq!(ov["statements"].as_array().unwrap().len(), refs.len());
     }
 }
+
+/// `match.subsystem` end to end: the `bt/beacon` fixture's generated CycloneDX SBOM, read back,
+/// with a finding joined to the `bluetooth-host` subcomponent by its subpath purl, resolves
+/// through a `match.subsystem: bluetooth-host` rule. A finding about Zephyr itself (its CPE
+/// `zephyrproject:zephyr`, as real scanners report) joins `zephyr`, not the subsystem, so the
+/// same rule does not apply to it.
+#[test]
+fn subsystem_rule_resolves_a_finding_on_the_generated_bt_sbom() {
+    use rollcall_core::cyclonedx::{self, Timestamp, WriteOptions};
+    use rollcall_core::model::{Cpe, Purl};
+    use rollcall_core::zephyr::{self, IngestOptions};
+    use std::collections::BTreeSet;
+
+    let ingest = zephyr::ingest(&IngestOptions::new(
+        manifest_dir().join("../../fixtures/zephyr/bt/beacon"),
+    ))
+    .unwrap();
+    let options = WriteOptions::new(Timestamp::parse("2026-01-02T03:04:05Z").unwrap());
+    let text = cyclonedx::write(&ingest.product, &options).unwrap();
+    let read = cyclonedx::read_str(&text).unwrap();
+    let host_purl = "pkg:github/zephyrproject-rtos/zephyr@v4.4.2#subsys/bluetooth/host";
+    let host = component(&read.product, "bluetooth-host");
+    assert_eq!(host.purl.as_ref().map(Purl::as_str), Some(host_purl));
+
+    let finding = |id: &str, purl: &str, name: &str| Finding {
+        id: id.to_owned(),
+        purl: Some(Purl::new(purl).unwrap()),
+        name: name.to_owned(),
+        version: Some("4.4.2".to_owned()),
+        aliases: BTreeSet::new(),
+        cpes: BTreeSet::new(),
+        severity: None,
+        fixed_in: BTreeSet::new(),
+        scanner: Scanner::Grype,
+    };
+    let on_host = finding("CVE-2099-0001", host_purl, "bluetooth-host");
+    let mut on_zephyr = finding(
+        "CVE-2099-0002",
+        "pkg:github/zephyrproject-rtos/zephyr@v4.4.2",
+        "zephyr",
+    );
+    on_zephyr.cpes =
+        BTreeSet::from([Cpe::new("cpe:2.3:o:zephyrproject:zephyr:4.4.2:*:*:*:*:*:*:*").unwrap()]);
+    let rules = parse_rules(
+        "version: 1\nrules:\n  - {id: bt-host, match: {subsystem: bluetooth-host}, status: not_affected, justification: code_not_reachable}\n",
+        "rules.yml",
+    )
+    .unwrap();
+    let report = rollcall_core::vex::evaluate_document(
+        &read.product,
+        &read.refs,
+        &BuildEvidence::new(),
+        &[on_host, on_zephyr],
+        &rules,
+    );
+    assert!(report.warnings.is_empty(), "{:?}", report.warnings);
+    let [statement] = report.statements.as_slice() else {
+        panic!("{report:?}")
+    };
+    assert_eq!(statement.vulnerability, "CVE-2099-0001");
+    assert_eq!(statement.component.name, "bluetooth-host");
+    assert_eq!(statement.status, Status::NotAffected);
+    assert_eq!(statement.rules, ["bt-host"]);
+    // The statement cites the document's own bom-ref for the subcomponent.
+    assert!(text.contains(&format!("\"bom-ref\": \"{}\"", statement.component.bom_ref)));
+    let [unresolved] = report.unresolved.as_slice() else {
+        panic!("{report:?}")
+    };
+    assert_eq!(unresolved.vulnerability, "CVE-2099-0002");
+    assert_eq!(
+        unresolved.component.as_ref().map(|c| c.name.as_str()),
+        Some("zephyr")
+    );
+    assert_eq!(unresolved.reason, Reason::NoRule);
+}

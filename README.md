@@ -95,8 +95,17 @@ always produce byte-identical output; changing only `--timestamp` changes only t
 `rollcall_core::cyclonedx` module docs (`cargo doc -p rollcall-core --open`).
 
 Exactly one of `--model` and `--zephyr` is required; `--west-list`, `--include-sdk`,
-`--sysbuild`, `--product`, `--identifier-db` and `--identify` only go with `--zephyr`, and
-`--workspace` needs `--west-list` and one of `--identifier-db` or `--identify`.
+`--sysbuild`, `--product`, `--identifier-db`, `--identify` and `-v`/`--verbose` only go with
+`--zephyr`, and `--workspace` needs `--west-list` and one of `--identifier-db` or `--identify`.
+
+With `--zephyr`, the `zephyr` component is split into one `library` subcomponent per Zephyr
+subsystem (Bluetooth host, IP stack, USB, logging, …) that the build's `zephyr/.config`
+enables *and* whose code `zephyr/zephyr.map` (the GNU ld map) shows was linked; libraries are
+traced to their sources through `spdx/build.spdx`. A subsystem that is enabled but whose code
+was garbage-collected is left out, and `--verbose` prints a `rollcall generate: note: …` line
+saying so; notes never change the SBOM. Without the map or `.config`, `zephyr` is not split
+(a warning). How the split works and how to add a subsystem is in
+[docs/subsystems.md](docs/subsystems.md).
 
 `--product NAME[@VERSION]` puts the generated images under that product exactly as
 `merge --product` does (same parsing: split at the last `@`, so `@scope/widget@1.0.0`), and
@@ -137,6 +146,7 @@ blobs:
     supplier: Example Radio Ltd
     path: lib/vendor-crypto.bin
     kind: library                           # optional: firmware | library
+    image: app                              # optional: the image it belongs to
 ```
 
 Each entry becomes a `blob` image with the file's SHA-256, the supplier, and the property
@@ -144,6 +154,10 @@ Each entry becomes a `blob` image with the file's SHA-256, the supplier, and the
 recognisers fill a missing name, version or supplier for Nordic SoftDevices
 (`s<nnn>_nrf5<n>_<M.m.p>_softdevice.hex`) and common Espressif, Nordic and Silicon Labs HAL
 libraries; licences are never guessed. Without input documents, `--product` is required.
+
+Each blob is a dependency of the product root, or, with `image: NAME`, of the merged
+product's image of that name (e.g. the application that links a vendor library). An `image:`
+that no image (other than a blob) is called, or that several are, is an error (exit 65).
 
 The optional `kind:` (`firmware` or `library`) sets the blob's CycloneDX component `type`;
 it does not change its `rollcall:image-kind`, which is always `blob`. Any other value is a
@@ -390,9 +404,13 @@ rules:
 - **Not yet evidenced from the CLI:** `cargo_feature_off` and `symbol_not_linked` conditions
   always need evidence (the finding stays unresolved) because `rollcall vex` cannot yet
   supply Cargo features or the linked-symbol list.
-- **Reserved:** `match.subsystem` (a nested subcomponent's name) is reserved until the Zephyr
-  kernel package is split into subsystems (SHA-108); a rule using it matches nothing today,
-  and the report warns about it.
+- **Subsystems:** `match.subsystem` matches a nested subcomponent by name: a subsystem split
+  out of the `zephyr` component (see `docs/subsystems.md`). It applies only to findings joined
+  to that subcomponent (by its subpath purl such as
+  `pkg:github/zephyrproject-rtos/zephyr@v4.4.2#subsys/bluetooth/host`, its cpe, or its name and
+  version). Real scanner findings do not join subsystems today: grype and osv-scanner report
+  Zephyr CVEs against the CPE `zephyrproject:zephyr`, which only the `zephyr` component has, so
+  a `match.subsystem` rule never applies to them.
 - **Precedence:** the most specific matching rule wins (naming CVEs, then a version range,
   then exact purl over purl glob over name), then the higher `priority`; equally ranked
   rules that disagree are a conflict, reported as a warning naming each rule, and the

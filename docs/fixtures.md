@@ -118,6 +118,36 @@ links its self-tests; upstream CI builds it. The reason is recorded in `MANIFEST
 scripts/regen-fixtures.sh --variant old-mbedtls --check-stable
 ```
 
+### The smp tree (Bluetooth on and off)
+
+`fixtures/zephyr-smp/` is a third tree, with the same layout and the same kind of
+`MANIFEST.json`, holding the BT-on/BT-off pair the subsystem split is checked against
+(SHA-108): the MCUmgr sample `samples/subsys/mgmt/mcumgr/smp_svr` built twice, identically
+except that `smp-bt` turns Bluetooth on. MCUmgr needs the `zcbor` module, which the main
+tree's project filter leaves out (without it `CONFIG_MCUMGR` resolves to `n` and
+`drivers/console/uart_mcumgr.c` does not compile), so the pair is a pin set of its own: the
+main tree's pins plus `zcbor`, in its own workspace, so the main tree's workspace and
+fixtures do not change. It is built with `--variant smp-serial --variant smp-bt`, which may
+not be mixed with other variants.
+
+| What        | Pin |
+|-------------|-----|
+| Zephyr, Zephyr SDK, board, Python tools | as for the main tree (`v4.4.2`, SDK `1.0.1`) |
+| Project filter | the main tree's plus `+zcbor` |
+| Directories | `.cache/zephyr-workspace-smp`, `.cache/zephyr-sdk` (shared with the main tree) |
+
+| Variant      | Sample                                  | Extra configuration | App image | Intended options |
+|--------------|-----------------------------------------|---------------------|-----------|------------------|
+| `smp-serial` | `samples/subsys/mgmt/mcumgr/smp_svr`    | `EXTRA_CONF_FILE=serial.conf` (MCUboot from the sample's `sysbuild.conf`) | `smp_svr` | `CONFIG_MCUMGR=y`, `CONFIG_MCUMGR_TRANSPORT_UART=y`, `CONFIG_BT` off |
+| `smp-bt`     | the same                                | the same, plus `-DCONFIG_BT=y -DCONFIG_BT_PERIPHERAL=y -DCONFIG_MCUMGR_TRANSPORT_BT=y` | `smp_svr` | as `smp-serial`, plus `CONFIG_BT=y`, `CONFIG_MCUMGR_TRANSPORT_BT=y` |
+
+The sample compiles `src/bluetooth.c` only with `CONFIG_MCUMGR_TRANSPORT_BT`, and `main.c`
+guards its Bluetooth code with `#ifdef`, so the two builds differ only by Bluetooth.
+
+```sh
+scripts/regen-fixtures.sh --variant smp-serial --variant smp-bt --check-stable
+```
+
 ## Pins
 
 All pins are constants at the top of `scripts/regen-fixtures.sh` and are copied into
@@ -201,7 +231,8 @@ The canonical fixtures come from the `regen-fixtures` workflow
 only; that step always succeeds) and uploads `fixtures/zephyr` as the `zephyr-fixtures`
 artifact. A second job of the same workflow builds the old-mbedTLS tree (`--variant
 old-mbedtls`) and uploads it as `zephyr-old-mbedtls-fixtures`, downloaded the same way into
-`fixtures/zephyr-old-mbedtls`. It runs on pull requests that change the script or the workflow,
+`fixtures/zephyr-old-mbedtls`; a third builds the smp tree (`--variant smp-serial --variant
+smp-bt`) and uploads it as `zephyr-smp-fixtures`, for `fixtures/zephyr-smp`. It runs on pull requests that change the script or the workflow,
 and on demand; the artifact of either kind of run is canonical. On demand:
 
 ```sh
@@ -304,12 +335,15 @@ endings; every other text fixture is LF. `*.map` has diffs turned off and `*.elf
 `crates/rollcall-core/tests/fixtures.rs` (part of `cargo test --workspace`) checks the committed
 tree, or the tree named by `ROLLCALL_FIXTURES_DIR`:
 
-- by default both trees are checked; with `ROLLCALL_FIXTURES_DIR`, only that tree, whose set
-  follows from its manifest's Zephyr tag;
+- by default all three trees are checked; with `ROLLCALL_FIXTURES_DIR`, only that tree, whose
+  set follows from its manifest's Zephyr tag and west project filter;
 - the manifest pins Zephyr `v4.4.2` at a 40-hex commit and SDK `1.0.1`, with three variants
   (for `fixtures/zephyr-old-mbedtls/`: `v4.2.0`, SDK `0.17.2`, variant `old-mbedtls`, whose
   `.config` has `CONFIG_MBEDTLS` and `CONFIG_MBEDTLS_BUILTIN` on and whose `west-list.txt` pins
-  mbedtls at `85440ef5…`);
+  mbedtls at `85440ef5…`; for `fixtures/zephyr-smp/`: the main pins with `+zcbor` in the
+  project filter, variants `smp-bt` and `smp-serial`, whose build commands differ only by
+  `-DCONFIG_BT=y -DCONFIG_BT_PERIPHERAL=y -DCONFIG_MCUMGR_TRANSPORT_BT=y` and whose `.config`s
+  have Bluetooth on and off);
 - each variant has the full file set, and the manifest lists exactly the files on disk, with
   matching sizes and SHA-256s;
 - the trees together are under 50,000,000 bytes, measured from disk;
