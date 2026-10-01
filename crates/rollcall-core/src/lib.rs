@@ -5,7 +5,8 @@
 //! schema validation. [`zephyr`] ingests a Zephyr image (or sysbuild) build directory into
 //! the model, [`blob`] turns a blob manifest into opaque blob images, and [`merge`] combines
 //! separately generated products into one. [`subsystems`] is the table of Zephyr subsystems
-//! (enabling Kconfig symbols and source paths) used to split the kernel package. [`vex`]
+//! (enabling Kconfig symbols and source paths) used to split the kernel package, and
+//! [`linker_map`] parses the GNU ld map that split is cross-checked against. [`vex`]
 //! evaluates VEX rules against scanner findings and build evidence. [`validate`] checks a
 //! CycloneDX document against regulators' SBOM profiles (CISA 2026, CRA).
 
@@ -29,6 +30,7 @@
 pub mod blob;
 pub mod cyclonedx;
 pub mod identify;
+pub mod linker_map;
 pub mod merge;
 pub mod model;
 pub mod subsystems;
@@ -37,7 +39,7 @@ pub mod vex;
 pub mod warning;
 pub mod zephyr;
 
-pub use blob::{BlobError, BlobIngest};
+pub use blob::{BlobError, BlobImage, BlobIngest};
 pub use cyclonedx::{
     ReadError, SchemaViolation, SerialNumber, Timestamp, WriteError, WriteOptions,
     validate_cyclonedx_1_6,

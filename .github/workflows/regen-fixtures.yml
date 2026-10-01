@@ -1,8 +1,9 @@
 name: Regenerate Zephyr fixtures
 
 # Rebuilds the Zephyr fixtures from their pinned releases on a clean runner (see
-# docs/fixtures.md), one job per pin set: fixtures/zephyr (artifact `zephyr-fixtures`) and
-# fixtures/zephyr-old-mbedtls (artifact `zephyr-old-mbedtls-fixtures`). The uploaded artifacts
+# docs/fixtures.md), one job per pin set: fixtures/zephyr (artifact `zephyr-fixtures`),
+# fixtures/zephyr-old-mbedtls (artifact `zephyr-old-mbedtls-fixtures`) and fixtures/zephyr-smp
+# (artifact `zephyr-smp-fixtures`). The uploaded artifacts
 # are the canonical fixture sets: they are downloaded and committed by hand, never pushed by
 # this workflow.
 
@@ -46,6 +47,10 @@ jobs:
             out: fixtures/zephyr-old-mbedtls
             variant_args: "--variant old-mbedtls"
             artifact: zephyr-old-mbedtls-fixtures
+          - set: smp
+            out: fixtures/zephyr-smp
+            variant_args: "--variant smp-serial --variant smp-bt"
+            artifact: zephyr-smp-fixtures
     env:
       FIXTURES_OUT: ${{ matrix.out }}
     steps:

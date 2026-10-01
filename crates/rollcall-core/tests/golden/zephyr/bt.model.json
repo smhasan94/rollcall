@@ -692,6 +692,140 @@
               "value": "zephyrproject",
               "confidence": 9000
             }
+          ],
+          "components": [
+            {
+              "kind": "library",
+              "name": "bluetooth-controller",
+              "version": "4.4.2",
+              "supplier": {
+                "name": "zephyrproject"
+              },
+              "purl": "pkg:github/zephyrproject-rtos/zephyr@v4.4.2#subsys/bluetooth/controller",
+              "evidence": [
+                {
+                  "field": "name",
+                  "technique": "manifest-analysis",
+                  "source": "kconfig",
+                  "occurrence": {
+                    "location": "zephyr/.config",
+                    "line": 1358
+                  },
+                  "value": "CONFIG_BT_LL_SW_SPLIT",
+                  "confidence": 6000
+                },
+                {
+                  "field": "name",
+                  "technique": "manifest-analysis",
+                  "source": "linker-map",
+                  "occurrence": {
+                    "location": "zephyr/zephyr.map",
+                    "line": 3430
+                  },
+                  "value": "zephyr/subsys/bluetooth/controller/libsubsys__bluetooth__controller.a(crypto.c.obj)",
+                  "confidence": 8000
+                },
+                {
+                  "field": "name",
+                  "technique": "manifest-analysis",
+                  "source": "west-spdx",
+                  "occurrence": {
+                    "location": "spdx/build.spdx",
+                    "line": 1336
+                  },
+                  "value": "subsys/bluetooth/controller/crypto/crypto.c",
+                  "confidence": 8000
+                }
+              ]
+            },
+            {
+              "kind": "library",
+              "name": "bluetooth-host",
+              "version": "4.4.2",
+              "supplier": {
+                "name": "zephyrproject"
+              },
+              "purl": "pkg:github/zephyrproject-rtos/zephyr@v4.4.2#subsys/bluetooth/host",
+              "evidence": [
+                {
+                  "field": "name",
+                  "technique": "manifest-analysis",
+                  "source": "kconfig",
+                  "occurrence": {
+                    "location": "zephyr/.config",
+                    "line": 1294
+                  },
+                  "value": "CONFIG_BT_HCI_HOST",
+                  "confidence": 6000
+                },
+                {
+                  "field": "name",
+                  "technique": "manifest-analysis",
+                  "source": "linker-map",
+                  "occurrence": {
+                    "location": "zephyr/zephyr.map",
+                    "line": 5653
+                  },
+                  "value": "zephyr/subsys/bluetooth/common/libsubsys__bluetooth__common.a(addr.c.obj)",
+                  "confidence": 8000
+                },
+                {
+                  "field": "name",
+                  "technique": "manifest-analysis",
+                  "source": "west-spdx",
+                  "occurrence": {
+                    "location": "spdx/build.spdx",
+                    "line": 1289
+                  },
+                  "value": "subsys/bluetooth/common/addr.c",
+                  "confidence": 8000
+                }
+              ]
+            },
+            {
+              "kind": "library",
+              "name": "logging",
+              "version": "4.4.2",
+              "supplier": {
+                "name": "zephyrproject"
+              },
+              "purl": "pkg:github/zephyrproject-rtos/zephyr@v4.4.2#subsys/logging",
+              "evidence": [
+                {
+                  "field": "name",
+                  "technique": "manifest-analysis",
+                  "source": "kconfig",
+                  "occurrence": {
+                    "location": "zephyr/.config",
+                    "line": 130
+                  },
+                  "value": "CONFIG_LOG",
+                  "confidence": 6000
+                },
+                {
+                  "field": "name",
+                  "technique": "manifest-analysis",
+                  "source": "linker-map",
+                  "occurrence": {
+                    "location": "zephyr/zephyr.map",
+                    "line": 2924
+                  },
+                  "value": "zephyr/libzephyr.a(log_backend_uart.c.obj)",
+                  "confidence": 8000
+                },
+                {
+                  "field": "name",
+                  "technique": "manifest-analysis",
+                  "source": "west-spdx",
+                  "occurrence": {
+                    "location": "spdx/build.spdx",
+                    "line": 1560
+                  },
+                  "value": "subsys/logging/backends/log_backend_uart.c",
+                  "confidence": 8000
+                }
+              ]
+            }
           ]
         }
       ]

@@ -1,0 +1,10 @@
+default: smp_svr
+build_dir: /zephyrproject/build/smp-serial
+domains:
+  - name: smp_svr
+    build_dir: /zephyrproject/build/smp-serial/smp_svr
+  - name: mcuboot
+    build_dir: /zephyrproject/build/smp-serial/mcuboot
+flash_order:
+  - mcuboot
+  - smp_svr

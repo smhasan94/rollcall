@@ -716,6 +716,415 @@
               "value": "zephyrproject",
               "confidence": 9000
             }
+          ],
+          "components": [
+            {
+              "kind": "library",
+              "name": "filesystem",
+              "version": "4.4.2",
+              "supplier": {
+                "name": "zephyrproject"
+              },
+              "purl": "pkg:github/zephyrproject-rtos/zephyr@v4.4.2#subsys/fs",
+              "evidence": [
+                {
+                  "field": "name",
+                  "technique": "manifest-analysis",
+                  "source": "kconfig",
+                  "occurrence": {
+                    "location": "zephyr/.config",
+                    "line": 1866
+                  },
+                  "value": "CONFIG_FILE_SYSTEM",
+                  "confidence": 6000
+                },
+                {
+                  "field": "name",
+                  "technique": "manifest-analysis",
+                  "source": "linker-map",
+                  "occurrence": {
+                    "location": "zephyr/zephyr.map",
+                    "line": 6623
+                  },
+                  "value": "zephyr/subsys/fs/libsubsys__fs.a(fs.c.obj)",
+                  "confidence": 8000
+                },
+                {
+                  "field": "name",
+                  "technique": "manifest-analysis",
+                  "source": "west-spdx",
+                  "occurrence": {
+                    "location": "spdx/build.spdx",
+                    "line": 2686
+                  },
+                  "value": "subsys/fs/fs.c",
+                  "confidence": 8000
+                }
+              ]
+            },
+            {
+              "kind": "library",
+              "name": "ip-stack",
+              "version": "4.4.2",
+              "supplier": {
+                "name": "zephyrproject"
+              },
+              "purl": "pkg:github/zephyrproject-rtos/zephyr@v4.4.2#subsys/net/ip",
+              "evidence": [
+                {
+                  "field": "name",
+                  "technique": "manifest-analysis",
+                  "source": "kconfig",
+                  "occurrence": {
+                    "location": "zephyr/.config",
+                    "line": 2115
+                  },
+                  "value": "CONFIG_NET_IP",
+                  "confidence": 6000
+                },
+                {
+                  "field": "name",
+                  "technique": "manifest-analysis",
+                  "source": "linker-map",
+                  "occurrence": {
+                    "location": "zephyr/zephyr.map",
+                    "line": 7513
+                  },
+                  "value": "zephyr/subsys/net/ip/libsubsys__net__ip.a(connection.c.obj)",
+                  "confidence": 8000
+                },
+                {
+                  "field": "name",
+                  "technique": "manifest-analysis",
+                  "source": "west-spdx",
+                  "occurrence": {
+                    "location": "spdx/build.spdx",
+                    "line": 2835
+                  },
+                  "value": "subsys/net/ip/connection.c",
+                  "confidence": 8000
+                }
+              ]
+            },
+            {
+              "kind": "library",
+              "name": "json",
+              "version": "4.4.2",
+              "supplier": {
+                "name": "zephyrproject"
+              },
+              "purl": "pkg:github/zephyrproject-rtos/zephyr@v4.4.2#lib/utils/json.c",
+              "evidence": [
+                {
+                  "field": "name",
+                  "technique": "manifest-analysis",
+                  "source": "kconfig",
+                  "occurrence": {
+                    "location": "zephyr/.config",
+                    "line": 1788
+                  },
+                  "value": "CONFIG_JSON_LIBRARY",
+                  "confidence": 6000
+                },
+                {
+                  "field": "name",
+                  "technique": "manifest-analysis",
+                  "source": "linker-map",
+                  "occurrence": {
+                    "location": "zephyr/zephyr.map",
+                    "line": 6123
+                  },
+                  "value": "zephyr/libzephyr.a(json.c.obj)",
+                  "confidence": 8000
+                },
+                {
+                  "field": "name",
+                  "technique": "manifest-analysis",
+                  "source": "west-spdx",
+                  "occurrence": {
+                    "location": "spdx/build.spdx",
+                    "line": 3338
+                  },
+                  "value": "lib/utils/json.c",
+                  "confidence": 8000
+                }
+              ]
+            },
+            {
+              "kind": "library",
+              "name": "logging",
+              "version": "4.4.2",
+              "supplier": {
+                "name": "zephyrproject"
+              },
+              "purl": "pkg:github/zephyrproject-rtos/zephyr@v4.4.2#subsys/logging",
+              "evidence": [
+                {
+                  "field": "name",
+                  "technique": "manifest-analysis",
+                  "source": "kconfig",
+                  "occurrence": {
+                    "location": "zephyr/.config",
+                    "line": 149
+                  },
+                  "value": "CONFIG_LOG",
+                  "confidence": 6000
+                },
+                {
+                  "field": "name",
+                  "technique": "manifest-analysis",
+                  "source": "linker-map",
+                  "occurrence": {
+                    "location": "zephyr/zephyr.map",
+                    "line": 6150
+                  },
+                  "value": "zephyr/libzephyr.a(log_core.c.obj)",
+                  "confidence": 8000
+                },
+                {
+                  "field": "name",
+                  "technique": "manifest-analysis",
+                  "source": "west-spdx",
+                  "occurrence": {
+                    "location": "spdx/build.spdx",
+                    "line": 3342
+                  },
+                  "value": "subsys/logging/log_core.c",
+                  "confidence": 8000
+                }
+              ]
+            },
+            {
+              "kind": "library",
+              "name": "mbedtls-integration",
+              "version": "4.4.2",
+              "supplier": {
+                "name": "zephyrproject"
+              },
+              "purl": "pkg:github/zephyrproject-rtos/zephyr@v4.4.2#modules/mbedtls",
+              "evidence": [
+                {
+                  "field": "name",
+                  "technique": "manifest-analysis",
+                  "source": "kconfig",
+                  "occurrence": {
+                    "location": "zephyr/.config",
+                    "line": 388
+                  },
+                  "value": "CONFIG_MBEDTLS",
+                  "confidence": 6000
+                },
+                {
+                  "field": "name",
+                  "technique": "manifest-analysis",
+                  "source": "linker-map",
+                  "occurrence": {
+                    "location": "zephyr/zephyr.map",
+                    "line": 8341
+                  },
+                  "value": "modules/mbedtls/libmodules__mbedtls.a(zephyr_entropy.c.obj)",
+                  "confidence": 8000
+                },
+                {
+                  "field": "name",
+                  "technique": "manifest-analysis",
+                  "source": "west-spdx",
+                  "occurrence": {
+                    "location": "spdx/build.spdx",
+                    "line": 2293
+                  },
+                  "value": "modules/mbedtls/zephyr_entropy.c",
+                  "confidence": 8000
+                }
+              ]
+            },
+            {
+              "kind": "library",
+              "name": "networking-core",
+              "version": "4.4.2",
+              "supplier": {
+                "name": "zephyrproject"
+              },
+              "purl": "pkg:github/zephyrproject-rtos/zephyr@v4.4.2#subsys/net/conn_mgr",
+              "evidence": [
+                {
+                  "field": "name",
+                  "technique": "manifest-analysis",
+                  "source": "kconfig",
+                  "occurrence": {
+                    "location": "zephyr/.config",
+                    "line": 2056
+                  },
+                  "value": "CONFIG_NETWORKING",
+                  "confidence": 6000
+                },
+                {
+                  "field": "name",
+                  "technique": "manifest-analysis",
+                  "source": "linker-map",
+                  "occurrence": {
+                    "location": "zephyr/zephyr.map",
+                    "line": 7958
+                  },
+                  "value": "zephyr/subsys/net/conn_mgr/libsubsys__net__conn_mgr.a(conn_mgr_connectivity.c.obj)",
+                  "confidence": 8000
+                },
+                {
+                  "field": "name",
+                  "technique": "manifest-analysis",
+                  "source": "west-spdx",
+                  "occurrence": {
+                    "location": "spdx/build.spdx",
+                    "line": 2795
+                  },
+                  "value": "subsys/net/conn_mgr/conn_mgr_connectivity.c",
+                  "confidence": 8000
+                }
+              ]
+            },
+            {
+              "kind": "library",
+              "name": "shell",
+              "version": "4.4.2",
+              "supplier": {
+                "name": "zephyrproject"
+              },
+              "purl": "pkg:github/zephyrproject-rtos/zephyr@v4.4.2#subsys/shell",
+              "evidence": [
+                {
+                  "field": "name",
+                  "technique": "manifest-analysis",
+                  "source": "kconfig",
+                  "occurrence": {
+                    "location": "zephyr/.config",
+                    "line": 2685
+                  },
+                  "value": "CONFIG_SHELL",
+                  "confidence": 6000
+                },
+                {
+                  "field": "name",
+                  "technique": "manifest-analysis",
+                  "source": "linker-map",
+                  "occurrence": {
+                    "location": "zephyr/zephyr.map",
+                    "line": 6246
+                  },
+                  "value": "zephyr/libzephyr.a(cycles.c.obj)",
+                  "confidence": 8000
+                },
+                {
+                  "field": "name",
+                  "technique": "manifest-analysis",
+                  "source": "west-spdx",
+                  "occurrence": {
+                    "location": "spdx/build.spdx",
+                    "line": 3351
+                  },
+                  "value": "subsys/shell/modules/kernel_service/cycles.c",
+                  "confidence": 8000
+                }
+              ]
+            },
+            {
+              "kind": "library",
+              "name": "tls-sockets",
+              "version": "4.4.2",
+              "supplier": {
+                "name": "zephyrproject"
+              },
+              "purl": "pkg:github/zephyrproject-rtos/zephyr@v4.4.2#subsys/net/lib/sockets/sockets_tls.c",
+              "evidence": [
+                {
+                  "field": "name",
+                  "technique": "manifest-analysis",
+                  "source": "kconfig",
+                  "occurrence": {
+                    "location": "zephyr/.config",
+                    "line": 2532
+                  },
+                  "value": "CONFIG_NET_SOCKETS_SOCKOPT_TLS",
+                  "confidence": 6000
+                },
+                {
+                  "field": "name",
+                  "technique": "manifest-analysis",
+                  "source": "kconfig",
+                  "occurrence": {
+                    "location": "zephyr/.config",
+                    "line": 2562
+                  },
+                  "value": "CONFIG_TLS_CREDENTIALS",
+                  "confidence": 6000
+                },
+                {
+                  "field": "name",
+                  "technique": "manifest-analysis",
+                  "source": "linker-map",
+                  "occurrence": {
+                    "location": "zephyr/zephyr.map",
+                    "line": 6843
+                  },
+                  "value": "zephyr/subsys/net/libsubsys__net.a(sockets_tls.c.obj)",
+                  "confidence": 8000
+                },
+                {
+                  "field": "name",
+                  "technique": "manifest-analysis",
+                  "source": "west-spdx",
+                  "occurrence": {
+                    "location": "spdx/build.spdx",
+                    "line": 2724
+                  },
+                  "value": "subsys/net/lib/sockets/sockets_tls.c",
+                  "confidence": 8000
+                }
+              ]
+            },
+            {
+              "kind": "library",
+              "name": "usb-device",
+              "version": "4.4.2",
+              "supplier": {
+                "name": "zephyrproject"
+              },
+              "purl": "pkg:github/zephyrproject-rtos/zephyr@v4.4.2#subsys/usb/device",
+              "evidence": [
+                {
+                  "field": "name",
+                  "technique": "manifest-analysis",
+                  "source": "kconfig",
+                  "occurrence": {
+                    "location": "zephyr/.config",
+                    "line": 2814
+                  },
+                  "value": "CONFIG_USB_DEVICE_STACK_NEXT",
+                  "confidence": 6000
+                },
+                {
+                  "field": "name",
+                  "technique": "manifest-analysis",
+                  "source": "linker-map",
+                  "occurrence": {
+                    "location": "zephyr/zephyr.map",
+                    "line": 6705
+                  },
+                  "value": "zephyr/subsys/usb/device_next/libsubsys__usb__device_next.a(usbd_cdc_ncm.c.obj)",
+                  "confidence": 8000
+                },
+                {
+                  "field": "name",
+                  "technique": "manifest-analysis",
+                  "source": "west-spdx",
+                  "occurrence": {
+                    "location": "spdx/build.spdx",
+                    "line": 3022
+                  },
+                  "value": "subsys/usb/device_next/class/usbd_cdc_ncm.c",
+                  "confidence": 8000
+                }
+              ]
+            }
           ]
         }
       ]

@@ -15,7 +15,9 @@
 #                    `--variant old-mbedtls` (alone) builds the separately pinned old-mbedTLS
 #                    tree instead: Zephyr v4.2.0, SDK 0.17.2, its own workspace and SDK
 #                    directory, output fixtures/zephyr-old-mbedtls; fixtures/zephyr is not
-#                    touched.
+#                    touched. `--variant smp-serial` and/or `--variant smp-bt` (alone)
+#                    build the smp set: the main pins plus the zcbor module (MCUmgr needs
+#                    it), its own workspace, output fixtures/zephyr-smp.
 #   --check-stable   build everything twice, from scratch, and compare the two trees
 #                    (see `compare`); fails without touching the output if they differ.
 #   --skip-setup     do not download, clone or pip-install anything; the pins are still
@@ -36,10 +38,13 @@
 # ROLLCALL_FIXTURES_DIR pointing at it) before it replaces the output.
 #
 # Environment (each applies to the pin set being built; defaults in brackets for the main set,
-# then for old-mbedtls):
-#   ROLLCALL_ZEPHYR_WORKSPACE  west workspace [.cache/zephyr-workspace, .cache/zephyr-workspace-v4.2.0]
-#   ROLLCALL_ZEPHYR_SDK        Zephyr SDK install dir [.cache/zephyr-sdk, .cache/zephyr-sdk-0.17.2]
-#   ROLLCALL_FIXTURES_OUT      output directory [fixtures/zephyr, fixtures/zephyr-old-mbedtls]
+# then for old-mbedtls, then for smp):
+#   ROLLCALL_ZEPHYR_WORKSPACE  west workspace [.cache/zephyr-workspace, .cache/zephyr-workspace-v4.2.0,
+#                              .cache/zephyr-workspace-smp]
+#   ROLLCALL_ZEPHYR_SDK        Zephyr SDK install dir [.cache/zephyr-sdk, .cache/zephyr-sdk-0.17.2,
+#                              .cache/zephyr-sdk]
+#   ROLLCALL_FIXTURES_OUT      output directory [fixtures/zephyr, fixtures/zephyr-old-mbedtls,
+#                              fixtures/zephyr-smp]
 #
 # Every setup step is idempotent: it is skipped when its marker file exists. Build logs go to
 # .cache/fixtures-logs/; with --check-stable, the staging trees and compare-stable.txt stay in
@@ -50,16 +55,18 @@ cd "$(dirname "$0")/.."
 REPO_ROOT="$(pwd -P)"
 
 # --- Pins -----------------------------------------------------------------------------------
-# Two pin sets. The main one (fixtures/zephyr: baseline, bt, tls) and old-mbedtls
-# (fixtures/zephyr-old-mbedtls), a build against an older Zephyr whose mbedTLS has known CVEs.
+# Three pin sets. The main one (fixtures/zephyr: baseline, bt, tls); old-mbedtls
+# (fixtures/zephyr-old-mbedtls), a build against an older Zephyr whose mbedTLS has known CVEs;
+# and smp (fixtures/zephyr-smp), the main pins plus the zcbor module, for the MCUmgr
+# smp_svr sample built with Bluetooth off (smp-serial) and on (smp-bt).
 # select_pins sets the per-set values; everything else is shared.
 ZEPHYR_URL=https://github.com/zephyrproject-rtos/zephyr
 WEST_VERSION=1.5.0
 REUSE_VERSION=6.2.0
 IMGTOOL_VERSION=2.4.0
 BOARD=nrf52840dk/nrf52840
-ALL_VARIANTS=(baseline bt tls old-mbedtls)
-PROJECT_FILTER="-.*,+hal_nordic,+cmsis,+cmsis_6,+mbedtls,+tf-psa-crypto,+mcuboot"
+ALL_VARIANTS=(baseline bt tls old-mbedtls smp-serial smp-bt)
+BASE_PROJECT_FILTER="-.*,+hal_nordic,+cmsis,+cmsis_6,+mbedtls,+tf-psa-crypto,+mcuboot"
 WEST_UPDATE_ARGS=(--narrow -o=--depth=1)
 # Placeholders that replace host-specific directories in every text fixture.
 WS_PLACEHOLDER=/zephyrproject
@@ -80,6 +87,23 @@ select_pins() {
             DEFAULT_SDK=.cache/zephyr-sdk
             DEFAULT_OUT=fixtures/zephyr
             VARIANTS=(baseline bt tls)
+            PROJECT_FILTER="$BASE_PROJECT_FILTER"
+            ;;
+        smp)
+            # The main pins, plus zcbor: MCUmgr depends on it (without it CONFIG_MCUMGR
+            # resolves to n and drivers/console/uart_mcumgr.c does not compile). A set of
+            # its own so the main fixtures' workspace, and so their output, do not change.
+            PIN_SET=smp
+            ZEPHYR_TAG=v4.4.2
+            ZEPHYR_COMMIT=dccb09599635bdff17633fa7e9dab014b91dce90
+            SDK_VERSION=1.0.1
+            SDK_ARM_PREFIX=toolchain_gnu_
+            SDK_TOOLCHAIN_PARENT=gnu
+            DEFAULT_WS=.cache/zephyr-workspace-smp
+            DEFAULT_SDK=.cache/zephyr-sdk
+            DEFAULT_OUT=fixtures/zephyr-smp
+            VARIANTS=(smp-serial smp-bt)
+            PROJECT_FILTER="$BASE_PROJECT_FILTER,+zcbor"
             ;;
         old-mbedtls)
             PIN_SET=old-mbedtls
@@ -94,6 +118,7 @@ select_pins() {
             DEFAULT_SDK=.cache/zephyr-sdk-0.17.2
             DEFAULT_OUT=fixtures/zephyr-old-mbedtls
             VARIANTS=(old-mbedtls)
+            PROJECT_FILTER="$BASE_PROJECT_FILTER"
             ;;
         *) return 1 ;;
     esac
@@ -135,6 +160,7 @@ variant_sample() {
         bt) echo zephyr/samples/bluetooth/beacon ;;
         tls) echo zephyr/samples/net/sockets/http_server ;;
         old-mbedtls) echo zephyr/tests/crypto/mbedtls ;;
+        smp-serial | smp-bt) echo zephyr/samples/subsys/mgmt/mcumgr/smp_svr ;;
         *) return 1 ;;
     esac
 }
@@ -146,6 +172,7 @@ variant_app() {
         bt) echo beacon ;;
         tls) echo http_server ;;
         old-mbedtls) echo mbedtls ;;
+        smp-serial | smp-bt) echo smp_svr ;;
         *) return 1 ;;
     esac
 }
@@ -154,7 +181,18 @@ variant_app() {
 variant_extra_conf() {
     case "$1" in
         tls) echo "overlay-usbd.conf;overlay-tls.conf" ;;
+        smp-serial | smp-bt) echo serial.conf ;;
         *) echo "" ;;
+    esac
+}
+
+# variant_extra_args <v>: further -D arguments for the application image, one per line.
+# smp-bt is smp-serial with Bluetooth on and nothing else changed: the BT-off/BT-on pair
+# (SHA-108). The sample compiles src/bluetooth.c only with CONFIG_MCUMGR_TRANSPORT_BT.
+variant_extra_args() {
+    case "$1" in
+        smp-bt) printf '%s\n' -DCONFIG_BT=y -DCONFIG_BT_PERIPHERAL=y -DCONFIG_MCUMGR_TRANSPORT_BT=y ;;
+        *) ;;
     esac
 }
 
@@ -182,10 +220,15 @@ variant_build_argv() {
     extra="$(variant_extra_conf "$v")"
     dtc="$(variant_extra_dtc "$v")"
     printf '%s\n' west build -b "$BOARD" --sysbuild -d "build/$v" "$(variant_sample "$v")" --
-    # with_mcuboot's own sysbuild.conf enables MCUboot; the other samples need it set.
-    [[ "$v" == baseline ]] || printf '%s\n' -DSB_CONFIG_BOOTLOADER_MCUBOOT=y
+    # with_mcuboot's and smp_svr's own sysbuild.conf enable MCUboot; the other samples need
+    # it set.
+    case "$v" in
+        baseline | smp-serial | smp-bt) ;;
+        *) printf '%s\n' -DSB_CONFIG_BOOTLOADER_MCUBOOT=y ;;
+    esac
     [[ -z "$extra" ]] || printf '%s\n' "-DEXTRA_CONF_FILE=$extra"
     [[ -z "$dtc" ]] || printf '%s\n' "-DEXTRA_DTC_OVERLAY_FILE=$dtc"
+    variant_extra_args "$v"
     printf '%s\n' -DCONFIG_BUILD_OUTPUT_META=y -Dmcuboot_CONFIG_BUILD_OUTPUT_META=y
 }
 
@@ -960,7 +1003,8 @@ while [[ $# -gt 0 ]]; do
         *) die "unknown argument: $1" ;;
     esac
 done
-# old-mbedtls is its own pin set and output tree, so it is never mixed with the others.
+# old-mbedtls and smp are pin sets with their own output trees, so they are never mixed with
+# the others.
 select_pins main
 if [[ ${#SELECTED[@]} -gt 0 && " ${SELECTED[*]} " == *" old-mbedtls "* ]]; then
     for v in "${SELECTED[@]}"; do
@@ -968,6 +1012,12 @@ if [[ ${#SELECTED[@]} -gt 0 && " ${SELECTED[*]} " == *" old-mbedtls "* ]]; then
             die "--variant old-mbedtls has its own pins and output; build it on its own"
     done
     select_pins old-mbedtls
+elif [[ ${#SELECTED[@]} -gt 0 && " ${SELECTED[*]} " =~ \ smp-(serial|bt)\  ]]; then
+    for v in "${SELECTED[@]}"; do
+        [[ "$v" == smp-serial || "$v" == smp-bt ]] ||
+            die "--variant $v: smp-serial and smp-bt have their own pins and output; build them on their own"
+    done
+    select_pins smp
 fi
 [[ ${#SELECTED[@]} -gt 0 ]] || SELECTED=("${VARIANTS[@]}")
 

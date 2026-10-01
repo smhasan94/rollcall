@@ -38,7 +38,7 @@ pub fn blob_product() -> Product {
     let ingest = rollcall_core::blob::load(&blobs_manifest()).unwrap();
     let spec: rollcall_core::merge::ProductSpec = "blobs-demo@1.0.0".parse().unwrap();
     let mut product = rollcall_core::merge::merge(Vec::new(), Some(&spec)).unwrap();
-    rollcall_core::merge::add_blobs(&mut product, ingest.images).unwrap();
+    rollcall_core::merge::add_blobs(&mut product, ingest.into_images()).unwrap();
     product
 }
 

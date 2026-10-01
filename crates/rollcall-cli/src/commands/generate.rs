@@ -7,7 +7,7 @@ use std::path::Path;
 use rollcall_core::identify::{self, DbSource, LoadedDbs};
 use rollcall_core::merge::{self, ProductSpec};
 use rollcall_core::model::Product;
-use rollcall_core::zephyr::{self, IngestOptions, UnknownModule, Warning};
+use rollcall_core::zephyr::{self, IngestOptions, Note, UnknownModule, Warning};
 
 use super::output::write_document;
 use crate::cli::{EXIT_DATAERR, EXIT_NOINPUT, EXIT_USAGE, Format, GenerateArgs};
@@ -31,8 +31,12 @@ pub fn run(args: GenerateArgs, identifiers: Option<&Path>) -> u8 {
             product,
             warnings,
             unknown_modules,
+            notes,
         }) => {
             print_warnings(&warnings);
+            if args.verbose {
+                print_notes(&notes);
+            }
             print_stubs(dbs.as_ref(), &unknown_modules);
             product
         }
@@ -84,6 +88,7 @@ struct Loaded {
     product: Product,
     warnings: Vec<Warning>,
     unknown_modules: Vec<UnknownModule>,
+    notes: Vec<Note>,
 }
 
 /// The identifier database to resolve modules with, if module resolution is on: with
@@ -151,6 +156,7 @@ fn load_product(args: &GenerateArgs, dbs: Option<&LoadedDbs>) -> Result<Loaded, 
                 product: ingest.product,
                 warnings: ingest.warnings,
                 unknown_modules: ingest.unknown_modules,
+                notes: ingest.notes,
             }),
             // Missing or unreadable input (including a directory where a file should be).
             Err(e) if e.is_read_error() => Err((EXIT_NOINPUT, e.to_string())),
@@ -171,6 +177,7 @@ fn load_product(args: &GenerateArgs, dbs: Option<&LoadedDbs>) -> Result<Loaded, 
         product,
         warnings: Vec::new(),
         unknown_modules: Vec::new(),
+        notes: Vec::new(),
     })
 }
 
@@ -180,6 +187,15 @@ fn print_warnings(warnings: &[Warning]) {
     let mut stderr = std::io::stderr().lock();
     for warning in warnings {
         let _ = writeln!(stderr, "rollcall generate: warning: {warning}");
+    }
+}
+
+/// With `--verbose`, one `rollcall generate: note: …` line per note on stderr, after the
+/// warnings. A closed stderr is not an error.
+fn print_notes(notes: &[Note]) {
+    let mut stderr = std::io::stderr().lock();
+    for note in notes {
+        let _ = writeln!(stderr, "rollcall generate: note: {note}");
     }
 }
 

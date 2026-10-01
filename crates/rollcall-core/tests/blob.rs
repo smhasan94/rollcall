@@ -12,9 +12,12 @@ use std::path::{Path, PathBuf};
 use common::{GOLDEN_TIMESTAMP, blob_product};
 use rollcall_core::blob::{self, BlobEntry, BlobError};
 use rollcall_core::cyclonedx::{self, Timestamp, WriteOptions, validate_cyclonedx_1_6};
+use rollcall_core::merge;
+use rollcall_core::model::{BomRef, PathSegment};
 use rollcall_core::model::{
     EvidenceField, HashAlgorithm, Image, ImageKind, ImageType, Product, Technique,
 };
+use rollcall_core::zephyr::{self, IngestOptions};
 use serde_json::{Value, json};
 
 /// `sha256sum crates/rollcall-core/tests/data/blobs/s140_nrf52_7.3.0_softdevice.hex`.
@@ -81,12 +84,11 @@ fn fake_softdevice_hash_matches_sha256sum() {
     assert_eq!(blob::sha256_file(&file).unwrap(), FAKE_SOFTDEVICE_SHA256);
     let ingest = blob::load(&manifest()).unwrap();
     let softdevice = ingest
-        .images
-        .iter()
+        .images()
         .find(|i| i.name == "s140_nrf52_softdevice")
         .unwrap();
     assert_eq!(sha256(softdevice), FAKE_SOFTDEVICE_SHA256);
-    let libphy = ingest.images.iter().find(|i| i.name == "libphy").unwrap();
+    let libphy = ingest.images().find(|i| i.name == "libphy").unwrap();
     assert_eq!(sha256(libphy), FAKE_LIBPHY_SHA256);
 }
 
@@ -121,14 +123,14 @@ fn real_signed_hex_hash_matches_fixture_manifest() {
     )
     .unwrap();
     let ingest = blob::load(&manifest_path).unwrap();
-    assert_eq!(sha256(&ingest.images[0]), expected);
+    assert_eq!(sha256(&ingest.blobs[0].image), expected);
 }
 
 #[test]
 fn blob_image_carries_sha256_supplier_and_opaque_property() {
     let ingest = blob::load(&manifest()).unwrap();
-    assert_eq!(ingest.images.len(), 2);
-    let softdevice = &ingest.images[0];
+    assert_eq!(ingest.blobs.len(), 2);
+    let softdevice = &ingest.blobs[0].image;
     assert_eq!(softdevice.kind, ImageKind::Blob);
     assert_eq!(softdevice.name, "s140_nrf52_softdevice");
     assert_eq!(softdevice.version.as_deref(), Some("7.3.0"));
@@ -173,7 +175,7 @@ fn blob_image_carries_sha256_supplier_and_opaque_property() {
         Technique::BinaryAnalysis,
         "blob-file"
     ));
-    let libphy = &ingest.images[1];
+    let libphy = &ingest.blobs[1].image;
     assert_eq!(libphy.name, "libphy");
     assert_eq!(libphy.version.as_deref(), Some("5.2.1"));
     assert_eq!(
@@ -341,7 +343,7 @@ fn blob_path_may_climb_out_of_the_manifest_directory() {
     )
     .unwrap();
     let ingest = blob::load(&manifest).unwrap();
-    assert_eq!(ingest.images.len(), 1);
+    assert_eq!(ingest.blobs.len(), 1);
     assert!(ingest.warnings.is_empty(), "{:?}", ingest.warnings);
 }
 
@@ -398,8 +400,8 @@ fn manifest_kind_library_firmware_and_bogus() {
         &["libphy.a"],
     )
     .unwrap();
-    assert_eq!(ingest.images[0].name, "libphy");
-    assert_eq!(ingest.images[0].image_type, ImageType::Firmware);
+    assert_eq!(ingest.blobs[0].image.name, "libphy");
+    assert_eq!(ingest.blobs[0].image.image_type, ImageType::Firmware);
 
     // `kind: library` on radio.bin overrides the `.bin` extension.
     let ingest = load_with(
@@ -408,14 +410,14 @@ fn manifest_kind_library_firmware_and_bogus() {
         &["radio.bin"],
     )
     .unwrap();
-    assert_eq!(ingest.images[0].image_type, ImageType::Library);
+    assert_eq!(ingest.blobs[0].image.image_type, ImageType::Library);
     // Without `kind`, the same file is firmware by its extension.
     let ingest = load_with(
         "blobs:\n  - name: radio\n    version: '1'\n    supplier: V\n    path: radio.bin\n",
         &["radio.bin"],
     )
     .unwrap();
-    assert_eq!(ingest.images[0].image_type, ImageType::Firmware);
+    assert_eq!(ingest.blobs[0].image.image_type, ImageType::Firmware);
 
     // `kind: bogus` is a manifest error naming the value, from the committed bad manifest
     // and from a generated one.
@@ -446,6 +448,7 @@ fn blob_type_falls_back_to_extension_then_firmware() {
         licence: None,
         purl: None,
         kind: None,
+        image: None,
     };
     // No manifest kind, no recogniser: the extension decides.
     for (file, expected) in [
@@ -486,6 +489,116 @@ fn blob_type_falls_back_to_extension_then_firmware() {
         &["vendor.a", "other.dat"],
     )
     .unwrap();
-    assert_eq!(ingest.images[0].image_type, ImageType::Library);
-    assert_eq!(ingest.images[1].image_type, ImageType::Firmware);
+    assert_eq!(ingest.blobs[0].image.image_type, ImageType::Library);
+    assert_eq!(ingest.blobs[1].image.image_type, ImageType::Firmware);
+}
+
+/// The `bom-ref` of the image `name` of `product`.
+fn image_ref(product: &Product, name: &str) -> BomRef {
+    let image = product.images.iter().find(|i| i.name == name).unwrap();
+    BomRef::derive(&product.path().child(PathSegment::of_image(image)))
+}
+
+/// A manifest entry's `image:` attaches the blob to that image: the blob is a dependency of
+/// the named image (here the real `bt/beacon` application), not of the product root.
+#[test]
+fn manifest_image_attaches_blob_to_the_named_image() {
+    let app = zephyr::ingest(&IngestOptions::new(fixtures_root().join("bt/beacon"))).unwrap();
+    let ingest = load_with(
+        "blobs:\n  - path: libsoftdevice_controller_multirole.a\n    name: softdevice_controller\n    version: 6.1.0\n    supplier: Nordic Semiconductor ASA\n    image: beacon\n  - path: libphy.a\n    name: libphy\n    version: 1.0.0\n    supplier: Espressif Systems\n",
+        &["libsoftdevice_controller_multirole.a", "libphy.a"],
+    )
+    .unwrap();
+    let owners: Vec<Option<&str>> = ingest.blobs.iter().map(|b| b.owner.as_deref()).collect();
+    assert_eq!(owners, [Some("beacon"), None]);
+    let spec: merge::ProductSpec = "widget@1.0.0".parse().unwrap();
+    let mut product = merge::merge(vec![app.product], Some(&spec)).unwrap();
+    merge::attach_blobs(&mut product, ingest.blobs).unwrap();
+
+    let root = BomRef::derive(&product.path());
+    let beacon = image_ref(&product, "beacon");
+    let controller = image_ref(&product, "softdevice_controller");
+    let libphy = image_ref(&product, "libphy");
+    let deps = |from: &BomRef| product.dependencies.get(from).cloned().unwrap_or_default();
+    assert!(deps(&beacon).contains(&controller));
+    assert!(!deps(&root).contains(&controller));
+    // Without `image:`, the product root.
+    assert!(deps(&root).contains(&libphy));
+    assert!(!deps(&beacon).contains(&libphy));
+    // The blob is still an image of its own, of kind blob, and the document validates.
+    let image = product
+        .images
+        .iter()
+        .find(|i| i.name == "softdevice_controller")
+        .unwrap();
+    assert_eq!(image.kind, ImageKind::Blob);
+    assert_eq!(image.image_type, ImageType::Library);
+    let doc: Value = serde_json::from_str(&render(&product)).unwrap();
+    validate_cyclonedx_1_6(&doc).unwrap();
+    // add_blobs is attach_blobs with no owners.
+    let mut a = merge::merge(Vec::new(), Some(&spec)).unwrap();
+    let mut b = a.clone();
+    let blobs = load_with(
+        "blobs:\n  - path: libphy.a\n    name: libphy\n",
+        &["libphy.a"],
+    )
+    .unwrap()
+    .blobs;
+    assert_eq!(blobs[0].owner, None);
+    merge::add_blobs(&mut a, blobs.iter().map(|b| b.image.clone()).collect()).unwrap();
+    merge::attach_blobs(&mut b, blobs).unwrap();
+    assert_eq!(a, b);
+}
+
+#[test]
+fn manifest_image_naming_no_image_or_an_ambiguous_one_is_an_error() {
+    let ingest = load_with(
+        "blobs:\n  - path: libphy.a\n    name: libphy\n    image: nope\n",
+        &["libphy.a"],
+    )
+    .unwrap();
+    let spec: merge::ProductSpec = "widget@1.0.0".parse().unwrap();
+    let mut product = merge::merge(Vec::new(), Some(&spec)).unwrap();
+    product
+        .add_image(Image::new(ImageKind::Application, "app").unwrap())
+        .unwrap();
+    product
+        .add_image(Image::new(ImageKind::Bootloader, "app").unwrap())
+        .unwrap();
+    let before = product.clone();
+    let blobs = ingest.blobs;
+    let err = merge::attach_blobs(&mut product, blobs.clone()).unwrap_err();
+    assert_eq!(
+        err.to_string(),
+        "blob libphy: the product has no image named \"nope\" to attach it to"
+    );
+    // Atomic: unchanged on error.
+    assert_eq!(product, before);
+    let ambiguous = blobs
+        .into_iter()
+        .map(|b| blob::BlobImage {
+            owner: Some("app".to_owned()),
+            ..b
+        })
+        .collect();
+    let err = merge::attach_blobs(&mut product, ambiguous).unwrap_err();
+    assert!(
+        matches!(&err, merge::Error::AmbiguousImage { blob, image } if blob == "libphy" && image == "app"),
+        "{err}"
+    );
+    assert_eq!(product, before);
+    // A blob image is not a target: naming another blob is no image.
+    let first = load_with(
+        "blobs:\n  - path: libphy.a\n    name: libphy\n",
+        &["libphy.a"],
+    )
+    .unwrap();
+    merge::add_blobs(&mut product, first.into_images()).unwrap();
+    let second = load_with(
+        "blobs:\n  - path: x.a\n    name: x\n    image: libphy\n",
+        &["x.a"],
+    )
+    .unwrap();
+    let err = merge::attach_blobs(&mut product, second.blobs).unwrap_err();
+    assert!(matches!(err, merge::Error::NoSuchImage { .. }), "{err}");
 }

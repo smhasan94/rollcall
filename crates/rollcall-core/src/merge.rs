@@ -17,8 +17,10 @@ use std::collections::{BTreeMap, BTreeSet};
 use std::fmt;
 use std::str::FromStr;
 
+use crate::blob::BlobImage;
 use crate::model::{
-    BomRef, EvidenceSet, Image, MergeError, NodePath, PathSegment, Product, Schema, ValidationError,
+    BomRef, EvidenceSet, Image, ImageKind, MergeError, NodePath, PathSegment, Product, Schema,
+    ValidationError,
 };
 
 /// The product to merge into: `NAME[@VERSION]`.
@@ -130,6 +132,22 @@ pub enum Error {
     /// The merged product breaks a model invariant.
     #[error("invalid merged product: {0}")]
     Validation(#[from] ValidationError),
+    /// A blob names an image (`image:`) the product does not have.
+    #[error("blob {blob}: the product has no image named {image:?} to attach it to")]
+    NoSuchImage {
+        /// The blob's name.
+        blob: String,
+        /// The image it names.
+        image: String,
+    },
+    /// A blob names an image (`image:`) that more than one image of the product is called.
+    #[error("blob {blob}: more than one image is named {image:?}; cannot tell which it belongs to")]
+    AmbiguousImage {
+        /// The blob's name.
+        blob: String,
+        /// The image it names.
+        image: String,
+    },
 }
 
 /// `path` with its root segment replaced by `root`.
@@ -198,13 +216,57 @@ pub fn merge(inputs: Vec<Product>, spec: Option<&ProductSpec>) -> Result<Product
 /// An image whose identity is already present merges into it. Atomic: on error `product` is
 /// unchanged.
 pub fn add_blobs(product: &mut Product, images: Vec<Image>) -> Result<(), Error> {
+    attach_blobs(
+        product,
+        images
+            .into_iter()
+            .map(|image| BlobImage { image, owner: None })
+            .collect(),
+    )
+}
+
+/// Adds blob images to `product`, each with the name of the image it belongs to
+/// ([`BlobImage::owner`]): a blob
+/// with an owner becomes a dependency of that image (the one non-blob image of the product
+/// with that name), one without becomes a dependency of the product root. The blob image
+/// itself sits beside the other images, as every image does. An owner no image is called is
+/// [`Error::NoSuchImage`]; one several images are called is [`Error::AmbiguousImage`]. An
+/// image whose identity is already present merges into it. Atomic: on error `product` is
+/// unchanged.
+pub fn attach_blobs(product: &mut Product, blobs: Vec<BlobImage>) -> Result<(), Error> {
     let mut work = product.clone();
     let root = work.path();
     let root_ref = BomRef::derive(&root);
-    for image in images {
+    for BlobImage { image, owner } in blobs {
+        let from = match &owner {
+            None => root_ref.clone(),
+            Some(name) => {
+                let named: Vec<&Image> = work
+                    .images
+                    .iter()
+                    .filter(|i| i.kind != ImageKind::Blob && i.name == *name)
+                    .collect();
+                let (blob, image_name) = (image.name.clone(), name.clone());
+                match named.as_slice() {
+                    [found] => BomRef::derive(&root.child(PathSegment::of_image(found))),
+                    [] => {
+                        return Err(Error::NoSuchImage {
+                            blob,
+                            image: image_name,
+                        });
+                    }
+                    _ => {
+                        return Err(Error::AmbiguousImage {
+                            blob,
+                            image: image_name,
+                        });
+                    }
+                }
+            }
+        };
         let image_ref = BomRef::derive(&root.child(PathSegment::of_image(&image)));
         work.add_image(image)?;
-        work.add_dependency(root_ref.clone(), image_ref);
+        work.add_dependency(from, image_ref);
     }
     work.validate()?;
     *product = work;

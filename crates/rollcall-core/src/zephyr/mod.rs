@@ -29,9 +29,10 @@
 //! | `build_info.yml` | yes | application name, Zephyr version fallback, toolchain name |
 //! | `spdx/zephyr.spdx` | yes | Zephyr and every module: version, download location, purl, cpe, licence, supplier |
 //! | `spdx/app.spdx` | no (warning) | the application's concluded licence |
-//! | `spdx/build.spdx` | no (warning) | parsed and checked only |
+//! | `spdx/build.spdx` | no (warning) | which Zephyr sources each library was compiled from (`GENERATED_FROM`), for the subsystem split |
 //! | `spdx/modules-deps.spdx` | no (warning) | upstream module version, purl, cpe, supplier; which modules Zephyr depends on |
-//! | `zephyr/.config` | no (warning) | `CONFIG_ZEPHYR_<MODULE>_MODULE=y` name evidence; the SDK version |
+//! | `zephyr/.config` | no (warning) | `CONFIG_ZEPHYR_<MODULE>_MODULE=y` name evidence; the SDK version; which subsystems are enabled |
+//! | `zephyr/zephyr.map` | no (warning) | the GNU ld map: which objects were linked, for the subsystem split |
 //! | `--west-list FILE` | no (warning) | module revisions and URLs from `west list -f "{name} {path} {revision} {url}"` |
 //! | `--identifier-db FILE` (or `--identify`: the active database, [`identify::select`]) | no | each module's upstream version, purl, cpe and supplier, from an [identifier database](crate::identify) |
 //! | `--workspace DIR` | no | the west workspace, so `file_regex` and `git_tag` rules can read a module's sources at `DIR/<west list path>` |
@@ -68,11 +69,12 @@
 //! | identifier-database entry for the module (only with `--identifier-db`) | `version`, `purl` and `cpe` evidence from source `identifier-db` at the database's file name, with the [`Level`](crate::identify::Level)'s confidence (technique `source-code-analysis` for a `file_regex` rule, else `manifest-analysis`), and `supplier` evidence, which the database asserts outright (`manifest-analysis`, `High`); the module's `purl`, `cpe` and `supplier` when `modules-deps.spdx` gave none (a purl or cpe that differs from the `modules-deps.spdx` one is a warning, and the SPDX one is kept, except a purl naming the same GitHub repository and a cpe that is one of the entry's `cpe_aliases`; a differing supplier is not a warning). Every other CPE (the database's when the SPDX one won, and each of its `cpe_aliases`) becomes one of the component's [`additional_cpes`](crate::model::Component::additional_cpes), with `cpe` evidence. The module's `version` stays the git revision |
 //! | module missing from the identifier database | a warning, once per module per run (across every sysbuild image), and a paste-ready stub entry in [`Ingest::unknown_modules`] |
 //! | `--include-sdk` | component `application` `zephyr-sdk` (or `<toolchain>-toolchain`), version `M.N` from `CONFIG_TOOLCHAIN_ZEPHYR_<M>_<N>` |
+//! | each subsystem of the [subsystem table](crate::subsystems) enabled in `zephyr/.config` with at least one object linked per `zephyr/zephyr.map` | a `library` subcomponent of `zephyr` named after the subsystem, with `zephyr`'s version and supplier, `zephyr`'s purl with the entry's primary source (`subpath`, else its first source) as subpath, the table's cpe, and `kconfig`, `linker-map` and `west-spdx` name evidence (see `docs/subsystems.md`); an enabled subsystem with nothing linked is a [`Note`] in [`Ingest::notes`] |
 //! | — | dependencies: product → image; image → `zephyr` (and the SDK); `zephyr` → each module that `modules-deps.spdx` says is a `DEPENDENCY_OF SPDXRef-zephyr-deps` (every module when that file is missing) |
 //!
 //! Every fact carries evidence with technique `manifest-analysis` (except as noted for the
-//! identifier database) and a source of `west-spdx`, `west-list`, `kconfig`, `build-info` or
-//! `identifier-db`, located at the file (relative to the
+//! identifier database) and a source of `west-spdx`, `west-list`, `kconfig`, `build-info`,
+//! `linker-map` or `identifier-db`, located at the file (relative to the
 //! build directory, or the `--west-list` file's name) and line it came from.
 //!
 //! # Warnings
@@ -82,10 +84,12 @@
 //! that is not a module of this build, a module the identifier database does not list or
 //! cannot version), are reported as [`Warning`]s, never errors. Warnings
 //! come in a fixed order: `spdx/app.spdx`, `spdx/build.spdx`, `spdx/modules-deps.spdx`,
-//! `zephyr/.config`, the west list, then the mapping's warnings sorted by file, line number
-//! and message. Missing or malformed *required* input, a malformed optional file that is
-//! present, and a missing or malformed identifier database, is a [`ZephyrError`] naming the
-//! file.
+//! `zephyr/.config`, `zephyr/zephyr.map` (missing, or not a GNU ld map), the west list, then
+//! the mapping's warnings sorted by file, line number and message. Decisions of the subsystem
+//! split that are not problems (a subsystem enabled but not linked, linked code under a
+//! disabled subsystem) are [`Note`]s, not warnings. Missing or malformed *required* input, a malformed optional file that is
+//! present (including a GNU ld map with a malformed number), and a missing or malformed
+//! identifier database, is a [`ZephyrError`] naming the file.
 //!
 //! # Determinism
 //!
@@ -96,15 +100,20 @@
 pub mod build_info;
 pub mod kconfig;
 mod map;
+mod objects;
 pub mod spdx;
+mod split;
 mod sysbuild;
 pub mod west_list;
 
+use std::fmt;
 use std::io;
 use std::path::{Path, PathBuf};
 
 use crate::identify::{self, IdentifierDb, LoadError, Resolver};
+use crate::linker_map::{self, LinkerMap, LinkerMapError};
 use crate::model::{ModelError, Product};
+use crate::subsystems::SubsystemsError;
 
 pub use crate::warning::Warning;
 pub use build_info::{BuildInfo, BuildInfoError};
@@ -185,6 +194,36 @@ pub struct Ingest {
     /// The modules the identifier database does not list, sorted by name, each once (empty
     /// without an identifier database).
     pub unknown_modules: Vec<UnknownModule>,
+    /// Diagnostics that are not problems: why a subsystem the `.config` enables was not
+    /// emitted, and linked code left in the `zephyr` package. Sorted; `rollcall generate
+    /// --verbose` prints them.
+    pub notes: Vec<Note>,
+}
+
+/// A diagnostic about a decision rollcall made, not a problem with the inputs (that is a
+/// [`Warning`]): e.g. a subsystem left out because none of its code was linked.
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
+pub struct Note {
+    /// The input it is about, e.g. `zephyr/zephyr.map`.
+    pub location: String,
+    /// What rollcall decided and why.
+    pub message: String,
+}
+
+impl Note {
+    /// A note about `location`.
+    pub fn new(location: impl Into<String>, message: impl Into<String>) -> Self {
+        Self {
+            location: location.into(),
+            message: message.into(),
+        }
+    }
+}
+
+impl fmt::Display for Note {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}: {}", self.location, self.message)
+    }
 }
 
 /// A module the identifier database does not list.
@@ -211,6 +250,8 @@ pub struct ZephyrBuild {
     pub modules_deps_spdx: Option<SpdxDocument>,
     /// `zephyr/.config`, if present.
     pub config: Option<Kconfig>,
+    /// `zephyr/zephyr.map`, if present and a GNU ld map.
+    pub linker_map: Option<LinkerMap>,
     /// The `west list` output, if given.
     pub west_list: Option<WestList>,
     /// The name the west list is cited by in evidence (its file name).
@@ -234,6 +275,8 @@ pub struct InputPaths {
     pub modules_deps_spdx: PathBuf,
     /// `zephyr/.config`.
     pub config: PathBuf,
+    /// `zephyr/zephyr.map`.
+    pub linker_map: PathBuf,
     /// The west list file, if given.
     pub west_list: Option<PathBuf>,
 }
@@ -279,6 +322,20 @@ pub enum ZephyrError {
         path: PathBuf,
         /// What is wrong, with the line.
         source: KconfigError,
+    },
+    /// `zephyr/zephyr.map` is a GNU ld map with a malformed number.
+    #[error("{}: {source}", path.display())]
+    LinkerMap {
+        /// The file.
+        path: PathBuf,
+        /// What is wrong, with the line.
+        source: LinkerMapError,
+    },
+    /// The built-in subsystem table could not be loaded.
+    #[error("{source}")]
+    Subsystems {
+        /// What is wrong, naming the table.
+        source: SubsystemsError,
     },
     /// `build_info.yml` is malformed.
     #[error("{}: {source}", path.display())]
@@ -444,6 +501,7 @@ pub fn load(options: &IngestOptions) -> Result<ZephyrBuild, ZephyrError> {
         app_spdx: dir.join("spdx").join("app.spdx"),
         modules_deps_spdx: dir.join("spdx").join("modules-deps.spdx"),
         config: dir.join("zephyr").join(".config"),
+        linker_map: dir.join("zephyr").join("zephyr.map"),
         west_list: options.west_list.clone(),
     };
     let build_spdx_path = dir.join("spdx").join("build.spdx");
@@ -491,7 +549,7 @@ pub fn load(options: &IngestOptions) -> Result<ZephyrBuild, ZephyrError> {
     let config = read_optional(
         &paths.config,
         "zephyr/.config",
-        "no Kconfig module evidence or SDK version",
+        "no Kconfig module evidence or SDK version; zephyr is not split into subsystems",
         &mut warnings,
     )?
     .map(|text| {
@@ -501,6 +559,30 @@ pub fn load(options: &IngestOptions) -> Result<ZephyrBuild, ZephyrError> {
         })
     })
     .transpose()?;
+    let linker_map = match read_optional(
+        &paths.linker_map,
+        "zephyr/zephyr.map",
+        "zephyr is not split into subsystems",
+        &mut warnings,
+    )? {
+        None => None,
+        Some(text) => match linker_map::parse(&text) {
+            Ok(map) => Some(map),
+            Err(LinkerMapError::NotGnuLd) => {
+                warnings.push(Warning::new(
+                    "zephyr/zephyr.map",
+                    "not a GNU ld map file; zephyr is not split into subsystems",
+                ));
+                None
+            }
+            Err(source) => {
+                return Err(ZephyrError::LinkerMap {
+                    path: paths.linker_map.clone(),
+                    source,
+                });
+            }
+        },
+    };
 
     let (west_list, west_list_location) = match &options.west_list {
         None => {
@@ -531,6 +613,7 @@ pub fn load(options: &IngestOptions) -> Result<ZephyrBuild, ZephyrError> {
         build_spdx,
         modules_deps_spdx,
         config,
+        linker_map,
         west_list,
         west_list_location,
         paths,

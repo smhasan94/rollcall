@@ -1,0 +1,34 @@
+SPDXVersion: SPDX-2.3
+DataLicense: CC0-1.0
+SPDXID: SPDXRef-DOCUMENT
+DocumentName: app-sources
+DocumentNamespace: http://spdx.org/spdxdocs/rollcall-smp-serial-smp_svr/app
+Creator: Tool: Zephyr SPDX builder
+Created: 2026-10-01T22:29:51Z
+
+Relationship: SPDXRef-DOCUMENT DESCRIBES SPDXRef-app-sources
+
+##### Package: app-sources
+
+PackageName: app-sources
+SPDXID: SPDXRef-app-sources
+PackageLicenseConcluded: Apache-2.0
+PackageLicenseDeclared: NOASSERTION
+PackageCopyrightText: NOASSERTION
+PrimaryPackagePurpose: SOURCE
+PackageDownloadLocation: NOASSERTION
+PackageLicenseInfoFromFiles: Apache-2.0
+FilesAnalyzed: true
+PackageVerificationCode: 7ce65b5935156d519c4293df49637f49636faf92
+
+FileName: ./src/main.c
+SPDXID: SPDXRef-File-main.c
+FileChecksum: SHA1: 3abb47e371b366582726d14f3775f2324dffd23b
+FileChecksum: SHA256: d648a1aa4efaf669d3769c71058f7ea054325bc6d6d20734e1230b6da9cf04ca
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>
+ * Copyright (c) 2012-2014 Wind River Systems, Inc.
+ * Copyright (c) 2020 Prevas A/S
+</text>
+

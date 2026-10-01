@@ -77,6 +77,19 @@ enriched with the seed identifier database. It is the union of the NVD CVE API's
 grype database it was observed with. Used by `scripts/smoke-scan.sh --only old-mbedtls` and the
 CI job `grype-expected-cves`.
 
+## `zephyr-subsystems.txt` — hand-audited subsystem lists (SHA-108)
+
+A **hand-audited** list (not build output): for each real Zephyr build under `fixtures/`, the
+subsystems of `db/subsystems.yaml` it both enables in `zephyr/.config` and links code from in
+`zephyr/zephyr.map`, with one cited linked map line per subsystem. Audited by reading each
+build's `.config`, the memory-map part of its `zephyr.map` and its `spdx/build.spdx`
+`GENERATED_FROM` relationships. Update it by hand (and re-audit) when the fixtures or the
+table change.
+
+| File | What it is | Used by |
+|------|------------|---------|
+| `zephyr-subsystems.txt` | `<build>: <subsystem> …` per fixture build, with the audit as comments. | `tests/zephyr.rs` (`every_fixture_subsystem_list_matches_hand_audited_list`) |
+
 ## `zephyr-manifest-pins.txt` — generated pin list
 
 **Generated** by `scripts/regen-version-tables.sh` from the `west.yml` of Zephyr v4.2.0 to

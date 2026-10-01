@@ -19,7 +19,7 @@
 //!     match:                                # at least one of purl | name | subsystem
 //!       purl: "pkg:github/mbed-tls/mbedtls@*"   # a purl, or a glob where * matches anything
 //!       name: mbedtls                       # exact component name
-//!       subsystem: net                      # reserved (see below)
+//!       subsystem: bluetooth-host           # a Zephyr subsystem subcomponent (see below)
 //!       cves: [CVE-2022-35409]              # optional; the finding's id or any alias
 //!       versions: ">=2.28.0, <2.28.5"       # optional semver range (Cargo syntax)
 //!     when:                                 # optional; every condition must hold
@@ -40,9 +40,20 @@
 //! compared case-sensitively with the canonical purl, so write it in canonical form (see
 //! [`PurlPattern`]).
 //!
-//! `match.subsystem` is **reserved** until the Zephyr kernel package is split into subsystems
-//! (SHA-108): it matches a nested subcomponent by name, but no ingester produces those yet, so
-//! a rule using it matches nothing today and the report carries a warning naming the rule.
+//! `match.subsystem` must name an entry of the built-in subsystem table
+//! ([`crate::subsystems::builtin`]); any other name (e.g. a misspelt `bluetooth_host`) is a
+//! [`RuleError`] at the rule's line, never a rule that silently matches nothing.
+//! `match.subsystem` matches a nested subcomponent by name: the subsystems Zephyr ingestion
+//! splits out of the `zephyr` component (`bluetooth-host`, `ip-stack`, …; see
+//! `docs/subsystems.md`). A rule naming a subsystem the SBOM does not contain matches
+//! nothing. Findings are joined to components by purl, cpe or name and version, so a
+//! subsystem rule applies only to findings joined to that subcomponent: by its purl (Zephyr's
+//! with a subpath, e.g. `pkg:github/zephyrproject-rtos/zephyr@v4.4.2#subsys/bluetooth/host`),
+//! its cpe (the subsystem table's, if any) or its name and version. **Real scanner findings
+//! for Zephyr do not join subsystems today:** grype and osv-scanner report Zephyr CVEs against
+//! the CPE `cpe:2.3:o:zephyrproject:zephyr:…`, which only the `zephyr` component carries, so a
+//! `match.subsystem` rule never applies to them; it applies to findings that target a
+//! subsystem's purl.
 //!
 //! Evidence for `cargo_feature_off` and `symbol_not_linked` ([`BuildEvidence`]'s feature and
 //! linked-symbol sets) can be given through the library but not yet through `rollcall vex`,

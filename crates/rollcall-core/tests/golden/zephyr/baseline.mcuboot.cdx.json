@@ -1,7 +1,7 @@
 {
   "bomFormat": "CycloneDX",
   "specVersion": "1.6",
-  "serialNumber": "urn:uuid:91b3497a-325e-8bae-9bb6-c718ef5ca71d",
+  "serialNumber": "urn:uuid:ba2c6bc1-ad7f-84b6-89f7-cfc93ff0eddf",
   "version": 1,
   "metadata": {
     "timestamp": "2026-01-02T03:04:05Z",
@@ -1200,6 +1200,160 @@
               "name": "rollcall:evidence-source",
               "value": "west-spdx"
             }
+          ],
+          "components": [
+            {
+              "type": "library",
+              "bom-ref": "component:c5c0b64a5b180c9108a31a1ca589a781",
+              "name": "logging",
+              "version": "4.4.2",
+              "supplier": {
+                "name": "zephyrproject"
+              },
+              "purl": "pkg:github/zephyrproject-rtos/zephyr@v4.4.2#subsys/logging",
+              "evidence": {
+                "identity": [
+                  {
+                    "field": "name",
+                    "confidence": 0.8,
+                    "concludedValue": "logging",
+                    "methods": [
+                      {
+                        "technique": "manifest-analysis",
+                        "confidence": 0.6,
+                        "value": "CONFIG_LOG"
+                      },
+                      {
+                        "technique": "manifest-analysis",
+                        "confidence": 0.8,
+                        "value": "zephyr/libzephyr.a(log_minimal.c.obj)"
+                      },
+                      {
+                        "technique": "manifest-analysis",
+                        "confidence": 0.8,
+                        "value": "subsys/logging/log_minimal.c"
+                      }
+                    ]
+                  }
+                ],
+                "occurrences": [
+                  {
+                    "location": "spdx/build.spdx",
+                    "line": 2610
+                  },
+                  {
+                    "location": "zephyr/.config",
+                    "line": 232
+                  },
+                  {
+                    "location": "zephyr/zephyr.map",
+                    "line": 3737
+                  }
+                ]
+              },
+              "properties": [
+                {
+                  "name": "rollcall:evidence",
+                  "value": "{\"field\":\"name\",\"technique\":\"manifest-analysis\",\"source\":\"kconfig\",\"occurrence\":{\"location\":\"zephyr/.config\",\"line\":232},\"value\":\"CONFIG_LOG\",\"confidence\":6000}"
+                },
+                {
+                  "name": "rollcall:evidence",
+                  "value": "{\"field\":\"name\",\"technique\":\"manifest-analysis\",\"source\":\"linker-map\",\"occurrence\":{\"location\":\"zephyr/zephyr.map\",\"line\":3737},\"value\":\"zephyr/libzephyr.a(log_minimal.c.obj)\",\"confidence\":8000}"
+                },
+                {
+                  "name": "rollcall:evidence",
+                  "value": "{\"field\":\"name\",\"technique\":\"manifest-analysis\",\"source\":\"west-spdx\",\"occurrence\":{\"location\":\"spdx/build.spdx\",\"line\":2610},\"value\":\"subsys/logging/log_minimal.c\",\"confidence\":8000}"
+                },
+                {
+                  "name": "rollcall:evidence-source",
+                  "value": "kconfig"
+                },
+                {
+                  "name": "rollcall:evidence-source",
+                  "value": "linker-map"
+                },
+                {
+                  "name": "rollcall:evidence-source",
+                  "value": "west-spdx"
+                }
+              ]
+            },
+            {
+              "type": "library",
+              "bom-ref": "component:4d045076d8709c41c8b94ec4e232a4cc",
+              "name": "mbedtls-integration",
+              "version": "4.4.2",
+              "supplier": {
+                "name": "zephyrproject"
+              },
+              "purl": "pkg:github/zephyrproject-rtos/zephyr@v4.4.2#modules/mbedtls",
+              "evidence": {
+                "identity": [
+                  {
+                    "field": "name",
+                    "confidence": 0.8,
+                    "concludedValue": "mbedtls-integration",
+                    "methods": [
+                      {
+                        "technique": "manifest-analysis",
+                        "confidence": 0.6,
+                        "value": "CONFIG_MBEDTLS"
+                      },
+                      {
+                        "technique": "manifest-analysis",
+                        "confidence": 0.8,
+                        "value": "modules/mbedtls/libmodules__mbedtls.a(zephyr_entropy.c.obj)"
+                      },
+                      {
+                        "technique": "manifest-analysis",
+                        "confidence": 0.8,
+                        "value": "modules/mbedtls/zephyr_entropy.c"
+                      }
+                    ]
+                  }
+                ],
+                "occurrences": [
+                  {
+                    "location": "spdx/build.spdx",
+                    "line": 1945
+                  },
+                  {
+                    "location": "zephyr/.config",
+                    "line": 467
+                  },
+                  {
+                    "location": "zephyr/zephyr.map",
+                    "line": 4027
+                  }
+                ]
+              },
+              "properties": [
+                {
+                  "name": "rollcall:evidence",
+                  "value": "{\"field\":\"name\",\"technique\":\"manifest-analysis\",\"source\":\"kconfig\",\"occurrence\":{\"location\":\"zephyr/.config\",\"line\":467},\"value\":\"CONFIG_MBEDTLS\",\"confidence\":6000}"
+                },
+                {
+                  "name": "rollcall:evidence",
+                  "value": "{\"field\":\"name\",\"technique\":\"manifest-analysis\",\"source\":\"linker-map\",\"occurrence\":{\"location\":\"zephyr/zephyr.map\",\"line\":4027},\"value\":\"modules/mbedtls/libmodules__mbedtls.a(zephyr_entropy.c.obj)\",\"confidence\":8000}"
+                },
+                {
+                  "name": "rollcall:evidence",
+                  "value": "{\"field\":\"name\",\"technique\":\"manifest-analysis\",\"source\":\"west-spdx\",\"occurrence\":{\"location\":\"spdx/build.spdx\",\"line\":1945},\"value\":\"modules/mbedtls/zephyr_entropy.c\",\"confidence\":8000}"
+                },
+                {
+                  "name": "rollcall:evidence-source",
+                  "value": "kconfig"
+                },
+                {
+                  "name": "rollcall:evidence-source",
+                  "value": "linker-map"
+                },
+                {
+                  "name": "rollcall:evidence-source",
+                  "value": "west-spdx"
+                }
+              ]
+            }
           ]
         }
       ]
@@ -1252,6 +1406,14 @@
         "component:d4b0cce369640845f7730d428453a1bd",
         "component:f03de58709481194ecc17dd33da06c4f"
       ]
+    },
+    {
+      "ref": "component:c5c0b64a5b180c9108a31a1ca589a781",
+      "dependsOn": []
+    },
+    {
+      "ref": "component:4d045076d8709c41c8b94ec4e232a4cc",
+      "dependsOn": []
     }
   ]
 }

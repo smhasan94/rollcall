@@ -1,0 +1,64 @@
+# Hand-audited (not generated): the subsystems of db/subsystems.yaml each real fixture build
+# both enables in zephyr/.config and links code from, per zephyr/zephyr.map. Audited for
+# SHA-108 by reading each build's .config (the table's symbols), the "Linker script and memory
+# map" part of zephyr.map (input sections with a non-zero size, before the .debug/.comment
+# output sections) and spdx/build.spdx GENERATED_FROM -> spdx/zephyr.spdx FileName (which
+# libzephyr.a / libmbedTLSBase.a members are which source). One linked map line per subsystem
+# is cited. No table subsystem is enabled without linked code on any build, and no linked
+# object lies under a disabled subsystem's sources.
+#
+# Format: <build directory under fixtures/>: <subsystem> ... (name order; empty = none)
+
+# No table symbol set (CONFIG_LOG, CONFIG_BT, CONFIG_MBEDTLS, ... all unset).
+zephyr/baseline/with_mcuboot:
+# logging: zephyr.map:3737 libzephyr.a(log_minimal.c.obj) 0x1a
+# mbedtls-integration: zephyr.map:4025 modules/mbedtls/libmodules__mbedtls.a(zephyr_init.c.obj) 0x10
+zephyr/baseline/mcuboot: logging mbedtls-integration
+# bluetooth-controller: zephyr.map:2812 libsubsys__bluetooth__controller.a(ull_adv.c.obj) 0x1c8
+#   (and :2819 .../ll_sw/nordic/libsubsys__bluetooth__controller__ll_sw__nordic.a(lll_adv.c.obj))
+# bluetooth-host: zephyr.map:3089 libsubsys__bluetooth__host.a(buf.c.obj) 0x34
+#   (and :3083 libsubsys__bluetooth__common.a(bt_str.c.obj) 0x44)
+# logging: zephyr.map:2842 libzephyr.a(log_core.c.obj) 0x60 (the sample's prj.conf sets CONFIG_LOG=y)
+zephyr/bt/beacon: bluetooth-controller bluetooth-host logging
+# logging: zephyr.map:3726 libzephyr.a(log_minimal.c.obj); mbedtls-integration: :4053 libmodules__mbedtls.a(zephyr_init.c.obj)
+zephyr/bt/mcuboot: logging mbedtls-integration
+# filesystem: zephyr.map:6623 libsubsys__fs.a(fs.c.obj) 0x10
+# ip-stack: :7181 libsubsys__net__ip.a(net_core.c.obj) 0xd0
+# json: :6123 libzephyr.a(json.c.obj) 0xe4
+# logging: :6150 libzephyr.a(log_core.c.obj) 0x60
+# mbedtls-integration: :8339 libmodules__mbedtls.a(zephyr_init.c.obj) 0x20
+# networking-core: :7924 libsubsys__net__conn_mgr.a(conn_mgr_monitor.c.obj) 0x48
+#   (and :7144 libsubsys__net__l2__ethernet.a(ethernet.c.obj), :7804 libsubsys__net__lib__http.a(http_parser.c.obj))
+# shell: :6295 libzephyr.a(shell_uart.c.obj) 0x30
+# tls-sockets: :6843 libsubsys__net.a(sockets_tls.c.obj) 0x24 (and :6895 tls_credentials.c.obj)
+# usb-device: :6640 libsubsys__usb__device_next.a(usbd_device.c.obj) 0x8c
+zephyr/tls/http_server: filesystem ip-stack json logging mbedtls-integration networking-core shell tls-sockets usb-device
+# logging: zephyr.map:3726 libzephyr.a(log_minimal.c.obj); mbedtls-integration: :4053 libmodules__mbedtls.a(zephyr_init.c.obj)
+zephyr/tls/mcuboot: logging mbedtls-integration
+# Zephyr v4.2.0: the glue (zephyr/modules/mbedtls/zephyr_init.c) is in libmbedTLSBase.a.
+# logging: zephyr.map:3211 libzephyr.a(log_minimal.c.obj) 0xc0
+# mbedtls-integration: :4500 modules/mbedtls/libmbedTLSBase.a(zephyr_init.c.obj) 0x4
+zephyr-old-mbedtls/old-mbedtls/mbedtls: logging mbedtls-integration
+# logging: zephyr.map:4014 libzephyr.a(log_minimal.c.obj) 0x1a
+# mbedtls-integration: :4336 modules/mbedtls/libmbedTLSBase.a(zephyr_init.c.obj) 0x4
+zephyr-old-mbedtls/old-mbedtls/mcuboot: logging mbedtls-integration
+# fixtures/zephyr-smp (the main pins plus zcbor; the canonical CI build, linux-x86_64):
+# samples/subsys/mgmt/mcumgr/smp_svr with serial.conf, Bluetooth off (smp-serial) and on
+# (smp-bt: -DCONFIG_BT=y -DCONFIG_BT_PERIPHERAL=y -DCONFIG_MCUMGR_TRANSPORT_BT=y). dfu owns
+# subsys/mgmt/mcumgr/grp/img_mgmt, the more specific path inside mcumgr's subsys/mgmt/mcumgr.
+# dfu: zephyr.map:3389 subsys/dfu/boot/libsubsys__dfu__boot.a(mcuboot.c.obj) 0x74
+#   (and :3304 libmcumgr_grp_img_mgmt.a(zephyr_img_mgmt.c.obj) 0x80)
+# logging: :3018 libzephyr.a(log_core.c.obj) 0x60
+# mcumgr: :3287 subsys/mgmt/mcumgr/mgmt/libmcumgr_mgmt.a(mgmt.c.obj) 0x24
+zephyr-smp/smp-serial/smp_svr: dfu logging mcumgr
+# logging: zephyr.map:3726 libzephyr.a(log_minimal.c.obj) 0x1a
+# mbedtls-integration: :4053 libmodules__mbedtls.a(zephyr_init.c.obj) 0x10
+zephyr-smp/smp-serial/mcuboot: logging mbedtls-integration
+# bluetooth-controller: zephyr.map:3733 libsubsys__bluetooth__controller.a(ull.c.obj) 0x90
+# bluetooth-host: :4210 libsubsys__bluetooth__host.a(uuid.c.obj) 0x68
+# dfu: :6064 libsubsys__dfu__boot.a(mcuboot.c.obj) 0x74; logging: :3812 log_core.c.obj 0x60;
+# mcumgr: :4086 libmcumgr_mgmt.a(mgmt.c.obj) 0x24
+zephyr-smp/smp-bt/smp_svr: bluetooth-controller bluetooth-host dfu logging mcumgr
+# The same MCUboot image as smp-serial's (byte-identical SBOM).
+# logging: zephyr.map:3726 log_minimal.c.obj 0x1a; mbedtls-integration: :4053 zephyr_init.c.obj 0x10
+zephyr-smp/smp-bt/mcuboot: logging mbedtls-integration

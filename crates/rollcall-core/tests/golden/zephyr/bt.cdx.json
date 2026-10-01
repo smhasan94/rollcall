@@ -1,7 +1,7 @@
 {
   "bomFormat": "CycloneDX",
   "specVersion": "1.6",
-  "serialNumber": "urn:uuid:29b73537-f94f-8778-86c0-9ea2f71fc955",
+  "serialNumber": "urn:uuid:0c6a5875-0a13-8b18-b250-6a66a278fb1c",
   "version": 1,
   "metadata": {
     "timestamp": "2026-01-02T03:04:05Z",
@@ -1112,6 +1112,236 @@
               "name": "rollcall:evidence-source",
               "value": "west-spdx"
             }
+          ],
+          "components": [
+            {
+              "type": "library",
+              "bom-ref": "component:d4f5392e43d6bc21fe8d24f0af7f3415",
+              "name": "bluetooth-controller",
+              "version": "4.4.2",
+              "supplier": {
+                "name": "zephyrproject"
+              },
+              "purl": "pkg:github/zephyrproject-rtos/zephyr@v4.4.2#subsys/bluetooth/controller",
+              "evidence": {
+                "identity": [
+                  {
+                    "field": "name",
+                    "confidence": 0.8,
+                    "concludedValue": "bluetooth-controller",
+                    "methods": [
+                      {
+                        "technique": "manifest-analysis",
+                        "confidence": 0.6,
+                        "value": "CONFIG_BT_LL_SW_SPLIT"
+                      },
+                      {
+                        "technique": "manifest-analysis",
+                        "confidence": 0.8,
+                        "value": "zephyr/subsys/bluetooth/controller/libsubsys__bluetooth__controller.a(crypto.c.obj)"
+                      },
+                      {
+                        "technique": "manifest-analysis",
+                        "confidence": 0.8,
+                        "value": "subsys/bluetooth/controller/crypto/crypto.c"
+                      }
+                    ]
+                  }
+                ],
+                "occurrences": [
+                  {
+                    "location": "spdx/build.spdx",
+                    "line": 1336
+                  },
+                  {
+                    "location": "zephyr/.config",
+                    "line": 1358
+                  },
+                  {
+                    "location": "zephyr/zephyr.map",
+                    "line": 3430
+                  }
+                ]
+              },
+              "properties": [
+                {
+                  "name": "rollcall:evidence",
+                  "value": "{\"field\":\"name\",\"technique\":\"manifest-analysis\",\"source\":\"kconfig\",\"occurrence\":{\"location\":\"zephyr/.config\",\"line\":1358},\"value\":\"CONFIG_BT_LL_SW_SPLIT\",\"confidence\":6000}"
+                },
+                {
+                  "name": "rollcall:evidence",
+                  "value": "{\"field\":\"name\",\"technique\":\"manifest-analysis\",\"source\":\"linker-map\",\"occurrence\":{\"location\":\"zephyr/zephyr.map\",\"line\":3430},\"value\":\"zephyr/subsys/bluetooth/controller/libsubsys__bluetooth__controller.a(crypto.c.obj)\",\"confidence\":8000}"
+                },
+                {
+                  "name": "rollcall:evidence",
+                  "value": "{\"field\":\"name\",\"technique\":\"manifest-analysis\",\"source\":\"west-spdx\",\"occurrence\":{\"location\":\"spdx/build.spdx\",\"line\":1336},\"value\":\"subsys/bluetooth/controller/crypto/crypto.c\",\"confidence\":8000}"
+                },
+                {
+                  "name": "rollcall:evidence-source",
+                  "value": "kconfig"
+                },
+                {
+                  "name": "rollcall:evidence-source",
+                  "value": "linker-map"
+                },
+                {
+                  "name": "rollcall:evidence-source",
+                  "value": "west-spdx"
+                }
+              ]
+            },
+            {
+              "type": "library",
+              "bom-ref": "component:6d77f54195a6d745815bb7906824c862",
+              "name": "bluetooth-host",
+              "version": "4.4.2",
+              "supplier": {
+                "name": "zephyrproject"
+              },
+              "purl": "pkg:github/zephyrproject-rtos/zephyr@v4.4.2#subsys/bluetooth/host",
+              "evidence": {
+                "identity": [
+                  {
+                    "field": "name",
+                    "confidence": 0.8,
+                    "concludedValue": "bluetooth-host",
+                    "methods": [
+                      {
+                        "technique": "manifest-analysis",
+                        "confidence": 0.6,
+                        "value": "CONFIG_BT_HCI_HOST"
+                      },
+                      {
+                        "technique": "manifest-analysis",
+                        "confidence": 0.8,
+                        "value": "zephyr/subsys/bluetooth/common/libsubsys__bluetooth__common.a(addr.c.obj)"
+                      },
+                      {
+                        "technique": "manifest-analysis",
+                        "confidence": 0.8,
+                        "value": "subsys/bluetooth/common/addr.c"
+                      }
+                    ]
+                  }
+                ],
+                "occurrences": [
+                  {
+                    "location": "spdx/build.spdx",
+                    "line": 1289
+                  },
+                  {
+                    "location": "zephyr/.config",
+                    "line": 1294
+                  },
+                  {
+                    "location": "zephyr/zephyr.map",
+                    "line": 5653
+                  }
+                ]
+              },
+              "properties": [
+                {
+                  "name": "rollcall:evidence",
+                  "value": "{\"field\":\"name\",\"technique\":\"manifest-analysis\",\"source\":\"kconfig\",\"occurrence\":{\"location\":\"zephyr/.config\",\"line\":1294},\"value\":\"CONFIG_BT_HCI_HOST\",\"confidence\":6000}"
+                },
+                {
+                  "name": "rollcall:evidence",
+                  "value": "{\"field\":\"name\",\"technique\":\"manifest-analysis\",\"source\":\"linker-map\",\"occurrence\":{\"location\":\"zephyr/zephyr.map\",\"line\":5653},\"value\":\"zephyr/subsys/bluetooth/common/libsubsys__bluetooth__common.a(addr.c.obj)\",\"confidence\":8000}"
+                },
+                {
+                  "name": "rollcall:evidence",
+                  "value": "{\"field\":\"name\",\"technique\":\"manifest-analysis\",\"source\":\"west-spdx\",\"occurrence\":{\"location\":\"spdx/build.spdx\",\"line\":1289},\"value\":\"subsys/bluetooth/common/addr.c\",\"confidence\":8000}"
+                },
+                {
+                  "name": "rollcall:evidence-source",
+                  "value": "kconfig"
+                },
+                {
+                  "name": "rollcall:evidence-source",
+                  "value": "linker-map"
+                },
+                {
+                  "name": "rollcall:evidence-source",
+                  "value": "west-spdx"
+                }
+              ]
+            },
+            {
+              "type": "library",
+              "bom-ref": "component:52d2288569985796c140d33096cb9966",
+              "name": "logging",
+              "version": "4.4.2",
+              "supplier": {
+                "name": "zephyrproject"
+              },
+              "purl": "pkg:github/zephyrproject-rtos/zephyr@v4.4.2#subsys/logging",
+              "evidence": {
+                "identity": [
+                  {
+                    "field": "name",
+                    "confidence": 0.8,
+                    "concludedValue": "logging",
+                    "methods": [
+                      {
+                        "technique": "manifest-analysis",
+                        "confidence": 0.6,
+                        "value": "CONFIG_LOG"
+                      },
+                      {
+                        "technique": "manifest-analysis",
+                        "confidence": 0.8,
+                        "value": "zephyr/libzephyr.a(log_backend_uart.c.obj)"
+                      },
+                      {
+                        "technique": "manifest-analysis",
+                        "confidence": 0.8,
+                        "value": "subsys/logging/backends/log_backend_uart.c"
+                      }
+                    ]
+                  }
+                ],
+                "occurrences": [
+                  {
+                    "location": "spdx/build.spdx",
+                    "line": 1560
+                  },
+                  {
+                    "location": "zephyr/.config",
+                    "line": 130
+                  },
+                  {
+                    "location": "zephyr/zephyr.map",
+                    "line": 2924
+                  }
+                ]
+              },
+              "properties": [
+                {
+                  "name": "rollcall:evidence",
+                  "value": "{\"field\":\"name\",\"technique\":\"manifest-analysis\",\"source\":\"kconfig\",\"occurrence\":{\"location\":\"zephyr/.config\",\"line\":130},\"value\":\"CONFIG_LOG\",\"confidence\":6000}"
+                },
+                {
+                  "name": "rollcall:evidence",
+                  "value": "{\"field\":\"name\",\"technique\":\"manifest-analysis\",\"source\":\"linker-map\",\"occurrence\":{\"location\":\"zephyr/zephyr.map\",\"line\":2924},\"value\":\"zephyr/libzephyr.a(log_backend_uart.c.obj)\",\"confidence\":8000}"
+                },
+                {
+                  "name": "rollcall:evidence",
+                  "value": "{\"field\":\"name\",\"technique\":\"manifest-analysis\",\"source\":\"west-spdx\",\"occurrence\":{\"location\":\"spdx/build.spdx\",\"line\":1560},\"value\":\"subsys/logging/backends/log_backend_uart.c\",\"confidence\":8000}"
+                },
+                {
+                  "name": "rollcall:evidence-source",
+                  "value": "kconfig"
+                },
+                {
+                  "name": "rollcall:evidence-source",
+                  "value": "linker-map"
+                },
+                {
+                  "name": "rollcall:evidence-source",
+                  "value": "west-spdx"
+                }
+              ]
+            }
           ]
         }
       ]
@@ -1164,6 +1394,18 @@
         "component:b4829966d0cd7073dd2f9f6a8b941bfa",
         "component:f57fdab356ff262fa74b8cf0ac4daad8"
       ]
+    },
+    {
+      "ref": "component:d4f5392e43d6bc21fe8d24f0af7f3415",
+      "dependsOn": []
+    },
+    {
+      "ref": "component:6d77f54195a6d745815bb7906824c862",
+      "dependsOn": []
+    },
+    {
+      "ref": "component:52d2288569985796c140d33096cb9966",
+      "dependsOn": []
     }
   ]
 }

@@ -1,0 +1,602 @@
+{
+  "board": "nrf52840dk/nrf52840",
+  "files": [
+    {
+      "bytes": 1108,
+      "path": "smp-bt/build_info.yml",
+      "sha256": "a9d167bea73839a3c5f7d2484f87fb8da179a738fa3b2cb2f730a653c61f3208",
+      "transform": "normalise-paths"
+    },
+    {
+      "bytes": 239,
+      "path": "smp-bt/domains.yaml",
+      "sha256": "6427306099b4c384cdc1c1bfa67c013e7ce89d14f986b0f2f025771f4f8aac02",
+      "transform": "normalise-paths"
+    },
+    {
+      "bytes": 2112,
+      "path": "smp-bt/mcuboot/build_info.yml",
+      "sha256": "b484123498c33837e7670f31bd3024d1e7bbca08f05b587f989573318e3ebbd3",
+      "transform": "normalise-paths"
+    },
+    {
+      "bytes": 4079,
+      "path": "smp-bt/mcuboot/spdx/app.spdx",
+      "sha256": "502fbf0447a79c11a3c8f70aedcc087ad5530eea3f27bcad1f408f5ed48f4bf9"
+    },
+    {
+      "bytes": 138415,
+      "path": "smp-bt/mcuboot/spdx/build.spdx",
+      "sha256": "cfe87e0d7dfce246523f6a7474b572fe4f88194a9bb19bf436d1cad50c3e1a48"
+    },
+    {
+      "bytes": 3823,
+      "path": "smp-bt/mcuboot/spdx/modules-deps.spdx",
+      "sha256": "7fe8e905123650fa3e7182e9bc200bd6c2b873c1eefa00ebd31d2fc602f9cc68"
+    },
+    {
+      "bytes": 109004,
+      "path": "smp-bt/mcuboot/spdx/zephyr.spdx",
+      "sha256": "4686ff37c78a56c620b5856a175e2e871ada74365cd86684ee571d2dd6d88be9"
+    },
+    {
+      "bytes": 51713,
+      "path": "smp-bt/mcuboot/zephyr/.config",
+      "sha256": "34b3d1b4d86d4018538c251ee01ab516b4c91a57d2a37a81cf1e25d0674ff62f",
+      "transform": "normalise-paths"
+    },
+    {
+      "bytes": 107560,
+      "path": "smp-bt/mcuboot/zephyr/zephyr.elf",
+      "sha256": "c0868c6fb05e1be99a6d80785e0a9c5fb8377e34a1f85892a08d72a8b9513892",
+      "source_sha256": "216b6a96fd1a83cfe47fdd4f22bf35424d1eb191785037fbb4f63493854047d6",
+      "transform": "strip-debug"
+    },
+    {
+      "bytes": 102617,
+      "path": "smp-bt/mcuboot/zephyr/zephyr.hex",
+      "sha256": "b7a830314a0a80fb9cc9861753080554fd6a8fb4fe020f7753b304adfde7f276"
+    },
+    {
+      "bytes": 512361,
+      "path": "smp-bt/mcuboot/zephyr/zephyr.map",
+      "sha256": "ab35d8bc0a210d29e3de1bc9dba13f61785b547cc2637d4f3f82978800d5408d",
+      "transform": "normalise-paths"
+    },
+    {
+      "bytes": 3444,
+      "path": "smp-bt/mcuboot/zephyr/zephyr.meta",
+      "sha256": "be0ff4ad548d8aecfd8c22ec4cb5a788203de5a907cc228c153ee10eab92993f",
+      "transform": "normalise-paths"
+    },
+    {
+      "bytes": 1890,
+      "path": "smp-bt/smp_svr/build_info.yml",
+      "sha256": "ea66a06f4de24ab2a361654e05e96b24733800b111fe84de36ed7aa5c8c3c166",
+      "transform": "normalise-paths"
+    },
+    {
+      "bytes": 1441,
+      "path": "smp-bt/smp_svr/spdx/app.spdx",
+      "sha256": "aed29ea6099f11f89b30518cb251d2707d84c1f947d2c3b9057b8ad7ade45818"
+    },
+    {
+      "bytes": 110072,
+      "path": "smp-bt/smp_svr/spdx/build.spdx",
+      "sha256": "dd260194aa02c8c4c71ad6316310030f59f169dfddc3218bd24469ba84c2d197"
+    },
+    {
+      "bytes": 3823,
+      "path": "smp-bt/smp_svr/spdx/modules-deps.spdx",
+      "sha256": "d70dbdd7034db9e03c47c8dfad8ded45ab45d2a2e97ff88b2af64d16a34ba739"
+    },
+    {
+      "bytes": 99128,
+      "path": "smp-bt/smp_svr/spdx/zephyr.spdx",
+      "sha256": "ff1c0f4d8e4911bc8e876f5342085411d650edd36054bf5cf87dec59dc3b02c7"
+    },
+    {
+      "bytes": 64404,
+      "path": "smp-bt/smp_svr/zephyr/.config",
+      "sha256": "fe13288c9a5f5fb84906496fb2ccff8a2044b5938e9e277f5e4ef64e9e03d256",
+      "transform": "normalise-paths"
+    },
+    {
+      "bytes": 313596,
+      "path": "smp-bt/smp_svr/zephyr/zephyr.elf",
+      "sha256": "2a95ebc095d08c42048e45f8582b6fb9564a371d6be94e7c6e768636237185b7",
+      "source_sha256": "89967e0e3936e8b4e75c06d62486b7f8183ff5bf0834db39c564e738a19a3129",
+      "transform": "strip-debug"
+    },
+    {
+      "bytes": 907397,
+      "path": "smp-bt/smp_svr/zephyr/zephyr.map",
+      "sha256": "6a25cd65b4427a2869e0db15c4bd1d5622103579370d1278d809c78b77ab52e0",
+      "transform": "normalise-paths"
+    },
+    {
+      "bytes": 3444,
+      "path": "smp-bt/smp_svr/zephyr/zephyr.meta",
+      "sha256": "be0ff4ad548d8aecfd8c22ec4cb5a788203de5a907cc228c153ee10eab92993f",
+      "transform": "normalise-paths"
+    },
+    {
+      "bytes": 398692,
+      "path": "smp-bt/smp_svr/zephyr/zephyr.signed.hex",
+      "sha256": "7684174a702cba52982d601d83aaa04eedd5fff46850b2a15ba9c346cf7997cb"
+    },
+    {
+      "bytes": 846,
+      "path": "smp-bt/west-list.txt",
+      "sha256": "1793018a803733c49807eae7af902265bbd66fe58239a322a05b557fbdc8b99d"
+    },
+    {
+      "bytes": 2164,
+      "path": "smp-bt/zephyr/.config",
+      "sha256": "06bea327ad6c276b57290e7712c881f86c7c10e68607d7a1783fac449a424275",
+      "transform": "normalise-paths"
+    },
+    {
+      "bytes": 1046,
+      "path": "smp-serial/build_info.yml",
+      "sha256": "f5282592c57986975794b17958a1bf4aa9a1fe36e56374dc807c6b8f9928fb38",
+      "transform": "normalise-paths"
+    },
+    {
+      "bytes": 251,
+      "path": "smp-serial/domains.yaml",
+      "sha256": "b2983ae925f0ef42184a15fcdab707bf140b04a44a4187a6948e9d9f555c1f42",
+      "transform": "normalise-paths"
+    },
+    {
+      "bytes": 2120,
+      "path": "smp-serial/mcuboot/build_info.yml",
+      "sha256": "94cae3a178a119f22b9afcfa36130caf42c6215cd20bbdf58d9ea18e13c63eed",
+      "transform": "normalise-paths"
+    },
+    {
+      "bytes": 4083,
+      "path": "smp-serial/mcuboot/spdx/app.spdx",
+      "sha256": "e32125a7d2016fbcf6413b83e29c6a1b43dd19d83f7745721c075a7b1a80e173"
+    },
+    {
+      "bytes": 138427,
+      "path": "smp-serial/mcuboot/spdx/build.spdx",
+      "sha256": "72fb7d300bb28b9ccbc013280ec5944285510d1fce1e1678103b7ea4a80d43fa"
+    },
+    {
+      "bytes": 3827,
+      "path": "smp-serial/mcuboot/spdx/modules-deps.spdx",
+      "sha256": "83cbe979270e5423cfa09221462dcc2f1a138444079973c9eba3a66a42cda647"
+    },
+    {
+      "bytes": 109008,
+      "path": "smp-serial/mcuboot/spdx/zephyr.spdx",
+      "sha256": "dcf7f7fc310c34605de4c5e431cc4785d6f3030628223ea9602d8aa0c9523754"
+    },
+    {
+      "bytes": 51713,
+      "path": "smp-serial/mcuboot/zephyr/.config",
+      "sha256": "34b3d1b4d86d4018538c251ee01ab516b4c91a57d2a37a81cf1e25d0674ff62f",
+      "transform": "normalise-paths"
+    },
+    {
+      "bytes": 107560,
+      "path": "smp-serial/mcuboot/zephyr/zephyr.elf",
+      "sha256": "c0868c6fb05e1be99a6d80785e0a9c5fb8377e34a1f85892a08d72a8b9513892",
+      "source_sha256": "694fd9444c41e3058df084780588d35cbad9868397ecbcde47e1db80d23cd589",
+      "transform": "strip-debug"
+    },
+    {
+      "bytes": 102617,
+      "path": "smp-serial/mcuboot/zephyr/zephyr.hex",
+      "sha256": "b7a830314a0a80fb9cc9861753080554fd6a8fb4fe020f7753b304adfde7f276"
+    },
+    {
+      "bytes": 512361,
+      "path": "smp-serial/mcuboot/zephyr/zephyr.map",
+      "sha256": "9be68fa06cf58f8d5dc56ae3d8b7940b861ce29e22cfcbcb47fdf1bb095680e3",
+      "transform": "normalise-paths"
+    },
+    {
+      "bytes": 3444,
+      "path": "smp-serial/mcuboot/zephyr/zephyr.meta",
+      "sha256": "be0ff4ad548d8aecfd8c22ec4cb5a788203de5a907cc228c153ee10eab92993f",
+      "transform": "normalise-paths"
+    },
+    {
+      "bytes": 1898,
+      "path": "smp-serial/smp_svr/build_info.yml",
+      "sha256": "10b0ef19ebb1e2f152790ca5fdbf17eaff0ee43523f837cbb571fc68071e446d",
+      "transform": "normalise-paths"
+    },
+    {
+      "bytes": 1057,
+      "path": "smp-serial/smp_svr/spdx/app.spdx",
+      "sha256": "db1bdb701a85b1e898d53d6f3902a9fe0283b428a9e0e365eeb930203ca15b38"
+    },
+    {
+      "bytes": 90992,
+      "path": "smp-serial/smp_svr/spdx/build.spdx",
+      "sha256": "037eda9e84246989adf23a5d5e253c5a2696c3a2fab46234857ff7d10ed3768c"
+    },
+    {
+      "bytes": 3827,
+      "path": "smp-serial/smp_svr/spdx/modules-deps.spdx",
+      "sha256": "177c31b5db3cfe0967f753afef3124193740b3929836cac2bec262128b5ade9d"
+    },
+    {
+      "bytes": 73466,
+      "path": "smp-serial/smp_svr/spdx/zephyr.spdx",
+      "sha256": "0d7674028513e23b1700f0259d8d6945725a90a59ad9a7b34328ce0b45528efc"
+    },
+    {
+      "bytes": 50595,
+      "path": "smp-serial/smp_svr/zephyr/.config",
+      "sha256": "777d36866816c2c3984f9fba408117c138eb4ebbdbc98b81da939cb2b130c400",
+      "transform": "normalise-paths"
+    },
+    {
+      "bytes": 145732,
+      "path": "smp-serial/smp_svr/zephyr/zephyr.elf",
+      "sha256": "e9af5b7f2caf777218416566de61e4bc6c7db58e54e44f97108cb8904b1099e3",
+      "source_sha256": "5271158569070e71026796071da0edf124bf865aa6bf97cb4ec1e35eed6d1b05",
+      "transform": "strip-debug"
+    },
+    {
+      "bytes": 534634,
+      "path": "smp-serial/smp_svr/zephyr/zephyr.map",
+      "sha256": "606402e3bfc21699c14a44e3a940808d1b51fe800370249c17d3d1b7c0078eb0",
+      "transform": "normalise-paths"
+    },
+    {
+      "bytes": 3444,
+      "path": "smp-serial/smp_svr/zephyr/zephyr.meta",
+      "sha256": "be0ff4ad548d8aecfd8c22ec4cb5a788203de5a907cc228c153ee10eab92993f",
+      "transform": "normalise-paths"
+    },
+    {
+      "bytes": 152504,
+      "path": "smp-serial/smp_svr/zephyr/zephyr.signed.hex",
+      "sha256": "356925b05e7437b756e602043f0d617d216dffaa5daf5bc8aaae8a145b88ac3c"
+    },
+    {
+      "bytes": 846,
+      "path": "smp-serial/west-list.txt",
+      "sha256": "1793018a803733c49807eae7af902265bbd66fe58239a322a05b557fbdc8b99d"
+    },
+    {
+      "bytes": 2164,
+      "path": "smp-serial/zephyr/.config",
+      "sha256": "06bea327ad6c276b57290e7712c881f86c7c10e68607d7a1783fac449a424275",
+      "transform": "normalise-paths"
+    }
+  ],
+  "format": "rollcall-fixtures/1",
+  "generator": "scripts/regen-fixtures.sh",
+  "host": {
+    "arch": "x86_64",
+    "os": "linux"
+  },
+  "modules": [
+    {
+      "name": "cmsis",
+      "path": "modules/hal/cmsis",
+      "revision": "512cc7e895e8491696b61f7ba8066b4a182569b8",
+      "url": "https://github.com/zephyrproject-rtos/cmsis"
+    },
+    {
+      "name": "cmsis_6",
+      "path": "modules/hal/cmsis_6",
+      "revision": "30a859f44ef8ab4dc8f84b03ed586fd16ccf9d74",
+      "url": "https://github.com/zephyrproject-rtos/CMSIS_6"
+    },
+    {
+      "name": "hal_nordic",
+      "path": "modules/hal/nordic",
+      "revision": "44fd3d44b15cb75f80a25b4679f91d2787e28664",
+      "url": "https://github.com/zephyrproject-rtos/hal_nordic"
+    },
+    {
+      "name": "mbedtls",
+      "path": "modules/crypto/mbedtls",
+      "revision": "a3e190fe44c78d1ba67f55979e1257328cc7d0d8",
+      "url": "https://github.com/zephyrproject-rtos/mbedtls"
+    },
+    {
+      "name": "mcuboot",
+      "path": "bootloader/mcuboot",
+      "revision": "6d3b3d2c38ab20c242e5b9abb04d050086383eb2",
+      "url": "https://github.com/zephyrproject-rtos/mcuboot"
+    },
+    {
+      "name": "tf-psa-crypto",
+      "path": "modules/crypto/tf-psa-crypto",
+      "revision": "dc575a2ddcc8cb16275d24c42a52eaf79ebe2231",
+      "url": "https://github.com/zephyrproject-rtos/tf-psa-crypto"
+    },
+    {
+      "name": "zcbor",
+      "path": "modules/lib/zcbor",
+      "revision": "9164bd18dcd88ff9d9ef98279501fc1093571017",
+      "url": "https://github.com/zephyrproject-rtos/zcbor"
+    }
+  ],
+  "path_placeholders": {
+    "/zephyr-sdk": "Zephyr SDK install directory",
+    "/zephyrproject": "west workspace topdir"
+  },
+  "python": {
+    "PyYAML": "6.0.3",
+    "freeze": [
+      "anytree==2.13.0",
+      "attrs==26.1.0",
+      "boolean.py==5.0",
+      "canopen==2.4.1",
+      "cbor2==6.1.5",
+      "cbor==1.0.0",
+      "certifi==2026.7.22",
+      "cffi==2.1.1",
+      "charset-normalizer==3.5.2",
+      "click==8.5.0",
+      "colorama==0.4.6",
+      "cryptography==50.0.2",
+      "docopt==0.6.2",
+      "idna==3.20",
+      "imgtool==2.4.0",
+      "intelhex==2.3.0",
+      "Jinja2==3.1.6",
+      "jsonschema-specifications==2025.9.1",
+      "jsonschema==4.26.0",
+      "license-expression==30.4.4",
+      "MarkupSafe==3.0.3",
+      "packaging==26.3",
+      "patool==4.1.0",
+      "psutil==7.2.2",
+      "pycparser==3.0",
+      "pyelftools==0.33",
+      "pykwalify==1.8.0",
+      "pylink-square==2.0.1",
+      "pyserial==3.5",
+      "python-can==4.6.1",
+      "python-dateutil==2.9.0.post0",
+      "python-debian==1.1.1",
+      "python-magic==0.4.27",
+      "PyYAML==6.0.3",
+      "referencing==0.37.0",
+      "requests==2.34.2",
+      "reuse==6.2.0",
+      "rpds-py==2026.6.3",
+      "ruamel.yaml==0.19.1",
+      "semver==3.1.0",
+      "six==1.17.0",
+      "tomlkit==0.15.1",
+      "tqdm==4.70.1",
+      "typing_extensions==4.16.0",
+      "urllib3==2.8.0",
+      "west==1.5.0",
+      "wrapt==1.17.3"
+    ],
+    "imgtool": "2.4.0",
+    "pyelftools": "0.33",
+    "reuse": "6.2.0",
+    "west": "1.5.0"
+  },
+  "sdk": {
+    "bundles": {
+      "arm-zephyr-eabi": {
+        "file": "toolchain_gnu_linux-x86_64_arm-zephyr-eabi.tar.xz",
+        "sha256": "21b85981cb5a1818d9bc53d82af80f208946ec038b982ff1907287572ed3a634"
+      },
+      "minimal": {
+        "file": "zephyr-sdk-1.0.1_linux-x86_64_minimal.tar.xz",
+        "sha256": "ca9bc0ff66fafca1dac9d592a36d953cf16d096a9d09b1c0357f021cf9f6a7eb"
+      }
+    },
+    "gcc_version": "14.3.0",
+    "host": "linux-x86_64",
+    "version": "1.0.1"
+  },
+  "total_bytes": 5040988,
+  "variants": {
+    "smp-bt": {
+      "build_command": [
+        "west",
+        "build",
+        "-b",
+        "nrf52840dk/nrf52840",
+        "--sysbuild",
+        "-d",
+        "build/smp-bt",
+        "zephyr/samples/subsys/mgmt/mcumgr/smp_svr",
+        "--",
+        "-DEXTRA_CONF_FILE=serial.conf",
+        "-DCONFIG_BT=y",
+        "-DCONFIG_BT_PERIPHERAL=y",
+        "-DCONFIG_MCUMGR_TRANSPORT_BT=y",
+        "-DCONFIG_BUILD_OUTPUT_META=y",
+        "-Dmcuboot_CONFIG_BUILD_OUTPUT_META=y"
+      ],
+      "built_with": {
+        "host": {
+          "arch": "x86_64",
+          "os": "linux"
+        },
+        "python": {
+          "PyYAML": "6.0.3",
+          "freeze": [
+            "anytree==2.13.0",
+            "attrs==26.1.0",
+            "boolean.py==5.0",
+            "canopen==2.4.1",
+            "cbor2==6.1.5",
+            "cbor==1.0.0",
+            "certifi==2026.7.22",
+            "cffi==2.1.1",
+            "charset-normalizer==3.5.2",
+            "click==8.5.0",
+            "colorama==0.4.6",
+            "cryptography==50.0.2",
+            "docopt==0.6.2",
+            "idna==3.20",
+            "imgtool==2.4.0",
+            "intelhex==2.3.0",
+            "Jinja2==3.1.6",
+            "jsonschema-specifications==2025.9.1",
+            "jsonschema==4.26.0",
+            "license-expression==30.4.4",
+            "MarkupSafe==3.0.3",
+            "packaging==26.3",
+            "patool==4.1.0",
+            "psutil==7.2.2",
+            "pycparser==3.0",
+            "pyelftools==0.33",
+            "pykwalify==1.8.0",
+            "pylink-square==2.0.1",
+            "pyserial==3.5",
+            "python-can==4.6.1",
+            "python-dateutil==2.9.0.post0",
+            "python-debian==1.1.1",
+            "python-magic==0.4.27",
+            "PyYAML==6.0.3",
+            "referencing==0.37.0",
+            "requests==2.34.2",
+            "reuse==6.2.0",
+            "rpds-py==2026.6.3",
+            "ruamel.yaml==0.19.1",
+            "semver==3.1.0",
+            "six==1.17.0",
+            "tomlkit==0.15.1",
+            "tqdm==4.70.1",
+            "typing_extensions==4.16.0",
+            "urllib3==2.8.0",
+            "west==1.5.0",
+            "wrapt==1.17.3"
+          ],
+          "imgtool": "2.4.0",
+          "pyelftools": "0.33",
+          "reuse": "6.2.0",
+          "west": "1.5.0"
+        },
+        "sdk": {
+          "gcc_version": "14.3.0"
+        }
+      },
+      "extra_conf_files": [
+        "serial.conf"
+      ],
+      "extra_dtc_overlay_files": [],
+      "images": {
+        "app": "smp_svr",
+        "mcuboot": "mcuboot"
+      },
+      "sample": "zephyr/samples/subsys/mgmt/mcumgr/smp_svr",
+      "spdx_namespace_prefix": "http://spdx.org/spdxdocs/rollcall-smp-bt"
+    },
+    "smp-serial": {
+      "build_command": [
+        "west",
+        "build",
+        "-b",
+        "nrf52840dk/nrf52840",
+        "--sysbuild",
+        "-d",
+        "build/smp-serial",
+        "zephyr/samples/subsys/mgmt/mcumgr/smp_svr",
+        "--",
+        "-DEXTRA_CONF_FILE=serial.conf",
+        "-DCONFIG_BUILD_OUTPUT_META=y",
+        "-Dmcuboot_CONFIG_BUILD_OUTPUT_META=y"
+      ],
+      "built_with": {
+        "host": {
+          "arch": "x86_64",
+          "os": "linux"
+        },
+        "python": {
+          "PyYAML": "6.0.3",
+          "freeze": [
+            "anytree==2.13.0",
+            "attrs==26.1.0",
+            "boolean.py==5.0",
+            "canopen==2.4.1",
+            "cbor2==6.1.5",
+            "cbor==1.0.0",
+            "certifi==2026.7.22",
+            "cffi==2.1.1",
+            "charset-normalizer==3.5.2",
+            "click==8.5.0",
+            "colorama==0.4.6",
+            "cryptography==50.0.2",
+            "docopt==0.6.2",
+            "idna==3.20",
+            "imgtool==2.4.0",
+            "intelhex==2.3.0",
+            "Jinja2==3.1.6",
+            "jsonschema-specifications==2025.9.1",
+            "jsonschema==4.26.0",
+            "license-expression==30.4.4",
+            "MarkupSafe==3.0.3",
+            "packaging==26.3",
+            "patool==4.1.0",
+            "psutil==7.2.2",
+            "pycparser==3.0",
+            "pyelftools==0.33",
+            "pykwalify==1.8.0",
+            "pylink-square==2.0.1",
+            "pyserial==3.5",
+            "python-can==4.6.1",
+            "python-dateutil==2.9.0.post0",
+            "python-debian==1.1.1",
+            "python-magic==0.4.27",
+            "PyYAML==6.0.3",
+            "referencing==0.37.0",
+            "requests==2.34.2",
+            "reuse==6.2.0",
+            "rpds-py==2026.6.3",
+            "ruamel.yaml==0.19.1",
+            "semver==3.1.0",
+            "six==1.17.0",
+            "tomlkit==0.15.1",
+            "tqdm==4.70.1",
+            "typing_extensions==4.16.0",
+            "urllib3==2.8.0",
+            "west==1.5.0",
+            "wrapt==1.17.3"
+          ],
+          "imgtool": "2.4.0",
+          "pyelftools": "0.33",
+          "reuse": "6.2.0",
+          "west": "1.5.0"
+        },
+        "sdk": {
+          "gcc_version": "14.3.0"
+        }
+      },
+      "extra_conf_files": [
+        "serial.conf"
+      ],
+      "extra_dtc_overlay_files": [],
+      "images": {
+        "app": "smp_svr",
+        "mcuboot": "mcuboot"
+      },
+      "sample": "zephyr/samples/subsys/mgmt/mcumgr/smp_svr",
+      "spdx_namespace_prefix": "http://spdx.org/spdxdocs/rollcall-smp-serial"
+    }
+  },
+  "west": {
+    "project_filter": "-.*,+hal_nordic,+cmsis,+cmsis_6,+mbedtls,+tf-psa-crypto,+mcuboot,+zcbor",
+    "update_args": [
+      "--narrow",
+      "-o=--depth=1"
+    ],
+    "version": "1.5.0"
+  },
+  "zephyr": {
+    "commit": "dccb09599635bdff17633fa7e9dab014b91dce90",
+    "source_date_epoch": 1786040434,
+    "tag": "v4.4.2",
+    "url": "https://github.com/zephyrproject-rtos/zephyr"
+  }
+}

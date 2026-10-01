@@ -153,6 +153,11 @@ pub struct GenerateArgs {
     /// their `west list` path. Requires --identifier-db or --identify, and --west-list
     #[arg(long, value_name = "DIR", requires_all = ["db", "west_list"])]
     pub workspace: Option<PathBuf>,
+    /// Also print notes (with --zephyr): why a subsystem the .config enables was not split
+    /// out of the zephyr component (none of its code was linked), and linked code left in it
+    // `conflicts_with` is not redundant: `requires` alone lets `--model … --verbose` through.
+    #[arg(short, long, requires = "zephyr", conflicts_with = "model")]
+    pub verbose: bool,
     /// Output format
     #[arg(long, value_enum, default_value_t = Format::Cyclonedx)]
     pub format: Format,
@@ -307,8 +312,7 @@ pub struct VexArgs {
     /// VEX rules (YAML). Repeatable; rule ids must be unique across files. Only
     /// `kconfig_off` and `version_in` conditions can be evidenced from the command line:
     /// `cargo_feature_off` and `symbol_not_linked` always lack evidence (the finding stays
-    /// unresolved), and `match.subsystem` is reserved until the subsystem split (SHA-108)
-    /// and matches nothing (with a warning)
+    /// unresolved). `match.subsystem` matches a Zephyr subsystem subcomponent by name
     #[arg(long, value_name = "FILE")]
     pub rules: Vec<PathBuf>,
     /// Output format. cyclonedx and openvex render only the statements; unresolved

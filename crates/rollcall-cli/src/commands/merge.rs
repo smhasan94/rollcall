@@ -124,7 +124,7 @@ fn merged_product(args: &MergeArgs) -> Result<(Product, Vec<Property>), (u8, Str
                 (code, format!("{}: {e}", manifest.display()))
             })?;
             print_warnings(manifest, &ingest.warnings);
-            ingest.images
+            ingest.blobs
         }
         None => Vec::new(),
     };
@@ -145,7 +145,7 @@ fn merged_product(args: &MergeArgs) -> Result<(Product, Vec<Property>), (u8, Str
             .as_deref()
             .map(|p| p.display().to_string())
             .unwrap_or_default();
-        merge::add_blobs(&mut product, blobs)
+        merge::attach_blobs(&mut product, blobs)
             .map_err(|e| (EXIT_DATAERR, format!("{manifest}: {e}")))?;
     }
     Ok((product, properties))

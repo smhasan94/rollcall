@@ -1,6 +1,8 @@
 //! Checks on the Zephyr build fixtures (see `docs/fixtures.md`): `fixtures/zephyr/` (the main
-//! pin set: Zephyr v4.4.2, variants baseline, bt and tls) and `fixtures/zephyr-old-mbedtls/`
-//! (Zephyr v4.2.0, variant old-mbedtls, whose mbedTLS has known CVEs).
+//! pin set: Zephyr v4.4.2, variants baseline, bt and tls), `fixtures/zephyr-old-mbedtls/`
+//! (Zephyr v4.2.0, variant old-mbedtls, whose mbedTLS has known CVEs) and
+//! `fixtures/zephyr-smp/` (the main pins plus the zcbor module, variants smp-serial and smp-bt:
+//! the MCUmgr smp_svr sample with Bluetooth off and on).
 //!
 //! The fixtures are produced only by `scripts/regen-fixtures.sh`; these tests check that each
 //! committed tree is what its `MANIFEST.json` says it is, and that each variant was built with
@@ -27,14 +29,20 @@ struct Set {
     dir: &'static str,
     zephyr_tag: &'static str,
     sdk_version: &'static str,
+    /// The manifest's `variants` keys, in manifest (sorted) order.
     variants: &'static [&'static str],
+    /// The west project filter the set's workspace uses.
+    project_filter: &'static str,
 }
+
+const BASE_FILTER: &str = "-.*,+hal_nordic,+cmsis,+cmsis_6,+mbedtls,+tf-psa-crypto,+mcuboot";
 
 const MAIN: Set = Set {
     dir: "fixtures/zephyr",
     zephyr_tag: "v4.4.2",
     sdk_version: "1.0.1",
     variants: &["baseline", "bt", "tls"],
+    project_filter: BASE_FILTER,
 };
 
 const OLD_MBEDTLS: Set = Set {
@@ -42,7 +50,18 @@ const OLD_MBEDTLS: Set = Set {
     zephyr_tag: "v4.2.0",
     sdk_version: "0.17.2",
     variants: &["old-mbedtls"],
+    project_filter: BASE_FILTER,
 };
+
+const SMP: Set = Set {
+    dir: "fixtures/zephyr-smp",
+    zephyr_tag: "v4.4.2",
+    sdk_version: "1.0.1",
+    variants: &["smp-bt", "smp-serial"],
+    project_filter: "-.*,+hal_nordic,+cmsis,+cmsis_6,+mbedtls,+tf-psa-crypto,+mcuboot,+zcbor",
+};
+
+const SETS: [Set; 3] = [MAIN, OLD_MBEDTLS, SMP];
 
 /// One fixture tree to check.
 struct Tree {
@@ -78,22 +97,30 @@ fn trees() -> Vec<Tree> {
         Some(dir) if !dir.is_empty() => {
             let root = PathBuf::from(dir);
             let probe = Tree { root, set: MAIN };
-            let tag = probe
-                .manifest()
+            let manifest = probe.manifest();
+            let tag = manifest
                 .pointer("/zephyr/tag")
                 .and_then(Value::as_str)
                 .unwrap_or_default()
                 .to_owned();
-            let set = [MAIN, OLD_MBEDTLS]
+            let filter = manifest
+                .pointer("/west/project_filter")
+                .and_then(Value::as_str)
+                .unwrap_or_default()
+                .to_owned();
+            // Two sets pin v4.4.2; the project filter tells them apart.
+            let set = SETS
                 .into_iter()
-                .find(|s| s.zephyr_tag == tag)
-                .unwrap_or_else(|| panic!("no fixture set pins Zephyr {tag:?}"));
+                .find(|s| s.zephyr_tag == tag && s.project_filter == filter)
+                .unwrap_or_else(|| {
+                    panic!("no fixture set pins Zephyr {tag:?} with project filter {filter:?}")
+                });
             vec![Tree {
                 root: probe.root,
                 set,
             }]
         }
-        _ => [MAIN, OLD_MBEDTLS]
+        _ => SETS
             .into_iter()
             .map(|set| Tree {
                 root: repo_root().join(set.dir),
@@ -244,6 +271,11 @@ fn manifest_pins_zephyr_revision_and_sdk_version() {
             .map(String::as_str)
             .collect();
         assert_eq!(variants, t.set.variants, "{what}: manifest variants");
+        assert_eq!(
+            m.pointer("/west/project_filter").and_then(Value::as_str),
+            Some(t.set.project_filter),
+            "{what}: west project filter"
+        );
     }
 }
 
@@ -367,7 +399,7 @@ fn fixture_tree_is_under_50_mb() {
         assert!(tree > 0, "{}: fixture tree is empty", t.set.dir);
         total += tree;
     }
-    for set in [MAIN, OLD_MBEDTLS] {
+    for set in SETS {
         let committed = repo_root().join(set.dir);
         if !checked.iter().any(|t| t.set == set) && committed.is_dir() {
             total += size(&committed);
@@ -429,6 +461,69 @@ fn tls_config_has_mbedtls_and_tls_sockets_on_and_bt_off() {
         config_is_unset(&config, "CONFIG_BT"),
         "tls: CONFIG_BT is not off"
     );
+}
+
+/// The `west build` argv a variant records in the manifest.
+fn build_command(manifest: &Value, variant: &str) -> Vec<String> {
+    manifest
+        .pointer(&format!("/variants/{variant}/build_command"))
+        .and_then(Value::as_array)
+        .unwrap_or_else(|| panic!("manifest has no variants.{variant}.build_command"))
+        .iter()
+        .map(|a| a.as_str().unwrap_or_default().to_owned())
+        .collect()
+}
+
+/// smp-serial and smp-bt are the BT-off/BT-on pair (SHA-108): the same sample, board and
+/// configuration file, with smp-bt adding exactly three `-D` options that turn Bluetooth on.
+#[test]
+fn smp_pair_differs_only_in_the_bluetooth_options() {
+    let Some(t) = trees().into_iter().find(|t| t.set == SMP) else {
+        return;
+    };
+    let m = t.manifest();
+    let off = build_command(&m, "smp-serial");
+    // The build directory is named after the variant; that is not a difference.
+    let on: Vec<String> = build_command(&m, "smp-bt")
+        .into_iter()
+        .map(|a| a.replace("build/smp-bt", "build/smp-serial"))
+        .collect();
+    let added: Vec<&String> = on.iter().filter(|a| !off.contains(a)).collect();
+    assert_eq!(
+        added,
+        [
+            "-DCONFIG_BT=y",
+            "-DCONFIG_BT_PERIPHERAL=y",
+            "-DCONFIG_MCUMGR_TRANSPORT_BT=y"
+        ]
+    );
+    // Apart from those, the commands are the same, in the same order.
+    let rest: Vec<&String> = on.iter().filter(|a| !added.contains(a)).collect();
+    assert_eq!(rest, off.iter().collect::<Vec<_>>());
+    assert!(
+        off.contains(&"-DEXTRA_CONF_FILE=serial.conf".to_owned()),
+        "{off:?}"
+    );
+    for v in ["smp-serial", "smp-bt"] {
+        assert_eq!(app_image(&m, v), "smp_svr");
+    }
+    let off_config = t.read_text("smp-serial/smp_svr/zephyr/.config");
+    let on_config = t.read_text("smp-bt/smp_svr/zephyr/.config");
+    assert!(
+        config_is_unset(&off_config, "CONFIG_BT"),
+        "smp-serial: CONFIG_BT is not off"
+    );
+    for key in [
+        "CONFIG_BT",
+        "CONFIG_BT_PERIPHERAL",
+        "CONFIG_MCUMGR_TRANSPORT_BT",
+    ] {
+        assert!(config_is_set(&on_config, key), "smp-bt: {key} is not on");
+    }
+    for config in [&off_config, &on_config] {
+        assert!(config_is_set(config, "CONFIG_MCUMGR"));
+        assert!(config_is_set(config, "CONFIG_MCUMGR_TRANSPORT_UART"));
+    }
 }
 
 /// The old-mbedTLS build has Mbed TLS built in, at Zephyr v4.2.0's fork commit (= 3.6.4).
