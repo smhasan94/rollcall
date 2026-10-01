@@ -1,0 +1,46 @@
+# The CISA 2026 SBOM minimum elements, as rollcall checks them. Loaded by
+# `rollcall validate --profile cisa-2026`; docs/validate.md explains each check and citation.
+# document.author is deliberately more lenient than the source (a tool alone is accepted); see
+# docs/validate.md.
+format: rollcall-profile/1
+id: cisa-2026
+title: CISA et al. 2026 Minimum Elements for a Software Bill of Materials (SBOM)
+sources:
+  - key: cisa
+    document: "CISA, NSA, FBI et al., 2026 Minimum Elements for a Software Bill of Materials (SBOM), version 2.1, July 29, 2026"
+    url: https://www.cisa.gov/resources-tools/resources/2026-minimum-elements-software-bill-materials-sbom
+checks:
+  - id: document.timestamp
+    severity: error
+    cite: { source: cisa, clause: "Data Fields, SBOM Metadata: SBOM Timestamp (p. 9)" }
+  - id: document.author
+    severity: error
+    cite: { source: cisa, clause: "Data Fields, SBOM Metadata: SBOM Author (p. 8) and SBOM Tool Name (p. 9) (lenient: a tool is accepted, see docs/validate.md)" }
+    params: { accept: [authors, manufacturer, tools] }
+  - id: document.root
+    severity: error
+    cite: { source: cisa, clause: "Data Fields (p. 8) and Component Data (p. 10): the target component, the component for which the SBOM is generated" }
+  - id: component.name
+    severity: error
+    cite: { source: cisa, clause: "Data Fields, Component Data: Component Name (p. 12)" }
+  - id: component.version
+    severity: error
+    cite: { source: cisa, clause: "Data Fields, Component Data: Component Version (p. 13)" }
+  - id: component.supplier
+    severity: error
+    cite: { source: cisa, clause: "Data Fields, Component Data: Component Producer (p. 10)" }
+    params: { accept: [supplier, manufacturer] }
+  - id: component.identifier
+    severity: error
+    cite: { source: cisa, clause: "Data Fields, Component Data: Component Identifiers (p. 12)" }
+  - id: component.hash
+    severity: error
+    cite: { source: cisa, clause: "Data Fields, Component Data: Component Hash Value and Component Hash Algorithm (p. 11)" }
+    params: { algorithms: [SHA-256, SHA-384, SHA-512, SHA3-256, SHA3-384, SHA3-512] }
+  - id: graph.refs-resolve
+    severity: error
+    cite: { source: cisa, clause: "Data Fields, Component Data: Component Dependency Relationship (p. 11)" }
+  - id: graph.reachable
+    severity: error
+    cite: { source: cisa, clause: "Data Fields, Component Data: Component Dependency Relationship (p. 11); Practices and Processes: Coverage (p. 13)" }
+    params: { nesting_is_dependency: true }

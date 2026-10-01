@@ -1,0 +1,317 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.6",
+  "serialNumber": "urn:uuid:82cd501a-0158-83c7-ba5e-fc4da43d15ed",
+  "version": 1,
+  "metadata": {
+    "timestamp": "2026-01-02T03:04:05Z",
+    "tools": {
+      "components": [
+        {
+          "type": "application",
+          "name": "rollcall",
+          "version": "0.0.1"
+        }
+      ]
+    },
+    "component": {
+      "type": "firmware",
+      "bom-ref": "product:ee193673a5716110c2e95bc112363dcb",
+      "name": "sensor-node",
+      "version": "1.0.0",
+      "supplier": {
+        "name": "Example Devices Ltd",
+        "url": [
+          "https://devices.example"
+        ]
+      },
+      "purl": "pkg:generic/example-devices/sensor-node@1.0.0",
+      "cpe": "cpe:2.3:o:example_devices:sensor-node:1.0.0:*:*:*:*:*:*:*",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+        },
+        {
+          "alg": "SHA-512",
+          "content": "a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "LicenseRef-proprietary"
+        }
+      ]
+    }
+  },
+  "components": [
+    {
+      "type": "firmware",
+      "bom-ref": "image:911161f57a3714ad122b6ea305d680fd",
+      "name": "mcuboot",
+      "version": "2.1.0",
+      "supplier": {
+        "name": "MCUboot project",
+        "url": [
+          "https://www.mcuboot.com"
+        ]
+      },
+      "purl": "pkg:github/mcu-tools/mcuboot@v2.1.0",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0"
+        },
+        {
+          "alg": "SHA-512",
+          "content": "b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "Apache-2.0"
+        }
+      ],
+      "properties": [
+        {
+          "name": "rollcall:image-kind",
+          "value": "bootloader"
+        }
+      ]
+    },
+    {
+      "type": "firmware",
+      "bom-ref": "image:613cff03dcdbf6304ca51767e2ff80b3",
+      "name": "sensor-app",
+      "version": "1.0.0",
+      "supplier": {
+        "name": "Example Devices Ltd",
+        "url": [
+          "https://devices.example"
+        ]
+      },
+      "purl": "pkg:generic/example-devices/sensor-app@1.0.0",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0"
+        },
+        {
+          "alg": "SHA-512",
+          "content": "c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "LicenseRef-proprietary"
+        }
+      ],
+      "properties": [
+        {
+          "name": "rollcall:image-kind",
+          "value": "application"
+        }
+      ],
+      "components": [
+        {
+          "type": "library",
+          "bom-ref": "component:929a445c0e3c76a5f601071900b671b9",
+          "name": "littlefs",
+          "version": "2.9.0",
+          "supplier": {
+            "name": "littlefs project",
+            "url": [
+              "https://github.com/littlefs-project"
+            ]
+          },
+          "purl": "pkg:github/littlefs-project/littlefs@v2.9.0",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0"
+            },
+            {
+              "alg": "SHA-512",
+              "content": "d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1"
+            }
+          ],
+          "licenses": [
+            {
+              "expression": "BSD-3-Clause"
+            }
+          ]
+        },
+        {
+          "type": "library",
+          "bom-ref": "component:490ab4fe086503c17e430dc3eabb2df9",
+          "name": "mbedtls",
+          "version": "3.6.4",
+          "supplier": {
+            "name": "Trusted Firmware",
+            "url": [
+              "https://www.trustedfirmware.org"
+            ]
+          },
+          "purl": "pkg:github/mbed-tls/mbedtls@v3.6.4",
+          "cpe": "cpe:2.3:a:arm:mbed_tls:3.6.4:*:*:*:*:*:*:*",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0"
+            },
+            {
+              "alg": "SHA-512",
+              "content": "e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1"
+            }
+          ],
+          "licenses": [
+            {
+              "expression": "Apache-2.0 OR GPL-2.0-or-later"
+            }
+          ]
+        },
+        {
+          "type": "operating-system",
+          "bom-ref": "component:e7da5136d5eaf78baff59bb4945f97f9",
+          "name": "zephyr",
+          "version": "4.2.0",
+          "supplier": {
+            "name": "Zephyr Project",
+            "url": [
+              "https://www.zephyrproject.org"
+            ]
+          },
+          "purl": "pkg:github/zephyrproject-rtos/zephyr@v4.2.0",
+          "cpe": "cpe:2.3:o:zephyrproject:zephyr:4.2.0:*:*:*:*:*:*:*",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0"
+            },
+            {
+              "alg": "SHA-512",
+              "content": "f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1"
+            }
+          ],
+          "licenses": [
+            {
+              "expression": "Apache-2.0"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "firmware",
+      "bom-ref": "image:840c2251d4a3fcaa4c8d9ec6dd5d2501",
+      "name": "radio-fw",
+      "version": "6.0.0",
+      "supplier": {
+        "name": "Nordic Semiconductor ASA",
+        "url": [
+          "https://www.nordicsemi.com"
+        ]
+      },
+      "purl": "pkg:generic/nordic/radio-fw@6.0.0",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "9090909090909090909090909090909090909090909090909090909090909090"
+        },
+        {
+          "alg": "SHA-512",
+          "content": "91919191919191919191919191919191919191919191919191919191919191919191919191919191919191919191919191919191919191919191919191919191"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "LicenseRef-Nordic-5-Clause"
+        }
+      ],
+      "properties": [
+        {
+          "name": "rollcall:image-kind",
+          "value": "blob"
+        },
+        {
+          "name": "rollcall:opaque",
+          "value": "contents not analysed; hashes computed from the file"
+        }
+      ],
+      "components": [
+        {
+          "type": "firmware",
+          "bom-ref": "component:e66735306088ef37e3383a98a12c4958",
+          "name": "sdc",
+          "version": "6.0.0",
+          "supplier": {
+            "name": "Nordic Semiconductor ASA",
+            "url": [
+              "https://www.nordicsemi.com"
+            ]
+          },
+          "cpe": "cpe:2.3:a:nordicsemi:softdevice_controller:6.0.0:*:*:*:*:*:*:*",
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "8080808080808080808080808080808080808080808080808080808080808080"
+            },
+            {
+              "alg": "SHA-512",
+              "content": "81818181818181818181818181818181818181818181818181818181818181818181818181818181818181818181818181818181818181818181818181818181"
+            }
+          ],
+          "licenses": [
+            {
+              "expression": "LicenseRef-Nordic-5-Clause"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "dependencies": [
+    {
+      "ref": "product:ee193673a5716110c2e95bc112363dcb",
+      "dependsOn": [
+        "image:613cff03dcdbf6304ca51767e2ff80b3",
+        "image:840c2251d4a3fcaa4c8d9ec6dd5d2501",
+        "image:911161f57a3714ad122b6ea305d680fd"
+      ]
+    },
+    {
+      "ref": "image:911161f57a3714ad122b6ea305d680fd",
+      "dependsOn": []
+    },
+    {
+      "ref": "image:613cff03dcdbf6304ca51767e2ff80b3",
+      "dependsOn": [
+        "component:490ab4fe086503c17e430dc3eabb2df9",
+        "component:929a445c0e3c76a5f601071900b671b9",
+        "component:e7da5136d5eaf78baff59bb4945f97f9"
+      ]
+    },
+    {
+      "ref": "component:929a445c0e3c76a5f601071900b671b9",
+      "dependsOn": []
+    },
+    {
+      "ref": "component:490ab4fe086503c17e430dc3eabb2df9",
+      "dependsOn": []
+    },
+    {
+      "ref": "component:e7da5136d5eaf78baff59bb4945f97f9",
+      "dependsOn": []
+    },
+    {
+      "ref": "image:840c2251d4a3fcaa4c8d9ec6dd5d2501",
+      "dependsOn": [
+        "component:e66735306088ef37e3383a98a12c4958"
+      ]
+    },
+    {
+      "ref": "component:e66735306088ef37e3383a98a12c4958",
+      "dependsOn": []
+    }
+  ]
+}

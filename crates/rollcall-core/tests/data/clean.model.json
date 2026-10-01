@@ -1,0 +1,208 @@
+{
+  "schema": "rollcall-model/1",
+  "name": "sensor-node",
+  "version": "1.0.0",
+  "supplier": {
+    "name": "Example Devices Ltd",
+    "urls": [
+      "https://devices.example"
+    ]
+  },
+  "purl": "pkg:generic/example-devices/sensor-node@1.0.0",
+  "cpe": "cpe:2.3:o:example_devices:sensor-node:1.0.0:*:*:*:*:*:*:*",
+  "hashes": [
+    {
+      "algorithm": "SHA-256",
+      "digest": "a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0"
+    },
+    {
+      "algorithm": "SHA-512",
+      "digest": "a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1"
+    }
+  ],
+  "licence": "LicenseRef-proprietary",
+  "images": [
+    {
+      "kind": "bootloader",
+      "name": "mcuboot",
+      "version": "2.1.0",
+      "supplier": {
+        "name": "MCUboot project",
+        "urls": [
+          "https://www.mcuboot.com"
+        ]
+      },
+      "purl": "pkg:github/mcu-tools/mcuboot@v2.1.0",
+      "hashes": [
+        {
+          "algorithm": "SHA-256",
+          "digest": "b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0"
+        },
+        {
+          "algorithm": "SHA-512",
+          "digest": "b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1"
+        }
+      ],
+      "licence": "Apache-2.0"
+    },
+    {
+      "kind": "application",
+      "name": "sensor-app",
+      "version": "1.0.0",
+      "supplier": {
+        "name": "Example Devices Ltd",
+        "urls": [
+          "https://devices.example"
+        ]
+      },
+      "purl": "pkg:generic/example-devices/sensor-app@1.0.0",
+      "hashes": [
+        {
+          "algorithm": "SHA-256",
+          "digest": "c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0"
+        },
+        {
+          "algorithm": "SHA-512",
+          "digest": "c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1"
+        }
+      ],
+      "licence": "LicenseRef-proprietary",
+      "components": [
+        {
+          "kind": "library",
+          "name": "littlefs",
+          "version": "2.9.0",
+          "supplier": {
+            "name": "littlefs project",
+            "urls": [
+              "https://github.com/littlefs-project"
+            ]
+          },
+          "purl": "pkg:github/littlefs-project/littlefs@v2.9.0",
+          "hashes": [
+            {
+              "algorithm": "SHA-256",
+              "digest": "d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0"
+            },
+            {
+              "algorithm": "SHA-512",
+              "digest": "d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1"
+            }
+          ],
+          "licence": "BSD-3-Clause"
+        },
+        {
+          "kind": "library",
+          "name": "mbedtls",
+          "version": "3.6.4",
+          "supplier": {
+            "name": "Trusted Firmware",
+            "urls": [
+              "https://www.trustedfirmware.org"
+            ]
+          },
+          "purl": "pkg:github/mbed-tls/mbedtls@v3.6.4",
+          "cpe": "cpe:2.3:a:arm:mbed_tls:3.6.4:*:*:*:*:*:*:*",
+          "hashes": [
+            {
+              "algorithm": "SHA-256",
+              "digest": "e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0"
+            },
+            {
+              "algorithm": "SHA-512",
+              "digest": "e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1"
+            }
+          ],
+          "licence": "Apache-2.0 OR GPL-2.0-or-later"
+        },
+        {
+          "kind": "operating-system",
+          "name": "zephyr",
+          "version": "4.2.0",
+          "supplier": {
+            "name": "Zephyr Project",
+            "urls": [
+              "https://www.zephyrproject.org"
+            ]
+          },
+          "purl": "pkg:github/zephyrproject-rtos/zephyr@v4.2.0",
+          "cpe": "cpe:2.3:o:zephyrproject:zephyr:4.2.0:*:*:*:*:*:*:*",
+          "hashes": [
+            {
+              "algorithm": "SHA-256",
+              "digest": "f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0"
+            },
+            {
+              "algorithm": "SHA-512",
+              "digest": "f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1"
+            }
+          ],
+          "licence": "Apache-2.0"
+        }
+      ]
+    },
+    {
+      "kind": "blob",
+      "name": "radio-fw",
+      "version": "6.0.0",
+      "supplier": {
+        "name": "Nordic Semiconductor ASA",
+        "urls": [
+          "https://www.nordicsemi.com"
+        ]
+      },
+      "purl": "pkg:generic/nordic/radio-fw@6.0.0",
+      "hashes": [
+        {
+          "algorithm": "SHA-256",
+          "digest": "9090909090909090909090909090909090909090909090909090909090909090"
+        },
+        {
+          "algorithm": "SHA-512",
+          "digest": "91919191919191919191919191919191919191919191919191919191919191919191919191919191919191919191919191919191919191919191919191919191"
+        }
+      ],
+      "licence": "LicenseRef-Nordic-5-Clause",
+      "components": [
+        {
+          "kind": "firmware",
+          "name": "sdc",
+          "version": "6.0.0",
+          "supplier": {
+            "name": "Nordic Semiconductor ASA",
+            "urls": [
+              "https://www.nordicsemi.com"
+            ]
+          },
+          "cpe": "cpe:2.3:a:nordicsemi:softdevice_controller:6.0.0:*:*:*:*:*:*:*",
+          "hashes": [
+            {
+              "algorithm": "SHA-256",
+              "digest": "8080808080808080808080808080808080808080808080808080808080808080"
+            },
+            {
+              "algorithm": "SHA-512",
+              "digest": "81818181818181818181818181818181818181818181818181818181818181818181818181818181818181818181818181818181818181818181818181818181"
+            }
+          ],
+          "licence": "LicenseRef-Nordic-5-Clause"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "image:613cff03dcdbf6304ca51767e2ff80b3": [
+      "component:490ab4fe086503c17e430dc3eabb2df9",
+      "component:929a445c0e3c76a5f601071900b671b9",
+      "component:e7da5136d5eaf78baff59bb4945f97f9"
+    ],
+    "image:840c2251d4a3fcaa4c8d9ec6dd5d2501": [
+      "component:e66735306088ef37e3383a98a12c4958"
+    ],
+    "product:ee193673a5716110c2e95bc112363dcb": [
+      "image:613cff03dcdbf6304ca51767e2ff80b3",
+      "image:840c2251d4a3fcaa4c8d9ec6dd5d2501",
+      "image:911161f57a3714ad122b6ea305d680fd"
+    ]
+  }
+}

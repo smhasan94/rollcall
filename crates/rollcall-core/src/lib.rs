@@ -6,7 +6,8 @@
 //! the model, [`blob`] turns a blob manifest into opaque blob images, and [`merge`] combines
 //! separately generated products into one. [`subsystems`] is the table of Zephyr subsystems
 //! (enabling Kconfig symbols and source paths) used to split the kernel package. [`vex`]
-//! evaluates VEX rules against scanner findings and build evidence.
+//! evaluates VEX rules against scanner findings and build evidence. [`validate`] checks a
+//! CycloneDX document against regulators' SBOM profiles (CISA 2026, CRA).
 
 #![deny(missing_docs)]
 #![deny(
@@ -31,6 +32,7 @@ pub mod identify;
 pub mod merge;
 pub mod model;
 pub mod subsystems;
+pub mod validate;
 pub mod vex;
 pub mod warning;
 pub mod zephyr;
