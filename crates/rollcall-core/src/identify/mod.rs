@@ -17,7 +17,9 @@
 //!       homepage: https://www.trustedfirmware.org/projects/mbed-tls/   # optional
 //!       supplier: Arm                     # optional; becomes the component's supplier
 //!     purl: pkg:github/Mbed-TLS/mbedtls@v{version}                     # required
-//!     cpe: cpe:2.3:a:arm:mbed_tls:{version}:*:*:*:*:*:*:*              # optional
+//!     cpe: cpe:2.3:a:trustedfirmware:mbed_tls:{version}:*:*:*:*:*:*:*  # optional
+//!     cpe_aliases:                        # optional; other vendor:products NVD files under
+//!       - cpe:2.3:a:arm:mbed_tls:{version}:*:*:*:*:*:*:*
 //!     version_rule:                       # required, exactly one kind
 //!       kind: manual
 //!       table:
@@ -28,12 +30,13 @@
 //! outside `[A-Za-z0-9_.+-]+`, and a `schema` other than `1` are rejected. Every rejection names the file, and, when the YAML parser can
 //! place it, the line and column (`identifiers.yaml:7:11: modules.mbedtls.purl: …`). A
 //! duplicate module is reported at the start of the `modules:` mapping; problems only visible after
-//! parsing (an empty manual table or version, an unusable homepage) name the module instead.
+//! parsing (an empty manual table or version, an unusable homepage, `cpe_aliases` without a
+//! `cpe` or repeating a template) name the module instead.
 //!
 //! # Templates
 //!
-//! `purl` and `cpe` are templates in which `{version}` is the derived upstream version; see
-//! [`template`]. Both are checked at load time: a template that does not render to a valid
+//! `purl`, `cpe` and each of `cpe_aliases` are templates in which `{version}` is the derived
+//! upstream version; see [`template`]. All are checked at load time: a template that does not render to a valid
 //! purl (by the `packageurl` crate) or CPE 2.3 formatted string ([`cpe::parse`]) is rejected
 //! with its line.
 //!
@@ -72,6 +75,8 @@ pub mod cpe;
 pub mod db;
 pub mod resolver;
 pub mod rules;
+#[cfg(test)]
+mod seed;
 pub mod stub;
 pub mod template;
 
@@ -133,6 +138,10 @@ pub struct Entry {
     /// The cpe template, if the project has a CPE.
     #[serde(default)]
     pub cpe: Option<CpeTemplate>,
+    /// Further cpe templates for the same project: other NVD vendor:product pairs its
+    /// vulnerabilities are filed under. Requires `cpe`; none may repeat it or each other.
+    #[serde(default)]
+    pub cpe_aliases: Vec<CpeTemplate>,
     /// How to find the upstream version.
     pub version_rule: VersionRule,
 }

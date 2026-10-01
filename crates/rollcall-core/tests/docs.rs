@@ -165,3 +165,105 @@ fn subsystems_docs_have_schema_and_lint_sections() {
         );
     }
 }
+
+const IDENTIFIERS_DOC: &str = include_str!("../../../docs/identifiers.md");
+
+/// The body of `## <name>` in docs/identifiers.md.
+fn identifiers_section(name: &str) -> String {
+    IDENTIFIERS_DOC
+        .lines()
+        .skip_while(|l| l.trim_end() != format!("## {name}"))
+        .skip(1)
+        .take_while(|l| !l.starts_with("## "))
+        .collect::<Vec<_>>()
+        .join("\n")
+}
+
+#[test]
+fn identifiers_doc_has_required_sections() {
+    assert!(IDENTIFIERS_DOC.starts_with("# Identifiers\n"));
+    let required: [(&str, &[&str]); 6] = [
+        (
+            "PURL convention",
+            &["pkg:generic", "vcs_url", "GitHub Actions", "pkg:github"],
+        ),
+        (
+            "CPE convention",
+            &[
+                "NVD CPE dictionary",
+                "No CPE is constructed",
+                "# No cpe:",
+                "cpe_aliases",
+                "Which CPE wins",
+                "syft:cpe23",
+                "evidence.identity",
+            ],
+        ),
+        (
+            "Version derivation",
+            &[
+                "git_tag",
+                "file_regex",
+                "manual",
+                "scripts/regen-version-tables.sh",
+                "# BEGIN generated",
+                "zephyr-manifest-pins.txt",
+            ],
+        ),
+        (
+            "Scanner behaviour",
+            &["cpe-match", "osv-scanner", "expected-cves.txt"],
+        ),
+        (
+            "NVD spot-check",
+            &["scripts/nvd-spot-check.sh", "totalResults"],
+        ),
+        ("Module table", &["| Module |"]),
+    ];
+    for (heading, terms) in required {
+        let body = identifiers_section(heading);
+        assert!(!body.trim().is_empty(), "missing section ## {heading}");
+        for term in terms {
+            assert!(body.contains(term), "## {heading} lacks {term:?}");
+        }
+    }
+    // At least five CPEs are spot-checked against the dictionary, each found.
+    let checked = identifiers_section("NVD spot-check")
+        .lines()
+        .filter(|l| {
+            l.starts_with("| `cpe:2.3:") && !l.ends_with("| 0 | 0 |") && !l.ends_with("| 0 |")
+        })
+        .count();
+    assert!(checked >= 5, "{checked} spot-checked CPEs");
+}
+
+#[test]
+fn identifiers_doc_lists_every_seeded_module() {
+    let db = rollcall_core::identify::builtin().unwrap();
+    let table = identifiers_section("Module table");
+    for (module, entry) in db.modules() {
+        let row = table
+            .lines()
+            .find(|l| l.starts_with(&format!("| `{module}` |")))
+            .unwrap_or_else(|| panic!("{module} is not in the module table"));
+        let cpe_cell = row.trim_end_matches(" |").rsplit(" | ").next().unwrap();
+        match &entry.cpe {
+            Some(cpe) => {
+                // `a:vendor:product` of each template: the cpe, then its aliases.
+                let pair = |t: &str| {
+                    let parts: Vec<&str> = t.split(':').skip(2).take(3).collect();
+                    format!("`{}`", parts.join(":"))
+                };
+                let mut want = pair(cpe.as_str());
+                for alias in &entry.cpe_aliases {
+                    want.push_str(&format!(", alias {}", pair(alias.as_str())));
+                }
+                assert_eq!(cpe_cell, want, "{module}");
+            }
+            None => assert!(
+                cpe_cell.starts_with("none: ") && cpe_cell.len() > "none: ".len() + 10,
+                "{module}: no CPE and no reason in {row:?}"
+            ),
+        }
+    }
+}

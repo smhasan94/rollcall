@@ -1,0 +1,87 @@
+SPDXVersion: SPDX-2.3
+DataLicense: CC0-1.0
+SPDXID: SPDXRef-DOCUMENT
+DocumentName: app-sources
+DocumentNamespace: http://spdx.org/spdxdocs/rollcall-old-mbedtls-mcuboot/app
+Creator: Tool: Zephyr SPDX builder
+Created: 2026-10-01T20:27:51Z
+
+Relationship: SPDXRef-DOCUMENT DESCRIBES SPDXRef-app-sources
+
+##### Package: app-sources
+
+PackageName: app-sources
+SPDXID: SPDXRef-app-sources
+PackageLicenseConcluded: Apache-2.0
+PackageLicenseDeclared: NOASSERTION
+PackageCopyrightText: NOASSERTION
+PrimaryPackagePurpose: SOURCE
+PackageDownloadLocation: NOASSERTION
+PackageLicenseInfoFromFiles: Apache-2.0
+FilesAnalyzed: true
+PackageVerificationCode: c5e68aff17adb7ec74b4aad3c36948d204b5a4d5
+
+FileName: ./arm_cleanup.c
+SPDXID: SPDXRef-File-arm-cleanup.c
+FileChecksum: SHA1: 39e4f42d1b21734ba73de91e83e341f44b8ffcdc
+FileChecksum: SHA256: aff37d787d0d67a301ad3a67e390b00d47a9256945cb12b58a374b31e7cff85d
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: NOASSERTION
+
+FileName: ./flash_check.c
+SPDXID: SPDXRef-File-flash-check.c
+FileChecksum: SHA1: 7ba346075dfb6b340e347da79db2f55631daccff
+FileChecksum: SHA256: 0a584f7b39417ae97fb48f94684b16eaa0a8d3d42fed4356acd93ec60334e273
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: NOASSERTION
+
+FileName: ./flash_map_extended.c
+SPDXID: SPDXRef-File-flash-map-extended.c
+FileChecksum: SHA1: 063e473c591cdb5d9f91cec4d5dfa83ee685979a
+FileChecksum: SHA256: 4e8dd5d5eeeca82c0f2a2486e2430cd407ebf4eb8edd1111e380eed630e586ba
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: NOASSERTION
+
+FileName: ./io.c
+SPDXID: SPDXRef-File-io.c
+FileChecksum: SHA1: 1ebc113e461fff7966ed43af1811b129c9d05a67
+FileChecksum: SHA256: 26b4734eaedb1e290420865c0d05139758fa9922c98f4fcd3d5eade4e3e3987c
+LicenseConcluded: NOASSERTION
+LicenseInfoInFile: NONE
+FileCopyrightText: NOASSERTION
+
+FileName: ./kernel/banner.c
+SPDXID: SPDXRef-File-banner.c
+FileChecksum: SHA1: 188aa39508ce62070c31bf6f68a308af96c73cf9
+FileChecksum: SHA256: 6335e4eec11345d1717a12fcf526f98adfe5f315760495eb7ac8b9dfbaad5f31
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: NOASSERTION
+
+FileName: ./keys.c
+SPDXID: SPDXRef-File-keys.c
+FileChecksum: SHA1: e76a7d65fb37466e178d41feaadaf7d5b2f300f7
+FileChecksum: SHA256: cc1758de021770b2b3ad85b6cb33f9f928cf5cc402357de97c63fac2a1459257
+LicenseConcluded: NOASSERTION
+LicenseInfoInFile: NONE
+FileCopyrightText: NOASSERTION
+
+FileName: ./main.c
+SPDXID: SPDXRef-File-main.c
+FileChecksum: SHA1: 86018324b2212f49ee06d9272de6ffe3353c624e
+FileChecksum: SHA256: 7d4a5146d735722f0584db4fb156d528b51c6fceaa42aac587ed245450413170
+LicenseConcluded: NOASSERTION
+LicenseInfoInFile: NONE
+FileCopyrightText: NOASSERTION
+
+FileName: ./os.c
+SPDXID: SPDXRef-File-os.c
+FileChecksum: SHA1: a980b254c25f1b1aa0d3df80fbbd8e7964c1e593
+FileChecksum: SHA256: cc04bb4b9013d02dc916ced3955418a7fd684346615fa593d48bc12dc8d09f1f
+LicenseConcluded: NOASSERTION
+LicenseInfoInFile: NONE
+FileCopyrightText: NOASSERTION
+

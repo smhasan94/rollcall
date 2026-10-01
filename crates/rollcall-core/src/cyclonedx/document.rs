@@ -172,8 +172,9 @@ pub struct Identity {
     /// The identity field: `name`, `version`, `purl`, `cpe` or `hash` (serialised as
     /// CycloneDX names them).
     pub field: EvidenceField,
-    /// The highest confidence of any method.
-    pub confidence: f64,
+    /// The highest confidence of any method; omitted for an additional CPE nothing observed.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub confidence: Option<f64>,
     /// The node's value for the field.
     #[serde(rename = "concludedValue", skip_serializing_if = "Option::is_none")]
     pub concluded_value: Option<String>,

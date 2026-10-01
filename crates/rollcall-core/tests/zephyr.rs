@@ -15,7 +15,7 @@ use std::path::{Path, PathBuf};
 use common::GOLDEN_TIMESTAMP;
 use rollcall_core::cyclonedx::{self, Timestamp, WriteOptions, validate_cyclonedx_1_6};
 use rollcall_core::merge::{self, ProductSpec};
-use rollcall_core::model::{ComponentKind, ImageKind, Product};
+use rollcall_core::model::{Component, ComponentKind, EvidenceField, ImageKind, Product};
 use rollcall_core::zephyr::{
     self, BuildInfoError, Ingest, IngestOptions, KconfigError, SpdxError, WestListError,
     ZephyrError, build_info, kconfig, spdx, west_list,
@@ -565,6 +565,8 @@ fn every_committed_zephyr_golden_validates_against_schema_1_6() {
             "baseline.sysbuild.model.json",
             "bt.cdx.json",
             "bt.model.json",
+            "old-mbedtls.cdx.json",
+            "old-mbedtls.model.json",
             "tls.cdx.json",
             "tls.model.json",
         ]
@@ -963,4 +965,247 @@ fn missing_optional_files_warn_and_still_validate() {
     assert_schema_valid("tls without optional files", &render(&out.product));
     // Every module is still there, from zephyr.spdx alone.
     assert_eq!(libraries(&out.product), west_list_modules("tls"));
+}
+
+// --- The seed identifier database (`db/identifiers.yaml`) on the fixtures ---------------------
+
+/// The seed identifier database shipped with rollcall.
+fn seed_db_path() -> PathBuf {
+    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("db/identifiers.yaml")
+}
+
+/// Values of `field` evidence from the identifier database.
+fn identifier_db_values(component: &Component, field: EvidenceField) -> Vec<String> {
+    component
+        .evidence
+        .iter()
+        .filter(|e| e.field == field && e.source() == "identifier-db")
+        .map(|e| e.value.clone())
+        .collect()
+}
+
+/// Each fixture module, the NVD-dictionary CPE the seed gives it (`None` when its upstream has
+/// no dictionary entry, checked 2026-10-01; see docs/identifiers.md), and every CPE the
+/// component then carries, primary first. Zephyr v4.4's own `modules-deps.spdx` names mbedtls
+/// and tf-psa-crypto under `arm`, so that is the primary CPE and the database's
+/// `trustedfirmware` one is an additional CPE.
+#[allow(clippy::type_complexity)]
+const FIXTURE_MODULE_CPES: [(&str, Option<&str>, &[&str]); 6] = [
+    ("cmsis", None, &[]),
+    ("cmsis_6", None, &[]),
+    ("hal_nordic", None, &[]),
+    (
+        "mbedtls",
+        Some("cpe:2.3:a:trustedfirmware:mbed_tls:4.1.0:*:*:*:*:*:*:*"),
+        &[
+            "cpe:2.3:a:arm:mbed_tls:4.1.0:*:*:*:*:*:*:*",
+            "cpe:2.3:a:trustedfirmware:mbed_tls:4.1.0:*:*:*:*:*:*:*",
+        ],
+    ),
+    ("mcuboot", None, &[]),
+    (
+        "tf-psa-crypto",
+        Some("cpe:2.3:a:trustedfirmware:tf-psa-crypto:1.1.0:*:*:*:*:*:*:*"),
+        &[
+            "cpe:2.3:a:arm:tf-psa-crypto:1.1.0:*:*:*:*:*:*:*",
+            "cpe:2.3:a:trustedfirmware:tf-psa-crypto:1.1.0:*:*:*:*:*:*:*",
+        ],
+    ),
+];
+
+/// The `syft:cpe23` property values of the library component `name` in a CycloneDX text.
+fn syft_cpes(text: &str, name: &str) -> Vec<String> {
+    fn walk<'v>(v: &'v Value, name: &str, out: &mut Vec<&'v Value>) {
+        if let Some(components) = v["components"].as_array() {
+            for c in components {
+                if c["type"] == "library" && c["name"] == name {
+                    out.push(c);
+                }
+                walk(c, name, out);
+            }
+        }
+    }
+    let doc: Value = serde_json::from_str(text).unwrap();
+    let mut found = Vec::new();
+    walk(&doc, name, &mut found);
+    assert_eq!(found.len(), 1, "{name}");
+    found[0]["properties"]
+        .as_array()
+        .into_iter()
+        .flatten()
+        .filter(|p| p["name"] == "syft:cpe23")
+        .map(|p| p["value"].as_str().unwrap().to_owned())
+        .collect()
+}
+
+/// Every CPE a component carries: the primary, then the additional ones in order.
+fn emitted_cpes(c: &Component) -> Vec<&str> {
+    c.cpe
+        .iter()
+        .chain(&c.additional_cpes)
+        .map(|cpe| cpe.as_str())
+        .collect()
+}
+
+#[test]
+fn fixture_modules_resolve_a_purl_and_nvd_listed_modules_their_cpe() {
+    let expected: std::collections::BTreeMap<&str, (Option<&str>, &[&str])> = FIXTURE_MODULE_CPES
+        .into_iter()
+        .map(|(module, nvd, emitted)| (module, (nvd, emitted)))
+        .collect();
+    let (mut modules, mut with_purl, mut with_db_purl, mut with_nvd_cpe) = (0, 0, 0, 0);
+    let mut seen = BTreeSet::new();
+    for (variant, image) in APP_BUILDS.into_iter().chain(MCUBOOT_BUILDS) {
+        let options = options(variant, image, true, false).with_identifier_db(seed_db_path());
+        let out = zephyr::ingest(&options).unwrap_or_else(|e| panic!("{variant}/{image}: {e}"));
+        assert!(
+            out.unknown_modules.is_empty(),
+            "{variant}/{image}: {:?}",
+            out.unknown_modules
+        );
+        let text = render(&out.product);
+        assert_schema_valid(&format!("{variant}/{image}"), &text);
+        for c in out
+            .product
+            .images
+            .iter()
+            .flat_map(|i| &i.components)
+            .filter(|c| c.kind == ComponentKind::Library)
+        {
+            let what = format!("{variant}/{image} {}", c.name);
+            let Some((nvd_cpe, want_emitted)) = expected.get(c.name.as_str()) else {
+                panic!("{what}: not a known fixture module; add it to FIXTURE_MODULE_CPES");
+            };
+            seen.insert(c.name.clone());
+            modules += 1;
+            // A purl on the component, and an upstream one from the database.
+            if c.purl.is_some() {
+                with_purl += 1;
+            }
+            let db_purls = identifier_db_values(c, EvidenceField::Purl);
+            assert_eq!(db_purls.len(), 1, "{what}: {db_purls:?}");
+            assert!(
+                db_purls[0].starts_with("pkg:generic/"),
+                "{what}: {db_purls:?}"
+            );
+            with_db_purl += 1;
+            // Exactly these CPEs, including the dictionary's; none constructed.
+            let emitted = emitted_cpes(c);
+            assert_eq!(emitted, *want_emitted, "{what}");
+            let db_cpes = identifier_db_values(c, EvidenceField::Cpe);
+            match nvd_cpe {
+                Some(cpe) => {
+                    assert!(emitted.contains(cpe), "{what}: {emitted:?} lacks {cpe}");
+                    assert!(db_cpes.iter().any(|v| v == cpe), "{what}: {db_cpes:?}");
+                    // Each additional CPE reaches grype as a syft:cpe23 property.
+                    let extra: Vec<&str> = c.additional_cpes.iter().map(|c| c.as_str()).collect();
+                    assert_eq!(syft_cpes(&text, &c.name), extra, "{what}");
+                    with_nvd_cpe += 1;
+                }
+                None => assert!(db_cpes.is_empty(), "{what}: constructed cpe {db_cpes:?}"),
+            }
+        }
+    }
+    assert_eq!(
+        seen.iter().map(String::as_str).collect::<Vec<_>>(),
+        expected.keys().copied().collect::<Vec<_>>(),
+        "every fixture module is checked"
+    );
+    let listed = expected.values().filter(|(nvd, _)| nvd.is_some()).count();
+    // 6 modules in each of 6 builds: every one has a purl (all from the database too); the 2
+    // NVD-listed modules (12 components) carry their dictionary CPE; the 4 others none.
+    assert_eq!(modules, 6 * MODULES_PER_VARIANT);
+    assert_eq!((with_purl, with_db_purl), (36, 36));
+    assert_eq!((listed, with_nvd_cpe), (2, 12));
+    println!(
+        "{modules} module components in 6 builds: purl {with_purl}/{modules}, database purl \
+         {with_db_purl}/{modules}, NVD-dictionary cpe {with_nvd_cpe}/{modules}; distinct \
+         modules {}, NVD-listed {listed}",
+        expected.len()
+    );
+}
+
+/// `fixtures/zephyr-old-mbedtls/old-mbedtls/`: the real Zephyr v4.2.0 build (see
+/// docs/fixtures.md), whose mbedTLS fork commit is Mbed TLS 3.6.4.
+fn old_mbedtls_variant_dir() -> PathBuf {
+    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../fixtures/zephyr-old-mbedtls/old-mbedtls")
+}
+
+/// The application image of the old-mbedTLS build, with its west list and the seed database.
+fn ingest_old_mbedtls() -> Ingest {
+    let variant = old_mbedtls_variant_dir();
+    let options = IngestOptions::new(variant.join("mbedtls"))
+        .with_west_list(variant.join("west-list.txt"))
+        .with_identifier_db(seed_db_path());
+    zephyr::ingest(&options).unwrap_or_else(|e| panic!("{}: {e}", variant.display()))
+}
+
+/// Zephyr v4.2.0's own `modules-deps.spdx` names mbedtls `arm:mbed_tls:3.6.4`, which stays the
+/// primary CPE; the seed database's `trustedfirmware` CPE is an additional one (written as a
+/// `syft:cpe23` property), so grype searches both vendors NVD files 3.6.4's CVEs under.
+#[test]
+fn old_mbedtls_fixture_resolves_mbedtls_3_6_4_with_both_cpes() {
+    let out = ingest_old_mbedtls();
+    let mbedtls = out
+        .product
+        .images
+        .iter()
+        .flat_map(|i| &i.components)
+        .find(|c| c.name == "mbedtls")
+        .expect("mbedtls component");
+    assert_eq!(
+        mbedtls.version.as_deref(),
+        Some("85440ef5fffa95d0e9971e9163719189cf34d979")
+    );
+    assert_eq!(
+        identifier_db_values(mbedtls, EvidenceField::Version),
+        ["3.6.4"]
+    );
+    assert_eq!(
+        emitted_cpes(mbedtls),
+        [
+            "cpe:2.3:a:arm:mbed_tls:3.6.4:*:*:*:*:*:*:*",
+            "cpe:2.3:a:trustedfirmware:mbed_tls:3.6.4:*:*:*:*:*:*:*",
+        ]
+    );
+    // Zephyr v4.2.0 writes the purl ExternalRef with the SPDX 2.2 category spelling
+    // `PACKAGE_MANAGER`, which ingestion (reading SPDX 2.3's `PACKAGE-MANAGER`) does not take,
+    // so the database's upstream purl is the component's.
+    let deps = fs::read_to_string(old_mbedtls_variant_dir().join("mbedtls/spdx/modules-deps.spdx"))
+        .unwrap();
+    assert!(deps.contains("ExternalRef: PACKAGE_MANAGER purl pkg:github/Mbed-TLS/mbedtls@v3.6.4"));
+    let db_purl =
+        "pkg:generic/mbedtls@3.6.4?vcs_url=git%2Bhttps:%2F%2Fgithub.com%2FMbed-TLS%2Fmbedtls";
+    assert_eq!(mbedtls.purl.as_ref().map(|p| p.as_str()), Some(db_purl));
+    assert_eq!(
+        identifier_db_values(mbedtls, EvidenceField::Purl),
+        [db_purl]
+    );
+    assert!(
+        !out.unknown_modules.iter().any(|m| m.name == "mbedtls"),
+        "{:?}",
+        out.unknown_modules
+    );
+    let text = render(&out.product);
+    assert_schema_valid("old-mbedtls", &text);
+    assert_eq!(
+        syft_cpes(&text, "mbedtls"),
+        ["cpe:2.3:a:trustedfirmware:mbed_tls:3.6.4:*:*:*:*:*:*:*"]
+    );
+    // The SPDX cpe `arm:mbed_tls` is one of the database's cpe_aliases: the same project under
+    // another NVD vendor, so the difference is not a warning.
+    let differs: Vec<&str> = out
+        .warnings
+        .iter()
+        .map(|w| w.message.as_str())
+        .filter(|m| m.starts_with("module mbedtls:") && m.contains("differs"))
+        .collect();
+    assert!(differs.is_empty(), "{differs:?}");
+}
+
+#[test]
+fn old_mbedtls_fixture_matches_golden() {
+    let out = ingest_old_mbedtls();
+    check_golden("old-mbedtls.cdx.json", &render(&out.product));
+    check_golden("old-mbedtls.model.json", &out.product.to_json().unwrap());
 }

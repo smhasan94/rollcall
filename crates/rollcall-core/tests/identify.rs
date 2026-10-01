@@ -313,27 +313,41 @@ fn every_fixture_module_resolves_with_stub_db_and_warnings_list_exactly_the_unma
 fn builtin_seed_loads_and_resolves_its_own_samples() {
     let db = identify::builtin().unwrap();
     assert_eq!(db.name(), "identifiers.yaml");
-    let names: Vec<&str> = db.modules().map(|(name, _)| name).collect();
-    assert_eq!(names, ["cmsis", "mbedtls", "tf-psa-crypto"]);
+    // The seed covers the ~30 common modules (see `identify::seed`); the fixtures' modules
+    // are among them.
+    let names: BTreeSet<&str> = db.modules().map(|(name, _)| name).collect();
+    for module in [
+        "cmsis",
+        "cmsis_6",
+        "hal_nordic",
+        "mbedtls",
+        "mcuboot",
+        "tf-psa-crypto",
+    ] {
+        assert!(names.contains(module), "{module} is not in the seed");
+    }
+    assert!(names.len() >= 30, "{names:?}");
     let mut resolver = Resolver::new(&db);
+    // The fixtures' revisions: every fork is pinned by commit, so each resolves through its
+    // manual table, to an upstream `pkg:generic` purl.
     let cases = [
         (
             "mbedtls",
             "a3e190fe44c78d1ba67f55979e1257328cc7d0d8",
             "4.1.0",
-            "pkg:github/mbed-tls/mbedtls@v4.1.0",
+            "pkg:generic/mbedtls@4.1.0?vcs_url=git%2Bhttps:%2F%2Fgithub.com%2FMbed-TLS%2Fmbedtls",
         ),
         (
             "tf-psa-crypto",
             "dc575a2ddcc8cb16275d24c42a52eaf79ebe2231",
             "1.1.0",
-            "pkg:github/mbed-tls/tf-psa-crypto@v1.1.0",
+            "pkg:generic/tf-psa-crypto@1.1.0?vcs_url=git%2Bhttps:%2F%2Fgithub.com%2FMbed-TLS%2FTF-PSA-Crypto",
         ),
         (
             "cmsis",
-            "v5.9.0",
+            "512cc7e895e8491696b61f7ba8066b4a182569b8",
             "5.9.0",
-            "pkg:github/arm-software/cmsis_5@5.9.0",
+            "pkg:generic/cmsis@5.9.0?vcs_url=git%2Bhttps:%2F%2Fgithub.com%2FARM-software%2FCMSIS_5",
         ),
     ];
     for (module, revision, version, purl) in cases {
@@ -347,12 +361,21 @@ fn builtin_seed_loads_and_resolves_its_own_samples() {
         };
         assert_eq!(id.version.as_deref(), Some(version), "{module}");
         assert_eq!(id.level, Level::High, "{module}");
+        assert_eq!(id.rule, "manual", "{module}");
         assert_eq!(id.purl.as_ref().map(|p| p.as_str()), Some(purl), "{module}");
     }
-    // The seed's entries agree with the hand-written test database.
+    // The seed and the hand-written test database name the same upstream for the modules
+    // both list (the stub keeps `pkg:github` purls and a `git_tag` cmsis on purpose: it
+    // exercises those code paths).
     let stub_db = identify::load(&stub_db_path()).unwrap();
-    for (name, entry) in db.modules() {
-        assert_eq!(stub_db.get(name), Some(entry), "{name}");
+    for (name, stub_entry) in stub_db.modules() {
+        let seed_entry = db
+            .get(name)
+            .unwrap_or_else(|| panic!("{name} not in the seed"));
+        assert_eq!(
+            seed_entry.upstream.homepage, stub_entry.upstream.homepage,
+            "{name}"
+        );
     }
 }
 

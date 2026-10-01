@@ -50,3 +50,18 @@ fixtures' other modules (`cmsis_6`, `hal_nordic`, `mcuboot`).
 | `vex/old-mbedtls.rules.yml` | **Hand-written** illustrative rules (not a security assessment) evaluated against the grype capture and the real `fixtures/zephyr/tls/http_server/zephyr/.config`. | `tests/vex.rs` (golden `tests/golden/vex/old-mbedtls.vex.json`), `rollcall-cli` `tests/vex.rs` |
 | `vex/conflict.rules.yml` | **Hand-written**: two equally ranked rules that disagree about one CVE. | conflict-warning tests |
 | `vex/bad-status.rules.yml` | **Hand-written** malformed rules file (unknown status on line 7). | `rollcall-cli` `tests/vex.rs` |
+
+## `old-mbedtls-expected-cves.txt` — hand-written expected-CVE list
+
+A **hand-written**, reviewed list (not build output): the CVEs grype must report for mbedtls in
+the real Zephyr v4.2.0 build `fixtures/zephyr-old-mbedtls/old-mbedtls/` (Mbed TLS 3.6.4),
+enriched with the seed identifier database. It is the union of the NVD CVE API's answers for
+`trustedfirmware:mbed_tls:3.6.4` and `arm:mbed_tls:3.6.4`; its header records the date and the
+grype database it was observed with. Used by `scripts/smoke-scan.sh --only old-mbedtls` and the
+CI job `grype-expected-cves`.
+
+## `zephyr-manifest-pins.txt` — generated pin list
+
+**Generated** by `scripts/regen-version-tables.sh` from the `west.yml` of Zephyr v4.2.0 to
+v4.4.2 (never edited by hand): one line per pinned project and commit, with the releases
+pinning it. `identify::seed` checks the seed database against it offline.

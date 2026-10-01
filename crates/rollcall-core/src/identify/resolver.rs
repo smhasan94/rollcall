@@ -30,6 +30,8 @@ pub struct Identity {
     pub purl: Option<Purl>,
     /// The upstream cpe, rendered only when a version was derived and the entry has one.
     pub cpe: Option<Cpe>,
+    /// The entry's `cpe_aliases`, rendered alongside `cpe`, in the entry's order.
+    pub cpe_aliases: Vec<Cpe>,
     /// The upstream supplier.
     pub supplier: Option<Supplier>,
     /// The upstream project's name.
@@ -106,7 +108,7 @@ impl<'db> Resolver<'db> {
             None => derived.note.into_iter().collect(),
             Some(_) => Vec::new(),
         };
-        let (purl, cpe) = match &derived.version {
+        let (purl, cpe, cpe_aliases) = match &derived.version {
             Some(version) => {
                 let purl = entry
                     .purl
@@ -118,9 +120,18 @@ impl<'db> Resolver<'db> {
                         .map_err(|e| notes.push(format!("cpe not rendered: {e}")))
                         .ok()
                 });
-                (purl, cpe)
+                let aliases = entry
+                    .cpe_aliases
+                    .iter()
+                    .filter_map(|t| {
+                        t.render(version)
+                            .map_err(|e| notes.push(format!("cpe alias not rendered: {e}")))
+                            .ok()
+                    })
+                    .collect();
+                (purl, cpe, aliases)
             }
-            None => (None, None),
+            None => (None, None, Vec::new()),
         };
         let supplier = entry
             .upstream
@@ -132,6 +143,7 @@ impl<'db> Resolver<'db> {
             level: derived.level,
             purl,
             cpe,
+            cpe_aliases,
             supplier,
             upstream_name: entry.upstream.name.clone(),
             rule: entry.version_rule.kind(),
@@ -234,6 +246,44 @@ modules:
         assert_eq!(id.purl.as_ref().unwrap().as_str(), "pkg:generic/lib@2.0.1");
         assert!(id.from_source());
         assert_eq!(resolver.unknown_modules().count(), 0);
+    }
+
+    #[test]
+    fn cpe_aliases_render_with_the_version_and_only_with_one() {
+        let db = DB.replace(
+            "    cpe: cpe:2.3:a:arm:mbed_tls:{version}:*:*:*:*:*:*:*\n",
+            "    cpe: cpe:2.3:a:trustedfirmware:mbed_tls:{version}:*:*:*:*:*:*:*\n    cpe_aliases:\n      - cpe:2.3:a:arm:mbed_tls:{version}:*:*:*:*:*:*:*\n",
+        );
+        let db = load_str("identifiers.yaml", &db).unwrap();
+        let mut resolver = Resolver::new(&db);
+        let query = Query {
+            module: "mbedtls",
+            revision: Some(SHA),
+            path: None,
+        };
+        let Outcome::Identified(id) = resolver.resolve(&query, None) else {
+            panic!("unknown");
+        };
+        assert_eq!(
+            id.cpe.as_ref().map(|c| c.as_str()),
+            Some("cpe:2.3:a:trustedfirmware:mbed_tls:4.1.0:*:*:*:*:*:*:*")
+        );
+        assert_eq!(
+            id.cpe_aliases
+                .iter()
+                .map(|c| c.as_str())
+                .collect::<Vec<_>>(),
+            ["cpe:2.3:a:arm:mbed_tls:4.1.0:*:*:*:*:*:*:*"]
+        );
+        // No version, no aliases either.
+        let query = Query {
+            revision: Some("ffff"),
+            ..query
+        };
+        let Outcome::Identified(id) = resolver.resolve(&query, None) else {
+            panic!("unknown");
+        };
+        assert!(id.cpe_aliases.is_empty());
     }
 
     #[test]

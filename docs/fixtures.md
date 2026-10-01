@@ -80,6 +80,44 @@ handle an unbuilt library that depends on a built one. So the `tls` variant is
 USB CDC-NCM network interface. No Zephyr file is patched and no Kconfig option is forced. The
 reason is recorded in `MANIFEST.json` as `variants.tls.fallback`.
 
+### The old-mbedTLS tree
+
+`fixtures/zephyr-old-mbedtls/` is a second, separately pinned tree with the same layout and the
+same kind of `MANIFEST.json`, holding one variant, `old-mbedtls`: Zephyr `v4.2.0`, whose
+mbedTLS fork commit `85440ef5fffa95d0e9971e9163719189cf34d979` is Mbed TLS 3.6.4, a release with
+known CVEs. It exists so that rollcall's identifier database can be shown to give a real
+build's mbedTLS the CPEs grype matches (`scripts/smoke-scan.sh --only old-mbedtls`, CI job
+`grype-expected-cves`). It is built with `--variant old-mbedtls`, which uses its own pins and
+never touches `fixtures/zephyr/`.
+
+| What        | Pin |
+|-------------|-----|
+| Zephyr      | `v4.2.0` = `413b789deb391d3a37d06b463288a5fe765ee57e` |
+| Zephyr SDK  | `0.17.2`, what `SDK_VERSION` at `v4.2.0` asks for (GCC 12.2.0) |
+| Directories | `.cache/zephyr-workspace-v4.2.0`, `.cache/zephyr-sdk-0.17.2` |
+| Board, Python tools, project filter | as for the main tree |
+
+The SDK is `zephyr-sdk-0.17.2_<host>_minimal.tar.xz` plus
+`toolchain_<host>_arm-zephyr-eabi.tar.xz`, SHA-256 checked like the main SDK; the 0.17
+toolchain unpacks to `<sdk>/arm-zephyr-eabi` rather than `<sdk>/gnu/arm-zephyr-eabi`. The
+separate directories leave the main workspace and SDK alone.
+
+| Variant       | Sample                     | Extra configuration               | App image | Intended options |
+|---------------|----------------------------|-----------------------------------|-----------|------------------|
+| `old-mbedtls` | `tests/crypto/mbedtls`     | `SB_CONFIG_BOOTLOADER_MCUBOOT=y`  | `mbedtls` | `CONFIG_MBEDTLS=y`, `CONFIG_MBEDTLS_BUILTIN=y` |
+
+**The `old-mbedtls` variant uses a test, not a TLS sample.** A TLS sample like the `tls`
+variant was planned, but at `v4.2.0` `samples/net/sockets/http_server` declares
+`depends_on: netif`, and `nrf52840dk` has no network interface without the USB CDC-NCM
+overlays (`overlay-usbd.conf`, `usbd_cdc_ncm.overlay`) that the `tls` variant uses, which only
+exist in later releases. `tests/crypto/mbedtls` builds Mbed TLS (`CONFIG_MBEDTLS_BUILTIN`) and
+links its self-tests; upstream CI builds it. The reason is recorded in `MANIFEST.json` as
+`variants.old-mbedtls.fallback`.
+
+```sh
+scripts/regen-fixtures.sh --variant old-mbedtls --check-stable
+```
+
 ## Pins
 
 All pins are constants at the top of `scripts/regen-fixtures.sh` and are copied into
@@ -161,8 +199,10 @@ The canonical fixtures come from the `regen-fixtures` workflow
 (`.github/workflows/regen-fixtures.yml`), which runs the same script with `--check-stable` on
 `ubuntu-24.04`, compares the result with the committed fixtures (a report in the job summary
 only; that step always succeeds) and uploads `fixtures/zephyr` as the `zephyr-fixtures`
-artifact. It runs on pull requests that change the script or the workflow, and on demand; the
-artifact of either kind of run is canonical. On demand:
+artifact. A second job of the same workflow builds the old-mbedTLS tree (`--variant
+old-mbedtls`) and uploads it as `zephyr-old-mbedtls-fixtures`, downloaded the same way into
+`fixtures/zephyr-old-mbedtls`. It runs on pull requests that change the script or the workflow,
+and on demand; the artifact of either kind of run is canonical. On demand:
 
 ```sh
 gh workflow run regen-fixtures.yml --ref <branch>
@@ -264,10 +304,15 @@ endings; every other text fixture is LF. `*.map` has diffs turned off and `*.elf
 `crates/rollcall-core/tests/fixtures.rs` (part of `cargo test --workspace`) checks the committed
 tree, or the tree named by `ROLLCALL_FIXTURES_DIR`:
 
-- the manifest pins Zephyr `v4.4.2` at a 40-hex commit and SDK `1.0.1`, with three variants;
+- by default both trees are checked; with `ROLLCALL_FIXTURES_DIR`, only that tree, whose set
+  follows from its manifest's Zephyr tag;
+- the manifest pins Zephyr `v4.4.2` at a 40-hex commit and SDK `1.0.1`, with three variants
+  (for `fixtures/zephyr-old-mbedtls/`: `v4.2.0`, SDK `0.17.2`, variant `old-mbedtls`, whose
+  `.config` has `CONFIG_MBEDTLS` and `CONFIG_MBEDTLS_BUILTIN` on and whose `west-list.txt` pins
+  mbedtls at `85440ef5…`);
 - each variant has the full file set, and the manifest lists exactly the files on disk, with
   matching sizes and SHA-256s;
-- the tree is under 50,000,000 bytes, measured from disk;
+- the trees together are under 50,000,000 bytes, measured from disk;
 - each variant's application `.config` has the intended options on and off (see the table
   above), and every variant enables MCUboot through sysbuild;
 - every SPDX document is SPDX 2.3 with a `http://spdx.org/spdxdocs/rollcall-<variant>-<image>/`

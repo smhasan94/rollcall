@@ -246,6 +246,20 @@ fn validate(entry: &Entry) -> Result<(), String> {
         check_iri_reference_chars(homepage)
             .map_err(|reason| format!("upstream.homepage {homepage:?}: {reason}"))?;
     }
+    if !entry.cpe_aliases.is_empty() {
+        let Some(cpe) = &entry.cpe else {
+            return Err("cpe_aliases needs a cpe (the primary CPE)".to_owned());
+        };
+        let mut seen = std::collections::BTreeSet::from([cpe.as_str()]);
+        for alias in &entry.cpe_aliases {
+            if !seen.insert(alias.as_str()) {
+                return Err(format!(
+                    "cpe_aliases repeats {} (already the cpe or an alias)",
+                    alias.as_str()
+                ));
+            }
+        }
+    }
     if let VersionRule::Manual { table } = &entry.version_rule {
         if table.is_empty() {
             return Err("version_rule.table must list at least one revision".to_owned());
@@ -544,6 +558,46 @@ modules:
                 "unbalanced",
             ),
             ("purl as number".into(), entry("12", manual), "purl"),
+            (
+                "cpe_aliases without cpe".into(),
+                entry(p, manual).replace(
+                    "    version_rule:",
+                    "    cpe_aliases: ['cpe:2.3:a:x:y:{version}:*:*:*:*:*:*:*']\n    version_rule:",
+                ),
+                "cpe_aliases needs a cpe",
+            ),
+            (
+                "cpe alias repeats cpe".into(),
+                entry(p, manual).replace(
+                    "    version_rule:",
+                    "    cpe: 'cpe:2.3:a:x:y:{version}:*:*:*:*:*:*:*'\n    cpe_aliases: ['cpe:2.3:a:x:y:{version}:*:*:*:*:*:*:*']\n    version_rule:",
+                ),
+                "cpe_aliases repeats",
+            ),
+            (
+                "duplicate cpe alias".into(),
+                entry(p, manual).replace(
+                    "    version_rule:",
+                    "    cpe: 'cpe:2.3:a:x:y:{version}:*:*:*:*:*:*:*'\n    cpe_aliases: ['cpe:2.3:a:z:y:{version}:*:*:*:*:*:*:*', 'cpe:2.3:a:z:y:{version}:*:*:*:*:*:*:*']\n    version_rule:",
+                ),
+                "cpe_aliases repeats",
+            ),
+            (
+                "invalid cpe alias".into(),
+                entry(p, manual).replace(
+                    "    version_rule:",
+                    "    cpe: 'cpe:2.3:a:x:y:{version}:*:*:*:*:*:*:*'\n    cpe_aliases: ['cpe:2.3:a:z:{version}']\n    version_rule:",
+                ),
+                "cpe_aliases",
+            ),
+            (
+                "cpe_aliases as scalar".into(),
+                entry(p, manual).replace(
+                    "    version_rule:",
+                    "    cpe: 'cpe:2.3:a:x:y:{version}:*:*:*:*:*:*:*'\n    cpe_aliases: 'cpe:2.3:a:z:y:{version}:*:*:*:*:*:*:*'\n    version_rule:",
+                ),
+                "cpe_aliases",
+            ),
             (
                 "empty manual table".into(),
                 entry(p, "      kind: manual\n      table: {}\n"),

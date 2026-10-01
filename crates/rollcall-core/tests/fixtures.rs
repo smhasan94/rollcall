@@ -1,11 +1,14 @@
-//! Checks on the Zephyr build fixtures in `fixtures/zephyr/` (see `docs/fixtures.md`).
+//! Checks on the Zephyr build fixtures (see `docs/fixtures.md`): `fixtures/zephyr/` (the main
+//! pin set: Zephyr v4.4.2, variants baseline, bt and tls) and `fixtures/zephyr-old-mbedtls/`
+//! (Zephyr v4.2.0, variant old-mbedtls, whose mbedTLS has known CVEs).
 //!
-//! The fixtures are produced only by `scripts/regen-fixtures.sh`; these tests check that the
+//! The fixtures are produced only by `scripts/regen-fixtures.sh`; these tests check that each
 //! committed tree is what its `MANIFEST.json` says it is, and that each variant was built with
 //! the options it claims.
 //!
-//! `ROLLCALL_FIXTURES_DIR` points the tests at another tree; the script uses it to test a
-//! staged tree before installing it. By default they check the repository's `fixtures/zephyr`.
+//! `ROLLCALL_FIXTURES_DIR` points the tests at one other tree (which set it is follows from its
+//! manifest's Zephyr tag); the script uses it to test a staged tree before installing it. By
+//! default they check both of the repository's trees.
 
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -14,26 +17,95 @@ use std::process::Command;
 use serde_json::Value;
 use sha2::{Digest, Sha256};
 
-const VARIANTS: [&str; 3] = ["baseline", "bt", "tls"];
 const SPDX_DOCS: [&str; 4] = ["app", "zephyr", "build", "modules-deps"];
 const MAX_TOTAL_BYTES: u64 = 50_000_000;
+
+/// A fixture tree's pins and variants.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+struct Set {
+    /// The tree's directory under the repository root.
+    dir: &'static str,
+    zephyr_tag: &'static str,
+    sdk_version: &'static str,
+    variants: &'static [&'static str],
+}
+
+const MAIN: Set = Set {
+    dir: "fixtures/zephyr",
+    zephyr_tag: "v4.4.2",
+    sdk_version: "1.0.1",
+    variants: &["baseline", "bt", "tls"],
+};
+
+const OLD_MBEDTLS: Set = Set {
+    dir: "fixtures/zephyr-old-mbedtls",
+    zephyr_tag: "v4.2.0",
+    sdk_version: "0.17.2",
+    variants: &["old-mbedtls"],
+};
+
+/// One fixture tree to check.
+struct Tree {
+    root: PathBuf,
+    set: Set,
+}
+
+impl Tree {
+    fn manifest(&self) -> Value {
+        let path = self.root.join("MANIFEST.json");
+        let text = fs::read_to_string(&path)
+            .unwrap_or_else(|e| panic!("cannot read {}: {e}", path.display()));
+        serde_json::from_str(&text)
+            .unwrap_or_else(|e| panic!("{} is not JSON: {e}", path.display()))
+    }
+
+    /// Reads a fixture as text, replacing invalid UTF-8 rather than failing.
+    fn read_text(&self, rel: &str) -> String {
+        let path = self.root.join(rel);
+        let bytes =
+            fs::read(&path).unwrap_or_else(|e| panic!("cannot read {}: {e}", path.display()));
+        String::from_utf8_lossy(&bytes).into_owned()
+    }
+}
 
 fn repo_root() -> PathBuf {
     Path::new(env!("CARGO_MANIFEST_DIR")).join("../..")
 }
 
-fn fixtures_root() -> PathBuf {
+/// The trees to check: the one `ROLLCALL_FIXTURES_DIR` names, else both committed trees.
+fn trees() -> Vec<Tree> {
     match std::env::var_os("ROLLCALL_FIXTURES_DIR") {
-        Some(dir) if !dir.is_empty() => PathBuf::from(dir),
-        _ => repo_root().join("fixtures/zephyr"),
+        Some(dir) if !dir.is_empty() => {
+            let root = PathBuf::from(dir);
+            let probe = Tree { root, set: MAIN };
+            let tag = probe
+                .manifest()
+                .pointer("/zephyr/tag")
+                .and_then(Value::as_str)
+                .unwrap_or_default()
+                .to_owned();
+            let set = [MAIN, OLD_MBEDTLS]
+                .into_iter()
+                .find(|s| s.zephyr_tag == tag)
+                .unwrap_or_else(|| panic!("no fixture set pins Zephyr {tag:?}"));
+            vec![Tree {
+                root: probe.root,
+                set,
+            }]
+        }
+        _ => [MAIN, OLD_MBEDTLS]
+            .into_iter()
+            .map(|set| Tree {
+                root: repo_root().join(set.dir),
+                set,
+            })
+            .collect(),
     }
 }
 
-fn manifest() -> Value {
-    let path = fixtures_root().join("MANIFEST.json");
-    let text =
-        fs::read_to_string(&path).unwrap_or_else(|e| panic!("cannot read {}: {e}", path.display()));
-    serde_json::from_str(&text).unwrap_or_else(|e| panic!("{} is not JSON: {e}", path.display()))
+/// The main tree, if it is being checked (tests of its own variants skip otherwise).
+fn main_tree() -> Option<Tree> {
+    trees().into_iter().find(|t| t.set == MAIN)
 }
 
 fn sha256_hex(bytes: &[u8]) -> String {
@@ -78,13 +150,6 @@ fn config_is_set(text: &str, key: &str) -> bool {
 fn config_is_unset(text: &str, key: &str) -> bool {
     let want = format!("# {key} is not set");
     text.lines().any(|l| l.trim_end_matches('\r') == want)
-}
-
-/// Reads a fixture as text, replacing invalid UTF-8 rather than failing.
-fn read_text(rel: &str) -> String {
-    let path = fixtures_root().join(rel);
-    let bytes = fs::read(&path).unwrap_or_else(|e| panic!("cannot read {}: {e}", path.display()));
-    String::from_utf8_lossy(&bytes).into_owned()
 }
 
 /// The application image name of a variant, from the manifest.
@@ -138,149 +203,187 @@ fn config_helpers_tolerate_malformed_lines() {
 
 #[test]
 fn manifest_pins_zephyr_revision_and_sdk_version() {
-    let m = manifest();
-    assert_eq!(
-        m.get("format").and_then(Value::as_str),
-        Some("rollcall-fixtures/1")
-    );
-    assert_eq!(
-        m.pointer("/zephyr/tag").and_then(Value::as_str),
-        Some("v4.4.2")
-    );
-    let commit = m
-        .pointer("/zephyr/commit")
-        .and_then(Value::as_str)
-        .unwrap_or_default();
-    assert_eq!(
-        commit.len(),
-        40,
-        "zephyr.commit is not 40 hex digits: {commit:?}"
-    );
-    assert!(
-        commit
-            .bytes()
-            .all(|b| b.is_ascii_digit() || (b'a'..=b'f').contains(&b)),
-        "zephyr.commit is not lowercase hex: {commit:?}"
-    );
-    assert_eq!(
-        m.pointer("/sdk/version").and_then(Value::as_str),
-        Some("1.0.1")
-    );
-    let variants: Vec<&str> = m
-        .get("variants")
-        .and_then(Value::as_object)
-        .expect("manifest has variants")
-        .keys()
-        .map(String::as_str)
-        .collect();
-    assert_eq!(variants, VARIANTS, "manifest variants");
+    for t in trees() {
+        let m = t.manifest();
+        let what = t.set.dir;
+        assert_eq!(
+            m.get("format").and_then(Value::as_str),
+            Some("rollcall-fixtures/1"),
+            "{what}"
+        );
+        assert_eq!(
+            m.pointer("/zephyr/tag").and_then(Value::as_str),
+            Some(t.set.zephyr_tag),
+            "{what}"
+        );
+        let commit = m
+            .pointer("/zephyr/commit")
+            .and_then(Value::as_str)
+            .unwrap_or_default();
+        assert_eq!(
+            commit.len(),
+            40,
+            "{what}: zephyr.commit is not 40 hex digits: {commit:?}"
+        );
+        assert!(
+            commit
+                .bytes()
+                .all(|b| b.is_ascii_digit() || (b'a'..=b'f').contains(&b)),
+            "{what}: zephyr.commit is not lowercase hex: {commit:?}"
+        );
+        assert_eq!(
+            m.pointer("/sdk/version").and_then(Value::as_str),
+            Some(t.set.sdk_version),
+            "{what}"
+        );
+        let variants: Vec<&str> = m
+            .get("variants")
+            .and_then(Value::as_object)
+            .expect("manifest has variants")
+            .keys()
+            .map(String::as_str)
+            .collect();
+        assert_eq!(variants, t.set.variants, "{what}: manifest variants");
+    }
 }
 
 #[test]
 fn every_variant_has_the_required_file_set() {
-    let m = manifest();
-    let root = fixtures_root();
-    for v in VARIANTS {
-        let app = app_image(&m, v);
-        let mut required = vec![
-            format!("{v}/west-list.txt"),
-            format!("{v}/build_info.yml"),
-            format!("{v}/domains.yaml"),
-            format!("{v}/zephyr/.config"),
-            format!("{v}/{app}/zephyr/zephyr.signed.hex"),
-            format!("{v}/mcuboot/zephyr/zephyr.hex"),
-        ];
-        for img in [app.as_str(), "mcuboot"] {
-            for f in [
-                "build_info.yml",
-                "zephyr/.config",
-                "zephyr/zephyr.map",
-                "zephyr/zephyr.meta",
-                "zephyr/zephyr.elf",
-            ] {
-                required.push(format!("{v}/{img}/{f}"));
+    for t in trees() {
+        let m = t.manifest();
+        for &v in t.set.variants {
+            let app = app_image(&m, v);
+            let mut required = vec![
+                format!("{v}/west-list.txt"),
+                format!("{v}/build_info.yml"),
+                format!("{v}/domains.yaml"),
+                format!("{v}/zephyr/.config"),
+                format!("{v}/{app}/zephyr/zephyr.signed.hex"),
+                format!("{v}/mcuboot/zephyr/zephyr.hex"),
+            ];
+            for img in [app.as_str(), "mcuboot"] {
+                for f in [
+                    "build_info.yml",
+                    "zephyr/.config",
+                    "zephyr/zephyr.map",
+                    "zephyr/zephyr.meta",
+                    "zephyr/zephyr.elf",
+                ] {
+                    required.push(format!("{v}/{img}/{f}"));
+                }
+                for doc in SPDX_DOCS {
+                    required.push(format!("{v}/{img}/spdx/{doc}.spdx"));
+                }
             }
-            for doc in SPDX_DOCS {
-                required.push(format!("{v}/{img}/spdx/{doc}.spdx"));
+            for rel in &required {
+                let path = t.root.join(rel);
+                assert!(path.is_file(), "{}: missing fixture {rel}", t.set.dir);
+                let len = fs::metadata(&path).map(|md| md.len()).unwrap_or(0);
+                assert!(len > 0, "{}: empty fixture {rel}", t.set.dir);
             }
-        }
-        for rel in &required {
-            let path = root.join(rel);
-            assert!(path.is_file(), "missing fixture {rel}");
-            let len = fs::metadata(&path).map(|md| md.len()).unwrap_or(0);
-            assert!(len > 0, "empty fixture {rel}");
         }
     }
 }
 
 #[test]
 fn manifest_lists_exactly_the_committed_files() {
-    let m = manifest();
-    let listed: Vec<String> = manifest_files(&m)
-        .iter()
-        .map(|e| {
-            e.get("path")
-                .and_then(Value::as_str)
-                .expect("file entry has a path")
-                .to_owned()
-        })
-        .collect();
-    let mut sorted = listed.clone();
-    sorted.sort();
-    sorted.dedup();
-    assert_eq!(listed, sorted, "manifest files are not sorted and unique");
-    let on_disk: Vec<String> = walk(&fixtures_root())
-        .into_iter()
-        .filter(|p| p != "MANIFEST.json")
-        .collect();
-    assert_eq!(listed, on_disk, "manifest file list differs from the tree");
-    let total: u64 = manifest_files(&m)
-        .iter()
-        .map(|e| e.get("bytes").and_then(Value::as_u64).unwrap_or(0))
-        .sum();
-    assert_eq!(m.get("total_bytes").and_then(Value::as_u64), Some(total));
+    for t in trees() {
+        let m = t.manifest();
+        let listed: Vec<String> = manifest_files(&m)
+            .iter()
+            .map(|e| {
+                e.get("path")
+                    .and_then(Value::as_str)
+                    .expect("file entry has a path")
+                    .to_owned()
+            })
+            .collect();
+        let mut sorted = listed.clone();
+        sorted.sort();
+        sorted.dedup();
+        assert_eq!(
+            listed, sorted,
+            "{}: manifest files are not sorted and unique",
+            t.set.dir
+        );
+        let on_disk: Vec<String> = walk(&t.root)
+            .into_iter()
+            .filter(|p| p != "MANIFEST.json")
+            .collect();
+        assert_eq!(
+            listed, on_disk,
+            "{}: manifest file list differs from the tree",
+            t.set.dir
+        );
+        let total: u64 = manifest_files(&m)
+            .iter()
+            .map(|e| e.get("bytes").and_then(Value::as_u64).unwrap_or(0))
+            .sum();
+        assert_eq!(m.get("total_bytes").and_then(Value::as_u64), Some(total));
+    }
 }
 
 #[test]
 fn manifest_sha256s_match_committed_files() {
-    let m = manifest();
-    let root = fixtures_root();
-    let files = manifest_files(&m);
-    assert!(!files.is_empty(), "manifest lists no files");
-    for entry in files {
-        let rel = entry.get("path").and_then(Value::as_str).expect("path");
-        let bytes = fs::read(root.join(rel)).unwrap_or_else(|e| panic!("cannot read {rel}: {e}"));
-        assert_eq!(
-            entry.get("sha256").and_then(Value::as_str),
-            Some(sha256_hex(&bytes).as_str()),
-            "sha256 of {rel}"
-        );
-        assert_eq!(
-            entry.get("bytes").and_then(Value::as_u64),
-            Some(bytes.len() as u64),
-            "size of {rel}"
-        );
+    for t in trees() {
+        let m = t.manifest();
+        let files = manifest_files(&m);
+        assert!(!files.is_empty(), "{}: manifest lists no files", t.set.dir);
+        for entry in files {
+            let rel = entry.get("path").and_then(Value::as_str).expect("path");
+            let bytes =
+                fs::read(t.root.join(rel)).unwrap_or_else(|e| panic!("cannot read {rel}: {e}"));
+            assert_eq!(
+                entry.get("sha256").and_then(Value::as_str),
+                Some(sha256_hex(&bytes).as_str()),
+                "{}: sha256 of {rel}",
+                t.set.dir
+            );
+            assert_eq!(
+                entry.get("bytes").and_then(Value::as_u64),
+                Some(bytes.len() as u64),
+                "{}: size of {rel}",
+                t.set.dir
+            );
+        }
     }
 }
 
 #[test]
 fn fixture_tree_is_under_50_mb() {
-    let root = fixtures_root();
-    let total: u64 = walk(&root)
-        .iter()
-        .map(|rel| fs::metadata(root.join(rel)).map(|md| md.len()).unwrap_or(0))
-        .sum();
-    assert!(total > 0, "fixture tree is empty");
+    // The limit is for everything committed under fixtures/, both trees together: a tree
+    // checked through ROLLCALL_FIXTURES_DIR (e.g. a staged one) is counted with the committed
+    // tree of the other set.
+    let size = |root: &Path| -> u64 {
+        walk(root)
+            .iter()
+            .map(|rel| fs::metadata(root.join(rel)).map(|md| md.len()).unwrap_or(0))
+            .sum()
+    };
+    let checked = trees();
+    let mut total = 0;
+    for t in &checked {
+        let tree = size(&t.root);
+        assert!(tree > 0, "{}: fixture tree is empty", t.set.dir);
+        total += tree;
+    }
+    for set in [MAIN, OLD_MBEDTLS] {
+        let committed = repo_root().join(set.dir);
+        if !checked.iter().any(|t| t.set == set) && committed.is_dir() {
+            total += size(&committed);
+        }
+    }
     assert!(
         total < MAX_TOTAL_BYTES,
-        "fixture tree is {total} bytes, limit {MAX_TOTAL_BYTES}"
+        "fixture trees are {total} bytes, limit {MAX_TOTAL_BYTES}"
     );
 }
 
 #[test]
 fn baseline_config_has_bt_and_mbedtls_off() {
-    let m = manifest();
-    let config = read_text(&format!(
+    let Some(t) = main_tree() else { return };
+    let m = t.manifest();
+    let config = t.read_text(&format!(
         "baseline/{}/zephyr/.config",
         app_image(&m, "baseline")
     ));
@@ -296,8 +399,9 @@ fn baseline_config_has_bt_and_mbedtls_off() {
 
 #[test]
 fn bt_config_has_bt_on_and_mbedtls_off() {
-    let m = manifest();
-    let config = read_text(&format!("bt/{}/zephyr/.config", app_image(&m, "bt")));
+    let Some(t) = main_tree() else { return };
+    let m = t.manifest();
+    let config = t.read_text(&format!("bt/{}/zephyr/.config", app_image(&m, "bt")));
     assert!(
         config_is_set(&config, "CONFIG_BT"),
         "bt: CONFIG_BT is not on"
@@ -310,8 +414,9 @@ fn bt_config_has_bt_on_and_mbedtls_off() {
 
 #[test]
 fn tls_config_has_mbedtls_and_tls_sockets_on_and_bt_off() {
-    let m = manifest();
-    let config = read_text(&format!("tls/{}/zephyr/.config", app_image(&m, "tls")));
+    let Some(t) = main_tree() else { return };
+    let m = t.manifest();
+    let config = t.read_text(&format!("tls/{}/zephyr/.config", app_image(&m, "tls")));
     assert!(
         config_is_set(&config, "CONFIG_MBEDTLS"),
         "tls: CONFIG_MBEDTLS is not on"
@@ -326,48 +431,77 @@ fn tls_config_has_mbedtls_and_tls_sockets_on_and_bt_off() {
     );
 }
 
+/// The old-mbedTLS build has Mbed TLS built in, at Zephyr v4.2.0's fork commit (= 3.6.4).
+#[test]
+fn old_mbedtls_config_has_mbedtls_on_at_the_v4_2_0_fork_commit() {
+    let Some(t) = trees().into_iter().find(|t| t.set == OLD_MBEDTLS) else {
+        return;
+    };
+    let m = t.manifest();
+    let config = t.read_text(&format!(
+        "old-mbedtls/{}/zephyr/.config",
+        app_image(&m, "old-mbedtls")
+    ));
+    for key in ["CONFIG_MBEDTLS", "CONFIG_MBEDTLS_BUILTIN"] {
+        assert!(config_is_set(&config, key), "old-mbedtls: {key} is not on");
+    }
+    let west_list = t.read_text("old-mbedtls/west-list.txt");
+    assert!(
+        west_list.lines().any(|l| {
+            let f: Vec<&str> = l.split_whitespace().collect();
+            f.first() == Some(&"mbedtls")
+                && f.get(2) == Some(&"85440ef5fffa95d0e9971e9163719189cf34d979")
+        }),
+        "old-mbedtls: west list does not pin mbedtls 85440ef5…"
+    );
+}
+
 #[test]
 fn every_variant_enables_mcuboot_via_sysbuild() {
-    let m = manifest();
-    for v in VARIANTS {
-        let sysbuild = read_text(&format!("{v}/zephyr/.config"));
-        assert!(
-            config_is_set(&sysbuild, "SB_CONFIG_BOOTLOADER_MCUBOOT"),
-            "{v}: sysbuild does not enable MCUboot"
-        );
-        let app = read_text(&format!("{v}/{}/zephyr/.config", app_image(&m, v)));
-        assert!(
-            config_is_set(&app, "CONFIG_BOOTLOADER_MCUBOOT"),
-            "{v}: app is not built for MCUboot"
-        );
-        let boot = read_text(&format!("{v}/mcuboot/zephyr/.config"));
-        assert!(
-            config_is_set(&boot, "CONFIG_MCUBOOT"),
-            "{v}: mcuboot image is not MCUboot"
-        );
+    for t in trees() {
+        let m = t.manifest();
+        for &v in t.set.variants {
+            let sysbuild = t.read_text(&format!("{v}/zephyr/.config"));
+            assert!(
+                config_is_set(&sysbuild, "SB_CONFIG_BOOTLOADER_MCUBOOT"),
+                "{v}: sysbuild does not enable MCUboot"
+            );
+            let app = t.read_text(&format!("{v}/{}/zephyr/.config", app_image(&m, v)));
+            assert!(
+                config_is_set(&app, "CONFIG_BOOTLOADER_MCUBOOT"),
+                "{v}: app is not built for MCUboot"
+            );
+            let boot = t.read_text(&format!("{v}/mcuboot/zephyr/.config"));
+            assert!(
+                config_is_set(&boot, "CONFIG_MCUBOOT"),
+                "{v}: mcuboot image is not MCUboot"
+            );
+        }
     }
 }
 
 #[test]
 fn spdx_documents_are_2_3_with_pinned_namespace() {
-    let m = manifest();
-    for v in VARIANTS {
-        let app = app_image(&m, v);
-        for img in [app.as_str(), "mcuboot"] {
-            for doc in SPDX_DOCS {
-                let rel = format!("{v}/{img}/spdx/{doc}.spdx");
-                let text = read_text(&rel);
-                assert_eq!(
-                    text.lines().next(),
-                    Some("SPDXVersion: SPDX-2.3"),
-                    "{rel}: not SPDX 2.3"
-                );
-                let want =
-                    format!("DocumentNamespace: http://spdx.org/spdxdocs/rollcall-{v}-{img}/");
-                assert!(
-                    text.lines().any(|l| l.starts_with(&want)),
-                    "{rel}: no namespace starting {want:?}"
-                );
+    for t in trees() {
+        let m = t.manifest();
+        for &v in t.set.variants {
+            let app = app_image(&m, v);
+            for img in [app.as_str(), "mcuboot"] {
+                for doc in SPDX_DOCS {
+                    let rel = format!("{v}/{img}/spdx/{doc}.spdx");
+                    let text = t.read_text(&rel);
+                    assert_eq!(
+                        text.lines().next(),
+                        Some("SPDXVersion: SPDX-2.3"),
+                        "{rel}: not SPDX 2.3"
+                    );
+                    let want =
+                        format!("DocumentNamespace: http://spdx.org/spdxdocs/rollcall-{v}-{img}/");
+                    assert!(
+                        text.lines().any(|l| l.starts_with(&want)),
+                        "{rel}: no namespace starting {want:?}"
+                    );
+                }
             }
         }
     }
@@ -375,32 +509,38 @@ fn spdx_documents_are_2_3_with_pinned_namespace() {
 
 #[test]
 fn text_fixtures_contain_no_host_paths() {
-    let root = fixtures_root();
-    let mut build_infos = 0;
-    for rel in walk(&root).iter().filter(|p| is_text_fixture(p)) {
-        let text = read_text(rel);
-        for needle in [
-            "/Users/",
-            "/home/",
-            "/private/",
-            "/root/",
-            "/work/",
-            "/opt/hostedtoolcache",
-        ] {
-            assert!(
-                !text.contains(needle),
-                "{rel} contains host path {needle:?}"
-            );
+    for t in trees() {
+        let mut build_infos = 0;
+        for rel in walk(&t.root).iter().filter(|p| is_text_fixture(p)) {
+            let text = t.read_text(rel);
+            for needle in [
+                "/Users/",
+                "/home/",
+                "/private/",
+                "/root/",
+                "/work/",
+                "/opt/hostedtoolcache",
+            ] {
+                assert!(
+                    !text.contains(needle),
+                    "{rel} contains host path {needle:?}"
+                );
+            }
+            if rel.ends_with("build_info.yml") {
+                build_infos += 1;
+                assert!(
+                    text.contains("/zephyrproject"),
+                    "{rel} does not use /zephyrproject"
+                );
+            }
         }
-        if rel.ends_with("build_info.yml") {
-            build_infos += 1;
-            assert!(
-                text.contains("/zephyrproject"),
-                "{rel} does not use /zephyrproject"
-            );
-        }
+        assert_eq!(
+            build_infos,
+            t.set.variants.len() * 3,
+            "{}: build_info.yml count",
+            t.set.dir
+        );
     }
-    assert_eq!(build_infos, VARIANTS.len() * 3, "build_info.yml count");
 }
 
 #[test]
@@ -432,6 +572,10 @@ fn fixtures_doc_has_required_sections() {
         "canonical",
         "v4.4.2",
         "1.0.1",
+        "--variant old-mbedtls",
+        "fixtures/zephyr-old-mbedtls",
+        "v4.2.0",
+        "0.17.2",
         "/zephyrproject",
         "/zephyr-sdk",
     ] {
@@ -616,14 +760,15 @@ fn compare_detects_real_differences_and_ignores_only_approved_ones() {
             return;
         }
     }
-    let m = manifest();
+    let Some(t) = main_tree() else { return };
+    let m = t.manifest();
     let tmp = tempfile::tempdir().expect("tempdir");
     let tmp = tmp.path();
 
     // Identical copies of the whole tree.
     let (a, b) = (tmp.join("full/a"), tmp.join("full/b"));
-    copy_tree(&fixtures_root(), &a);
-    copy_tree(&fixtures_root(), &b);
+    copy_tree(&t.root, &a);
+    copy_tree(&t.root, &b);
     assert!(compare_passes(&a, &b), "identical copies must PASS");
 
     // Signed hex: image body vs signature.
@@ -631,7 +776,7 @@ fn compare_detects_real_differences_and_ignores_only_approved_ones() {
         "baseline/{}/zephyr/zephyr.signed.hex",
         app_image(&m, "baseline")
     );
-    let hex = read_text(&hex_rel);
+    let hex = t.read_text(&hex_rel);
     assert!(!hex.contains('\r'), "{hex_rel} is expected to be LF");
     let (_, body, (sig, sig_len)) = mcuboot_layout(&hex).expect("MCUboot layout");
     assert!(sig_len > 0, "empty signature TLV");
@@ -648,7 +793,7 @@ fn compare_detects_real_differences_and_ignores_only_approved_ones() {
     assert!(!compare_passes(&a, &b), "a CRLF-converted hex must FAIL");
 
     // Kconfig value.
-    let config = read_text("baseline/zephyr/.config");
+    let config = t.read_text("baseline/zephyr/.config");
     let changed = config.replace(
         "SB_CONFIG_BOOTLOADER_MCUBOOT=y",
         "SB_CONFIG_BOOTLOADER_MCUBOOT=n",
@@ -664,7 +809,7 @@ fn compare_detects_real_differences_and_ignores_only_approved_ones() {
     assert!(!compare_passes(&a, &b), "a .config value change must FAIL");
 
     // SPDX relationships and Created:.
-    let spdx = read_text(&format!(
+    let spdx = t.read_text(&format!(
         "baseline/{}/spdx/build.spdx",
         app_image(&m, "baseline")
     ));

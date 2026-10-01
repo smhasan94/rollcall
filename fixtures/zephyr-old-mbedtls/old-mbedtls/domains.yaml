@@ -1,0 +1,10 @@
+default: mbedtls
+build_dir: /zephyrproject/build/old-mbedtls
+domains:
+  - name: mbedtls
+    build_dir: /zephyrproject/build/old-mbedtls/mbedtls
+  - name: mcuboot
+    build_dir: /zephyrproject/build/old-mbedtls/mcuboot
+flash_order:
+  - mcuboot
+  - mbedtls

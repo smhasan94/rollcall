@@ -1,0 +1,39 @@
+SPDXVersion: SPDX-2.3
+DataLicense: CC0-1.0
+SPDXID: SPDXRef-DOCUMENT
+DocumentName: app-sources
+DocumentNamespace: http://spdx.org/spdxdocs/rollcall-old-mbedtls-mbedtls/app
+Creator: Tool: Zephyr SPDX builder
+Created: 2026-10-01T20:27:50Z
+
+Relationship: SPDXRef-DOCUMENT DESCRIBES SPDXRef-app-sources
+
+##### Package: app-sources
+
+PackageName: app-sources
+SPDXID: SPDXRef-app-sources
+PackageLicenseConcluded: Apache-2.0
+PackageLicenseDeclared: NOASSERTION
+PackageCopyrightText: NOASSERTION
+PrimaryPackagePurpose: SOURCE
+PackageDownloadLocation: NOASSERTION
+PackageLicenseInfoFromFiles: Apache-2.0
+FilesAnalyzed: true
+PackageVerificationCode: 305c796b4fbefbd538245c732ccef2ba0eeb0515
+
+FileName: ./src/main.c
+SPDXID: SPDXRef-File-main.c
+FileChecksum: SHA1: cb3670228183da72dcde1ad9326a78bd71ff1db2
+FileChecksum: SHA256: a15791d7406a288d44b4042fa75754a60d2284f6871ac1acf92cea93bb0734d4
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: NOASSERTION
+
+FileName: ./src/mbedtls.c
+SPDXID: SPDXRef-File-mbedtls.c
+FileChecksum: SHA1: e5aa81084c2a1e2dfdcc7b3e672e95ea20ddc56a
+FileChecksum: SHA256: c4385e06aa51d6896b615663e066fda33cb71e5e1e9998b0e34dcfe2d4ecfc4f
+LicenseConcluded: Apache-2.0
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: NOASSERTION
+

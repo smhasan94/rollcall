@@ -1051,3 +1051,100 @@ fn generate_product_requires_zephyr_exit_64() {
         stderr_of(&out)
     );
 }
+
+/// The real Zephyr v4.2.0 old-mbedTLS build (`fixtures/zephyr-old-mbedtls/`) with the seed
+/// identifier database: the same bytes as
+/// `crates/rollcall-core/tests/golden/zephyr/old-mbedtls.cdx.json`, which
+/// `scripts/smoke-scan.sh --only old-mbedtls` scans with grype.
+#[test]
+fn old_mbedtls_fixture_cli_output_matches_golden() {
+    let core = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../rollcall-core");
+    let variant = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("../../fixtures/zephyr-old-mbedtls/old-mbedtls");
+    let dir = variant.join("mbedtls");
+    let west_list = variant.join("west-list.txt");
+    let db = core.join("db/identifiers.yaml");
+    let out = generate_zephyr(
+        &dir,
+        &[
+            "--west-list",
+            west_list.to_str().unwrap(),
+            "--identifier-db",
+            db.to_str().unwrap(),
+            "--timestamp",
+            GOLDEN_TIMESTAMP,
+        ],
+    );
+    let stderr = stderr_of(&out);
+    assert_eq!(out.status.code(), Some(0), "{stderr}");
+    assert!(!stderr.contains("module mbedtls is not in"), "{stderr}");
+    let stdout = String::from_utf8(out.stdout).unwrap();
+    assert_eq!(stdout, golden("old-mbedtls"));
+    // The build's own cpe is primary; the seed database's is a syft:cpe23 property.
+    let doc: Value = serde_json::from_str(&stdout).unwrap();
+    let mbedtls = doc["components"]
+        .as_array()
+        .into_iter()
+        .flatten()
+        .flat_map(|c| c["components"].as_array().into_iter().flatten())
+        .find(|c| c["type"] == "library" && c["name"] == "mbedtls")
+        .expect("mbedtls component");
+    assert_eq!(mbedtls["cpe"], "cpe:2.3:a:arm:mbed_tls:3.6.4:*:*:*:*:*:*:*");
+    let syft: Vec<&str> = mbedtls["properties"]
+        .as_array()
+        .into_iter()
+        .flatten()
+        .filter(|p| p["name"] == "syft:cpe23")
+        .filter_map(|p| p["value"].as_str())
+        .collect();
+    assert_eq!(
+        syft,
+        ["cpe:2.3:a:trustedfirmware:mbed_tls:3.6.4:*:*:*:*:*:*:*"]
+    );
+}
+
+/// `generate --sysbuild` on the `tls` fixture with the seed identifier database: Zephyr's own
+/// mbedtls purl and cpe and the database's name the same project (same GitHub repository; the
+/// SPDX cpe `arm:mbed_tls` is one of the database's `cpe_aliases`), so nothing "differs" for
+/// mbedtls, and no purl differs for tf-psa-crypto either. tf-psa-crypto's SPDX cpe
+/// `arm:tf-psa-crypto` is not in the NVD CPE dictionary, so it cannot be an alias: that genuinely
+/// different cpe is still a warning, once per image.
+#[test]
+fn sysbuild_tls_with_seed_db_warns_only_about_genuinely_different_identifiers() {
+    let db = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../rollcall-core/db/identifiers.yaml");
+    let west_list = west_list("tls");
+    let out = generate_zephyr(
+        &fixtures_root().join("tls"),
+        &[
+            "--sysbuild",
+            "--west-list",
+            west_list.to_str().unwrap(),
+            "--identifier-db",
+            db.to_str().unwrap(),
+            "--timestamp",
+            GOLDEN_TIMESTAMP,
+        ],
+    );
+    let stderr = stderr_of(&out);
+    assert_eq!(out.status.code(), Some(0), "{stderr}");
+    let differs: Vec<&str> = stderr.lines().filter(|l| l.contains("differs")).collect();
+    assert!(
+        !differs.iter().any(|l| l.contains("module mbedtls:")),
+        "{differs:#?}"
+    );
+    assert!(
+        !differs.iter().any(|l| l.contains(" purl ")),
+        "{differs:#?}"
+    );
+    assert_eq!(
+        differs,
+        ["http_server", "mcuboot"].map(|image| format!(
+            "rollcall generate: warning: {image}: identifiers.yaml: module tf-psa-crypto: \
+             identifiers.yaml cpe cpe:2.3:a:trustedfirmware:tf-psa-crypto:1.1.0:*:*:*:*:*:*:* \
+             differs from spdx/modules-deps.spdx cpe cpe:2.3:a:arm:tf-psa-crypto:1.1.0:*:*:*:*:*:*:*; \
+             using cpe:2.3:a:arm:tf-psa-crypto:1.1.0:*:*:*:*:*:*:*, with \
+             cpe:2.3:a:trustedfirmware:tf-psa-crypto:1.1.0:*:*:*:*:*:*:* as an additional CPE"
+        )),
+        "{stderr}"
+    );
+}

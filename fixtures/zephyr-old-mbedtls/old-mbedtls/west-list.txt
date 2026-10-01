@@ -1,0 +1,6 @@
+manifest zephyr HEAD N/A
+cmsis modules/hal/cmsis 512cc7e895e8491696b61f7ba8066b4a182569b8 https://github.com/zephyrproject-rtos/cmsis
+cmsis_6 modules/hal/cmsis_6 06d952b6713a2ca41c9224a62075e4059402a151 https://github.com/zephyrproject-rtos/CMSIS_6
+hal_nordic modules/hal/nordic 9587b1dcb83d24ab74e89837843a5f7d573f7059 https://github.com/zephyrproject-rtos/hal_nordic
+mbedtls modules/crypto/mbedtls 85440ef5fffa95d0e9971e9163719189cf34d979 https://github.com/zephyrproject-rtos/mbedtls
+mcuboot bootloader/mcuboot 4eba8087fa606db801455f14d185255bc8c49467 https://github.com/zephyrproject-rtos/mcuboot

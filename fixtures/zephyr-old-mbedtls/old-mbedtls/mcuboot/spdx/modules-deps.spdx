@@ -1,0 +1,71 @@
+SPDXVersion: SPDX-2.3
+DataLicense: CC0-1.0
+SPDXID: SPDXRef-DOCUMENT
+DocumentName: modules-deps
+DocumentNamespace: http://spdx.org/spdxdocs/rollcall-old-mbedtls-mcuboot/modules-deps
+Creator: Tool: Zephyr SPDX builder
+Created: 2026-10-01T20:27:51Z
+
+Relationship: SPDXRef-DOCUMENT DESCRIBES SPDXRef-cmsis-deps
+Relationship: SPDXRef-DOCUMENT DESCRIBES SPDXRef-cmsis-6-deps
+Relationship: SPDXRef-DOCUMENT DESCRIBES SPDXRef-hal-nordic-deps
+Relationship: SPDXRef-DOCUMENT DESCRIBES SPDXRef-mbedtls-deps
+Relationship: SPDXRef-DOCUMENT DESCRIBES SPDXRef-mcuboot-deps
+
+##### Package: cmsis-deps
+
+PackageName: cmsis-deps
+SPDXID: SPDXRef-cmsis-deps
+PackageLicenseConcluded: NOASSERTION
+PackageLicenseDeclared: NOASSERTION
+PackageCopyrightText: NOASSERTION
+PackageDownloadLocation: NOASSERTION
+FilesAnalyzed: false
+PackageComment: Utility target; no files
+
+##### Package: cmsis-6-deps
+
+PackageName: cmsis-6-deps
+SPDXID: SPDXRef-cmsis-6-deps
+PackageLicenseConcluded: NOASSERTION
+PackageLicenseDeclared: NOASSERTION
+PackageCopyrightText: NOASSERTION
+PackageDownloadLocation: NOASSERTION
+FilesAnalyzed: false
+PackageComment: Utility target; no files
+
+##### Package: hal-nordic-deps
+
+PackageName: hal-nordic-deps
+SPDXID: SPDXRef-hal-nordic-deps
+PackageLicenseConcluded: NOASSERTION
+PackageLicenseDeclared: NOASSERTION
+PackageCopyrightText: NOASSERTION
+PackageDownloadLocation: NOASSERTION
+FilesAnalyzed: false
+PackageComment: Utility target; no files
+
+##### Package: mbedtls-deps
+
+PackageName: mbedtls-deps
+SPDXID: SPDXRef-mbedtls-deps
+PackageLicenseConcluded: NOASSERTION
+PackageLicenseDeclared: NOASSERTION
+PackageCopyrightText: NOASSERTION
+PackageDownloadLocation: NOASSERTION
+ExternalRef: SECURITY cpe23Type cpe:2.3:a:arm:mbed_tls:3.6.4:*:*:*:*:*:*:*
+ExternalRef: PACKAGE_MANAGER purl pkg:github/Mbed-TLS/mbedtls@v3.6.4
+FilesAnalyzed: false
+PackageComment: Utility target; no files
+
+##### Package: mcuboot-deps
+
+PackageName: mcuboot-deps
+SPDXID: SPDXRef-mcuboot-deps
+PackageLicenseConcluded: NOASSERTION
+PackageLicenseDeclared: NOASSERTION
+PackageCopyrightText: NOASSERTION
+PackageDownloadLocation: NOASSERTION
+FilesAnalyzed: false
+PackageComment: Utility target; no files
+

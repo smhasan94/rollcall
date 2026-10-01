@@ -1,0 +1,29 @@
+# Hand-written (reviewed) list: the CVEs grype must report for mbedtls in the real Zephyr v4.2.0
+# build fixtures/zephyr-old-mbedtls/old-mbedtls/mbedtls (mbedTLS fork commit
+# 85440ef5fffa95d0e9971e9163719189cf34d979 = Mbed TLS 3.6.4), checked by
+# scripts/smoke-scan.sh --only old-mbedtls ("grype expected CVEs"): every ID here must be
+# reported; more is fine.
+#
+# NVD files Mbed TLS CVEs under two vendor:products, so this is the union of the NVD CVE API's
+# answers (2026-10-01) for virtualMatchString=cpe:2.3:a:trustedfirmware:mbed_tls:3.6.4 (6 CVEs:
+# CVE-2026-25833, -25834, -34873, -34874, -34875, -34876) and for
+# virtualMatchString=cpe:2.3:a:arm:mbed_tls:3.6.4 (7 CVEs: CVE-2025-54764, -59438, -66442,
+# CVE-2026-25835, -34871, -34872, -34877). The build's own modules-deps.spdx names
+# cpe:2.3:a:arm:mbed_tls:3.6.4, which stays the component's cpe; the seed database's
+# trustedfirmware CPE is written as a syft:cpe23 additional CPE; grype searches both.
+#
+# Observed with grype 0.119.0, database schema v6.1.9 built 2026-09-29T06:32:31Z.
+# If a database update drops one of these, fix this list in a reviewed change.
+CVE-2025-54764
+CVE-2025-59438
+CVE-2025-66442
+CVE-2026-25833
+CVE-2026-25834
+CVE-2026-25835
+CVE-2026-34871
+CVE-2026-34872
+CVE-2026-34873
+CVE-2026-34874
+CVE-2026-34875
+CVE-2026-34876
+CVE-2026-34877
