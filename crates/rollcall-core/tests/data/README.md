@@ -38,3 +38,14 @@ fixtures' other modules (`cmsis_6`, `hal_nordic`, `mcuboot`).
 | File | What it is | Used by |
 |------|------------|---------|
 | `identifiers-stub.yaml` | Three entries; the fixtures' other three modules are unmapped on purpose. | `tests/identify.rs` (every fixture module resolves or is reported unknown exactly once), `rollcall-cli` `tests/generate_zephyr.rs` (`--identifier-db`) |
+
+## `old-*.model.json`, `findings/`, `vex/` — VEX evaluator test data (SHA-111)
+
+| File | What it is | Used by |
+|------|------------|---------|
+| `old-mbedtls.model.json` | **Hand-written** model: `old-tls-node` with `mbedtls` 2.28.0 (`pkg:github/mbed-tls/mbedtls@v2.28.0`, `cpe:2.3:a:arm:mbed_tls:2.28.0:…`) and `zephyr` 3.7.0. A stand-in for a real old-mbedTLS build until one exists as a fixture. | `tests/vex.rs`, `rollcall-cli` `tests/vex.rs`, `scripts/capture-findings.sh` |
+| `old-heapless.model.json` | **Hand-written** model: `rust-node` with `heapless` 0.5.0 (`pkg:cargo/heapless@0.5.0`), which has published RustSec/GHSA advisories, so osv-scanner reports real vulnerabilities. | same |
+| `findings/*.json`, `findings/CAPTURE.txt` | **Captured, not hand-written**: real grype 0.119.0 and osv-scanner 2.6.0 output for the two models above, written only by `scripts/capture-findings.sh` (absolute paths replaced with `<capture>`, `<repo>`, `<home>`; tool versions and the grype database in `CAPTURE.txt`). Never edit them by hand; re-capturing changes the findings and so the VEX golden. | same |
+| `vex/old-mbedtls.rules.yml` | **Hand-written** illustrative rules (not a security assessment) evaluated against the grype capture and the real `fixtures/zephyr/tls/http_server/zephyr/.config`. | `tests/vex.rs` (golden `tests/golden/vex/old-mbedtls.vex.json`), `rollcall-cli` `tests/vex.rs` |
+| `vex/conflict.rules.yml` | **Hand-written**: two equally ranked rules that disagree about one CVE. | conflict-warning tests |
+| `vex/bad-status.rules.yml` | **Hand-written** malformed rules file (unknown status on line 7). | `rollcall-cli` `tests/vex.rs` |

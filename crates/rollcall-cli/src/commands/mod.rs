@@ -4,3 +4,4 @@ pub mod generate;
 pub mod merge;
 pub mod output;
 pub mod validate;
+pub mod vex;

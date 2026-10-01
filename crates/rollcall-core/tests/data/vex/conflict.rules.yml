@@ -1,0 +1,15 @@
+# Hand-written: two equally specific, equally prioritised rules that disagree about one
+# CVE, for the conflict-warning tests (SHA-111).
+version: 1
+rules:
+  - id: dtls-says-not-affected
+    match:
+      name: mbedtls
+      cves: [CVE-2022-35409]
+    status: not_affected
+    justification: code_not_present
+  - id: dtls-says-affected
+    match:
+      name: mbedtls
+      cves: [CVE-2022-35409]
+    status: affected

@@ -14,8 +14,9 @@ build (the MCUboot bootloader and the application) into one product. `rollcall m
 combines separately generated SBOMs, and opaque binary blobs listed in a `--blob-manifest`,
 into one product hierarchy. `rollcall generate --model` renders a rollcall model (the
 internal `rollcall-model/1` JSON form) the same way; and `rollcall validate --schema` checks a
-document against the official CycloneDX 1.6 JSON schema. `vex`, `scan` and `assay` are not
-implemented yet; they print `not implemented` and exit 64. The 0.0.1 releases of `rollcall`,
+document against the official CycloneDX 1.6 JSON schema. `rollcall vex` triages grype or
+osv-scanner findings for an SBOM with VEX rules and Kconfig evidence (see [VEX rules](#vex-rules)).
+`scan` and `assay` are not implemented yet; they print `not implemented` and exit 64. The 0.0.1 releases of `rollcall`,
 `rollcall-core`, `rollcall-cli` and `rollcall-assay` on crates.io and `rollcall` on PyPI are
 placeholders that reserve the names.
 
@@ -200,6 +201,66 @@ code stays 0.
 
 rollcall carries a small seed database in `crates/rollcall-core/db/identifiers.yaml`.
 
+### VEX rules
+
+`rollcall vex` reads an SBOM (`--sbom`, CycloneDX 1.6) or a model (`--model`), scanner output
+(`--findings`, grype `-o json` or osv-scanner `--format json`, repeatable), VEX rules
+(`--rules`, YAML, repeatable) and optionally each image's Kconfig (`--kconfig IMAGE=FILE`,
+repeatable), and writes a `rollcall-vex/1` JSON report: a statement for each finding a rule
+decides, and each other finding under `unresolved` with a rule template to fill in.
+
+```sh
+rollcall vex --sbom product.cdx.json \
+  --kconfig mcuboot=build/mcuboot/zephyr/.config \
+  --kconfig app=build/app/zephyr/.config \
+  --findings grype.json --rules vex-rules.yml -o vex.json
+```
+
+```yaml
+version: 1
+rules:
+  - id: mbedtls-dtls-compiled-out
+    match:
+      purl: "pkg:github/mbed-tls/mbedtls@*"   # or name; * matches anything (case-sensitive,
+                                              # against the canonical purl)
+      cves: [CVE-2022-35409]                  # optional
+      versions: ">=2.28.0, <2.28.5"           # optional semver range
+    when:                                     # optional; all must hold
+      - kconfig_off: CONFIG_MBEDTLS_SSL_PROTO_DTLS
+    status: not_affected                      # not_affected | affected | fixed | under_investigation
+    justification: code_not_present           # CycloneDX or OpenVEX word, kept as written;
+                                              # only for not_affected
+    detail: DTLS is compiled out.
+```
+
+- **Kconfig is per image.** A `kconfig_off` condition on a component is judged only by the
+  `.config` of the component's own image (in a sysbuild product, MCUboot's mbedtls by
+  MCUboot's `.config`). A bare `--kconfig FILE` is accepted only for a single-image product;
+  naming an image the product does not have, or one image twice, is a usage error (64).
+  Evidence cites the file as `IMAGE/zephyr/.config`, never by the path given.
+- **Unknown is never true.** Without evidence for a condition (no `.config` for the image, or a
+  symbol the `.config` does not mention) it is unknown, and the finding stays unresolved
+  (needs evidence). The same goes for a version that is not a release version (a
+  git-describe or pre-release suffix such as `v3.7.0-123-gabc` or `-rc1`, or a git SHA with
+  no release version in the purl) when a rule has `versions` or `version_in`.
+- **Not yet evidenced from the CLI:** `cargo_feature_off` and `symbol_not_linked` conditions
+  always need evidence (the finding stays unresolved) because `rollcall vex` cannot yet
+  supply Cargo features or the linked-symbol list.
+- **Reserved:** `match.subsystem` (a nested subcomponent's name) is reserved until the Zephyr
+  kernel package is split into subsystems (SHA-108); a rule using it matches nothing today,
+  and the report warns about it.
+- **Precedence:** the most specific matching rule wins (naming CVEs, then a version range,
+  then exact purl over purl glob over name), then the higher `priority`; equally ranked
+  rules that disagree are a conflict, reported as a warning naming each rule, and the
+  finding stays unresolved.
+- **Aliases:** reports of one vulnerability under different ids (e.g. a RUSTSEC and a GHSA
+  advisory for the same CVE, or grype and osv-scanner) are merged per component; the entry's
+  id is the CVE when there is one.
+- **bom-refs:** with `--sbom`, statements cite the document's own `bom-ref`s.
+
+Unresolved findings and conflicts are summarised on stderr; the exit code stays 0. Rendering
+CycloneDX VEX or OpenVEX is not implemented yet.
+
 ### Known scanner behaviour
 
 grype (verified with 0.119.0) silently ignores CycloneDX components of type
@@ -213,9 +274,10 @@ such as Zephyr is typed is decided at ingestion. osv-scanner is unaffected.
 |------|--------------------------------------------------------------------------|
 | 0    | Success (including `--help`, `--version`)                                |
 | 1    | `validate`: the document has schema violations                           |
-| 64   | Usage error (bad arguments, bad `--timestamp`, `--serial-number` or `--product`, `merge --blob-manifest` without inputs or `--product`), or subcommand/format not implemented |
-| 65   | Input is malformed: not JSON, not UTF-8, too deeply nested, or an invalid model; or a Zephyr input (SPDX, `west list`, `.config`, `build_info.yml`) or the `--identifier-db` file is malformed, or `--zephyr` names a sysbuild top-level directory without `--sysbuild` (or an image directory with it); or a `merge` input is not a readable CycloneDX 1.6 document, the inputs conflict (including different product names or versions without `--product`), or the blob manifest is malformed |
-| 66   | Input file missing or unreadable (including a directory), including a required Zephyr input, the `--west-list` or `--identifier-db` file, a `merge` input, the blob manifest or a blob it lists |
+| 64   | Usage error (bad arguments, bad `--timestamp`, `--serial-number` or `--product`, `merge --blob-manifest` without inputs or `--product`, a `vex --kconfig` that names no image of the product, names one twice, or omits `IMAGE=` for a multi-image product), or subcommand/format not implemented |
+| 65   | Input is malformed: not JSON, not UTF-8, too deeply nested, or an invalid model; or a Zephyr input (SPDX, `west list`, `.config`, `build_info.yml`) or the `--identifier-db` file is malformed, or `--zephyr` names a sysbuild top-level directory without `--sysbuild` (or an image directory with it); or a `merge` input is not a readable CycloneDX 1.6 document, the inputs conflict (including different product names or versions without `--product`), or the blob manifest is malformed; or a `vex` input (SBOM, model, `--kconfig`, findings, rules) is malformed, with `file:line:column` for rules |
+| 66   | Input file missing or unreadable (including a directory), including a required Zephyr input, the `--west-list` or `--identifier-db` file, a `merge` input, the blob manifest or a blob it lists, or a `vex` input |
+| 70   | Internal error (`vex`: the report cannot be serialised)                  |
 | 74   | Output cannot be written                                                 |
 
 ## CycloneDX schema

@@ -34,6 +34,7 @@ time = { version = "0.3.55", default-features = false, features = ["std", "forma
 tempfile = "3"
 yaml_serde = "0.10"
 regex = "1.13"
+semver = "1.0"
 rollcall-core = { path = "crates/rollcall-core", version = "0.0.1" }
 rollcall-assay = { path = "crates/rollcall-assay", version = "0.0.1" }
 

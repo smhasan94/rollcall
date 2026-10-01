@@ -1,0 +1,354 @@
+{
+  "schema": "rollcall-vex/1",
+  "statements": [
+    {
+      "vulnerability": "CVE-2021-45451",
+      "component": {
+        "bom-ref": "component:9404b57b22a8bf72df5b6d6c93f4defd",
+        "name": "mbedtls",
+        "version": "2.28.0",
+        "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0"
+      },
+      "status": "under_investigation",
+      "detail": "Not yet triaged.",
+      "rules": [
+        "mbedtls-triage"
+      ]
+    },
+    {
+      "vulnerability": "CVE-2022-35409",
+      "component": {
+        "bom-ref": "component:9404b57b22a8bf72df5b6d6c93f4defd",
+        "name": "mbedtls",
+        "version": "2.28.0",
+        "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0"
+      },
+      "status": "not_affected",
+      "justification": "vulnerable_code_not_present",
+      "detail": "DTLS support (MBEDTLS_SSL_PROTO_DTLS) is not compiled in.",
+      "rules": [
+        "mbedtls-dtls-compiled-out"
+      ],
+      "evidence": [
+        "old-tls-app/zephyr/.config:403: CONFIG_MBEDTLS_SSL_PROTO_DTLS is not set"
+      ]
+    },
+    {
+      "vulnerability": "CVE-2022-46392",
+      "component": {
+        "bom-ref": "component:9404b57b22a8bf72df5b6d6c93f4defd",
+        "name": "mbedtls",
+        "version": "2.28.0",
+        "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0"
+      },
+      "status": "affected",
+      "detail": "Upgrade Mbed TLS to 2.28.2 or later.",
+      "rules": [
+        "mbedtls-2-28-before-2-28-2"
+      ]
+    },
+    {
+      "vulnerability": "CVE-2022-46393",
+      "component": {
+        "bom-ref": "component:9404b57b22a8bf72df5b6d6c93f4defd",
+        "name": "mbedtls",
+        "version": "2.28.0",
+        "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0"
+      },
+      "status": "not_affected",
+      "justification": "vulnerable_code_not_present",
+      "detail": "DTLS support (MBEDTLS_SSL_PROTO_DTLS) is not compiled in.",
+      "rules": [
+        "mbedtls-dtls-compiled-out"
+      ],
+      "evidence": [
+        "old-tls-app/zephyr/.config:403: CONFIG_MBEDTLS_SSL_PROTO_DTLS is not set"
+      ]
+    },
+    {
+      "vulnerability": "CVE-2023-43615",
+      "component": {
+        "bom-ref": "component:9404b57b22a8bf72df5b6d6c93f4defd",
+        "name": "mbedtls",
+        "version": "2.28.0",
+        "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0"
+      },
+      "status": "under_investigation",
+      "detail": "Not yet triaged.",
+      "rules": [
+        "mbedtls-triage"
+      ]
+    },
+    {
+      "vulnerability": "CVE-2023-52353",
+      "component": {
+        "bom-ref": "component:9404b57b22a8bf72df5b6d6c93f4defd",
+        "name": "mbedtls",
+        "version": "2.28.0",
+        "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0"
+      },
+      "status": "under_investigation",
+      "detail": "Not yet triaged.",
+      "rules": [
+        "mbedtls-triage"
+      ]
+    },
+    {
+      "vulnerability": "CVE-2024-23170",
+      "component": {
+        "bom-ref": "component:9404b57b22a8bf72df5b6d6c93f4defd",
+        "name": "mbedtls",
+        "version": "2.28.0",
+        "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0"
+      },
+      "status": "under_investigation",
+      "detail": "Not yet triaged.",
+      "rules": [
+        "mbedtls-triage"
+      ]
+    },
+    {
+      "vulnerability": "CVE-2024-23775",
+      "component": {
+        "bom-ref": "component:9404b57b22a8bf72df5b6d6c93f4defd",
+        "name": "mbedtls",
+        "version": "2.28.0",
+        "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0"
+      },
+      "status": "not_affected",
+      "justification": "code_not_present",
+      "detail": "Neither X.509 CSR writing nor certificate writing is compiled in.",
+      "rules": [
+        "mbedtls-x509-write-compiled-out"
+      ],
+      "evidence": [
+        "old-tls-app/zephyr/.config:433: CONFIG_MBEDTLS_X509_CSR_WRITE_C is not set",
+        "old-tls-app/zephyr/.config:435: CONFIG_MBEDTLS_X509_CRT_WRITE_C is not set"
+      ]
+    },
+    {
+      "vulnerability": "CVE-2024-28960",
+      "component": {
+        "bom-ref": "component:9404b57b22a8bf72df5b6d6c93f4defd",
+        "name": "mbedtls",
+        "version": "2.28.0",
+        "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0"
+      },
+      "status": "under_investigation",
+      "detail": "Not yet triaged.",
+      "rules": [
+        "mbedtls-triage"
+      ]
+    },
+    {
+      "vulnerability": "CVE-2025-27809",
+      "component": {
+        "bom-ref": "component:9404b57b22a8bf72df5b6d6c93f4defd",
+        "name": "mbedtls",
+        "version": "2.28.0",
+        "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0"
+      },
+      "status": "under_investigation",
+      "detail": "Not yet triaged.",
+      "rules": [
+        "mbedtls-triage"
+      ]
+    },
+    {
+      "vulnerability": "CVE-2025-27810",
+      "component": {
+        "bom-ref": "component:9404b57b22a8bf72df5b6d6c93f4defd",
+        "name": "mbedtls",
+        "version": "2.28.0",
+        "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0"
+      },
+      "status": "under_investigation",
+      "detail": "Not yet triaged.",
+      "rules": [
+        "mbedtls-triage"
+      ]
+    },
+    {
+      "vulnerability": "CVE-2025-47917",
+      "component": {
+        "bom-ref": "component:9404b57b22a8bf72df5b6d6c93f4defd",
+        "name": "mbedtls",
+        "version": "2.28.0",
+        "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0"
+      },
+      "status": "under_investigation",
+      "detail": "Not yet triaged.",
+      "rules": [
+        "mbedtls-triage"
+      ]
+    },
+    {
+      "vulnerability": "CVE-2025-48965",
+      "component": {
+        "bom-ref": "component:9404b57b22a8bf72df5b6d6c93f4defd",
+        "name": "mbedtls",
+        "version": "2.28.0",
+        "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0"
+      },
+      "status": "under_investigation",
+      "detail": "Not yet triaged.",
+      "rules": [
+        "mbedtls-triage"
+      ]
+    },
+    {
+      "vulnerability": "CVE-2025-52496",
+      "component": {
+        "bom-ref": "component:9404b57b22a8bf72df5b6d6c93f4defd",
+        "name": "mbedtls",
+        "version": "2.28.0",
+        "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0"
+      },
+      "status": "under_investigation",
+      "detail": "Not yet triaged.",
+      "rules": [
+        "mbedtls-triage"
+      ]
+    },
+    {
+      "vulnerability": "CVE-2025-52497",
+      "component": {
+        "bom-ref": "component:9404b57b22a8bf72df5b6d6c93f4defd",
+        "name": "mbedtls",
+        "version": "2.28.0",
+        "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0"
+      },
+      "status": "under_investigation",
+      "detail": "Not yet triaged.",
+      "rules": [
+        "mbedtls-triage"
+      ]
+    },
+    {
+      "vulnerability": "CVE-2025-54764",
+      "component": {
+        "bom-ref": "component:9404b57b22a8bf72df5b6d6c93f4defd",
+        "name": "mbedtls",
+        "version": "2.28.0",
+        "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0"
+      },
+      "status": "under_investigation",
+      "detail": "Not yet triaged.",
+      "rules": [
+        "mbedtls-triage"
+      ]
+    },
+    {
+      "vulnerability": "CVE-2025-59438",
+      "component": {
+        "bom-ref": "component:9404b57b22a8bf72df5b6d6c93f4defd",
+        "name": "mbedtls",
+        "version": "2.28.0",
+        "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0"
+      },
+      "status": "under_investigation",
+      "detail": "Not yet triaged.",
+      "rules": [
+        "mbedtls-triage"
+      ]
+    },
+    {
+      "vulnerability": "CVE-2025-66442",
+      "component": {
+        "bom-ref": "component:9404b57b22a8bf72df5b6d6c93f4defd",
+        "name": "mbedtls",
+        "version": "2.28.0",
+        "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0"
+      },
+      "status": "under_investigation",
+      "detail": "Not yet triaged.",
+      "rules": [
+        "mbedtls-triage"
+      ]
+    },
+    {
+      "vulnerability": "CVE-2026-25835",
+      "component": {
+        "bom-ref": "component:9404b57b22a8bf72df5b6d6c93f4defd",
+        "name": "mbedtls",
+        "version": "2.28.0",
+        "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0"
+      },
+      "status": "under_investigation",
+      "detail": "Not yet triaged.",
+      "rules": [
+        "mbedtls-triage"
+      ]
+    },
+    {
+      "vulnerability": "CVE-2026-34871",
+      "component": {
+        "bom-ref": "component:9404b57b22a8bf72df5b6d6c93f4defd",
+        "name": "mbedtls",
+        "version": "2.28.0",
+        "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0"
+      },
+      "status": "under_investigation",
+      "detail": "Not yet triaged.",
+      "rules": [
+        "mbedtls-triage"
+      ]
+    },
+    {
+      "vulnerability": "CVE-2026-34872",
+      "component": {
+        "bom-ref": "component:9404b57b22a8bf72df5b6d6c93f4defd",
+        "name": "mbedtls",
+        "version": "2.28.0",
+        "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0"
+      },
+      "status": "under_investigation",
+      "detail": "Not yet triaged.",
+      "rules": [
+        "mbedtls-triage"
+      ]
+    },
+    {
+      "vulnerability": "CVE-2026-34877",
+      "component": {
+        "bom-ref": "component:9404b57b22a8bf72df5b6d6c93f4defd",
+        "name": "mbedtls",
+        "version": "2.28.0",
+        "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0"
+      },
+      "status": "under_investigation",
+      "detail": "Not yet triaged.",
+      "rules": [
+        "mbedtls-triage"
+      ]
+    }
+  ],
+  "unresolved": [
+    {
+      "vulnerability": "CVE-2021-43666",
+      "component": {
+        "bom-ref": "component:9404b57b22a8bf72df5b6d6c93f4defd",
+        "name": "mbedtls",
+        "version": "2.28.0",
+        "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0"
+      },
+      "package": {
+        "name": "mbedtls",
+        "version": "2.28.0",
+        "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0"
+      },
+      "severity": "High",
+      "reason": {
+        "kind": "needs_evidence",
+        "rules": [
+          "mbedtls-pkcs12-off"
+        ],
+        "missing": [
+          "rule `mbedtls-pkcs12-off`: kconfig_off: CONFIG_MBEDTLS_PKCS12_C: CONFIG_MBEDTLS_PKCS12_C is not in old-tls-app/zephyr/.config"
+        ]
+      },
+      "template": "- id: todo-cve-2021-43666-mbedtls-085b5de1\n  match:\n    purl: pkg:github/mbed-tls/mbedtls@v2.28.0\n    cves:\n    - CVE-2021-43666\n  status: under_investigation\n  detail: 'TODO: assess CVE-2021-43666 for mbedtls; set status (with a justification for not_affected) and add `when` conditions backed by build evidence'\n"
+    }
+  ],
+  "warnings": []
+}

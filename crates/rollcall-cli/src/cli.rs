@@ -15,6 +15,8 @@ pub const EXIT_USAGE: u8 = 64;
 pub const EXIT_DATAERR: u8 = 65;
 /// Exit code when an input file is missing or unreadable (`EX_NOINPUT`).
 pub const EXIT_NOINPUT: u8 = 66;
+/// Exit code for an internal error, e.g. a report that cannot be serialised (`EX_SOFTWARE`).
+pub const EXIT_SOFTWARE: u8 = 70;
 /// Exit code when output cannot be written (`EX_IOERR`).
 pub const EXIT_IOERR: u8 = 74;
 
@@ -41,7 +43,7 @@ pub enum Command {
     /// Merge bootloader, application and blob SBOMs into one product hierarchy
     Merge(MergeArgs),
     /// Emit VEX statements for an SBOM
-    Vex,
+    Vex(VexArgs),
     /// Scan an SBOM for known vulnerabilities
     Scan,
     /// Produce a CycloneDX CBOM (cryptographic inventory) for a build
@@ -55,7 +57,7 @@ impl Command {
             Command::Generate(_) => "generate",
             Command::Validate(_) => "validate",
             Command::Merge(_) => "merge",
-            Command::Vex => "vex",
+            Command::Vex(_) => "vex",
             Command::Scan => "scan",
             Command::Assay => "assay",
         }
@@ -150,6 +152,39 @@ pub struct MergeArgs {
     #[arg(long, value_name = "URN", value_parser = SerialNumber::from_str)]
     pub serial_number: Option<SerialNumber>,
     /// Write the document here instead of to stdout
+    #[arg(short, long, value_name = "FILE")]
+    pub output: Option<PathBuf>,
+}
+
+/// Arguments of `rollcall vex`.
+#[derive(Debug, Args)]
+#[command(group = ArgGroup::new("input").required(true).multiple(false))]
+pub struct VexArgs {
+    /// The CycloneDX 1.6 SBOM the findings are about (e.g. from `rollcall generate`)
+    #[arg(long, value_name = "FILE", group = "input")]
+    pub sbom: Option<PathBuf>,
+    /// The rollcall model (`rollcall-model/1` JSON) the findings are about
+    #[arg(long, value_name = "FILE", group = "input")]
+    pub model: Option<PathBuf>,
+    /// An image's Kconfig `.config` (e.g. BUILD/IMAGE/zephyr/.config), evidence for
+    /// `kconfig_off` conditions on that image's components, as IMAGE=FILE (IMAGE is the
+    /// image's name in the SBOM). Repeatable, once per image. A bare FILE is allowed only
+    /// when the product has a single image. Components of an image without a .config get
+    /// unknown `kconfig_off` conditions. Evidence cites it as IMAGE/zephyr/.config
+    #[arg(long, value_name = "[IMAGE=]FILE")]
+    pub kconfig: Vec<String>,
+    /// Scanner output to triage: grype `-o json` or osv-scanner `--format json` (detected
+    /// from the content). Repeatable
+    #[arg(long, value_name = "FILE", required = true)]
+    pub findings: Vec<PathBuf>,
+    /// VEX rules (YAML). Repeatable; rule ids must be unique across files. Only
+    /// `kconfig_off` and `version_in` conditions can be evidenced from the command line:
+    /// `cargo_feature_off` and `symbol_not_linked` always lack evidence (the finding stays
+    /// unresolved), and `match.subsystem` is reserved until the subsystem split (SHA-108)
+    /// and matches nothing (with a warning)
+    #[arg(long, value_name = "FILE")]
+    pub rules: Vec<PathBuf>,
+    /// Write the report here instead of to stdout
     #[arg(short, long, value_name = "FILE")]
     pub output: Option<PathBuf>,
 }
