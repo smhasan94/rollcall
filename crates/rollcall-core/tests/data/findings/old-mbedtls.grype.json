@@ -1,0 +1,2875 @@
+{
+  "matches": [
+    {
+      "vulnerability": {
+        "id": "CVE-2022-35409",
+        "dataSource": "https://nvd.nist.gov/vuln/detail/CVE-2022-35409",
+        "namespace": "nvd:cpe",
+        "severity": "Critical",
+        "urls": [
+          "https://github.com/Mbed-TLS/mbedtls/releases",
+          "https://lists.debian.org/debian-lts-announce/2022/12/msg00036.html",
+          "https://mbed-tls.readthedocs.io/en/latest/security-advisories/advisories/mbedtls-security-advisory-2022-07.html"
+        ],
+        "description": "An issue was discovered in Mbed TLS before 2.28.1 and 3.x before 3.2.0. In some configurations, an unauthenticated attacker can send an invalid ClientHello message to a DTLS server that causes a heap-based buffer over-read of up to 255 bytes. This can cause a server crash or possibly information disclosure based on error responses. Affected configurations have MBEDTLS_SSL_DTLS_CLIENT_PORT_REUSE enabled and MBEDTLS_SSL_IN_CONTENT_LEN less than a threshold that depends on the configuration: 258 bytes if using mbedtls_ssl_cookie_check, and possibly up to 571 bytes with a custom cookie check function.",
+        "cvss": [
+          {
+            "source": "nvd@nist.gov",
+            "type": "Primary",
+            "version": "3.1",
+            "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:H",
+            "metrics": {
+              "baseScore": 9.1,
+              "exploitabilityScore": 3.9,
+              "impactScore": 5.2
+            },
+            "vendorMetadata": {}
+          }
+        ],
+        "epss": [
+          {
+            "cve": "CVE-2022-35409",
+            "epss": 0.02234,
+            "percentile": 0.82103,
+            "date": "2026-09-28"
+          }
+        ],
+        "cwes": [
+          {
+            "cve": "CVE-2022-35409",
+            "cwe": "CWE-125",
+            "source": "nvd@nist.gov",
+            "type": "Primary"
+          }
+        ],
+        "fix": {
+          "versions": [
+            "2.28.1"
+          ],
+          "state": "fixed",
+          "available": [
+            {
+              "version": "2.28.1",
+              "date": "2025-09-04",
+              "kind": "first-observed"
+            }
+          ]
+        },
+        "advisories": [],
+        "risk": 2.0217699999999996
+      },
+      "relatedVulnerabilities": [],
+      "matchDetails": [
+        {
+          "type": "cpe-match",
+          "matcher": "stock-matcher",
+          "searchedBy": {
+            "namespace": "nvd:cpe",
+            "cpes": [
+              "cpe:2.3:a:arm:mbed_tls:2.28.0:*:*:*:*:*:*:*"
+            ],
+            "package": {
+              "name": "mbedtls",
+              "version": "2.28.0"
+            }
+          },
+          "found": {
+            "vulnerabilityID": "CVE-2022-35409",
+            "versionConstraint": "< 2.28.1 (unknown)",
+            "cpes": [
+              "cpe:2.3:a:arm:mbed_tls:*:*:*:*:*:*:*:*"
+            ]
+          },
+          "fix": {
+            "suggestedVersion": "2.28.1"
+          }
+        }
+      ],
+      "artifact": {
+        "id": "component:9404b57b22a8bf72df5b6d6c93f4defd",
+        "name": "mbedtls",
+        "version": "2.28.0",
+        "type": "UnknownPackage",
+        "locations": null,
+        "language": "",
+        "licenses": [
+          "Apache-2.0 OR GPL-2.0-or-later"
+        ],
+        "cpes": [
+          "cpe:2.3:a:arm:mbed_tls:2.28.0:*:*:*:*:*:*:*"
+        ],
+        "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0",
+        "upstreams": []
+      }
+    },
+    {
+      "vulnerability": {
+        "id": "CVE-2025-47917",
+        "dataSource": "https://nvd.nist.gov/vuln/detail/CVE-2025-47917",
+        "namespace": "nvd:cpe",
+        "severity": "Critical",
+        "urls": [
+          "https://github.com/Mbed-TLS/mbedtls-docs/blob/main/security-advisories/mbedtls-security-advisory-2025-06-7.md",
+          "https://mbed-tls.readthedocs.io/en/latest/tech-updates/security-advisories/",
+          "https://lists.debian.org/debian-lts-announce/2025/08/msg00013.html",
+          "https://lists.debian.org/debian-lts-announce/2025/08/msg00025.html"
+        ],
+        "description": "Mbed TLS before 3.6.4 allows a use-after-free in certain situations of applications that are developed in accordance with the documentation. The function mbedtls_x509_string_to_names() takes a head argument that is documented as an output argument. The documentation does not suggest that the function will free that pointer; however, the function does call mbedtls_asn1_free_named_data_list() on that argument, which performs a deep free(). As a result, application code that uses this function (relying only on documented behavior) is likely to still hold pointers to the memory blocks that were freed, resulting in a high risk of use-after-free or double-free. In particular, the two sample programs x509/cert_write and x509/cert_req are affected (use-after-free if the san string contains more than one DN).",
+        "cvss": [
+          {
+            "source": "nvd@nist.gov",
+            "type": "Primary",
+            "version": "3.1",
+            "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+            "metrics": {
+              "baseScore": 9.8,
+              "exploitabilityScore": 3.9,
+              "impactScore": 5.9
+            },
+            "vendorMetadata": {}
+          },
+          {
+            "source": "cve@mitre.org",
+            "type": "Secondary",
+            "version": "3.1",
+            "vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:C/C:L/I:H/A:H",
+            "metrics": {
+              "baseScore": 8.9,
+              "exploitabilityScore": 2.3,
+              "impactScore": 6
+            },
+            "vendorMetadata": {}
+          }
+        ],
+        "epss": [
+          {
+            "cve": "CVE-2025-47917",
+            "epss": 0.02145,
+            "percentile": 0.81347,
+            "date": "2026-09-28"
+          }
+        ],
+        "cwes": [
+          {
+            "cve": "CVE-2025-47917",
+            "cwe": "CWE-416",
+            "source": "cve@mitre.org",
+            "type": "Secondary"
+          }
+        ],
+        "fix": {
+          "versions": [
+            "3.6.4"
+          ],
+          "state": "fixed",
+          "available": [
+            {
+              "version": "3.6.4",
+              "date": "2025-09-04",
+              "kind": "first-observed"
+            }
+          ]
+        },
+        "advisories": [],
+        "risk": 1.9680375000000003
+      },
+      "relatedVulnerabilities": [],
+      "matchDetails": [
+        {
+          "type": "cpe-match",
+          "matcher": "stock-matcher",
+          "searchedBy": {
+            "namespace": "nvd:cpe",
+            "cpes": [
+              "cpe:2.3:a:arm:mbed_tls:2.28.0:*:*:*:*:*:*:*"
+            ],
+            "package": {
+              "name": "mbedtls",
+              "version": "2.28.0"
+            }
+          },
+          "found": {
+            "vulnerabilityID": "CVE-2025-47917",
+            "versionConstraint": "< 3.6.4 (unknown)",
+            "cpes": [
+              "cpe:2.3:a:arm:mbed_tls:*:*:*:*:*:*:*:*"
+            ]
+          },
+          "fix": {
+            "suggestedVersion": "3.6.4"
+          }
+        }
+      ],
+      "artifact": {
+        "id": "component:9404b57b22a8bf72df5b6d6c93f4defd",
+        "name": "mbedtls",
+        "version": "2.28.0",
+        "type": "UnknownPackage",
+        "locations": null,
+        "language": "",
+        "licenses": [
+          "Apache-2.0 OR GPL-2.0-or-later"
+        ],
+        "cpes": [
+          "cpe:2.3:a:arm:mbed_tls:2.28.0:*:*:*:*:*:*:*"
+        ],
+        "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0",
+        "upstreams": []
+      }
+    },
+    {
+      "vulnerability": {
+        "id": "CVE-2021-43666",
+        "dataSource": "https://nvd.nist.gov/vuln/detail/CVE-2021-43666",
+        "namespace": "nvd:cpe",
+        "severity": "High",
+        "urls": [
+          "https://github.com/ARMmbed/mbedtls/issues/5136",
+          "https://lists.debian.org/debian-lts-announce/2022/12/msg00036.html",
+          "https://lists.debian.org/debian-lts-announce/2025/06/msg00034.html"
+        ],
+        "description": "A Denial of Service vulnerability exists in mbed TLS 3.0.0 and earlier in the mbedtls_pkcs12_derivation function when an input password's length is 0.",
+        "cvss": [
+          {
+            "source": "nvd@nist.gov",
+            "type": "Primary",
+            "version": "3.1",
+            "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+            "metrics": {
+              "baseScore": 7.5,
+              "exploitabilityScore": 3.9,
+              "impactScore": 3.6
+            },
+            "vendorMetadata": {}
+          },
+          {
+            "source": "nvd@nist.gov",
+            "type": "Primary",
+            "version": "2.0",
+            "vector": "AV:N/AC:L/Au:N/C:N/I:N/A:P",
+            "metrics": {
+              "baseScore": 5,
+              "exploitabilityScore": 10,
+              "impactScore": 2.9
+            },
+            "vendorMetadata": {}
+          },
+          {
+            "source": "134c704f-9b21-4f2e-91b3-4a467353bcc0",
+            "type": "Secondary",
+            "version": "3.1",
+            "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+            "metrics": {
+              "baseScore": 7.5,
+              "exploitabilityScore": 3.9,
+              "impactScore": 3.6
+            },
+            "vendorMetadata": {}
+          }
+        ],
+        "epss": [
+          {
+            "cve": "CVE-2021-43666",
+            "epss": 0.02068,
+            "percentile": 0.80639,
+            "date": "2026-09-28"
+          }
+        ],
+        "cwes": [
+          {
+            "cve": "CVE-2021-43666",
+            "cwe": "CWE-130",
+            "source": "134c704f-9b21-4f2e-91b3-4a467353bcc0",
+            "type": "Secondary"
+          }
+        ],
+        "fix": {
+          "versions": [],
+          "state": ""
+        },
+        "advisories": [],
+        "risk": 1.4648333333333334
+      },
+      "relatedVulnerabilities": [],
+      "matchDetails": [
+        {
+          "type": "cpe-match",
+          "matcher": "stock-matcher",
+          "searchedBy": {
+            "namespace": "nvd:cpe",
+            "cpes": [
+              "cpe:2.3:a:arm:mbed_tls:2.28.0:*:*:*:*:*:*:*"
+            ],
+            "package": {
+              "name": "mbedtls",
+              "version": "2.28.0"
+            }
+          },
+          "found": {
+            "vulnerabilityID": "CVE-2021-43666",
+            "versionConstraint": "<= 3.0.0 (unknown)",
+            "cpes": [
+              "cpe:2.3:a:arm:mbed_tls:*:*:*:*:*:*:*:*"
+            ]
+          }
+        }
+      ],
+      "artifact": {
+        "id": "component:9404b57b22a8bf72df5b6d6c93f4defd",
+        "name": "mbedtls",
+        "version": "2.28.0",
+        "type": "UnknownPackage",
+        "locations": null,
+        "language": "",
+        "licenses": [
+          "Apache-2.0 OR GPL-2.0-or-later"
+        ],
+        "cpes": [
+          "cpe:2.3:a:arm:mbed_tls:2.28.0:*:*:*:*:*:*:*"
+        ],
+        "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0",
+        "upstreams": []
+      }
+    },
+    {
+      "vulnerability": {
+        "id": "CVE-2022-46393",
+        "dataSource": "https://nvd.nist.gov/vuln/detail/CVE-2022-46393",
+        "namespace": "nvd:cpe",
+        "severity": "Critical",
+        "urls": [
+          "https://github.com/Mbed-TLS/mbedtls/releases/tag/v2.28.2",
+          "https://github.com/Mbed-TLS/mbedtls/releases/tag/v3.3.0",
+          "https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/4BR7ZCVKLPGCOEEALUHZMFHXQHR6S4QL/",
+          "https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/6XMKJ5IMJEPXYAHHU56Z4P2FSYIEAESB/",
+          "https://mbed-tls.readthedocs.io/en/latest/tech-updates/security-advisories/"
+        ],
+        "description": "An issue was discovered in Mbed TLS before 2.28.2 and 3.x before 3.3.0. There is a potential heap-based buffer overflow and heap-based buffer over-read in DTLS if MBEDTLS_SSL_DTLS_CONNECTION_ID is enabled and MBEDTLS_SSL_CID_IN_LEN_MAX > 2 * MBEDTLS_SSL_CID_OUT_LEN_MAX.",
+        "cvss": [
+          {
+            "source": "nvd@nist.gov",
+            "type": "Primary",
+            "version": "3.1",
+            "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+            "metrics": {
+              "baseScore": 9.8,
+              "exploitabilityScore": 3.9,
+              "impactScore": 5.9
+            },
+            "vendorMetadata": {}
+          },
+          {
+            "source": "134c704f-9b21-4f2e-91b3-4a467353bcc0",
+            "type": "Secondary",
+            "version": "3.1",
+            "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+            "metrics": {
+              "baseScore": 9.8,
+              "exploitabilityScore": 3.9,
+              "impactScore": 5.9
+            },
+            "vendorMetadata": {}
+          }
+        ],
+        "epss": [
+          {
+            "cve": "CVE-2022-46393",
+            "epss": 0.0121,
+            "percentile": 0.67222,
+            "date": "2026-09-28"
+          }
+        ],
+        "cwes": [
+          {
+            "cve": "CVE-2022-46393",
+            "cwe": "CWE-125",
+            "source": "nvd@nist.gov",
+            "type": "Primary"
+          },
+          {
+            "cve": "CVE-2022-46393",
+            "cwe": "CWE-787",
+            "source": "nvd@nist.gov",
+            "type": "Primary"
+          },
+          {
+            "cve": "CVE-2022-46393",
+            "cwe": "CWE-125",
+            "source": "134c704f-9b21-4f2e-91b3-4a467353bcc0",
+            "type": "Secondary"
+          },
+          {
+            "cve": "CVE-2022-46393",
+            "cwe": "CWE-787",
+            "source": "134c704f-9b21-4f2e-91b3-4a467353bcc0",
+            "type": "Secondary"
+          }
+        ],
+        "fix": {
+          "versions": [
+            "2.28.2"
+          ],
+          "state": "fixed",
+          "available": [
+            {
+              "version": "2.28.2",
+              "date": "2025-09-04",
+              "kind": "first-observed"
+            }
+          ]
+        },
+        "advisories": [],
+        "risk": 1.1374
+      },
+      "relatedVulnerabilities": [],
+      "matchDetails": [
+        {
+          "type": "cpe-match",
+          "matcher": "stock-matcher",
+          "searchedBy": {
+            "namespace": "nvd:cpe",
+            "cpes": [
+              "cpe:2.3:a:arm:mbed_tls:2.28.0:*:*:*:*:*:*:*"
+            ],
+            "package": {
+              "name": "mbedtls",
+              "version": "2.28.0"
+            }
+          },
+          "found": {
+            "vulnerabilityID": "CVE-2022-46393",
+            "versionConstraint": "< 2.28.2 (unknown)",
+            "cpes": [
+              "cpe:2.3:a:arm:mbed_tls:*:*:*:*:*:*:*:*"
+            ]
+          },
+          "fix": {
+            "suggestedVersion": "2.28.2"
+          }
+        }
+      ],
+      "artifact": {
+        "id": "component:9404b57b22a8bf72df5b6d6c93f4defd",
+        "name": "mbedtls",
+        "version": "2.28.0",
+        "type": "UnknownPackage",
+        "locations": null,
+        "language": "",
+        "licenses": [
+          "Apache-2.0 OR GPL-2.0-or-later"
+        ],
+        "cpes": [
+          "cpe:2.3:a:arm:mbed_tls:2.28.0:*:*:*:*:*:*:*"
+        ],
+        "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0",
+        "upstreams": []
+      }
+    },
+    {
+      "vulnerability": {
+        "id": "CVE-2024-23775",
+        "dataSource": "https://nvd.nist.gov/vuln/detail/CVE-2024-23775",
+        "namespace": "nvd:cpe",
+        "severity": "High",
+        "urls": [
+          "https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/GP5UU7Z6LJNBLBT4SC5WWS2HDNMTFZH5/",
+          "https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/IIBPEYSVRK4IFLBSYJAWKH33YBNH5HR2/",
+          "https://mbed-tls.readthedocs.io/en/latest/security-advisories/mbedtls-security-advisory-2024-01-2/",
+          "https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/GP5UU7Z6LJNBLBT4SC5WWS2HDNMTFZH5/",
+          "https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/IIBPEYSVRK4IFLBSYJAWKH33YBNH5HR2/"
+        ],
+        "description": "Integer Overflow vulnerability in Mbed TLS 2.x before 2.28.7 and 3.x before 3.5.2, allows attackers to cause a denial of service (DoS) via mbedtls_x509_set_extension().",
+        "cvss": [
+          {
+            "source": "nvd@nist.gov",
+            "type": "Primary",
+            "version": "3.1",
+            "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+            "metrics": {
+              "baseScore": 7.5,
+              "exploitabilityScore": 3.9,
+              "impactScore": 3.6
+            },
+            "vendorMetadata": {}
+          },
+          {
+            "source": "134c704f-9b21-4f2e-91b3-4a467353bcc0",
+            "type": "Secondary",
+            "version": "3.1",
+            "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+            "metrics": {
+              "baseScore": 7.5,
+              "exploitabilityScore": 3.9,
+              "impactScore": 3.6
+            },
+            "vendorMetadata": {}
+          }
+        ],
+        "epss": [
+          {
+            "cve": "CVE-2024-23775",
+            "epss": 0.0112,
+            "percentile": 0.64831,
+            "date": "2026-09-28"
+          }
+        ],
+        "cwes": [
+          {
+            "cve": "CVE-2024-23775",
+            "cwe": "CWE-190",
+            "source": "nvd@nist.gov",
+            "type": "Primary"
+          },
+          {
+            "cve": "CVE-2024-23775",
+            "cwe": "CWE-190",
+            "source": "134c704f-9b21-4f2e-91b3-4a467353bcc0",
+            "type": "Secondary"
+          }
+        ],
+        "fix": {
+          "versions": [
+            "2.28.7"
+          ],
+          "state": "fixed",
+          "available": [
+            {
+              "version": "2.28.7",
+              "date": "2025-09-04",
+              "kind": "first-observed"
+            }
+          ]
+        },
+        "advisories": [],
+        "risk": 0.84
+      },
+      "relatedVulnerabilities": [],
+      "matchDetails": [
+        {
+          "type": "cpe-match",
+          "matcher": "stock-matcher",
+          "searchedBy": {
+            "namespace": "nvd:cpe",
+            "cpes": [
+              "cpe:2.3:a:arm:mbed_tls:2.28.0:*:*:*:*:*:*:*"
+            ],
+            "package": {
+              "name": "mbedtls",
+              "version": "2.28.0"
+            }
+          },
+          "found": {
+            "vulnerabilityID": "CVE-2024-23775",
+            "versionConstraint": ">= 2.0.0, < 2.28.7 (unknown)",
+            "cpes": [
+              "cpe:2.3:a:arm:mbed_tls:*:*:*:*:*:*:*:*"
+            ]
+          },
+          "fix": {
+            "suggestedVersion": "2.28.7"
+          }
+        }
+      ],
+      "artifact": {
+        "id": "component:9404b57b22a8bf72df5b6d6c93f4defd",
+        "name": "mbedtls",
+        "version": "2.28.0",
+        "type": "UnknownPackage",
+        "locations": null,
+        "language": "",
+        "licenses": [
+          "Apache-2.0 OR GPL-2.0-or-later"
+        ],
+        "cpes": [
+          "cpe:2.3:a:arm:mbed_tls:2.28.0:*:*:*:*:*:*:*"
+        ],
+        "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0",
+        "upstreams": []
+      }
+    },
+    {
+      "vulnerability": {
+        "id": "CVE-2026-34877",
+        "dataSource": "https://nvd.nist.gov/vuln/detail/CVE-2026-34877",
+        "namespace": "nvd:cpe",
+        "severity": "Critical",
+        "urls": [
+          "https://mbed-tls.readthedocs.io/en/latest/security-advisories/",
+          "https://mbed-tls.readthedocs.io/en/latest/security-advisories/mbedtls-security-advisory-2026-03-serialized-data/"
+        ],
+        "description": "An issue was discovered in Mbed TLS versions from 2.19.0 up to 3.6.5, Mbed TLS 4.0.0. Insufficient protection of serialized SSL context or session structures allows an attacker who can modify the serialized structures to induce memory corruption, leading to arbitrary code execution. This is caused by Incorrect Use of Privileged APIs.",
+        "cvss": [
+          {
+            "source": "134c704f-9b21-4f2e-91b3-4a467353bcc0",
+            "type": "Secondary",
+            "version": "3.1",
+            "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+            "metrics": {
+              "baseScore": 9.8,
+              "exploitabilityScore": 3.9,
+              "impactScore": 5.9
+            },
+            "vendorMetadata": {}
+          }
+        ],
+        "epss": [
+          {
+            "cve": "CVE-2026-34877",
+            "epss": 0.00725,
+            "percentile": 0.52223,
+            "date": "2026-09-28"
+          }
+        ],
+        "cwes": [
+          {
+            "cve": "CVE-2026-34877",
+            "cwe": "CWE-250",
+            "source": "134c704f-9b21-4f2e-91b3-4a467353bcc0",
+            "type": "Secondary"
+          },
+          {
+            "cve": "CVE-2026-34877",
+            "cwe": "CWE-502",
+            "source": "134c704f-9b21-4f2e-91b3-4a467353bcc0",
+            "type": "Secondary"
+          }
+        ],
+        "fix": {
+          "versions": [
+            "3.6.6"
+          ],
+          "state": "fixed",
+          "available": [
+            {
+              "version": "3.6.6",
+              "date": "2026-04-06",
+              "kind": "first-observed"
+            }
+          ]
+        },
+        "advisories": [],
+        "risk": 0.6815000000000001
+      },
+      "relatedVulnerabilities": [],
+      "matchDetails": [
+        {
+          "type": "cpe-match",
+          "matcher": "stock-matcher",
+          "searchedBy": {
+            "namespace": "nvd:cpe",
+            "cpes": [
+              "cpe:2.3:a:arm:mbed_tls:2.28.0:*:*:*:*:*:*:*"
+            ],
+            "package": {
+              "name": "mbedtls",
+              "version": "2.28.0"
+            }
+          },
+          "found": {
+            "vulnerabilityID": "CVE-2026-34877",
+            "versionConstraint": ">= 2.19.0, < 3.6.6 (unknown)",
+            "cpes": [
+              "cpe:2.3:a:arm:mbed_tls:*:*:*:*:*:*:*:*"
+            ]
+          },
+          "fix": {
+            "suggestedVersion": "3.6.6"
+          }
+        }
+      ],
+      "artifact": {
+        "id": "component:9404b57b22a8bf72df5b6d6c93f4defd",
+        "name": "mbedtls",
+        "version": "2.28.0",
+        "type": "UnknownPackage",
+        "locations": null,
+        "language": "",
+        "licenses": [
+          "Apache-2.0 OR GPL-2.0-or-later"
+        ],
+        "cpes": [
+          "cpe:2.3:a:arm:mbed_tls:2.28.0:*:*:*:*:*:*:*"
+        ],
+        "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0",
+        "upstreams": []
+      }
+    },
+    {
+      "vulnerability": {
+        "id": "CVE-2024-28960",
+        "dataSource": "https://nvd.nist.gov/vuln/detail/CVE-2024-28960",
+        "namespace": "nvd:cpe",
+        "severity": "High",
+        "urls": [
+          "https://github.com/Mbed-TLS/mbedtls-docs/blob/main/security-advisories/mbedtls-security-advisory-2024-03.md",
+          "https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/5YE3QRREGJC6K34JD4LZ5P3IALNX4QYY/",
+          "https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/6UZNBMKYEV2J5DI7R4BQGL472V7X3WJY/",
+          "https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/NCDU52ZDA7TX3HC5JCU6ZZIJQOPTNBK6/",
+          "https://mbed-tls.readthedocs.io/en/latest/tech-updates/security-advisories/",
+          "https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/5YE3QRREGJC6K34JD4LZ5P3IALNX4QYY/",
+          "https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/6UZNBMKYEV2J5DI7R4BQGL472V7X3WJY/",
+          "https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/NCDU52ZDA7TX3HC5JCU6ZZIJQOPTNBK6/"
+        ],
+        "description": "An issue was discovered in Mbed TLS 2.18.0 through 2.28.x before 2.28.8 and 3.x before 3.6.0, and Mbed Crypto. The PSA Crypto API mishandles shared memory.",
+        "cvss": [
+          {
+            "source": "134c704f-9b21-4f2e-91b3-4a467353bcc0",
+            "type": "Secondary",
+            "version": "3.1",
+            "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:L/A:N",
+            "metrics": {
+              "baseScore": 8.2,
+              "exploitabilityScore": 3.9,
+              "impactScore": 4.3
+            },
+            "vendorMetadata": {}
+          }
+        ],
+        "epss": [
+          {
+            "cve": "CVE-2024-28960",
+            "epss": 0.00847,
+            "percentile": 0.5642,
+            "date": "2026-09-28"
+          }
+        ],
+        "cwes": [
+          {
+            "cve": "CVE-2024-28960",
+            "cwe": "CWE-284",
+            "source": "134c704f-9b21-4f2e-91b3-4a467353bcc0",
+            "type": "Secondary"
+          }
+        ],
+        "fix": {
+          "versions": [
+            "2.28.8",
+            "3.6.0"
+          ],
+          "state": "fixed",
+          "available": [
+            {
+              "version": "2.28.8",
+              "date": "2025-09-04",
+              "kind": "first-observed"
+            },
+            {
+              "version": "3.6.0",
+              "date": "2025-09-04",
+              "kind": "first-observed"
+            }
+          ]
+        },
+        "advisories": [],
+        "risk": 0.664895
+      },
+      "relatedVulnerabilities": [],
+      "matchDetails": [
+        {
+          "type": "cpe-match",
+          "matcher": "stock-matcher",
+          "searchedBy": {
+            "namespace": "nvd:cpe",
+            "cpes": [
+              "cpe:2.3:a:arm:mbed_tls:2.28.0:*:*:*:*:*:*:*"
+            ],
+            "package": {
+              "name": "mbedtls",
+              "version": "2.28.0"
+            }
+          },
+          "found": {
+            "vulnerabilityID": "CVE-2024-28960",
+            "versionConstraint": ">= 2.18.0, < 2.28.8||>= 3, < 3.6.0 (unknown)",
+            "cpes": [
+              "cpe:2.3:a:arm:mbed_tls:*:*:*:*:*:*:*:*"
+            ]
+          },
+          "fix": {
+            "suggestedVersion": "2.28.8"
+          }
+        }
+      ],
+      "artifact": {
+        "id": "component:9404b57b22a8bf72df5b6d6c93f4defd",
+        "name": "mbedtls",
+        "version": "2.28.0",
+        "type": "UnknownPackage",
+        "locations": null,
+        "language": "",
+        "licenses": [
+          "Apache-2.0 OR GPL-2.0-or-later"
+        ],
+        "cpes": [
+          "cpe:2.3:a:arm:mbed_tls:2.28.0:*:*:*:*:*:*:*"
+        ],
+        "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0",
+        "upstreams": []
+      }
+    },
+    {
+      "vulnerability": {
+        "id": "CVE-2021-45451",
+        "dataSource": "https://nvd.nist.gov/vuln/detail/CVE-2021-45451",
+        "namespace": "nvd:cpe",
+        "severity": "High",
+        "urls": [
+          "https://github.com/ARMmbed/mbedtls/releases/tag/v3.1.0",
+          "https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/IL66WKJGXY5AXMTFE7QDMGL3RIBD6PX5/",
+          "https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/TALJHOYAYSUJTLN6BYGLO4YJGNZUY74W/"
+        ],
+        "description": "In Mbed TLS before 3.1.0, psa_aead_generate_nonce allows policy bypass or oracle-based decryption when the output buffer is at memory locations accessible to an untrusted application.",
+        "cvss": [
+          {
+            "source": "nvd@nist.gov",
+            "type": "Primary",
+            "version": "3.1",
+            "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N",
+            "metrics": {
+              "baseScore": 7.5,
+              "exploitabilityScore": 3.9,
+              "impactScore": 3.6
+            },
+            "vendorMetadata": {}
+          },
+          {
+            "source": "nvd@nist.gov",
+            "type": "Primary",
+            "version": "2.0",
+            "vector": "AV:N/AC:L/Au:N/C:P/I:N/A:N",
+            "metrics": {
+              "baseScore": 5,
+              "exploitabilityScore": 10,
+              "impactScore": 2.9
+            },
+            "vendorMetadata": {}
+          }
+        ],
+        "epss": [
+          {
+            "cve": "CVE-2021-45451",
+            "epss": 0.00923,
+            "percentile": 0.58827,
+            "date": "2026-09-28"
+          }
+        ],
+        "cwes": [
+          {
+            "cve": "CVE-2021-45451",
+            "cwe": "CWE-327",
+            "source": "nvd@nist.gov",
+            "type": "Primary"
+          }
+        ],
+        "fix": {
+          "versions": [
+            "3.1.0"
+          ],
+          "state": "fixed",
+          "available": [
+            {
+              "version": "3.1.0",
+              "date": "2025-09-04",
+              "kind": "first-observed"
+            }
+          ]
+        },
+        "advisories": [],
+        "risk": 0.6345625
+      },
+      "relatedVulnerabilities": [],
+      "matchDetails": [
+        {
+          "type": "cpe-match",
+          "matcher": "stock-matcher",
+          "searchedBy": {
+            "namespace": "nvd:cpe",
+            "cpes": [
+              "cpe:2.3:a:arm:mbed_tls:2.28.0:*:*:*:*:*:*:*"
+            ],
+            "package": {
+              "name": "mbedtls",
+              "version": "2.28.0"
+            }
+          },
+          "found": {
+            "vulnerabilityID": "CVE-2021-45451",
+            "versionConstraint": "< 3.1.0 (unknown)",
+            "cpes": [
+              "cpe:2.3:a:arm:mbed_tls:*:*:*:*:*:*:*:*"
+            ]
+          },
+          "fix": {
+            "suggestedVersion": "3.1.0"
+          }
+        }
+      ],
+      "artifact": {
+        "id": "component:9404b57b22a8bf72df5b6d6c93f4defd",
+        "name": "mbedtls",
+        "version": "2.28.0",
+        "type": "UnknownPackage",
+        "locations": null,
+        "language": "",
+        "licenses": [
+          "Apache-2.0 OR GPL-2.0-or-later"
+        ],
+        "cpes": [
+          "cpe:2.3:a:arm:mbed_tls:2.28.0:*:*:*:*:*:*:*"
+        ],
+        "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0",
+        "upstreams": []
+      }
+    },
+    {
+      "vulnerability": {
+        "id": "CVE-2023-43615",
+        "dataSource": "https://nvd.nist.gov/vuln/detail/CVE-2023-43615",
+        "namespace": "nvd:cpe",
+        "severity": "High",
+        "urls": [
+          "https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/BDSHAANRULB57GVS5B3DZHXL5KCC7OWQ/",
+          "https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/GGRB5MO2KUJKYPMGXMIZH2WRH6QR5UZS/",
+          "https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/O7SB7L6A56QZALDTOZ6O4X7PTC4I647R/",
+          "https://mbed-tls.readthedocs.io/en/latest/security-advisories/mbedtls-security-advisory-2023-10-1/"
+        ],
+        "description": "Mbed TLS 2.x before 2.28.5 and 3.x before 3.5.0 has a Buffer Overflow.",
+        "cvss": [
+          {
+            "source": "nvd@nist.gov",
+            "type": "Primary",
+            "version": "3.1",
+            "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N",
+            "metrics": {
+              "baseScore": 7.5,
+              "exploitabilityScore": 3.9,
+              "impactScore": 3.6
+            },
+            "vendorMetadata": {}
+          }
+        ],
+        "epss": [
+          {
+            "cve": "CVE-2023-43615",
+            "epss": 0.00789,
+            "percentile": 0.54477,
+            "date": "2026-09-28"
+          }
+        ],
+        "cwes": [
+          {
+            "cve": "CVE-2023-43615",
+            "cwe": "CWE-120",
+            "source": "nvd@nist.gov",
+            "type": "Primary"
+          }
+        ],
+        "fix": {
+          "versions": [
+            "2.28.5"
+          ],
+          "state": "fixed",
+          "available": [
+            {
+              "version": "2.28.5",
+              "date": "2025-09-04",
+              "kind": "first-observed"
+            }
+          ]
+        },
+        "advisories": [],
+        "risk": 0.5917499999999999
+      },
+      "relatedVulnerabilities": [],
+      "matchDetails": [
+        {
+          "type": "cpe-match",
+          "matcher": "stock-matcher",
+          "searchedBy": {
+            "namespace": "nvd:cpe",
+            "cpes": [
+              "cpe:2.3:a:arm:mbed_tls:2.28.0:*:*:*:*:*:*:*"
+            ],
+            "package": {
+              "name": "mbedtls",
+              "version": "2.28.0"
+            }
+          },
+          "found": {
+            "vulnerabilityID": "CVE-2023-43615",
+            "versionConstraint": ">= 2.0.0, < 2.28.5 (unknown)",
+            "cpes": [
+              "cpe:2.3:a:arm:mbed_tls:*:*:*:*:*:*:*:*"
+            ]
+          },
+          "fix": {
+            "suggestedVersion": "2.28.5"
+          }
+        }
+      ],
+      "artifact": {
+        "id": "component:9404b57b22a8bf72df5b6d6c93f4defd",
+        "name": "mbedtls",
+        "version": "2.28.0",
+        "type": "UnknownPackage",
+        "locations": null,
+        "language": "",
+        "licenses": [
+          "Apache-2.0 OR GPL-2.0-or-later"
+        ],
+        "cpes": [
+          "cpe:2.3:a:arm:mbed_tls:2.28.0:*:*:*:*:*:*:*"
+        ],
+        "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0",
+        "upstreams": []
+      }
+    },
+    {
+      "vulnerability": {
+        "id": "CVE-2022-46392",
+        "dataSource": "https://nvd.nist.gov/vuln/detail/CVE-2022-46392",
+        "namespace": "nvd:cpe",
+        "severity": "Medium",
+        "urls": [
+          "https://github.com/Mbed-TLS/mbedtls/releases/tag/v2.28.2",
+          "https://github.com/Mbed-TLS/mbedtls/releases/tag/v3.3.0",
+          "https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/4BR7ZCVKLPGCOEEALUHZMFHXQHR6S4QL/",
+          "https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/6XMKJ5IMJEPXYAHHU56Z4P2FSYIEAESB/",
+          "https://lists.debian.org/debian-lts-announce/2025/06/msg00034.html"
+        ],
+        "description": "An issue was discovered in Mbed TLS before 2.28.2 and 3.x before 3.3.0. An adversary with access to precise enough information about memory accesses (typically, an untrusted operating system attacking a secure enclave) can recover an RSA private key after observing the victim performing a single private-key operation, if the window size (MBEDTLS_MPI_WINDOW_SIZE) used for the exponentiation is 3 or smaller.",
+        "cvss": [
+          {
+            "source": "nvd@nist.gov",
+            "type": "Primary",
+            "version": "3.1",
+            "vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:U/C:H/I:N/A:N",
+            "metrics": {
+              "baseScore": 5.3,
+              "exploitabilityScore": 1.7,
+              "impactScore": 3.6
+            },
+            "vendorMetadata": {}
+          },
+          {
+            "source": "134c704f-9b21-4f2e-91b3-4a467353bcc0",
+            "type": "Secondary",
+            "version": "3.1",
+            "vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:U/C:H/I:N/A:N",
+            "metrics": {
+              "baseScore": 5.3,
+              "exploitabilityScore": 1.7,
+              "impactScore": 3.6
+            },
+            "vendorMetadata": {}
+          }
+        ],
+        "epss": [
+          {
+            "cve": "CVE-2022-46392",
+            "epss": 0.00823,
+            "percentile": 0.55639,
+            "date": "2026-09-28"
+          }
+        ],
+        "cwes": [
+          {
+            "cve": "CVE-2022-46392",
+            "cwe": "CWE-203",
+            "source": "nvd@nist.gov",
+            "type": "Primary"
+          },
+          {
+            "cve": "CVE-2022-46392",
+            "cwe": "CWE-203",
+            "source": "134c704f-9b21-4f2e-91b3-4a467353bcc0",
+            "type": "Secondary"
+          }
+        ],
+        "fix": {
+          "versions": [
+            "2.28.2"
+          ],
+          "state": "fixed",
+          "available": [
+            {
+              "version": "2.28.2",
+              "date": "2025-09-04",
+              "kind": "first-observed"
+            }
+          ]
+        },
+        "advisories": [],
+        "risk": 0.42384499999999997
+      },
+      "relatedVulnerabilities": [],
+      "matchDetails": [
+        {
+          "type": "cpe-match",
+          "matcher": "stock-matcher",
+          "searchedBy": {
+            "namespace": "nvd:cpe",
+            "cpes": [
+              "cpe:2.3:a:arm:mbed_tls:2.28.0:*:*:*:*:*:*:*"
+            ],
+            "package": {
+              "name": "mbedtls",
+              "version": "2.28.0"
+            }
+          },
+          "found": {
+            "vulnerabilityID": "CVE-2022-46392",
+            "versionConstraint": "< 2.28.2 (unknown)",
+            "cpes": [
+              "cpe:2.3:a:arm:mbed_tls:*:*:*:*:*:*:*:*"
+            ]
+          },
+          "fix": {
+            "suggestedVersion": "2.28.2"
+          }
+        }
+      ],
+      "artifact": {
+        "id": "component:9404b57b22a8bf72df5b6d6c93f4defd",
+        "name": "mbedtls",
+        "version": "2.28.0",
+        "type": "UnknownPackage",
+        "locations": null,
+        "language": "",
+        "licenses": [
+          "Apache-2.0 OR GPL-2.0-or-later"
+        ],
+        "cpes": [
+          "cpe:2.3:a:arm:mbed_tls:2.28.0:*:*:*:*:*:*:*"
+        ],
+        "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0",
+        "upstreams": []
+      }
+    },
+    {
+      "vulnerability": {
+        "id": "CVE-2023-52353",
+        "dataSource": "https://nvd.nist.gov/vuln/detail/CVE-2023-52353",
+        "namespace": "nvd:cpe",
+        "severity": "High",
+        "urls": [
+          "https://github.com/Mbed-TLS/mbedtls/issues/8654"
+        ],
+        "description": "An issue was discovered in Mbed TLS through 3.5.1. In mbedtls_ssl_session_reset, the maximum negotiable TLS version is mishandled. For example, if the last connection negotiated TLS 1.2, then 1.2 becomes the new maximum.",
+        "cvss": [
+          {
+            "source": "nvd@nist.gov",
+            "type": "Primary",
+            "version": "3.1",
+            "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:N",
+            "metrics": {
+              "baseScore": 7.5,
+              "exploitabilityScore": 3.9,
+              "impactScore": 3.6
+            },
+            "vendorMetadata": {}
+          },
+          {
+            "source": "134c704f-9b21-4f2e-91b3-4a467353bcc0",
+            "type": "Secondary",
+            "version": "3.1",
+            "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:N",
+            "metrics": {
+              "baseScore": 7.5,
+              "exploitabilityScore": 3.9,
+              "impactScore": 3.6
+            },
+            "vendorMetadata": {}
+          }
+        ],
+        "epss": [
+          {
+            "cve": "CVE-2023-52353",
+            "epss": 0.00465,
+            "percentile": 0.37734,
+            "date": "2026-09-28"
+          }
+        ],
+        "cwes": [
+          {
+            "cve": "CVE-2023-52353",
+            "cwe": "CWE-384",
+            "source": "nvd@nist.gov",
+            "type": "Primary"
+          },
+          {
+            "cve": "CVE-2023-52353",
+            "cwe": "CWE-384",
+            "source": "134c704f-9b21-4f2e-91b3-4a467353bcc0",
+            "type": "Secondary"
+          }
+        ],
+        "fix": {
+          "versions": [
+            "3.5.2"
+          ],
+          "state": "fixed",
+          "available": [
+            {
+              "version": "3.5.2",
+              "date": "2025-09-04",
+              "kind": "first-observed"
+            }
+          ]
+        },
+        "advisories": [],
+        "risk": 0.34874999999999995
+      },
+      "relatedVulnerabilities": [],
+      "matchDetails": [
+        {
+          "type": "cpe-match",
+          "matcher": "stock-matcher",
+          "searchedBy": {
+            "namespace": "nvd:cpe",
+            "cpes": [
+              "cpe:2.3:a:arm:mbed_tls:2.28.0:*:*:*:*:*:*:*"
+            ],
+            "package": {
+              "name": "mbedtls",
+              "version": "2.28.0"
+            }
+          },
+          "found": {
+            "vulnerabilityID": "CVE-2023-52353",
+            "versionConstraint": "< 3.5.2 (unknown)",
+            "cpes": [
+              "cpe:2.3:a:arm:mbed_tls:*:*:*:*:*:*:*:*"
+            ]
+          },
+          "fix": {
+            "suggestedVersion": "3.5.2"
+          }
+        }
+      ],
+      "artifact": {
+        "id": "component:9404b57b22a8bf72df5b6d6c93f4defd",
+        "name": "mbedtls",
+        "version": "2.28.0",
+        "type": "UnknownPackage",
+        "locations": null,
+        "language": "",
+        "licenses": [
+          "Apache-2.0 OR GPL-2.0-or-later"
+        ],
+        "cpes": [
+          "cpe:2.3:a:arm:mbed_tls:2.28.0:*:*:*:*:*:*:*"
+        ],
+        "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0",
+        "upstreams": []
+      }
+    },
+    {
+      "vulnerability": {
+        "id": "CVE-2025-48965",
+        "dataSource": "https://nvd.nist.gov/vuln/detail/CVE-2025-48965",
+        "namespace": "nvd:cpe",
+        "severity": "High",
+        "urls": [
+          "https://github.com/Mbed-TLS/mbedtls-docs/blob/main/security-advisories/mbedtls-security-advisory-2025-06-6.md",
+          "https://mbed-tls.readthedocs.io/en/latest/tech-updates/security-advisories/",
+          "https://lists.debian.org/debian-lts-announce/2025/08/msg00013.html"
+        ],
+        "description": "Mbed TLS before 3.6.4 has a NULL pointer dereference because mbedtls_asn1_store_named_data can trigger conflicting data with val.p of NULL but val.len greater than zero.",
+        "cvss": [
+          {
+            "source": "nvd@nist.gov",
+            "type": "Primary",
+            "version": "3.1",
+            "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+            "metrics": {
+              "baseScore": 7.5,
+              "exploitabilityScore": 3.9,
+              "impactScore": 3.6
+            },
+            "vendorMetadata": {}
+          },
+          {
+            "source": "cve@mitre.org",
+            "type": "Secondary",
+            "version": "3.1",
+            "vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:C/C:N/I:N/A:L",
+            "metrics": {
+              "baseScore": 4,
+              "exploitabilityScore": 2.3,
+              "impactScore": 1.5
+            },
+            "vendorMetadata": {}
+          }
+        ],
+        "epss": [
+          {
+            "cve": "CVE-2025-48965",
+            "epss": 0.00504,
+            "percentile": 0.40635,
+            "date": "2026-09-28"
+          }
+        ],
+        "cwes": [
+          {
+            "cve": "CVE-2025-48965",
+            "cwe": "CWE-696",
+            "source": "cve@mitre.org",
+            "type": "Secondary"
+          },
+          {
+            "cve": "CVE-2025-48965",
+            "cwe": "CWE-476",
+            "source": "nvd@nist.gov",
+            "type": "Primary"
+          }
+        ],
+        "fix": {
+          "versions": [
+            "3.6.4"
+          ],
+          "state": "fixed",
+          "available": [
+            {
+              "version": "3.6.4",
+              "date": "2025-09-04",
+              "kind": "first-observed"
+            }
+          ]
+        },
+        "advisories": [],
+        "risk": 0.3339
+      },
+      "relatedVulnerabilities": [],
+      "matchDetails": [
+        {
+          "type": "cpe-match",
+          "matcher": "stock-matcher",
+          "searchedBy": {
+            "namespace": "nvd:cpe",
+            "cpes": [
+              "cpe:2.3:a:arm:mbed_tls:2.28.0:*:*:*:*:*:*:*"
+            ],
+            "package": {
+              "name": "mbedtls",
+              "version": "2.28.0"
+            }
+          },
+          "found": {
+            "vulnerabilityID": "CVE-2025-48965",
+            "versionConstraint": "< 3.6.4 (unknown)",
+            "cpes": [
+              "cpe:2.3:a:arm:mbed_tls:*:*:*:*:*:*:*:*"
+            ]
+          },
+          "fix": {
+            "suggestedVersion": "3.6.4"
+          }
+        }
+      ],
+      "artifact": {
+        "id": "component:9404b57b22a8bf72df5b6d6c93f4defd",
+        "name": "mbedtls",
+        "version": "2.28.0",
+        "type": "UnknownPackage",
+        "locations": null,
+        "language": "",
+        "licenses": [
+          "Apache-2.0 OR GPL-2.0-or-later"
+        ],
+        "cpes": [
+          "cpe:2.3:a:arm:mbed_tls:2.28.0:*:*:*:*:*:*:*"
+        ],
+        "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0",
+        "upstreams": []
+      }
+    },
+    {
+      "vulnerability": {
+        "id": "CVE-2026-34872",
+        "dataSource": "https://nvd.nist.gov/vuln/detail/CVE-2026-34872",
+        "namespace": "nvd:cpe",
+        "severity": "Critical",
+        "urls": [
+          "https://mbed-tls.readthedocs.io/en/latest/security-advisories/",
+          "https://mbed-tls.readthedocs.io/en/latest/security-advisories/mbedtls-security-advisory-2026-03-ffdh-peerkey-checks/"
+        ],
+        "description": "An issue was discovered in Mbed TLS 3.5.x and 3.6.x through 3.6.5 and TF-PSA-Crypto 1.0. There is a lack of contributory behavior in FFDH due to improper input validation. Using finite-field Diffie-Hellman, the other party can force the shared secret into a small set of values (lack of contributory behavior). This is a problem for protocols that depend on contributory behavior (which is not the case for TLS). The attack can be carried by the peer, or depending on the protocol by an active network attacker (person in the middle).",
+        "cvss": [
+          {
+            "source": "134c704f-9b21-4f2e-91b3-4a467353bcc0",
+            "type": "Secondary",
+            "version": "3.1",
+            "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:N",
+            "metrics": {
+              "baseScore": 9.1,
+              "exploitabilityScore": 3.9,
+              "impactScore": 5.2
+            },
+            "vendorMetadata": {}
+          }
+        ],
+        "epss": [
+          {
+            "cve": "CVE-2026-34872",
+            "epss": 0.00276,
+            "percentile": 0.17981,
+            "date": "2026-09-28"
+          }
+        ],
+        "cwes": [
+          {
+            "cve": "CVE-2026-34872",
+            "cwe": "CWE-347",
+            "source": "134c704f-9b21-4f2e-91b3-4a467353bcc0",
+            "type": "Secondary"
+          }
+        ],
+        "fix": {
+          "versions": [
+            "3.6.6"
+          ],
+          "state": "fixed",
+          "available": [
+            {
+              "version": "3.6.6",
+              "date": "2026-04-04",
+              "kind": "first-observed"
+            }
+          ]
+        },
+        "advisories": [],
+        "risk": 0.24978
+      },
+      "relatedVulnerabilities": [],
+      "matchDetails": [
+        {
+          "type": "cpe-match",
+          "matcher": "stock-matcher",
+          "searchedBy": {
+            "namespace": "nvd:cpe",
+            "cpes": [
+              "cpe:2.3:a:arm:mbed_tls:2.28.0:*:*:*:*:*:*:*"
+            ],
+            "package": {
+              "name": "mbedtls",
+              "version": "2.28.0"
+            }
+          },
+          "found": {
+            "vulnerabilityID": "CVE-2026-34872",
+            "versionConstraint": "< 3.6.6 (unknown)",
+            "cpes": [
+              "cpe:2.3:a:arm:mbed_tls:*:*:*:*:*:*:*:*"
+            ]
+          },
+          "fix": {
+            "suggestedVersion": "3.6.6"
+          }
+        }
+      ],
+      "artifact": {
+        "id": "component:9404b57b22a8bf72df5b6d6c93f4defd",
+        "name": "mbedtls",
+        "version": "2.28.0",
+        "type": "UnknownPackage",
+        "locations": null,
+        "language": "",
+        "licenses": [
+          "Apache-2.0 OR GPL-2.0-or-later"
+        ],
+        "cpes": [
+          "cpe:2.3:a:arm:mbed_tls:2.28.0:*:*:*:*:*:*:*"
+        ],
+        "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0",
+        "upstreams": []
+      }
+    },
+    {
+      "vulnerability": {
+        "id": "CVE-2024-23170",
+        "dataSource": "https://nvd.nist.gov/vuln/detail/CVE-2024-23170",
+        "namespace": "nvd:cpe",
+        "severity": "Medium",
+        "urls": [
+          "https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/GP5UU7Z6LJNBLBT4SC5WWS2HDNMTFZH5/",
+          "https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/IIBPEYSVRK4IFLBSYJAWKH33YBNH5HR2/",
+          "https://mbed-tls.readthedocs.io/en/latest/security-advisories/mbedtls-security-advisory-2024-01-1/",
+          "https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/GP5UU7Z6LJNBLBT4SC5WWS2HDNMTFZH5/",
+          "https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/IIBPEYSVRK4IFLBSYJAWKH33YBNH5HR2/"
+        ],
+        "description": "An issue was discovered in Mbed TLS 2.x before 2.28.7 and 3.x before 3.5.2. There was a timing side channel in RSA private operations. This side channel could be sufficient for a local attacker to recover the plaintext. It requires the attacker to send a large number of messages for decryption, as described in \"Everlasting ROBOT: the Marvin Attack\" by Hubert Kario.",
+        "cvss": [
+          {
+            "source": "nvd@nist.gov",
+            "type": "Primary",
+            "version": "3.1",
+            "vector": "CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:N/A:N",
+            "metrics": {
+              "baseScore": 5.5,
+              "exploitabilityScore": 1.9,
+              "impactScore": 3.6
+            },
+            "vendorMetadata": {}
+          },
+          {
+            "source": "134c704f-9b21-4f2e-91b3-4a467353bcc0",
+            "type": "Secondary",
+            "version": "3.1",
+            "vector": "CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:N/A:N",
+            "metrics": {
+              "baseScore": 5.5,
+              "exploitabilityScore": 1.9,
+              "impactScore": 3.6
+            },
+            "vendorMetadata": {}
+          }
+        ],
+        "epss": [
+          {
+            "cve": "CVE-2024-23170",
+            "epss": 0.00314,
+            "percentile": 0.21851,
+            "date": "2026-09-28"
+          }
+        ],
+        "cwes": [
+          {
+            "cve": "CVE-2024-23170",
+            "cwe": "CWE-203",
+            "source": "nvd@nist.gov",
+            "type": "Primary"
+          },
+          {
+            "cve": "CVE-2024-23170",
+            "cwe": "CWE-385",
+            "source": "134c704f-9b21-4f2e-91b3-4a467353bcc0",
+            "type": "Secondary"
+          }
+        ],
+        "fix": {
+          "versions": [
+            "2.28.7"
+          ],
+          "state": "fixed",
+          "available": [
+            {
+              "version": "2.28.7",
+              "date": "2025-09-04",
+              "kind": "first-observed"
+            }
+          ]
+        },
+        "advisories": [],
+        "risk": 0.16485
+      },
+      "relatedVulnerabilities": [],
+      "matchDetails": [
+        {
+          "type": "cpe-match",
+          "matcher": "stock-matcher",
+          "searchedBy": {
+            "namespace": "nvd:cpe",
+            "cpes": [
+              "cpe:2.3:a:arm:mbed_tls:2.28.0:*:*:*:*:*:*:*"
+            ],
+            "package": {
+              "name": "mbedtls",
+              "version": "2.28.0"
+            }
+          },
+          "found": {
+            "vulnerabilityID": "CVE-2024-23170",
+            "versionConstraint": ">= 2.0.0, < 2.28.7 (unknown)",
+            "cpes": [
+              "cpe:2.3:a:arm:mbed_tls:*:*:*:*:*:*:*:*"
+            ]
+          },
+          "fix": {
+            "suggestedVersion": "2.28.7"
+          }
+        }
+      ],
+      "artifact": {
+        "id": "component:9404b57b22a8bf72df5b6d6c93f4defd",
+        "name": "mbedtls",
+        "version": "2.28.0",
+        "type": "UnknownPackage",
+        "locations": null,
+        "language": "",
+        "licenses": [
+          "Apache-2.0 OR GPL-2.0-or-later"
+        ],
+        "cpes": [
+          "cpe:2.3:a:arm:mbed_tls:2.28.0:*:*:*:*:*:*:*"
+        ],
+        "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0",
+        "upstreams": []
+      }
+    },
+    {
+      "vulnerability": {
+        "id": "CVE-2025-52496",
+        "dataSource": "https://nvd.nist.gov/vuln/detail/CVE-2025-52496",
+        "namespace": "nvd:cpe",
+        "severity": "High",
+        "urls": [
+          "https://github.com/Mbed-TLS/mbedtls-docs/blob/main/security-advisories/mbedtls-security-advisory-2025-06-1.md",
+          "https://lists.debian.org/debian-lts-announce/2025/08/msg00013.html"
+        ],
+        "description": "Mbed TLS before 3.6.4 has a race condition in AESNI detection if certain compiler optimizations occur. An attacker may be able to extract an AES key from a multithreaded program, or perform a GCM forgery.",
+        "cvss": [
+          {
+            "source": "nvd@nist.gov",
+            "type": "Primary",
+            "version": "3.1",
+            "vector": "CVSS:3.1/AV:L/AC:H/PR:N/UI:N/S:C/C:H/I:H/A:N",
+            "metrics": {
+              "baseScore": 7.8,
+              "exploitabilityScore": 1.5,
+              "impactScore": 5.8
+            },
+            "vendorMetadata": {}
+          },
+          {
+            "source": "cve@mitre.org",
+            "type": "Secondary",
+            "version": "3.1",
+            "vector": "CVSS:3.1/AV:L/AC:H/PR:N/UI:N/S:C/C:H/I:H/A:N",
+            "metrics": {
+              "baseScore": 7.8,
+              "exploitabilityScore": 1.5,
+              "impactScore": 5.8
+            },
+            "vendorMetadata": {}
+          }
+        ],
+        "epss": [
+          {
+            "cve": "CVE-2025-52496",
+            "epss": 0.00199,
+            "percentile": 0.08691,
+            "date": "2026-09-28"
+          }
+        ],
+        "cwes": [
+          {
+            "cve": "CVE-2025-52496",
+            "cwe": "CWE-733",
+            "source": "cve@mitre.org",
+            "type": "Secondary"
+          }
+        ],
+        "fix": {
+          "versions": [
+            "3.6.4"
+          ],
+          "state": "fixed",
+          "available": [
+            {
+              "version": "3.6.4",
+              "date": "2025-09-04",
+              "kind": "first-observed"
+            }
+          ]
+        },
+        "advisories": [],
+        "risk": 0.152235
+      },
+      "relatedVulnerabilities": [],
+      "matchDetails": [
+        {
+          "type": "cpe-match",
+          "matcher": "stock-matcher",
+          "searchedBy": {
+            "namespace": "nvd:cpe",
+            "cpes": [
+              "cpe:2.3:a:arm:mbed_tls:2.28.0:*:*:*:*:*:*:*"
+            ],
+            "package": {
+              "name": "mbedtls",
+              "version": "2.28.0"
+            }
+          },
+          "found": {
+            "vulnerabilityID": "CVE-2025-52496",
+            "versionConstraint": "< 3.6.4 (unknown)",
+            "cpes": [
+              "cpe:2.3:a:arm:mbed_tls:*:*:*:*:*:*:*:*"
+            ]
+          },
+          "fix": {
+            "suggestedVersion": "3.6.4"
+          }
+        }
+      ],
+      "artifact": {
+        "id": "component:9404b57b22a8bf72df5b6d6c93f4defd",
+        "name": "mbedtls",
+        "version": "2.28.0",
+        "type": "UnknownPackage",
+        "locations": null,
+        "language": "",
+        "licenses": [
+          "Apache-2.0 OR GPL-2.0-or-later"
+        ],
+        "cpes": [
+          "cpe:2.3:a:arm:mbed_tls:2.28.0:*:*:*:*:*:*:*"
+        ],
+        "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0",
+        "upstreams": []
+      }
+    },
+    {
+      "vulnerability": {
+        "id": "CVE-2025-52497",
+        "dataSource": "https://nvd.nist.gov/vuln/detail/CVE-2025-52497",
+        "namespace": "nvd:cpe",
+        "severity": "Medium",
+        "urls": [
+          "https://github.com/Mbed-TLS/mbedtls-docs/blob/main/security-advisories/mbedtls-security-advisory-2025-06-2.md",
+          "https://lists.debian.org/debian-lts-announce/2025/08/msg00013.html"
+        ],
+        "description": "Mbed TLS before 3.6.4 has a PEM parsing one-byte heap-based buffer underflow, in mbedtls_pem_read_buffer and two mbedtls_pk_parse functions, via untrusted PEM input.",
+        "cvss": [
+          {
+            "source": "cve@mitre.org",
+            "type": "Secondary",
+            "version": "3.1",
+            "vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:N/A:L",
+            "metrics": {
+              "baseScore": 4.8,
+              "exploitabilityScore": 2.3,
+              "impactScore": 2.6
+            },
+            "vendorMetadata": {}
+          }
+        ],
+        "epss": [
+          {
+            "cve": "CVE-2025-52497",
+            "epss": 0.00308,
+            "percentile": 0.21212,
+            "date": "2026-09-28"
+          }
+        ],
+        "cwes": [
+          {
+            "cve": "CVE-2025-52497",
+            "cwe": "CWE-193",
+            "source": "cve@mitre.org",
+            "type": "Secondary"
+          }
+        ],
+        "fix": {
+          "versions": [
+            "3.6.4"
+          ],
+          "state": "fixed",
+          "available": [
+            {
+              "version": "3.6.4",
+              "date": "2025-09-04",
+              "kind": "first-observed"
+            }
+          ]
+        },
+        "advisories": [],
+        "risk": 0.15091999999999997
+      },
+      "relatedVulnerabilities": [],
+      "matchDetails": [
+        {
+          "type": "cpe-match",
+          "matcher": "stock-matcher",
+          "searchedBy": {
+            "namespace": "nvd:cpe",
+            "cpes": [
+              "cpe:2.3:a:arm:mbed_tls:2.28.0:*:*:*:*:*:*:*"
+            ],
+            "package": {
+              "name": "mbedtls",
+              "version": "2.28.0"
+            }
+          },
+          "found": {
+            "vulnerabilityID": "CVE-2025-52497",
+            "versionConstraint": "< 3.6.4 (unknown)",
+            "cpes": [
+              "cpe:2.3:a:arm:mbed_tls:*:*:*:*:*:*:*:*"
+            ]
+          },
+          "fix": {
+            "suggestedVersion": "3.6.4"
+          }
+        }
+      ],
+      "artifact": {
+        "id": "component:9404b57b22a8bf72df5b6d6c93f4defd",
+        "name": "mbedtls",
+        "version": "2.28.0",
+        "type": "UnknownPackage",
+        "locations": null,
+        "language": "",
+        "licenses": [
+          "Apache-2.0 OR GPL-2.0-or-later"
+        ],
+        "cpes": [
+          "cpe:2.3:a:arm:mbed_tls:2.28.0:*:*:*:*:*:*:*"
+        ],
+        "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0",
+        "upstreams": []
+      }
+    },
+    {
+      "vulnerability": {
+        "id": "CVE-2025-27810",
+        "dataSource": "https://nvd.nist.gov/vuln/detail/CVE-2025-27810",
+        "namespace": "nvd:cpe",
+        "severity": "Medium",
+        "urls": [
+          "https://github.com/Mbed-TLS/mbedtls/releases",
+          "https://mbed-tls.readthedocs.io/en/latest/security-advisories/mbedtls-security-advisory-2025-03-2/"
+        ],
+        "description": "Mbed TLS before 2.28.10 and 3.x before 3.6.3, in some cases of failed memory allocation or hardware errors, uses uninitialized stack memory to compose the TLS Finished message, potentially leading to authentication bypasses such as replays.",
+        "cvss": [
+          {
+            "source": "nvd@nist.gov",
+            "type": "Primary",
+            "version": "3.1",
+            "vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:L/A:N",
+            "metrics": {
+              "baseScore": 4.8,
+              "exploitabilityScore": 2.3,
+              "impactScore": 2.6
+            },
+            "vendorMetadata": {}
+          },
+          {
+            "source": "cve@mitre.org",
+            "type": "Secondary",
+            "version": "3.1",
+            "vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:C/C:L/I:L/A:N",
+            "metrics": {
+              "baseScore": 5.4,
+              "exploitabilityScore": 2.3,
+              "impactScore": 2.8
+            },
+            "vendorMetadata": {}
+          }
+        ],
+        "epss": [
+          {
+            "cve": "CVE-2025-27810",
+            "epss": 0.00291,
+            "percentile": 0.1945,
+            "date": "2026-09-28"
+          }
+        ],
+        "cwes": [
+          {
+            "cve": "CVE-2025-27810",
+            "cwe": "CWE-908",
+            "source": "cve@mitre.org",
+            "type": "Secondary"
+          }
+        ],
+        "fix": {
+          "versions": [
+            "2.28.10",
+            "3.6.3"
+          ],
+          "state": "fixed",
+          "available": [
+            {
+              "version": "2.28.10",
+              "date": "2025-09-04",
+              "kind": "first-observed"
+            },
+            {
+              "version": "3.6.3",
+              "date": "2025-09-04",
+              "kind": "first-observed"
+            }
+          ]
+        },
+        "advisories": [],
+        "risk": 0.146955
+      },
+      "relatedVulnerabilities": [],
+      "matchDetails": [
+        {
+          "type": "cpe-match",
+          "matcher": "stock-matcher",
+          "searchedBy": {
+            "namespace": "nvd:cpe",
+            "cpes": [
+              "cpe:2.3:a:arm:mbed_tls:2.28.0:*:*:*:*:*:*:*"
+            ],
+            "package": {
+              "name": "mbedtls",
+              "version": "2.28.0"
+            }
+          },
+          "found": {
+            "vulnerabilityID": "CVE-2025-27810",
+            "versionConstraint": "< 2.28.10||>= 3.0.0, < 3.6.3 (unknown)",
+            "cpes": [
+              "cpe:2.3:a:arm:mbed_tls:*:*:*:*:*:*:*:*"
+            ]
+          },
+          "fix": {
+            "suggestedVersion": "2.28.10"
+          }
+        }
+      ],
+      "artifact": {
+        "id": "component:9404b57b22a8bf72df5b6d6c93f4defd",
+        "name": "mbedtls",
+        "version": "2.28.0",
+        "type": "UnknownPackage",
+        "locations": null,
+        "language": "",
+        "licenses": [
+          "Apache-2.0 OR GPL-2.0-or-later"
+        ],
+        "cpes": [
+          "cpe:2.3:a:arm:mbed_tls:2.28.0:*:*:*:*:*:*:*"
+        ],
+        "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0",
+        "upstreams": []
+      }
+    },
+    {
+      "vulnerability": {
+        "id": "CVE-2025-66442",
+        "dataSource": "https://nvd.nist.gov/vuln/detail/CVE-2025-66442",
+        "namespace": "nvd:cpe",
+        "severity": "Medium",
+        "urls": [
+          "https://github.com/Mbed-TLS/TF-PSA-Crypto/releases",
+          "https://github.com/Mbed-TLS/mbedtls/releases",
+          "https://mbed-tls.readthedocs.io/en/latest/security-advisories/",
+          "https://mbed-tls.readthedocs.io/en/latest/security-advisories/mbedtls-security-advisory-2026-03-compiler-induced-constant-time-violations/"
+        ],
+        "description": "In Mbed TLS through 4.0.0, there is a compiler-induced timing side channel (in RSA and CBC/ECB decryption) that only occurs with LLVM's select-optimize feature. TF-PSA-Crypto through 1.0.0 is also affected.",
+        "cvss": [
+          {
+            "source": "134c704f-9b21-4f2e-91b3-4a467353bcc0",
+            "type": "Secondary",
+            "version": "3.1",
+            "vector": "CVSS:3.1/AV:L/AC:H/PR:N/UI:N/S:U/C:H/I:N/A:N",
+            "metrics": {
+              "baseScore": 5.1,
+              "exploitabilityScore": 1.5,
+              "impactScore": 3.6
+            },
+            "vendorMetadata": {}
+          }
+        ],
+        "epss": [
+          {
+            "cve": "CVE-2025-66442",
+            "epss": 0.0027,
+            "percentile": 0.17279,
+            "date": "2026-09-28"
+          }
+        ],
+        "cwes": [
+          {
+            "cve": "CVE-2025-66442",
+            "cwe": "CWE-385",
+            "source": "134c704f-9b21-4f2e-91b3-4a467353bcc0",
+            "type": "Secondary"
+          }
+        ],
+        "fix": {
+          "versions": [],
+          "state": ""
+        },
+        "advisories": [],
+        "risk": 0.13635000000000003
+      },
+      "relatedVulnerabilities": [],
+      "matchDetails": [
+        {
+          "type": "cpe-match",
+          "matcher": "stock-matcher",
+          "searchedBy": {
+            "namespace": "nvd:cpe",
+            "cpes": [
+              "cpe:2.3:a:arm:mbed_tls:2.28.0:*:*:*:*:*:*:*"
+            ],
+            "package": {
+              "name": "mbedtls",
+              "version": "2.28.0"
+            }
+          },
+          "found": {
+            "vulnerabilityID": "CVE-2025-66442",
+            "versionConstraint": "<= 4.0.0 (unknown)",
+            "cpes": [
+              "cpe:2.3:a:arm:mbed_tls:*:*:*:*:*:*:*:*"
+            ]
+          }
+        }
+      ],
+      "artifact": {
+        "id": "component:9404b57b22a8bf72df5b6d6c93f4defd",
+        "name": "mbedtls",
+        "version": "2.28.0",
+        "type": "UnknownPackage",
+        "locations": null,
+        "language": "",
+        "licenses": [
+          "Apache-2.0 OR GPL-2.0-or-later"
+        ],
+        "cpes": [
+          "cpe:2.3:a:arm:mbed_tls:2.28.0:*:*:*:*:*:*:*"
+        ],
+        "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0",
+        "upstreams": []
+      }
+    },
+    {
+      "vulnerability": {
+        "id": "CVE-2025-59438",
+        "dataSource": "https://nvd.nist.gov/vuln/detail/CVE-2025-59438",
+        "namespace": "nvd:cpe",
+        "severity": "Medium",
+        "urls": [
+          "https://mbed-tls.readthedocs.io/en/latest/security-advisories/mbedtls-security-advisory-2025-10-invalid-padding-error/",
+          "https://mbed-tls.readthedocs.io/en/latest/tech-updates/security-advisories/"
+        ],
+        "description": "Mbed TLS through 3.6.4 has an Observable Timing Discrepancy.",
+        "cvss": [
+          {
+            "source": "134c704f-9b21-4f2e-91b3-4a467353bcc0",
+            "type": "Secondary",
+            "version": "3.1",
+            "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
+            "metrics": {
+              "baseScore": 5.3,
+              "exploitabilityScore": 3.9,
+              "impactScore": 1.5
+            },
+            "vendorMetadata": {}
+          }
+        ],
+        "epss": [
+          {
+            "cve": "CVE-2025-59438",
+            "epss": 0.00264,
+            "percentile": 0.16354,
+            "date": "2026-09-28"
+          }
+        ],
+        "cwes": [
+          {
+            "cve": "CVE-2025-59438",
+            "cwe": "CWE-208",
+            "source": "134c704f-9b21-4f2e-91b3-4a467353bcc0",
+            "type": "Secondary"
+          }
+        ],
+        "fix": {
+          "versions": [
+            "3.6.5"
+          ],
+          "state": "fixed",
+          "available": [
+            {
+              "version": "3.6.5",
+              "date": "2025-10-25",
+              "kind": "first-observed"
+            }
+          ]
+        },
+        "advisories": [],
+        "risk": 0.13596
+      },
+      "relatedVulnerabilities": [],
+      "matchDetails": [
+        {
+          "type": "cpe-match",
+          "matcher": "stock-matcher",
+          "searchedBy": {
+            "namespace": "nvd:cpe",
+            "cpes": [
+              "cpe:2.3:a:arm:mbed_tls:2.28.0:*:*:*:*:*:*:*"
+            ],
+            "package": {
+              "name": "mbedtls",
+              "version": "2.28.0"
+            }
+          },
+          "found": {
+            "vulnerabilityID": "CVE-2025-59438",
+            "versionConstraint": "< 3.6.5 (unknown)",
+            "cpes": [
+              "cpe:2.3:a:arm:mbed_tls:*:*:*:*:*:*:*:*"
+            ]
+          },
+          "fix": {
+            "suggestedVersion": "3.6.5"
+          }
+        }
+      ],
+      "artifact": {
+        "id": "component:9404b57b22a8bf72df5b6d6c93f4defd",
+        "name": "mbedtls",
+        "version": "2.28.0",
+        "type": "UnknownPackage",
+        "locations": null,
+        "language": "",
+        "licenses": [
+          "Apache-2.0 OR GPL-2.0-or-later"
+        ],
+        "cpes": [
+          "cpe:2.3:a:arm:mbed_tls:2.28.0:*:*:*:*:*:*:*"
+        ],
+        "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0",
+        "upstreams": []
+      }
+    },
+    {
+      "vulnerability": {
+        "id": "CVE-2026-25835",
+        "dataSource": "https://nvd.nist.gov/vuln/detail/CVE-2026-25835",
+        "namespace": "nvd:cpe",
+        "severity": "High",
+        "urls": [
+          "https://mbed-tls.readthedocs.io/en/latest/security-advisories/",
+          "https://mbed-tls.readthedocs.io/en/latest/security-advisories/mbedtls-security-advisory-2026-03-rng-cloning/"
+        ],
+        "description": "Mbed TLS before 3.6.6 and TF-PSA-Crypto before 1.1.0 misuse seeds in a Pseudo-Random Number Generator (PRNG).",
+        "cvss": [
+          {
+            "source": "134c704f-9b21-4f2e-91b3-4a467353bcc0",
+            "type": "Secondary",
+            "version": "3.1",
+            "vector": "CVSS:3.1/AV:L/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:N",
+            "metrics": {
+              "baseScore": 7.7,
+              "exploitabilityScore": 2.6,
+              "impactScore": 5.2
+            },
+            "vendorMetadata": {}
+          }
+        ],
+        "epss": [
+          {
+            "cve": "CVE-2026-25835",
+            "epss": 0.00177,
+            "percentile": 0.06542,
+            "date": "2026-09-28"
+          }
+        ],
+        "cwes": [
+          {
+            "cve": "CVE-2026-25835",
+            "cwe": "CWE-335",
+            "source": "134c704f-9b21-4f2e-91b3-4a467353bcc0",
+            "type": "Secondary"
+          }
+        ],
+        "fix": {
+          "versions": [
+            "3.6.6"
+          ],
+          "state": "fixed",
+          "available": [
+            {
+              "version": "3.6.6",
+              "date": "2026-04-06",
+              "kind": "first-observed"
+            }
+          ]
+        },
+        "advisories": [],
+        "risk": 0.13452000000000003
+      },
+      "relatedVulnerabilities": [],
+      "matchDetails": [
+        {
+          "type": "cpe-match",
+          "matcher": "stock-matcher",
+          "searchedBy": {
+            "namespace": "nvd:cpe",
+            "cpes": [
+              "cpe:2.3:a:arm:mbed_tls:2.28.0:*:*:*:*:*:*:*"
+            ],
+            "package": {
+              "name": "mbedtls",
+              "version": "2.28.0"
+            }
+          },
+          "found": {
+            "vulnerabilityID": "CVE-2026-25835",
+            "versionConstraint": ">= 2.18.0, < 3.6.6 (unknown)",
+            "cpes": [
+              "cpe:2.3:a:arm:mbed_tls:*:*:*:*:*:*:*:*"
+            ]
+          },
+          "fix": {
+            "suggestedVersion": "3.6.6"
+          }
+        }
+      ],
+      "artifact": {
+        "id": "component:9404b57b22a8bf72df5b6d6c93f4defd",
+        "name": "mbedtls",
+        "version": "2.28.0",
+        "type": "UnknownPackage",
+        "locations": null,
+        "language": "",
+        "licenses": [
+          "Apache-2.0 OR GPL-2.0-or-later"
+        ],
+        "cpes": [
+          "cpe:2.3:a:arm:mbed_tls:2.28.0:*:*:*:*:*:*:*"
+        ],
+        "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0",
+        "upstreams": []
+      }
+    },
+    {
+      "vulnerability": {
+        "id": "CVE-2025-54764",
+        "dataSource": "https://nvd.nist.gov/vuln/detail/CVE-2025-54764",
+        "namespace": "nvd:cpe",
+        "severity": "Medium",
+        "urls": [
+          "https://mbed-tls.readthedocs.io/en/latest/security-advisories/mbedtls-security-advisory-2025-10-ssbleed-mstep/",
+          "https://mbed-tls.readthedocs.io/en/latest/tech-updates/security-advisories/"
+        ],
+        "description": "Mbed TLS before 3.6.5 allows a local timing attack against certain RSA operations, and direct calls to mbedtls_mpi_mod_inv or mbedtls_mpi_gcd.",
+        "cvss": [
+          {
+            "source": "134c704f-9b21-4f2e-91b3-4a467353bcc0",
+            "type": "Secondary",
+            "version": "3.1",
+            "vector": "CVSS:3.1/AV:L/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N",
+            "metrics": {
+              "baseScore": 6.2,
+              "exploitabilityScore": 2.6,
+              "impactScore": 3.6
+            },
+            "vendorMetadata": {}
+          }
+        ],
+        "epss": [
+          {
+            "cve": "CVE-2025-54764",
+            "epss": 0.00221,
+            "percentile": 0.11425,
+            "date": "2026-09-28"
+          }
+        ],
+        "cwes": [
+          {
+            "cve": "CVE-2025-54764",
+            "cwe": "CWE-208",
+            "source": "134c704f-9b21-4f2e-91b3-4a467353bcc0",
+            "type": "Secondary"
+          }
+        ],
+        "fix": {
+          "versions": [
+            "3.6.5"
+          ],
+          "state": "fixed",
+          "available": [
+            {
+              "version": "3.6.5",
+              "date": "2025-11-01",
+              "kind": "first-observed"
+            }
+          ]
+        },
+        "advisories": [],
+        "risk": 0.12376000000000001
+      },
+      "relatedVulnerabilities": [],
+      "matchDetails": [
+        {
+          "type": "cpe-match",
+          "matcher": "stock-matcher",
+          "searchedBy": {
+            "namespace": "nvd:cpe",
+            "cpes": [
+              "cpe:2.3:a:arm:mbed_tls:2.28.0:*:*:*:*:*:*:*"
+            ],
+            "package": {
+              "name": "mbedtls",
+              "version": "2.28.0"
+            }
+          },
+          "found": {
+            "vulnerabilityID": "CVE-2025-54764",
+            "versionConstraint": "< 3.6.5 (unknown)",
+            "cpes": [
+              "cpe:2.3:a:arm:mbed_tls:*:*:*:*:*:*:*:*"
+            ]
+          },
+          "fix": {
+            "suggestedVersion": "3.6.5"
+          }
+        }
+      ],
+      "artifact": {
+        "id": "component:9404b57b22a8bf72df5b6d6c93f4defd",
+        "name": "mbedtls",
+        "version": "2.28.0",
+        "type": "UnknownPackage",
+        "locations": null,
+        "language": "",
+        "licenses": [
+          "Apache-2.0 OR GPL-2.0-or-later"
+        ],
+        "cpes": [
+          "cpe:2.3:a:arm:mbed_tls:2.28.0:*:*:*:*:*:*:*"
+        ],
+        "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0",
+        "upstreams": []
+      }
+    },
+    {
+      "vulnerability": {
+        "id": "CVE-2025-27809",
+        "dataSource": "https://nvd.nist.gov/vuln/detail/CVE-2025-27809",
+        "namespace": "nvd:cpe",
+        "severity": "Medium",
+        "urls": [
+          "https://github.com/Mbed-TLS/mbedtls/releases",
+          "https://mbed-tls.readthedocs.io/en/latest/security-advisories/mbedtls-security-advisory-2025-03-1/",
+          "https://github.com/Mbed-TLS/mbedtls/issues/466",
+          "https://mastodon.social/@bagder/114219540623402700"
+        ],
+        "description": "Mbed TLS before 2.28.10 and 3.x before 3.6.3, on the client side, accepts servers that have trusted certificates for arbitrary hostnames unless the TLS client application calls mbedtls_ssl_set_hostname.",
+        "cvss": [
+          {
+            "source": "cve@mitre.org",
+            "type": "Secondary",
+            "version": "3.1",
+            "vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:C/C:L/I:L/A:N",
+            "metrics": {
+              "baseScore": 5.4,
+              "exploitabilityScore": 2.3,
+              "impactScore": 2.8
+            },
+            "vendorMetadata": {}
+          }
+        ],
+        "epss": [
+          {
+            "cve": "CVE-2025-27809",
+            "epss": 0.00197,
+            "percentile": 0.08476,
+            "date": "2026-09-28"
+          }
+        ],
+        "cwes": [
+          {
+            "cve": "CVE-2025-27809",
+            "cwe": "CWE-1188",
+            "source": "cve@mitre.org",
+            "type": "Secondary"
+          }
+        ],
+        "fix": {
+          "versions": [
+            "2.28.10",
+            "3.6.3"
+          ],
+          "state": "fixed",
+          "available": [
+            {
+              "version": "2.28.10",
+              "date": "2025-09-04",
+              "kind": "first-observed"
+            },
+            {
+              "version": "3.6.3",
+              "date": "2025-09-04",
+              "kind": "first-observed"
+            }
+          ]
+        },
+        "advisories": [],
+        "risk": 0.10244
+      },
+      "relatedVulnerabilities": [],
+      "matchDetails": [
+        {
+          "type": "cpe-match",
+          "matcher": "stock-matcher",
+          "searchedBy": {
+            "namespace": "nvd:cpe",
+            "cpes": [
+              "cpe:2.3:a:arm:mbed_tls:2.28.0:*:*:*:*:*:*:*"
+            ],
+            "package": {
+              "name": "mbedtls",
+              "version": "2.28.0"
+            }
+          },
+          "found": {
+            "vulnerabilityID": "CVE-2025-27809",
+            "versionConstraint": "< 2.28.10||>= 3.0.0, < 3.6.3 (unknown)",
+            "cpes": [
+              "cpe:2.3:a:arm:mbed_tls:*:*:*:*:*:*:*:*"
+            ]
+          },
+          "fix": {
+            "suggestedVersion": "2.28.10"
+          }
+        }
+      ],
+      "artifact": {
+        "id": "component:9404b57b22a8bf72df5b6d6c93f4defd",
+        "name": "mbedtls",
+        "version": "2.28.0",
+        "type": "UnknownPackage",
+        "locations": null,
+        "language": "",
+        "licenses": [
+          "Apache-2.0 OR GPL-2.0-or-later"
+        ],
+        "cpes": [
+          "cpe:2.3:a:arm:mbed_tls:2.28.0:*:*:*:*:*:*:*"
+        ],
+        "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0",
+        "upstreams": []
+      }
+    },
+    {
+      "vulnerability": {
+        "id": "CVE-2026-34871",
+        "dataSource": "https://nvd.nist.gov/vuln/detail/CVE-2026-34871",
+        "namespace": "nvd:cpe",
+        "severity": "Medium",
+        "urls": [
+          "https://mbed-tls.readthedocs.io/en/latest/security-advisories/",
+          "https://mbed-tls.readthedocs.io/en/latest/security-advisories/mbedtls-security-advisory-2026-03-dev-random/"
+        ],
+        "description": "An issue was discovered in Mbed TLS before 3.6.6 and 4.x before 4.1.0 and TF-PSA-Crypto before 1.1.0. There is a Predictable Seed in a Pseudo-Random Number Generator (PRNG).",
+        "cvss": [
+          {
+            "source": "134c704f-9b21-4f2e-91b3-4a467353bcc0",
+            "type": "Secondary",
+            "version": "3.1",
+            "vector": "CVSS:3.1/AV:L/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:N",
+            "metrics": {
+              "baseScore": 6.7,
+              "exploitabilityScore": 1.5,
+              "impactScore": 5.2
+            },
+            "vendorMetadata": {}
+          }
+        ],
+        "epss": [
+          {
+            "cve": "CVE-2026-34871",
+            "epss": 0.00152,
+            "percentile": 0.03673,
+            "date": "2026-09-28"
+          }
+        ],
+        "cwes": [
+          {
+            "cve": "CVE-2026-34871",
+            "cwe": "CWE-338",
+            "source": "134c704f-9b21-4f2e-91b3-4a467353bcc0",
+            "type": "Secondary"
+          }
+        ],
+        "fix": {
+          "versions": [
+            "3.6.6"
+          ],
+          "state": "fixed",
+          "available": [
+            {
+              "version": "3.6.6",
+              "date": "2026-04-06",
+              "kind": "first-observed"
+            }
+          ]
+        },
+        "advisories": [],
+        "risk": 0.08892
+      },
+      "relatedVulnerabilities": [],
+      "matchDetails": [
+        {
+          "type": "cpe-match",
+          "matcher": "stock-matcher",
+          "searchedBy": {
+            "namespace": "nvd:cpe",
+            "cpes": [
+              "cpe:2.3:a:arm:mbed_tls:2.28.0:*:*:*:*:*:*:*"
+            ],
+            "package": {
+              "name": "mbedtls",
+              "version": "2.28.0"
+            }
+          },
+          "found": {
+            "vulnerabilityID": "CVE-2026-34871",
+            "versionConstraint": "< 3.6.6 (unknown)",
+            "cpes": [
+              "cpe:2.3:a:arm:mbed_tls:*:*:*:*:*:*:*:*"
+            ]
+          },
+          "fix": {
+            "suggestedVersion": "3.6.6"
+          }
+        }
+      ],
+      "artifact": {
+        "id": "component:9404b57b22a8bf72df5b6d6c93f4defd",
+        "name": "mbedtls",
+        "version": "2.28.0",
+        "type": "UnknownPackage",
+        "locations": null,
+        "language": "",
+        "licenses": [
+          "Apache-2.0 OR GPL-2.0-or-later"
+        ],
+        "cpes": [
+          "cpe:2.3:a:arm:mbed_tls:2.28.0:*:*:*:*:*:*:*"
+        ],
+        "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0",
+        "upstreams": []
+      }
+    }
+  ],
+  "source": {
+    "type": "sbom-file",
+    "target": "<capture>/old-mbedtls.cdx.json"
+  },
+  "distro": {
+    "name": "",
+    "version": "",
+    "idLike": null
+  },
+  "descriptor": {
+    "name": "grype",
+    "version": "0.119.0",
+    "configuration": {
+      "output": [
+        "json"
+      ],
+      "file": "<capture>/old-mbedtls.grype.raw.json",
+      "pretty": false,
+      "distro": "",
+      "add-cpes-if-none": false,
+      "output-template-file": "",
+      "check-for-app-update": false,
+      "only-fixed": false,
+      "only-notfixed": false,
+      "ignore-wontfix": "",
+      "platform": "",
+      "search": {
+        "scope": "squashed",
+        "unindexed-archives": false,
+        "indexed-archives": true
+      },
+      "ignore": [
+        {
+          "vulnerability": "",
+          "include-aliases": false,
+          "reason": "",
+          "namespace": "",
+          "fix-state": "",
+          "package": {
+            "name": "kernel-headers",
+            "version": "",
+            "language": "",
+            "type": "rpm",
+            "location": "",
+            "upstream-name": "kernel"
+          },
+          "vex-status": "",
+          "vex-justification": "",
+          "match-type": "exact-indirect-match"
+        },
+        {
+          "vulnerability": "",
+          "include-aliases": false,
+          "reason": "",
+          "namespace": "",
+          "fix-state": "",
+          "package": {
+            "name": "linux(-.*)?-headers-.*",
+            "version": "",
+            "language": "",
+            "type": "deb",
+            "location": "",
+            "upstream-name": "linux.*"
+          },
+          "vex-status": "",
+          "vex-justification": "",
+          "match-type": "exact-indirect-match"
+        },
+        {
+          "vulnerability": "",
+          "include-aliases": false,
+          "reason": "",
+          "namespace": "",
+          "fix-state": "",
+          "package": {
+            "name": "linux-libc-dev",
+            "version": "",
+            "language": "",
+            "type": "deb",
+            "location": "",
+            "upstream-name": "linux"
+          },
+          "vex-status": "",
+          "vex-justification": "",
+          "match-type": "exact-indirect-match"
+        },
+        {
+          "vulnerability": "",
+          "include-aliases": false,
+          "reason": "",
+          "namespace": "",
+          "fix-state": "",
+          "package": {
+            "name": "linux-kbuild-.*",
+            "version": "",
+            "language": "",
+            "type": "deb",
+            "location": "",
+            "upstream-name": "linux.*"
+          },
+          "vex-status": "",
+          "vex-justification": "",
+          "match-type": "exact-indirect-match"
+        }
+      ],
+      "exclude": [],
+      "externalSources": {
+        "enable": false,
+        "maven": {
+          "searchUpstreamBySha1": true,
+          "baseUrl": "https://search.maven.org/solrsearch/select",
+          "rateLimit": 300000000
+        }
+      },
+      "match": {
+        "java": {
+          "using-cpes": false
+        },
+        "jvm": {
+          "using-cpes": true
+        },
+        "dotnet": {
+          "using-cpes": false
+        },
+        "golang": {
+          "using-cpes": false,
+          "always-use-cpe-for-stdlib": false,
+          "allow-main-module-pseudo-version-comparison": false
+        },
+        "javascript": {
+          "using-cpes": false
+        },
+        "python": {
+          "using-cpes": false
+        },
+        "ruby": {
+          "using-cpes": false
+        },
+        "rust": {
+          "using-cpes": false
+        },
+        "hex": {
+          "using-cpes": false
+        },
+        "stock": {
+          "using-cpes": true
+        },
+        "dpkg": {
+          "using-cpes": false,
+          "missing-epoch-strategy": "zero",
+          "use-cpes-for-eol": false
+        },
+        "rpm": {
+          "using-cpes": false,
+          "missing-epoch-strategy": "auto",
+          "use-cpes-for-eol": false
+        }
+      },
+      "fail-on-severity": "",
+      "registry": {
+        "insecure-skip-tls-verify": false,
+        "insecure-use-http": false,
+        "ca-cert": ""
+      },
+      "show-suppressed": false,
+      "include-matcher-suppressions": false,
+      "by-cve": false,
+      "SortBy": {
+        "sort-by": "risk"
+      },
+      "name": "",
+      "default-image-pull-source": "",
+      "from": null,
+      "vex-documents": [],
+      "vex-add": [],
+      "match-upstream-kernel-headers": false,
+      "fix-channel": {
+        "redhat-eus": {
+          "apply": "auto",
+          "versions": ">= 8.0"
+        },
+        "ubuntu-esm": {
+          "apply": "auto",
+          "versions": ""
+        }
+      },
+      "timestamp": true,
+      "alerts": {
+        "enable-eol-distro-warnings": true
+      },
+      "db": {
+        "cache-dir": ".cache/grype-db",
+        "update-url": "https://grype.anchore.io/databases",
+        "ca-cert": "",
+        "auto-update": false,
+        "validate-by-hash-on-start": true,
+        "validate-age": true,
+        "max-allowed-built-age": 432000000000000,
+        "require-update-check": false,
+        "update-available-timeout": 30000000000,
+        "update-download-timeout": 300000000000,
+        "max-update-check-frequency": 7200000000000
+      },
+      "exp": {},
+      "dev": {
+        "db": {
+          "debug": false
+        }
+      }
+    },
+    "db": {
+      "status": {
+        "schemaVersion": "v6.1.9",
+        "from": "https://grype.anchore.io/databases/v6/vulnerability-db_v6.1.9_2026-09-29T00:34:00Z_1790663551.tar.zst?checksum=sha256%3A1e88821121dd3ec9bef68b4eb7c5524997f62da37215113ec256179d4e6da8cf",
+        "built": "2026-09-29T06:32:31Z",
+        "path": ".cache/grype-db/6/vulnerability.db",
+        "valid": true
+      },
+      "providers": {
+        "alma": {
+          "captured": "2026-09-29T00:34:01Z",
+          "input": "xxh64:2c410be7de40b2f7"
+        },
+        "alpine": {
+          "captured": "2026-09-29T00:34:31Z",
+          "input": "xxh64:15ce1a1494081fc0"
+        },
+        "amazon": {
+          "captured": "2026-09-29T00:34:29Z",
+          "input": "xxh64:7537c717b0864901"
+        },
+        "arch": {
+          "captured": "2026-09-29T00:34:03Z",
+          "input": "xxh64:8c3406a850424235"
+        },
+        "bitnami": {
+          "captured": "2026-09-29T00:34:02Z",
+          "input": "xxh64:a8bfd30bd37b4434"
+        },
+        "chainguard": {
+          "captured": "2026-09-29T00:34:11Z",
+          "input": "xxh64:2e2485ac2374a642"
+        },
+        "chainguard-libraries": {
+          "captured": "2026-09-29T00:34:06Z",
+          "input": "xxh64:875d4d096f788018"
+        },
+        "debian": {
+          "captured": "2026-09-29T00:34:41Z",
+          "input": "xxh64:8ceec73d37426857"
+        },
+        "echo": {
+          "captured": "2026-09-29T00:34:03Z",
+          "input": "xxh64:aa7f11442631dad3"
+        },
+        "eol": {
+          "captured": "2026-09-29T00:34:00Z",
+          "input": "xxh64:766ebbb5b1b7ba27"
+        },
+        "epss": {
+          "captured": "2026-09-29T00:34:08Z",
+          "input": "xxh64:62576b39a726f131"
+        },
+        "fedora": {
+          "captured": "2026-09-29T00:34:28Z",
+          "input": "xxh64:ae06c7c3200ae925"
+        },
+        "github": {
+          "captured": "2026-09-29T00:34:23Z",
+          "input": "xxh64:c57fe0f3e33e5b00"
+        },
+        "govulndb": {
+          "captured": "2026-09-29T00:34:19Z",
+          "input": "xxh64:1fe819315e296b60"
+        },
+        "hummingbird": {
+          "captured": "2026-09-29T00:36:38Z",
+          "input": "xxh64:5cebaa5a1c443bfe"
+        },
+        "kev": {
+          "captured": "2026-09-29T00:34:26Z",
+          "input": "xxh64:a7f7e45ad81b0d4e"
+        },
+        "mariner": {
+          "captured": "2026-09-29T00:34:07Z",
+          "input": "xxh64:076ee081c211255b"
+        },
+        "minimos": {
+          "captured": "2026-09-29T00:34:18Z",
+          "input": "xxh64:7d286954f22f9dd8"
+        },
+        "nvd": {
+          "captured": "2026-09-29T00:35:04Z",
+          "input": "xxh64:294e75ed40176c5b"
+        },
+        "oracle": {
+          "captured": "2026-09-29T00:34:08Z",
+          "input": "xxh64:4c875d39b0ddb79f"
+        },
+        "photon": {
+          "captured": "2026-09-29T00:34:08Z",
+          "input": "xxh64:b124d8c6386fff8a"
+        },
+        "rhel": {
+          "captured": "2026-09-29T00:35:22Z",
+          "input": "xxh64:6a3781fadfafa501"
+        },
+        "secureos": {
+          "captured": "2026-09-29T00:34:25Z",
+          "input": "xxh64:c909bfc6b2e55509"
+        },
+        "sles": {
+          "captured": "2026-09-29T00:35:56Z",
+          "input": "xxh64:6bc9457d28435855"
+        },
+        "ubuntu": {
+          "captured": "2026-09-29T00:35:02Z",
+          "input": "xxh64:77b9e2367e4fe4e0"
+        },
+        "wolfi": {
+          "captured": "2026-09-29T00:34:09Z",
+          "input": "xxh64:0d6df25a28569ce2"
+        }
+      }
+    },
+    "timestamp": "2026-10-01T15:14:50.241846-04:00"
+  }
+}

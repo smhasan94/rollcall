@@ -1,0 +1,7 @@
+# Hand-written malformed rules file: an unknown status on line 7.
+version: 1
+rules:
+  - id: bad
+    match:
+      name: mbedtls
+    status: probably_fine

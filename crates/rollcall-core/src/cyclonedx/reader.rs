@@ -44,6 +44,10 @@ pub struct Read {
     pub product: Product,
     /// What could not be represented and was dropped, in document order.
     pub warnings: Vec<Warning>,
+    /// Each `bom-ref` in the document that names a node of `product`, with that node's path.
+    /// rollcall derives its own refs from paths ([`BomRef::derive`]); this table maps them
+    /// back to the document's, which may differ for documents rollcall did not write.
+    pub refs: BTreeMap<String, NodePath>,
 }
 
 /// Why a CycloneDX document could not be read into the model.
@@ -610,6 +614,7 @@ pub fn read(document: &Value) -> Result<Read, ReadError> {
     Ok(Read {
         product,
         warnings: reader.warnings,
+        refs: reader.refs,
     })
 }
 

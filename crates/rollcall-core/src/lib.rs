@@ -4,7 +4,8 @@
 //! deterministic `bom-ref` derivation, and [`cyclonedx`] for CycloneDX 1.6 output, input and
 //! schema validation. [`zephyr`] ingests a Zephyr image (or sysbuild) build directory into
 //! the model, [`blob`] turns a blob manifest into opaque blob images, and [`merge`] combines
-//! separately generated products into one.
+//! separately generated products into one. [`vex`] evaluates VEX rules against scanner
+//! findings and build evidence.
 
 #![deny(missing_docs)]
 #![deny(
@@ -28,6 +29,7 @@ pub mod cyclonedx;
 pub mod identify;
 pub mod merge;
 pub mod model;
+pub mod vex;
 pub mod warning;
 pub mod zephyr;
 

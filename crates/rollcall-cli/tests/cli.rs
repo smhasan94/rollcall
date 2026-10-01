@@ -128,8 +128,14 @@ fn validate_without_file_is_usage_error_exit_64() {
 }
 
 #[test]
-fn vex_exits_64_not_implemented() {
-    assert_not_implemented("vex");
+fn vex_without_inputs_is_usage_error_exit_64() {
+    rollcall()
+        .arg("vex")
+        .assert()
+        .code(64)
+        .stdout(predicate::str::is_empty())
+        .stderr(predicate::str::contains("--findings <FILE>"))
+        .stderr(predicate::str::contains("--sbom <FILE>|--model <FILE>"));
 }
 
 #[test]

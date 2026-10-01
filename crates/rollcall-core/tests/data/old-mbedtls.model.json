@@ -1,0 +1,30 @@
+{
+  "schema": "rollcall-model/1",
+  "name": "old-tls-node",
+  "version": "1.0.0",
+  "images": [
+    {
+      "kind": "application",
+      "name": "old-tls-app",
+      "version": "1.0.0",
+      "components": [
+        {
+          "kind": "library",
+          "name": "mbedtls",
+          "version": "2.28.0",
+          "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0",
+          "cpe": "cpe:2.3:a:arm:mbed_tls:2.28.0:*:*:*:*:*:*:*",
+          "licence": "Apache-2.0 OR GPL-2.0-or-later"
+        },
+        {
+          "kind": "operating-system",
+          "name": "zephyr",
+          "version": "3.7.0",
+          "purl": "pkg:github/zephyrproject-rtos/zephyr@v3.7.0",
+          "cpe": "cpe:2.3:o:zephyrproject:zephyr:3.7.0:-:*:*:*:*:*:*",
+          "licence": "Apache-2.0"
+        }
+      ]
+    }
+  ]
+}

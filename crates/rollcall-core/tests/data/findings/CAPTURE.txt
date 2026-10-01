@@ -1,0 +1,10 @@
+# Written by scripts/capture-findings.sh; do not edit.
+captured: 2026-10-01
+grype: 0.119.0
+osv-scanner: 2.6.0 (queries osv.dev at capture time)
+grype db status:
+  Path:      .cache/grype-db/6/vulnerability.db
+  Schema:    v6.1.9
+  Built:     2026-09-29T06:32:31Z
+  From:      https://grype.anchore.io/databases/v6/vulnerability-db_v6.1.9_2026-09-29T00:34:00Z_1790663551.tar.zst?checksum=sha256%3A1e88821121dd3ec9bef68b4eb7c5524997f62da37215113ec256179d4e6da8cf
+  Status:    valid

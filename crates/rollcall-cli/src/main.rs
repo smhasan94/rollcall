@@ -28,7 +28,8 @@ fn main() -> ExitCode {
         Command::Generate(args) => commands::generate::run(args),
         Command::Validate(args) => commands::validate::run(args),
         Command::Merge(args) => commands::merge::run(args),
-        other @ (Command::Vex | Command::Scan | Command::Assay) => {
+        Command::Vex(args) => commands::vex::run(args),
+        other @ (Command::Scan | Command::Assay) => {
             eprintln!("rollcall {}: not implemented", other.name());
             EXIT_USAGE
         }

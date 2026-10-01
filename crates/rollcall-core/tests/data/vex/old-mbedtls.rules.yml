@@ -1,0 +1,70 @@
+# Hand-written starter rules for the old-mbedTLS VEX tests (SHA-111), evaluated against the
+# captured grype findings in ../findings/old-mbedtls.grype.json and the real Kconfig from
+# fixtures/zephyr/tls/http_server/zephyr/.config. Illustrative test data, not a security
+# assessment of Mbed TLS.
+version: 1
+rules:
+  # DTLS-only vulnerabilities: the TLS sample is built without DTLS.
+  - id: mbedtls-dtls-compiled-out
+    match:
+      purl: "pkg:github/mbed-tls/mbedtls@*"
+      cves: [CVE-2022-35409, CVE-2022-46393]
+    when:
+      - kconfig_off: CONFIG_MBEDTLS_SSL_PROTO_DTLS
+    status: not_affected
+    justification: vulnerable_code_not_present
+    detail: DTLS support (MBEDTLS_SSL_PROTO_DTLS) is not compiled in.
+
+  # mbedtls_x509_set_extensions is only reached when writing CSRs or certificates.
+  - id: mbedtls-x509-write-compiled-out
+    match:
+      name: mbedtls
+      cves: [CVE-2024-23775]
+    when:
+      - kconfig_off: CONFIG_MBEDTLS_X509_CSR_WRITE_C
+      - kconfig_off: CONFIG_MBEDTLS_X509_CRT_WRITE_C
+    status: not_affected
+    justification: code_not_present
+    detail: Neither X.509 CSR writing nor certificate writing is compiled in.
+
+  # PSA crypto is enabled in this build, so this condition is false and the rule does not
+  # apply: the finding falls through to the component-wide rules.
+  - id: mbedtls-psa-crypto-off
+    match:
+      name: mbedtls
+      cves: [CVE-2024-28960]
+    when:
+      - kconfig_off: CONFIG_MBEDTLS_PSA_CRYPTO_C
+    status: not_affected
+    justification: code_not_present
+
+  # The .config does not mention this symbol, so the rule needs evidence and the finding is
+  # left unresolved (with a template) rather than claimed not affected.
+  - id: mbedtls-pkcs12-off
+    match:
+      name: mbedtls
+      cves: [CVE-2021-43666]
+    when:
+      - kconfig_off: CONFIG_MBEDTLS_PKCS12_C
+    status: not_affected
+    justification: code_not_present
+
+  - id: mbedtls-2-28-before-2-28-2
+    match:
+      name: mbedtls
+      cves: [CVE-2022-46392]
+      versions: "<2.28.2"
+    status: affected
+    detail: Upgrade Mbed TLS to 2.28.2 or later.
+
+  # Component-wide fallbacks at equal specificity: priority decides.
+  - id: mbedtls-triage
+    priority: 1
+    match:
+      purl: "pkg:github/mbed-tls/mbedtls@*"
+    status: under_investigation
+    detail: Not yet triaged.
+  - id: mbedtls-assume-affected
+    match:
+      purl: "pkg:github/mbed-tls/mbedtls@*"
+    status: affected
