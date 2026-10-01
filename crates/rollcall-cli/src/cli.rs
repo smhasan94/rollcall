@@ -97,6 +97,16 @@ pub struct GenerateArgs {
     /// (e.g. MCUboot and the application) and merge them into one product
     #[arg(long, requires = "zephyr", conflicts_with = "model")]
     pub sysbuild: bool,
+    /// Put the product under this name and optional version (split at the last @, so
+    /// `@scope/widget@1.0.0`), exactly as `merge --product` would. With or without --sysbuild
+    #[arg(
+        long,
+        value_name = "NAME[@VERSION]",
+        value_parser = ProductSpec::from_str,
+        requires = "zephyr",
+        conflicts_with = "model"
+    )]
+    pub product: Option<ProductSpec>,
     /// Identifier database (YAML) mapping modules to upstream purl, cpe, supplier and
     /// version (with --zephyr). Modules it does not list are warned about once each, and a
     /// stub entry for each is printed to stderr

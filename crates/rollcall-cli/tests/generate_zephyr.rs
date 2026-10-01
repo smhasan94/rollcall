@@ -863,3 +863,191 @@ fn generate_identifier_db_and_workspace_flags_need_their_inputs_exit_64() {
     );
     assert_eq!(out.status.code(), Some(0), "{}", stderr_of(&out));
 }
+
+#[test]
+fn generate_sysbuild_product_names_and_versions_the_root_and_validates() {
+    let dir = tempfile::tempdir().unwrap();
+    let out_path = dir.path().join("widget.cdx.json");
+    rollcall()
+        .arg("generate")
+        .arg("--zephyr")
+        .arg(fixtures_root().join("baseline"))
+        .arg("--west-list")
+        .arg(west_list("baseline"))
+        .args([
+            "--sysbuild",
+            "--product",
+            "widget@1.2.3",
+            "--timestamp",
+            GOLDEN_TIMESTAMP,
+            "-o",
+        ])
+        .arg(&out_path)
+        .assert()
+        .code(0)
+        .stdout("");
+    let doc: Value = serde_json::from_slice(&fs::read(&out_path).unwrap()).unwrap();
+    let root = &doc["metadata"]["component"];
+    assert_eq!(root["name"], "widget", "{root}");
+    assert_eq!(root["version"], "1.2.3", "{root}");
+    // Both sysbuild images are still there, under the new root.
+    let mut images: Vec<&str> = doc["components"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|c| c["name"].as_str().unwrap())
+        .collect();
+    images.sort_unstable();
+    assert_eq!(images, ["mcuboot", "with_mcuboot"]);
+    let out = rollcall()
+        .args(["validate", "--schema"])
+        .arg(&out_path)
+        .output()
+        .unwrap();
+    assert_eq!(out.status.code(), Some(0), "{}", stderr_of(&out));
+    assert_eq!(
+        String::from_utf8(out.stdout).unwrap(),
+        format!("{}: valid CycloneDX 1.6\n", out_path.display())
+    );
+}
+
+#[test]
+fn generate_product_equals_generate_plus_merge_product_bytes() {
+    let dir = tempfile::tempdir().unwrap();
+    let west = west_list("baseline").display().to_string();
+    let db = stub_db().display().to_string();
+    let inputs: [(&str, PathBuf, &[&str]); 2] = [
+        (
+            "sysbuild",
+            fixtures_root().join("baseline"),
+            &["--sysbuild"],
+        ),
+        ("single", fixture_build("baseline", "with_mcuboot"), &[]),
+    ];
+    let options: [Vec<&str>; 2] = [
+        vec!["--west-list", &west],
+        vec!["--west-list", &west, "--identifier-db", &db],
+    ];
+    for (label, input, mode) in &inputs {
+        for opts in &options {
+            for spec in ["widget@1.2.3", "widget", "@scope/widget@1.0.0"] {
+                let context = format!("{label} {opts:?} --product {spec}");
+                let mut extra: Vec<&str> = mode.to_vec();
+                extra.extend(opts.iter().copied());
+                extra.extend(["--timestamp", GOLDEN_TIMESTAMP]);
+
+                // The manual pipeline: generate, then merge --product.
+                let generated = dir.path().join("generated.cdx.json");
+                let mut plain_args = extra.clone();
+                plain_args.push("-o");
+                let plain = rollcall()
+                    .arg("generate")
+                    .arg("--zephyr")
+                    .arg(input)
+                    .args(&plain_args)
+                    .arg(&generated)
+                    .output()
+                    .unwrap();
+                assert_eq!(
+                    plain.status.code(),
+                    Some(0),
+                    "{context}: {}",
+                    stderr_of(&plain)
+                );
+                let manual = rollcall()
+                    .arg("merge")
+                    .arg(&generated)
+                    .args(["--product", spec, "--timestamp", GOLDEN_TIMESTAMP])
+                    .output()
+                    .unwrap();
+                assert_eq!(
+                    manual.status.code(),
+                    Some(0),
+                    "{context}: {}",
+                    stderr_of(&manual)
+                );
+
+                // One step.
+                let mut one_step = extra.clone();
+                one_step.extend(["--product", spec]);
+                let direct = generate_zephyr(input, &one_step);
+                assert_eq!(
+                    direct.status.code(),
+                    Some(0),
+                    "{context}: {}",
+                    stderr_of(&direct)
+                );
+                assert!(
+                    direct.stdout == manual.stdout,
+                    "{context}: generate --product differs from generate + merge --product"
+                );
+                // Warnings and identifier-database stubs are unchanged by --product.
+                assert_eq!(stderr_of(&direct), stderr_of(&plain), "{context}");
+                if opts.len() > 2 {
+                    assert!(
+                        stderr_of(&direct).contains("paste and fill in"),
+                        "{context}: {}",
+                        stderr_of(&direct)
+                    );
+                }
+            }
+        }
+    }
+}
+
+#[test]
+fn generate_invalid_product_spec_exit_64() {
+    for spec in ["", "@scope/widget", "@1.2.3", "widget@"] {
+        for mode in [&["--sysbuild"][..], &[][..]] {
+            let input = if mode.is_empty() {
+                fixture_build("baseline", "with_mcuboot")
+            } else {
+                fixtures_root().join("baseline")
+            };
+            let mut extra = mode.to_vec();
+            extra.extend(["--product", spec]);
+            let out = generate_zephyr(&input, &extra);
+            let stderr = stderr_of(&out);
+            assert_eq!(out.status.code(), Some(64), "{spec:?} {mode:?}: {stderr}");
+            assert!(out.stdout.is_empty(), "{spec:?} {mode:?}");
+            assert!(!stderr.contains("panicked"), "{stderr}");
+            assert!(
+                stderr.contains("--product <NAME[@VERSION]>"),
+                "{spec:?} {mode:?}: {stderr}"
+            );
+        }
+    }
+}
+
+#[test]
+fn generate_product_requires_zephyr_exit_64() {
+    let model = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("../rollcall-core/tests/data/minimal.model.json");
+    let out = rollcall()
+        .arg("generate")
+        .arg("--model")
+        .arg(&model)
+        .args(["--product", "widget@1.2.3"])
+        .output()
+        .unwrap();
+    let stderr = stderr_of(&out);
+    assert_eq!(out.status.code(), Some(64), "{stderr}");
+    assert!(out.stdout.is_empty());
+    assert!(
+        stderr.contains("cannot be used with")
+            && stderr.contains("'--product <NAME[@VERSION]>'")
+            && stderr.contains("'--model <FILE>'"),
+        "{stderr}"
+    );
+    // With no input at all, the missing --zephyr is reported.
+    let out = rollcall()
+        .args(["generate", "--product", "widget"])
+        .output()
+        .unwrap();
+    assert_eq!(out.status.code(), Some(64));
+    assert!(
+        stderr_of(&out).contains("--zephyr <DIR>"),
+        "{}",
+        stderr_of(&out)
+    );
+}

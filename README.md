@@ -63,6 +63,10 @@ rollcall validate --schema product.cdx.json
 # A sysbuild build (MCUboot + application) as one product, in one step...
 rollcall generate --zephyr build --sysbuild --west-list west-list.txt -o product.cdx.json
 
+# Name and version the product while generating it. Byte-identical to generate --sysbuild
+# followed by merge --product widget@1.2.3.
+rollcall generate --zephyr build --sysbuild --product widget@1.2.3 -o widget.cdx.json
+
 # ...or by hand: generate each image, then merge them under one product. The result is
 # byte-identical to --sysbuild when --product names the application.
 rollcall generate --zephyr build/app --west-list west-list.txt -o app.cdx.json
@@ -79,8 +83,15 @@ always produce byte-identical output; changing only `--timestamp` changes only t
 `rollcall_core::cyclonedx` module docs (`cargo doc -p rollcall-core --open`).
 
 Exactly one of `--model` and `--zephyr` is required; `--west-list`, `--include-sdk`,
-`--sysbuild` and `--identifier-db` only go with `--zephyr`, and `--workspace` needs both
-`--identifier-db` and `--west-list`.
+`--sysbuild`, `--product` and `--identifier-db` only go with `--zephyr`, and `--workspace`
+needs both `--identifier-db` and `--west-list`.
+
+`--product NAME[@VERSION]` puts the generated images under that product exactly as
+`merge --product` does (same parsing: split at the last `@`, so `@scope/widget@1.0.0`), and
+the output is byte-identical to `generate` followed by `merge --product` with the same spec.
+It works with or without `--sysbuild`: without it, it renames and versions the single-image
+product. An invalid spec (an empty name or version, or `@scope/widget` with no version) is a
+usage error (exit 64).
 
 ### Merging
 
@@ -127,7 +138,7 @@ sysbuild that is `build/<app>/`, not `build/`; the top-level directory is refuse
 message naming the image directory to use), or the sysbuild top-level directory with
 `--sysbuild`, which reads the image list from its `build_info.yml` (`domains.yaml` is not
 used), ingests every image (`--west-list` and `--include-sdk` apply to each) and merges them
-under a product named after the `MAIN` application. Warnings are prefixed with the image
+under a product named after the `MAIN` application, unless `--product` names it. Warnings are prefixed with the image
 name. Two images that ingest to the same image (e.g. a second MCUboot build next to
 `mcuboot`, both `bootloader:mcuboot`) are an error naming both directories (exit 65). Run `west spdx --init -d <build>` before the
 build and `west spdx -d <build>` after it to create `spdx/`.
