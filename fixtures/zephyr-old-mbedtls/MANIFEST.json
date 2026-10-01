@@ -22,22 +22,22 @@
     {
       "bytes": 1266,
       "path": "old-mbedtls/mbedtls/spdx/app.spdx",
-      "sha256": "1da389f76cdcaa5d96220d983a3e06321fbbaf848e3440ee5598b11321093d28"
+      "sha256": "7638368d2f04c31b1c2b21b9d2fbe45f4d7de03b3409d55bb20a8fed5bf7c8a2"
     },
     {
       "bytes": 102888,
       "path": "old-mbedtls/mbedtls/spdx/build.spdx",
-      "sha256": "f304e4aad1336b7fff578b676a0fbfa8ae5ec6d40e7c3159b3b131fe82929010"
+      "sha256": "4792b976fdf07de58fdc9943b60d090ef343e0ec553ebebbabc5b54c70bb68dc"
     },
     {
       "bytes": 2161,
       "path": "old-mbedtls/mbedtls/spdx/modules-deps.spdx",
-      "sha256": "809a3a49e51dfc762e4bc0245570ae8a0554520784279331918f9e43d0829094"
+      "sha256": "a021a20f20eb026fb809a1832cbe2344ef6970e0830ff7a35563753a43e19f4c"
     },
     {
       "bytes": 83086,
       "path": "old-mbedtls/mbedtls/spdx/zephyr.spdx",
-      "sha256": "6cebf9ed9def7145c05bb7f6e45bcbe5e1b18f3a29a3d53bdfb2993ffb5a0441"
+      "sha256": "20e3b4a0c527e99572bf92961ea1686273bc5271854b7b4615c2e84f0da05cc8"
     },
     {
       "bytes": 46255,
@@ -46,16 +46,16 @@
       "transform": "normalise-paths"
     },
     {
-      "bytes": 187224,
+      "bytes": 187128,
       "path": "old-mbedtls/mbedtls/zephyr/zephyr.elf",
-      "sha256": "a0927238010643d0d5b5c4826e0055a5a54f421c786df13220ad7ad66764aae9",
-      "source_sha256": "4e317e107a703c1389d23f55490298f0f1dffeb5917a259ae5611a1f658b0c87",
+      "sha256": "3d0386fea8272e8417844ff838a23f2c8b2da445cd071668f23990ac5e4cfe08",
+      "source_sha256": "eb6369e6480a295af75c6b331a17856eabb5ceaf6515879f6229ddeff8f82f2e",
       "transform": "strip-debug"
     },
     {
       "bytes": 594489,
       "path": "old-mbedtls/mbedtls/zephyr/zephyr.map",
-      "sha256": "9426a0f1be80b2297e26d3c05aeacdf15cf0a793cf9305235bd6e5a749f3617d",
+      "sha256": "278976ac75b7e801240025b232820f2120bd142fdaffc407cf7ad110906a1504",
       "transform": "normalise-paths"
     },
     {
@@ -65,9 +65,9 @@
       "transform": "normalise-paths"
     },
     {
-      "bytes": 266852,
+      "bytes": 266588,
       "path": "old-mbedtls/mbedtls/zephyr/zephyr.signed.hex",
-      "sha256": "1ded2e98ecde5d3ee0a4d010e0dff16ab5d89aa0e2d18d8e7aa8abb849ecc993"
+      "sha256": "74a43cc0e7b829d501448cff3cf23259d9192c11e4305db61a0f3f581d498631"
     },
     {
       "bytes": 2111,
@@ -78,22 +78,22 @@
     {
       "bytes": 3007,
       "path": "old-mbedtls/mcuboot/spdx/app.spdx",
-      "sha256": "a5dfbf01445c4a06dfd37999674013545dab76a314a9c165a6a286563f873e5d"
+      "sha256": "97b013e9e5ed08bbe54cdef9975bbb11b17773554daae88fdd5b6a9fd882647f"
     },
     {
       "bytes": 80389,
       "path": "old-mbedtls/mcuboot/spdx/build.spdx",
-      "sha256": "f0936c94ed1a277658aaff35071107110e3cdcb38d990206a713bbecb0dd543c"
+      "sha256": "c2e7da502dc9c24445d9ae614d939a9b999ab3220d212b7f16887c7586b8c4b6"
     },
     {
       "bytes": 2161,
       "path": "old-mbedtls/mcuboot/spdx/modules-deps.spdx",
-      "sha256": "bd42128d06cc4f770db7a501d4c3604302dae040990d7766f0828384e8bd4081"
+      "sha256": "1ad6caef70f2977dfc95ea01ece6f4ae23267dfe33f1590864720ac0a957f6a6"
     },
     {
       "bytes": 74013,
       "path": "old-mbedtls/mcuboot/spdx/zephyr.spdx",
-      "sha256": "279664bda7c8b299e8f3fcc34d9872205855baa438dca7adfca078dc0620a9c3"
+      "sha256": "bcd271cbc8718a8583b7f21de5e3681db809af6f82da84303618b2656b7f699d"
     },
     {
       "bytes": 46585,
@@ -105,7 +105,7 @@
       "bytes": 98328,
       "path": "old-mbedtls/mcuboot/zephyr/zephyr.elf",
       "sha256": "bc38fb9f9e871b2c8fd338274cedcbbe0fea915fd92fc406f842b7f8e106b832",
-      "source_sha256": "e059b50489e43cbc678a587055aac1dfd3315e1f96236c4d6f753323d5cb9b20",
+      "source_sha256": "acc6e0a2c5f0a9bd04b8fe8c2fb79d64b39e95793ee069db7f87de7d50d68792",
       "transform": "strip-debug"
     },
     {
@@ -116,7 +116,7 @@
     {
       "bytes": 520535,
       "path": "old-mbedtls/mcuboot/zephyr/zephyr.map",
-      "sha256": "36c32d52a3f76e295a05e09d177b4096452f5c09471c3768fc94ae637fcb0840",
+      "sha256": "6734c39b13dfbb0eff21fe1bb737696a5a21aedb5f08c65ea489846142cdf773",
       "transform": "normalise-paths"
     },
     {
@@ -140,8 +140,8 @@
   "format": "rollcall-fixtures/1",
   "generator": "scripts/regen-fixtures.sh",
   "host": {
-    "arch": "aarch64",
-    "os": "macos"
+    "arch": "x86_64",
+    "os": "linux"
   },
   "modules": [
     {
@@ -235,19 +235,19 @@
   "sdk": {
     "bundles": {
       "arm-zephyr-eabi": {
-        "file": "toolchain_macos-aarch64_arm-zephyr-eabi.tar.xz",
-        "sha256": "83bc167273d9208121c2ebe67a0f4a29910efeba2c0d47928f17e85e88f82007"
+        "file": "toolchain_linux-x86_64_arm-zephyr-eabi.tar.xz",
+        "sha256": "ecbfb362a9347b247848d5d8ffa7bd7ff566689bbb47cddeb7e504c87f143d17"
       },
       "minimal": {
-        "file": "zephyr-sdk-0.17.2_macos-aarch64_minimal.tar.xz",
-        "sha256": "ef9d34fda0a92037c98b7c28824e536f9418f92b3eeecc15098641e843c7d7c8"
+        "file": "zephyr-sdk-0.17.2_linux-x86_64_minimal.tar.xz",
+        "sha256": "a95082150d5df6255f682f05eab00228b858444b581db90ec47e5ded090ca74d"
       }
     },
     "gcc_version": "12.2.0",
-    "host": "macos-aarch64",
+    "host": "linux-x86_64",
     "version": "0.17.2"
   },
-  "total_bytes": 2213814,
+  "total_bytes": 2213454,
   "variants": {
     "old-mbedtls": {
       "build_command": [
@@ -266,8 +266,8 @@
       ],
       "built_with": {
         "host": {
-          "arch": "aarch64",
-          "os": "macos"
+          "arch": "x86_64",
+          "os": "linux"
         },
         "python": {
           "PyYAML": "6.0.3",

@@ -4,7 +4,7 @@ SPDXID: SPDXRef-DOCUMENT
 DocumentName: modules-deps
 DocumentNamespace: http://spdx.org/spdxdocs/rollcall-old-mbedtls-mbedtls/modules-deps
 Creator: Tool: Zephyr SPDX builder
-Created: 2026-10-01T20:27:50Z
+Created: 2026-10-01T20:48:20Z
 
 Relationship: SPDXRef-DOCUMENT DESCRIBES SPDXRef-cmsis-deps
 Relationship: SPDXRef-DOCUMENT DESCRIBES SPDXRef-cmsis-6-deps
