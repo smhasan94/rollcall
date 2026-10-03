@@ -1,5 +1,5 @@
 # Written by scripts/capture-findings.sh; do not edit.
-captured: 2026-10-01
+captured: 2026-10-03
 grype: 0.119.0
 osv-scanner: 2.6.0 (queries osv.dev at capture time)
 grype db status:

@@ -74,6 +74,10 @@ pub struct Match {
 pub enum Condition {
     /// `kconfig_off: CONFIG_X` — the Kconfig symbol is `n` or not set.
     KconfigOff(String),
+    /// `kconfig_equals: {CONFIG_X: value}` — the Kconfig symbol's value, exactly as written in
+    /// the `.config` (`y`, `n` for `is not set`, `m`, a number or hex number as text, or a
+    /// string's contents), is `value`.
+    KconfigEquals(String, String),
     /// `cargo_feature_off: name` — the Cargo feature is not enabled.
     CargoFeatureOff(String),
     /// `symbol_not_linked: name` — the symbol is not in the linked image.
@@ -85,6 +89,7 @@ pub enum Condition {
 /// The condition keys, as written in YAML.
 pub const CONDITIONS: &[&str] = &[
     "kconfig_off",
+    "kconfig_equals",
     "cargo_feature_off",
     "symbol_not_linked",
     "version_in",
@@ -94,6 +99,7 @@ impl fmt::Display for Condition {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::KconfigOff(s) => write!(f, "kconfig_off: {s}"),
+            Self::KconfigEquals(s, v) => write!(f, "kconfig_equals: {s}={v:?}"),
             Self::CargoFeatureOff(s) => write!(f, "cargo_feature_off: {s}"),
             Self::SymbolNotLinked(s) => write!(f, "symbol_not_linked: {s}"),
             Self::VersionIn(r) => write!(f, "version_in: {r}"),
@@ -608,8 +614,12 @@ impl RawRule {
     }
 }
 
+/// A Kconfig symbol name: a letter or `_`, then letters, digits and `_`.
 fn is_kconfig_symbol(s: &str) -> bool {
-    !s.is_empty() && s.bytes().all(|b| b.is_ascii_alphanumeric() || b == b'_')
+    s.bytes()
+        .next()
+        .is_some_and(|b| b.is_ascii_alphabetic() || b == b'_')
+        && s.bytes().all(|b| b.is_ascii_alphanumeric() || b == b'_')
 }
 
 fn is_word(s: &str) -> bool {
@@ -642,10 +652,24 @@ impl<'de> Deserialize<'de> for Condition {
                         let symbol: String = map.next_value()?;
                         if !is_kconfig_symbol(&symbol) {
                             return Err(de::Error::custom(format!(
-                                "kconfig_off: {symbol:?} is not a Kconfig symbol ([A-Za-z0-9_]+)"
+                                "kconfig_off: {symbol:?} is not a Kconfig symbol ([A-Za-z_][A-Za-z0-9_]*)"
                             )));
                         }
                         Condition::KconfigOff(symbol)
+                    }
+                    "kconfig_equals" => {
+                        let OnePair(symbol, value) = map.next_value()?;
+                        if !is_kconfig_symbol(&symbol) {
+                            return Err(de::Error::custom(format!(
+                                "kconfig_equals: {symbol:?} is not a Kconfig symbol ([A-Za-z_][A-Za-z0-9_]*)"
+                            )));
+                        }
+                        if value.chars().any(|c| c == '\n' || c == '\r') {
+                            return Err(de::Error::custom(format!(
+                                "kconfig_equals: the value of {symbol} spans lines"
+                            )));
+                        }
+                        Condition::KconfigEquals(symbol, value)
                     }
                     "cargo_feature_off" => {
                         let feature: String = map.next_value()?;
@@ -685,6 +709,45 @@ impl<'de> Deserialize<'de> for Condition {
             }
         }
         d.deserialize_map(ConditionVisitor)
+    }
+}
+
+/// A `kconfig_equals` mapping: exactly one `CONFIG_X: value` entry, the value a string.
+/// A second entry, including a repeated key (which a map type would silently collapse), is
+/// an error.
+struct OnePair(String, String);
+
+impl<'de> Deserialize<'de> for OnePair {
+    fn deserialize<D: Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
+        struct PairVisitor;
+        impl<'de> Visitor<'de> for PairVisitor {
+            type Value = OnePair;
+
+            fn expecting(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+                f.write_str("a map with one `CONFIG_X: value` entry")
+            }
+
+            fn visit_map<A: MapAccess<'de>>(self, mut map: A) -> Result<OnePair, A::Error> {
+                let Some(symbol) = map.next_key::<String>()? else {
+                    return Err(de::Error::custom(
+                        "kconfig_equals: write one `CONFIG_X: value` mapping",
+                    ));
+                };
+                let value: String = map.next_value()?;
+                if let Some(next) = map.next_key::<String>()? {
+                    return Err(de::Error::custom(if next == symbol {
+                        format!("kconfig_equals: duplicate key {symbol}")
+                    } else {
+                        format!(
+                            "kconfig_equals: write one `CONFIG_X: value` mapping, found \
+                             {symbol} and {next}; use one condition per symbol"
+                        )
+                    }));
+                }
+                Ok(OnePair(symbol, value))
+            }
+        }
+        d.deserialize_map(PairVisitor)
     }
 }
 
@@ -988,6 +1051,86 @@ rules:
                 .rules
                 .is_empty()
         );
+    }
+
+    #[test]
+    fn kconfig_equals_values_are_kept_as_written() {
+        for (written, kept) in [
+            ("0x10", "0x10"),
+            ("\"0x10\"", "0x10"),
+            ("4", "4"),
+            ("y", "y"),
+            ("true", "true"),
+            ("~", "~"),
+            ("config-mbedtls.h", "config-mbedtls.h"),
+        ] {
+            let set = parse_rules(
+                &one_rule(&format!(
+                    "match: {{name: x}}\nwhen:\n  - kconfig_equals: {{CONFIG_A: {written}}}\nstatus: fixed\n"
+                )),
+                "r.yml",
+            )
+            .unwrap_or_else(|e| panic!("{written}: {e}"));
+            assert_eq!(
+                set.rules[0].when,
+                [Condition::KconfigEquals(
+                    "CONFIG_A".to_owned(),
+                    kept.to_owned()
+                )],
+                "{written}"
+            );
+        }
+    }
+
+    #[test]
+    fn kconfig_equals_parses_and_rejects_bad_forms() {
+        let set = parse_rules(
+            &one_rule(
+                "match: {name: x}\nwhen:\n  - kconfig_equals: {CONFIG_MBEDTLS_CFG_FILE: config-mbedtls.h}\n  - kconfig_equals: {CONFIG_N: \"4\"}\nstatus: fixed\n",
+            ),
+            "r.yml",
+        )
+        .unwrap();
+        assert_eq!(
+            set.rules[0].when,
+            [
+                Condition::KconfigEquals(
+                    "CONFIG_MBEDTLS_CFG_FILE".to_owned(),
+                    "config-mbedtls.h".to_owned()
+                ),
+                Condition::KconfigEquals("CONFIG_N".to_owned(), "4".to_owned()),
+            ]
+        );
+        assert_eq!(
+            set.rules[0].when[0].to_string(),
+            "kconfig_equals: CONFIG_MBEDTLS_CFG_FILE=\"config-mbedtls.h\""
+        );
+        for (body, message) in [
+            ("kconfig_equals: CONFIG_A", "expected a map"),
+            ("kconfig_equals: {}", "one `CONFIG_X: value` mapping"),
+            (
+                "kconfig_equals: {CONFIG_A: y, CONFIG_B: n}",
+                "one `CONFIG_X: value` mapping",
+            ),
+            (
+                "kconfig_equals: {CONFIG_A: y, CONFIG_A: n}",
+                "duplicate key CONFIG_A",
+            ),
+            ("kconfig_equals: {1: y}", "is not a Kconfig symbol"),
+            ("kconfig_off: 1CONFIG_A", "is not a Kconfig symbol"),
+            (
+                "kconfig_equals: {\"CONFIG A\": y}",
+                "is not a Kconfig symbol",
+            ),
+            ("kconfig_equals: {CONFIG_A: [y]}", "expected a string"),
+            ("kconfig_equals: {CONFIG_A: \"a\\nb\"}", "spans lines"),
+        ] {
+            let e = err(&one_rule(&format!(
+                "match: {{name: x}}\nwhen:\n  - {body}\nstatus: fixed\n"
+            )));
+            assert_eq!(e.line, Some(6), "{body}: {e}");
+            assert!(e.message.contains(message), "{body}: {e}");
+        }
     }
 
     #[test]

@@ -1,9 +1,10 @@
 //! `rollcall vex`: triage scanner findings for an SBOM with VEX rules and build evidence, and
 //! write the resulting statements as rollcall's `rollcall-vex/1` report, a CycloneDX 1.6 VEX
 //! document, an OpenVEX document, or embedded in the SBOM; optionally signed. `rollcall vex
-//! verify` checks a signature.
+//! verify` checks a signature; `rollcall vex lint` checks rules files.
 
 mod cosign;
+mod lint;
 mod sign;
 mod verify;
 
@@ -28,8 +29,10 @@ type Failure = (u8, String);
 /// Runs `rollcall vex` (or `rollcall vex verify`), returning the exit code. Unresolved
 /// findings and rule conflicts are summarised on stderr; they do not fail the command.
 pub fn run(args: VexArgs) -> u8 {
-    if let Some(VexCommand::Verify(verify)) = &args.command {
-        return verify::run(verify);
+    match &args.command {
+        Some(VexCommand::Verify(verify)) => return verify::run(verify),
+        Some(VexCommand::Lint(lint)) => return lint::run(lint),
+        None => {}
     }
     match produce(&args) {
         Ok(()) => 0,
@@ -235,8 +238,26 @@ fn load_findings(args: &VexArgs) -> Result<Vec<Finding>, Failure> {
     Ok(all)
 }
 
+/// The embedded starter rule pack (`rollcall_identifiers::VEX_RULES_YAML`).
+fn starter_rules() -> Result<RuleSet, Failure> {
+    vex::parse_rules(
+        rollcall_identifiers::VEX_RULES_YAML,
+        rollcall_identifiers::VEX_RULES_FILE_NAME,
+    )
+    .map_err(|e| {
+        (
+            EXIT_SOFTWARE,
+            format!("the embedded starter rule pack: {e}"),
+        )
+    })
+}
+
 fn load_rules(args: &VexArgs) -> Result<RuleSet, Failure> {
-    let mut rules = RuleSet::default();
+    let mut rules = if args.starter_rules {
+        starter_rules()?
+    } else {
+        RuleSet::default()
+    };
     for path in &args.rules {
         let name = path.display().to_string();
         // RuleError already starts with the file name.

@@ -1,0 +1,214 @@
+# rollcall's starter VEX rule pack (SHA-115), loaded by `rollcall vex --starter-rules`.
+#
+# Every rule says `not_affected` / `code_not_present` for a vulnerability whose code the build
+# leaves out, and only when the build's own evidence proves it: a Kconfig symbol that is `n`
+# or "is not set" in the image's .config, or a function the linker map shows is not linked.
+# A symbol the .config does not mention proves nothing, so the rule then leaves the finding
+# unresolved. The format, the starter pack and worked examples are in docs/vex-rules.md;
+# `rollcall vex lint --starter-rules --lint-starter-symbols` checks every Kconfig symbol here
+# exists.
+#
+# Each CVE was checked against its NVD record and its upstream advisory (Mbed TLS:
+# https://mbed-tls.readthedocs.io/en/latest/security-advisories/, Zephyr: the GHSA named in
+# the NVD record). This is a starting point, not a security assessment of your product: read
+# each rule before you rely on it.
+version: 1
+rules:
+  # --- Mbed TLS: modules compiled out by Kconfig ------------------------------------------
+  #
+  # Zephyr turns these Kconfig symbols into Mbed TLS options in its own configuration file,
+  # modules/mbedtls/configs/config-mbedtls.h (checked for Zephyr v4.2.0, Mbed TLS 3.6.4). The
+  # rules therefore apply only when the image really uses that file:
+  #
+  # - CONFIG_MBEDTLS_CFG_FILE must be "config-mbedtls.h". In v4.2.0 its default is that file,
+  #   and its prompt is hidden unless CONFIG_CUSTOM_MBEDTLS_CFG_FILE is set; but MCUboot
+  #   (bootloader/mcuboot/boot/zephyr/Kconfig) changes the default to "mcuboot-mbedtls-cfg.h"
+  #   with BOOT_USE_TINYCRYPT, or BOOT_USE_MBEDTLS without MBEDTLS_BUILTIN. Any other file can
+  #   turn a module on whatever Kconfig says, so the value is checked (kconfig_equals).
+  # - CONFIG_CUSTOM_MBEDTLS_CFG_FILE and CONFIG_MBEDTLS_USER_CONFIG_ENABLE must be off: a
+  #   custom file of the same name, or a user file included after it, could do the same.
+  # - Not checkable: an application include directory with its own config-mbedtls.h,
+  #   earlier on the include path, shadows Zephyr's (docs/vex-rules.md says so).
+  #
+  # Zephyr v4.3 (Mbed TLS 3.6.5) renamed the TLS symbols (CONFIG_MBEDTLS_TLS_VERSION_1_3 is
+  # deprecated there and only selects CONFIG_MBEDTLS_SSL_PROTO_TLS1_3) and the configuration
+  # file symbol (CONFIG_MBEDTLS_CONFIG_FILE), so these rules match Mbed TLS before 3.6.5 only.
+
+  # CVE-2026-34873: client impersonation while resuming a TLS 1.3 session, on the TLS 1.3
+  # server (Mbed TLS 3.5.0 to 3.6.5 and 4.0.0; advisory
+  # mbedtls-security-advisory-2026-03-client-impersonation-while-resuming-tls13-session).
+  - id: mbedtls-tls13-compiled-out
+    match:
+      name: mbedtls
+      cves: [CVE-2026-34873]
+      versions: "<3.6.5"
+    when:
+      - kconfig_off: CONFIG_MBEDTLS_TLS_VERSION_1_3
+      - kconfig_equals: {CONFIG_MBEDTLS_CFG_FILE: config-mbedtls.h}
+      - kconfig_off: CONFIG_CUSTOM_MBEDTLS_CFG_FILE
+      - kconfig_off: CONFIG_MBEDTLS_USER_CONFIG_ENABLE
+    status: not_affected
+    justification: code_not_present
+    detail: >-
+      TLS 1.3 is compiled out: the image uses Zephyr's config-mbedtls.h
+      (CONFIG_MBEDTLS_CFG_FILE) with CONFIG_MBEDTLS_TLS_VERSION_1_3 not set, so
+      MBEDTLS_SSL_PROTO_TLS1_3 is not defined and the TLS 1.3 code, session resumption
+      included, is not built.
+
+  # CVE-2026-34874: NULL pointer dereference in mbedtls_x509_string_to_names(), reached only
+  # through mbedtls_x509write_csr_set_subject_name(), mbedtls_x509write_crt_set_subject_name()
+  # and mbedtls_x509write_crt_set_issuer_name() (Mbed TLS 3.5.0 to 3.6.5 and 4.0.0; advisory
+  # mbedtls-security-advisory-2026-03-null-pointer-dereference-x509). The function is in
+  # library/x509_create.c, which builds nothing without MBEDTLS_X509_CREATE_C;
+  # config-mbedtls.h defines that only with CONFIG_MBEDTLS_X509_CSR_WRITE_C, and certificate
+  # writing (CONFIG_MBEDTLS_X509_CRT_WRITE_C) needs it, so both must be off.
+  # (CRT_WRITE_C without CREATE_C does not build: it is an #error in Mbed TLS 3.6.4's
+  # include/mbedtls/check_config.h.)
+  #
+  # (A PSA Crypto rule for CVE-2026-34872 and CVE-2026-34875 was dropped: with
+  # CONFIG_BUILD_WITH_TFM, TF-M builds PSA Crypto from this same Mbed TLS module into the
+  # secure image while the application's CONFIG_MBEDTLS_PSA_CRYPTO_C is off, and on boards
+  # without TrustZone the .config does not mention CONFIG_BUILD_WITH_TFM at all, so a build
+  # cannot prove TF-M is absent.)
+  - id: mbedtls-x509-write-compiled-out
+    match:
+      name: mbedtls
+      cves: [CVE-2026-34874]
+      versions: "<3.6.5"
+    when:
+      - kconfig_off: CONFIG_MBEDTLS_X509_CSR_WRITE_C
+      - kconfig_off: CONFIG_MBEDTLS_X509_CRT_WRITE_C
+      - kconfig_equals: {CONFIG_MBEDTLS_CFG_FILE: config-mbedtls.h}
+      - kconfig_off: CONFIG_CUSTOM_MBEDTLS_CFG_FILE
+      - kconfig_off: CONFIG_MBEDTLS_USER_CONFIG_ENABLE
+    status: not_affected
+    justification: code_not_present
+    detail: >-
+      X.509 writing is compiled out: the image uses Zephyr's config-mbedtls.h
+      (CONFIG_MBEDTLS_CFG_FILE) with CONFIG_MBEDTLS_X509_CSR_WRITE_C and
+      CONFIG_MBEDTLS_X509_CRT_WRITE_C not set, so MBEDTLS_X509_CREATE_C is not defined and
+      mbedtls_x509_string_to_names() is not built.
+
+  # --- Mbed TLS: TLS server or client side not linked -------------------------------------
+  #
+  # Zephyr has no Kconfig switch for the TLS client or server alone, and the linker does not
+  # drop the unused side either: mbedtls_ssl_handshake_step() calls both the client and the
+  # server state machine, so any image that runs a TLS handshake links both (the TLS sample
+  # fixtures/zephyr/tls/http_server, a server, links mbedtls_ssl_handshake_client_step). In
+  # practice these rules fire only when that side's handshake really is not in the image,
+  # which on stock Zephyr usually means the image does not use TLS at all.
+  #
+  # The evidence is the image's linker map (symbol_not_linked, both state machines of that
+  # side, TLS 1.2 and TLS 1.3), read conservatively by rollcall_core::linker_map::
+  # linked_functions. `rollcall vex` cannot take linker-map evidence yet, so from the command
+  # line these rules leave findings unresolved (needs evidence).
+
+  # CVE-2026-34873: TLS 1.3 server (see above).
+  - id: mbedtls-tls-server-not-linked
+    match:
+      name: mbedtls
+      cves: [CVE-2026-34873]
+    when:
+      - symbol_not_linked: mbedtls_ssl_handshake_server_step
+      - symbol_not_linked: mbedtls_ssl_tls13_handshake_server_step
+    status: not_affected
+    justification: code_not_present
+    detail: >-
+      The TLS server is not linked: neither mbedtls_ssl_handshake_server_step (TLS 1.2) nor
+      mbedtls_ssl_tls13_handshake_server_step (TLS 1.3) is in the image.
+
+  # CVE-2026-25834: TLS 1.2 client accepts a signature algorithm it did not offer (Mbed TLS
+  # 3.3.0 to 3.6.5 and 4.0.0; advisory mbedtls-security-advisory-2026-03-sigalg-injection).
+  # CVE-2026-25832: TLS 1.3 client accepts a HelloRetryRequest for a group it did not
+  # advertise (Mbed TLS 3.5 to 3.6.6, 4.0 to 4.1.1; advisory
+  # mbedtls-security-advisory-2026-07-tls13-hrr-unadvertised-group).
+  # CVE-2026-50580: buffer overflow in the TLS 1.2 ECDHE-PSK client's ClientKeyExchange
+  # (Mbed TLS 1.3.10 to 3.6.6 and 4.0.0 to 4.1.0; advisory
+  # mbedtls-security-advisory-2026-07-tls12-ecdhe-psk-client-buffer-overflow).
+  - id: mbedtls-tls-client-not-linked
+    match:
+      name: mbedtls
+      cves: [CVE-2026-25832, CVE-2026-25834, CVE-2026-50580]
+    when:
+      - symbol_not_linked: mbedtls_ssl_handshake_client_step
+      - symbol_not_linked: mbedtls_ssl_tls13_handshake_client_step
+    status: not_affected
+    justification: code_not_present
+    detail: >-
+      The TLS client is not linked: neither mbedtls_ssl_handshake_client_step (TLS 1.2) nor
+      mbedtls_ssl_tls13_handshake_client_step (TLS 1.3) is in the image.
+
+  # --- Zephyr: subsystems compiled out by Kconfig ------------------------------------------
+
+  # Bluetooth: every Zephyr CVE whose description names a file under subsys/bluetooth/
+  # (host, classic, mesh, ISO, controller), as grype 0.119.0 with vulnerability database
+  # v6.1.9 (built 2026-09-29) matched them on 2026-10-03 (UTC) against
+  # cpe:2.3:o:zephyrproject:zephyr:4.4.2 (fixtures/zephyr/bt) and :4.2.0
+  # (fixtures/zephyr-old-mbedtls/old-mbedtls). grype reports no Zephyr CVEs for rollcall's
+  # SBOMs as written (it skips CPE matching for the `operating-system` component), so the
+  # SBOMs were scanned with that component retyped `library`. Re-run with
+  # `scripts/capture-findings.sh --bluetooth-cves`. A dated snapshot: newer Bluetooth CVEs are
+  # not covered until they are added here. Nothing under subsys/bluetooth/ is built without
+  # CONFIG_BT (subsys/CMakeLists.txt: add_subdirectory_ifdef(CONFIG_BT bluetooth)).
+  - id: zephyr-bluetooth-off
+    match:
+      name: zephyr
+      cves:
+        - CVE-2026-10641  # host/classic/hfp_hf.c: HFP out-of-bounds write
+        - CVE-2026-10651  # host/classic/sdp.c: SDP attribute parsing
+        - CVE-2026-10654  # host/classic/rfcomm.c: RFCOMM race
+        - CVE-2026-10658  # host/iso.c: ISO SDU header
+        - CVE-2026-10675  # mesh/pb_adv.c: provisioning watchdog
+        - CVE-2026-10680  # host/classic/l2cap_br.c: L2CAP BR/EDR configuration
+        - CVE-2026-10685  # host/gatt.c: GATT client CCC write response
+        - CVE-2026-10774  # mesh/subnet.c: PSA key slot leak
+        - CVE-2026-11368  # host/att.c: ATT TX buffer use after free
+        - CVE-2026-2411   # host/gatt.c: characteristic declaration permissions
+        - CVE-2026-5068   # host/l2cap.c: LE CoC SDU reassembly out-of-bounds write
+        - CVE-2026-5589   # mesh/solicitation.c: integer underflow
+        - CVE-2026-9263   # controller/ll_sw/isoal.c: framed ISO PDU length
+    when:
+      - kconfig_off: CONFIG_BT
+    status: not_affected
+    justification: code_not_present
+    detail: >-
+      Bluetooth is compiled out: CONFIG_BT is not set, so nothing under
+      subsys/bluetooth/ is built.
+
+  # MCUmgr: CVE-2026-10648, a NULL dereference in mcumgr_serial_process_frag()
+  # (subsys/mgmt/mcumgr/transport/src/serial_util.c) in the serial/console SMP transport
+  # (Zephyr 4.4.0; GHSA-j64f-h3ww-f32c). serial_util.c is built only for the UART and raw UART
+  # transports (both depend on CONFIG_UART_MCUMGR) and the shell transport (depends on
+  # CONFIG_SHELL), so both must be off. The dummy transports (CONFIG_MCUMGR_TRANSPORT_DUMMY,
+  # _RAW_DUMMY, test-only) do not build serial_util.c: they select neither
+  # MCUMGR_TRANSPORT_SERIAL_HAS_* symbol (checked in v4.4.0 and v4.4.2).
+  - id: zephyr-mcumgr-serial-off
+    match:
+      name: zephyr
+      cves: [CVE-2026-10648]
+    when:
+      - kconfig_off: CONFIG_UART_MCUMGR
+      - kconfig_off: CONFIG_SHELL
+    status: not_affected
+    justification: code_not_present
+    detail: >-
+      The MCUmgr serial transports are compiled out: CONFIG_UART_MCUMGR and CONFIG_SHELL are
+      not set, so subsys/mgmt/mcumgr/transport/src/serial_util.c is not built.
+
+  # File systems: CVE-2020-13598 (FAT long file names, fs_stat; GHSA-7fhv-rgxr-x56h),
+  # CVE-2020-13599 (settings over littlefs, default permissions; GHSA-5qhg-j6wc-4f6q) and
+  # CVE-2026-7007 (ext2 superblock divide by zero, Zephyr 3.5.0 and later, before 4.5.0;
+  # GHSA-wrf2-79mm-cvw5). subsys/fs/Kconfig defines FAT, littlefs and ext2 only under
+  # CONFIG_FILE_SYSTEM_LIB_LINK, which CONFIG_FILE_SYSTEM selects; it can also be set on its
+  # own, so CONFIG_FILE_SYSTEM being off would not be enough.
+  - id: zephyr-filesystem-off
+    match:
+      name: zephyr
+      cves: [CVE-2020-13598, CVE-2020-13599, CVE-2026-7007]
+    when:
+      - kconfig_off: CONFIG_FILE_SYSTEM_LIB_LINK
+    status: not_affected
+    justification: code_not_present
+    detail: >-
+      File systems are compiled out: CONFIG_FILE_SYSTEM_LIB_LINK is not set, so no file
+      system library (FAT, littlefs, ext2) is built.

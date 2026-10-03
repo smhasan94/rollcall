@@ -6,6 +6,15 @@ of the fork revision a build pins. `db/identifiers.yaml` is the data; this crate
 it (`rollcall_identifiers::IDENTIFIERS_YAML`). The schema, loader and resolver are in
 `rollcall_core::identify`.
 
+## The starter VEX rule pack
+
+`db/vex-rules.yaml` is rollcall's starter VEX rule pack (`rollcall_identifiers::VEX_RULES_YAML`),
+loaded by `rollcall vex --starter-rules`: `not_affected` / `code_not_present` rules for Mbed
+TLS modules compiled out, Zephyr subsystems switched off in Kconfig, and the TLS client or
+server side not linked. It ships with the database (and in its release tarball, next to
+`identifiers.yaml`) but has no version of its own; rollcall always uses the embedded copy.
+The format and worked examples are in `docs/vex-rules.md` at the repository root.
+
 ## Versioning
 
 The crate version **is** the database's `db_version` (the `db_version:` line of

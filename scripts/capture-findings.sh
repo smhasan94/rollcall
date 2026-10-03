@@ -8,10 +8,22 @@
 # GRYPE_DB_AUTO_UPDATE=true to fetch the latest one), so the grype capture is reproducible
 # for a given database.
 #
-# Usage: scripts/capture-findings.sh [--install]
+# Usage: scripts/capture-findings.sh [--install] [--bluetooth-cves]
 #
-#   --install   install the pinned grype and osv-scanner first, by running
-#               scripts/smoke-scan.sh --install (which also smoke-tests them).
+#   --install          install the pinned grype and osv-scanner first, by running
+#                      scripts/smoke-scan.sh --install (which also smoke-tests them).
+#   --bluetooth-cves   capture nothing; instead print the Bluetooth CVE list of the starter
+#                      VEX rule pack's `zephyr-bluetooth-off` rule (see below). Offline
+#                      (grype only, cached database).
+#
+# The Bluetooth list: grype skips CPE matching for components typed `operating-system`,
+# which is how rollcall types `zephyr`, so it reports no Zephyr CVEs for rollcall's SBOMs.
+# The list is made by rendering the sysbuild SBOMs of fixtures/zephyr/bt (Zephyr v4.4.2,
+# cpe:2.3:o:zephyrproject:zephyr:4.4.2:-:*) and fixtures/zephyr-old-mbedtls/old-mbedtls
+# (v4.2.0, cpe:2.3:o:zephyrproject:zephyr:4.2.0:-:*), retyping that component `library`
+# (jq, in the scratch copy only), scanning both with grype, and keeping every vulnerability of
+# the `zephyr` component whose description names a file under subsys/bluetooth/; one id per
+# line, sorted.
 #
 # Environment:
 #   ROLLCALL_TOOLS_DIR      where the scanners live (default .cache/tools), else PATH
@@ -26,6 +38,13 @@
 #                            them to "GitHub Actions" and finds nothing)
 #   old-heapless.osv.json    osv-scanner on old-heapless (pkg:cargo/heapless@0.5.0, which has
 #                            RUSTSEC/GHSA advisories)
+#
+# and one from a real build, `rollcall generate --zephyr fixtures/zephyr-old-mbedtls/old-mbedtls
+# --sysbuild` with its west list and the seed identifier database
+# (crates/rollcall-identifiers/db/identifiers.yaml), rendered with the golden timestamp:
+#   zephyr-old-mbedtls.grype.json   grype on the Zephyr v4.2.0 build (Mbed TLS 3.6.4 in both
+#                                   images, CPE-matched CVEs); the starter VEX rule pack's
+#                                   tests and docs/vex-rules.md use it (SHA-115)
 #
 # Every absolute path in the scanner output (the temporary capture directory, the repository
 # root, $HOME) is replaced with a fixed placeholder, so the committed files do not depend on
@@ -55,9 +74,11 @@ die() {
 }
 
 install=0
+bluetooth=0
 for arg in "$@"; do
     case "$arg" in
         --install) install=1 ;;
+        --bluetooth-cves) bluetooth=1 ;;
         -h | --help)
             sed -n '2,/^set -euo/p' "$0" | sed '$d' | sed 's/^# \{0,1\}//'
             exit 0
@@ -86,7 +107,6 @@ find_tool() {
 }
 
 GRYPE="$(find_tool grype)"
-OSV_SCANNER="$(find_tool osv-scanner)"
 
 if ! grype_out="$("$GRYPE" version 2>&1)"; then
     die "refusing $GRYPE: 'grype version' failed"
@@ -94,12 +114,15 @@ fi
 grype_reported="$(awk '$1 == "Version:" {print $2}' <<<"$grype_out")"
 [[ "$grype_reported" == "$GRYPE_VERSION" ]] ||
     die "refusing $GRYPE: version '${grype_reported:-unknown}', pinned $GRYPE_VERSION"
+if [[ "$bluetooth" -eq 0 ]]; then
+OSV_SCANNER="$(find_tool osv-scanner)"
 if ! osv_out="$("$OSV_SCANNER" --version 2>&1)"; then
     die "refusing $OSV_SCANNER: 'osv-scanner --version' failed"
 fi
 osv_reported="$(awk '/^osv-scanner version:/ {print $3}' <<<"$osv_out")"
 [[ "$osv_reported" == "$OSV_SCANNER_VERSION" ]] ||
     die "refusing $OSV_SCANNER: version '${osv_reported:-unknown}', pinned $OSV_SCANNER_VERSION"
+fi
 
 if [[ -n "${ROLLCALL_BIN:-}" ]]; then
     ROLLCALL="$ROLLCALL_BIN"
@@ -155,11 +178,36 @@ osv_capture() {
     echo "captured $OUT_DIR/$1.osv.json ($(jq '[.results[]?.packages[]?.vulnerabilities[]?] | length' "$OUT_DIR/$1.osv.json") vulnerabilities)"
 }
 
+# generate_zephyr <name> <variant dir>: renders the real sysbuild build to $WORK/<name>.cdx.json.
+generate_zephyr() {
+    "$ROLLCALL" generate --zephyr "$2" --sysbuild --west-list "$2/west-list.txt" \
+        --identifier-db crates/rollcall-identifiers/db/identifiers.yaml \
+        --timestamp "$GOLDEN_TIMESTAMP" -o "$WORK/$1.cdx.json" 2>"$WORK/$1.generate.stderr" ||
+        die "rollcall generate failed on $2: $(head -c 300 "$WORK/$1.generate.stderr")"
+}
+
+if [[ "$bluetooth" -eq 1 ]]; then
+    for variant in fixtures/zephyr/bt fixtures/zephyr-old-mbedtls/old-mbedtls; do
+        name="$(basename "$variant")"
+        generate_zephyr "$name" "$variant"
+        jq '(.. | objects | select(.type? == "operating-system")) .type = "library"' \
+            "$WORK/$name.cdx.json" >"$WORK/$name.library.cdx.json"
+        "$GRYPE" "sbom:$WORK/$name.library.cdx.json" -o json --file "$WORK/$name.bt.json" \
+            2>"$WORK/$name.bt.stderr" || die "grype failed on $name: $(head -c 300 "$WORK/$name.bt.stderr")"
+    done
+    jq -r '.matches[] | select(.artifact.name == "zephyr")
+           | select(.vulnerability.description // "" | contains("subsys/bluetooth/"))
+           | .vulnerability.id' "$WORK"/*.bt.json | LC_ALL=C sort -u
+    exit 0
+fi
+
 generate old-mbedtls
 generate old-heapless
+generate_zephyr zephyr-old-mbedtls fixtures/zephyr-old-mbedtls/old-mbedtls
 grype_capture old-mbedtls
 osv_capture old-mbedtls
 osv_capture old-heapless
+grype_capture zephyr-old-mbedtls
 
 # sed_escape <text>: <text> as a literal sed pattern (with `|` as the delimiter).
 sed_escape() {

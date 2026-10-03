@@ -247,6 +247,41 @@ pub enum VexCommand {
     /// Verify a signed VEX document: its rollcall Ed25519 signature (--key) or its Sigstore
     /// bundle (--cosign)
     Verify(VexVerifyArgs),
+    /// Check VEX rules files: every `kconfig_off` and `kconfig_equals` symbol must exist (a
+    /// misspelt one makes the rule never apply), rule ids must be unique across files, and a
+    /// `kconfig_equals` value must not be bool-like (`true`, `no`, `~`, `null`, …) or empty.
+    /// Exit 1 on any warning
+    Lint(VexLintArgs),
+}
+
+/// Arguments of `rollcall vex lint`.
+#[derive(Debug, Args)]
+pub struct VexLintArgs {
+    /// VEX rules files (YAML) to check. Repeatable
+    #[arg(value_name = "FILE")]
+    pub files: Vec<PathBuf>,
+    /// Also load the starter rule pack (`rollcall vex --starter-rules`): rule ids in FILE that
+    /// it already uses are reported. Its Kconfig symbols are checked with --zephyr-tree, but
+    /// with --kconfig only when --lint-starter-symbols is given too
+    #[arg(long)]
+    pub starter_rules: bool,
+    /// With --starter-rules and --kconfig, also check the starter pack's Kconfig symbols
+    /// against the .config files (with --zephyr-tree they are always checked, so the two
+    /// flags conflict). Its Mbed TLS symbols are hidden in a build without Mbed TLS,
+    /// so give the .config files of builds that enable everything the pack names
+    #[arg(long, requires = "starter_rules", conflicts_with = "zephyr_tree")]
+    pub lint_starter_symbols: bool,
+    /// A Kconfig `.config` whose symbols (set or `is not set`) are the known ones; an
+    /// `IMAGE=` prefix is allowed and ignored. Repeatable: the union is used. Offline, but a
+    /// .config lists only the symbols visible in that build, so a valid symbol hidden by an
+    /// unmet dependency is warned about too
+    #[arg(long, value_name = "[IMAGE=]FILE", conflicts_with = "zephyr_tree")]
+    pub kconfig: Vec<String>,
+    /// A Zephyr repository checkout (the directory holding VERSION) whose Kconfig files
+    /// define the known symbols. Authoritative for that Zephyr version. Repeatable: a symbol
+    /// any tree defines is known
+    #[arg(long, value_name = "DIR")]
+    pub zephyr_tree: Vec<PathBuf>,
 }
 
 /// Arguments of `rollcall vex verify`.
@@ -313,11 +348,17 @@ pub struct VexArgs {
     #[arg(long, value_name = "FILE", required = true)]
     pub findings: Vec<PathBuf>,
     /// VEX rules (YAML). Repeatable; rule ids must be unique across files. Only
-    /// `kconfig_off` and `version_in` conditions can be evidenced from the command line:
+    /// `kconfig_off`, `kconfig_equals` and `version_in` conditions can be evidenced from the
+    /// command line:
     /// `cargo_feature_off` and `symbol_not_linked` always lack evidence (the finding stays
     /// unresolved). `match.subsystem` matches a Zephyr subsystem subcomponent by name
     #[arg(long, value_name = "FILE")]
     pub rules: Vec<PathBuf>,
+    /// Also use rollcall's starter rule pack (vex-rules.yaml, shipped with the identifier
+    /// database; see docs/vex-rules.md), before any --rules files. Its rule ids must not be
+    /// reused in them
+    #[arg(long)]
+    pub starter_rules: bool,
     /// Output format. cyclonedx and openvex render only the statements; unresolved
     /// findings are summarised on stderr
     #[arg(long, value_enum, default_value_t = VexFormat::Rollcall)]
