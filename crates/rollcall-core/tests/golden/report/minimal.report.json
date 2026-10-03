@@ -1,0 +1,247 @@
+{
+  "schema": "rollcall-report/1",
+  "generated": "2026-01-02T03:04:05Z",
+  "tool": {
+    "name": "rollcall",
+    "version": "0.0.1"
+  },
+  "product": {
+    "name": "sensor-node",
+    "version": "1.0.0"
+  },
+  "summary": "This report checks how ready the software bill of materials (SBOM) of sensor-node 1.0.0 is to hand to a customer or regulator. Its readiness score is 44 out of 100. The SBOM lists 4 items in total: the product, 1 firmware image and 2 software components. 3 of them carry an identifier (a PURL or CPE) that vulnerability databases can match, 1 a file hash that proves exactly which file was shipped, and 2 a licence. No unresolved modules. The SBOM is valid CycloneDX 1.6; the CISA 2026 and EU Cyber Resilience Act checks found 7 problems to fix and 0 recommendations. No vulnerability scan was supplied, so known vulnerabilities were not checked and are not part of the score.",
+  "score": {
+    "value": 44,
+    "basis_points": 4444,
+    "weight_assessed": 90,
+    "scan_supplied": false,
+    "categories": [
+      {
+        "id": "identified",
+        "weight": 25,
+        "assessed": true,
+        "numerator": 3,
+        "denominator": 4,
+        "earned": 187500
+      },
+      {
+        "id": "hashed",
+        "weight": 15,
+        "assessed": true,
+        "numerator": 1,
+        "denominator": 4,
+        "earned": 37500
+      },
+      {
+        "id": "licensed",
+        "weight": 15,
+        "assessed": true,
+        "numerator": 2,
+        "denominator": 4,
+        "earned": 75000
+      },
+      {
+        "id": "validation",
+        "weight": 25,
+        "assessed": true,
+        "numerator": 0,
+        "denominator": 4,
+        "earned": 0
+      },
+      {
+        "id": "modules",
+        "weight": 10,
+        "assessed": true,
+        "numerator": 0,
+        "denominator": 0,
+        "earned": 100000
+      },
+      {
+        "id": "vulnerabilities",
+        "weight": 10,
+        "assessed": false,
+        "numerator": 0,
+        "denominator": 0,
+        "earned": 0
+      }
+    ]
+  },
+  "coverage": {
+    "nodes": 4,
+    "purl": {
+      "count": 3,
+      "basis_points": 7500
+    },
+    "cpe": {
+      "count": 2,
+      "basis_points": 5000
+    },
+    "identified": {
+      "count": 3,
+      "basis_points": 7500
+    },
+    "hash": {
+      "count": 1,
+      "basis_points": 2500
+    },
+    "licence": {
+      "count": 2,
+      "basis_points": 5000
+    }
+  },
+  "components": [
+    {
+      "level": "product",
+      "path": "sensor-node",
+      "type": "firmware",
+      "name": "sensor-node",
+      "version": "1.0.0",
+      "bom_ref": "product:ee193673a5716110c2e95bc112363dcb",
+      "purl": false,
+      "cpe": false,
+      "hash": false,
+      "licence": false
+    },
+    {
+      "level": "image",
+      "path": "sensor-app",
+      "type": "firmware",
+      "name": "sensor-app",
+      "version": "1.0.0",
+      "bom_ref": "image:613cff03dcdbf6304ca51767e2ff80b3",
+      "purl": true,
+      "cpe": false,
+      "hash": true,
+      "licence": false
+    },
+    {
+      "level": "component",
+      "path": "sensor-app / littlefs",
+      "type": "library",
+      "name": "littlefs",
+      "version": "2.9.0",
+      "bom_ref": "component:929a445c0e3c76a5f601071900b671b9",
+      "purl": true,
+      "cpe": true,
+      "hash": false,
+      "licence": true
+    },
+    {
+      "level": "component",
+      "path": "sensor-app / tinycrypt",
+      "type": "library",
+      "name": "tinycrypt",
+      "version": "0.2.8",
+      "bom_ref": "component:4f45e8f3d5c1e31602f21fa076d1fdab",
+      "purl": true,
+      "cpe": true,
+      "hash": false,
+      "licence": true
+    }
+  ],
+  "unresolved": [],
+  "findings": null,
+  "vex": null,
+  "validation": {
+    "schema": {
+      "valid": true,
+      "violations": []
+    },
+    "profiles": {
+      "profiles": [
+        "cisa-2026",
+        "cra"
+      ],
+      "passed": false,
+      "errors": 7,
+      "warnings": 0,
+      "findings": [
+        {
+          "check": "component.hash",
+          "severity": "error",
+          "profiles": [
+            "cisa-2026",
+            "cra"
+          ],
+          "component": "sensor-node",
+          "level": "product",
+          "pointer": null,
+          "message": "no hash"
+        },
+        {
+          "check": "component.identifier",
+          "severity": "error",
+          "profiles": [
+            "cisa-2026",
+            "cra"
+          ],
+          "component": "sensor-node",
+          "level": "product",
+          "pointer": null,
+          "message": "no unique identifier (cpe, purl missing)"
+        },
+        {
+          "check": "component.supplier",
+          "severity": "error",
+          "profiles": [
+            "cisa-2026",
+            "cra"
+          ],
+          "component": "sensor-app",
+          "level": "image",
+          "pointer": null,
+          "message": "no supplier (manufacturer.name and supplier.name missing)"
+        },
+        {
+          "check": "component.hash",
+          "severity": "error",
+          "profiles": [
+            "cisa-2026",
+            "cra"
+          ],
+          "component": "sensor-app / littlefs",
+          "level": "component",
+          "pointer": null,
+          "message": "no hash"
+        },
+        {
+          "check": "component.supplier",
+          "severity": "error",
+          "profiles": [
+            "cisa-2026",
+            "cra"
+          ],
+          "component": "sensor-app / littlefs",
+          "level": "component",
+          "pointer": null,
+          "message": "no supplier (manufacturer.name and supplier.name missing)"
+        },
+        {
+          "check": "component.hash",
+          "severity": "error",
+          "profiles": [
+            "cisa-2026",
+            "cra"
+          ],
+          "component": "sensor-app / tinycrypt",
+          "level": "component",
+          "pointer": null,
+          "message": "no hash"
+        },
+        {
+          "check": "component.supplier",
+          "severity": "error",
+          "profiles": [
+            "cisa-2026",
+            "cra"
+          ],
+          "component": "sensor-app / tinycrypt",
+          "level": "component",
+          "pointer": null,
+          "message": "no supplier (manufacturer.name and supplier.name missing)"
+        }
+      ]
+    }
+  },
+  "warnings": []
+}

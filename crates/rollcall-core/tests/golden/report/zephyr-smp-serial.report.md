@@ -1,0 +1,117 @@
+# Readiness report: smp\_svr
+
+This report checks how ready the software bill of materials (SBOM) of smp\_svr is to hand to a customer or regulator. Its readiness score is 43 out of 100. The SBOM lists 24 items in total: the product, 2 firmware images and 21 software components. 21 of them carry an identifier (a PURL or CPE) that vulnerability databases can match, 0 a file hash that proves exactly which file was shipped, and 11 a licence. No unresolved modules. The SBOM is valid CycloneDX 1.6; the CISA 2026 and EU Cyber Resilience Act checks found 33 problems to fix and 0 recommendations. No vulnerability scan was supplied, so known vulnerabilities were not checked and are not part of the score.
+
+Generated 2026-01-02T03:04:05Z by rollcall 0.0.1. Report schema `rollcall-report/1`; see `docs/report.md` for how the score is calculated.
+
+## Score
+
+**43 / 100**
+
+| Category | Weight | Result | Points |
+| --- | ---: | --- | ---: |
+| Identified (PURL or CPE) | 25 | 21 of 24 | 21.87 |
+| Hashed | 15 | 0 of 24 | 0.00 |
+| Licensed | 15 | 11 of 24 | 6.87 |
+| Validation (CISA 2026, CRA) | 25 | 0 of 24 | 0.00 |
+| Modules resolved | 10 | 14 of 14 | 10.00 |
+| Vulnerabilities closed | 10 | not assessed (no scan supplied) | — |
+| **Total** | 90 | no scan supplied; out of 90, scaled to 100 | **43.05** |
+
+## Coverage
+
+Over 24 items (the product, its images and every component).
+
+| Measure | Items |
+| --- | --- |
+| PURL | 21 of 24 (87.50%) |
+| CPE | 6 of 24 (25.00%) |
+| PURL or CPE | 21 of 24 (87.50%) |
+| Hash | 0 of 24 (0.00%) |
+| Licence | 11 of 24 (45.83%) |
+
+## Components
+
+| Item | Version | Type | PURL | CPE | Hash | Licence |
+| --- | --- | --- | --- | --- | --- | --- |
+| smp\_svr (product) | — | firmware | no | no | no | no |
+| mcuboot (image) | — | firmware | no | no | no | yes |
+| mcuboot / cmsis | 512cc7e895e8491696b61f7ba8066b4a182569b8 | library | yes | no | no | no |
+| mcuboot / cmsis\_6 | 30a859f44ef8ab4dc8f84b03ed586fd16ccf9d74 | library | yes | no | no | no |
+| mcuboot / hal\_nordic | 44fd3d44b15cb75f80a25b4679f91d2787e28664 | library | yes | no | no | yes |
+| mcuboot / mbedtls | a3e190fe44c78d1ba67f55979e1257328cc7d0d8 | library | yes | yes | no | yes |
+| mcuboot / mcuboot | 6d3b3d2c38ab20c242e5b9abb04d050086383eb2 | library | yes | no | no | yes |
+| mcuboot / tf-psa-crypto | dc575a2ddcc8cb16275d24c42a52eaf79ebe2231 | library | yes | yes | no | yes |
+| mcuboot / zcbor | 9164bd18dcd88ff9d9ef98279501fc1093571017 | library | yes | no | no | no |
+| mcuboot / zephyr | 4.4.2 | operating-system | yes | yes | no | yes |
+| mcuboot / zephyr / logging | 4.4.2 | library | yes | no | no | no |
+| mcuboot / zephyr / mbedtls-integration | 4.4.2 | library | yes | no | no | no |
+| smp\_svr (image) | — | firmware | no | no | no | yes |
+| smp\_svr / cmsis | 512cc7e895e8491696b61f7ba8066b4a182569b8 | library | yes | no | no | no |
+| smp\_svr / cmsis\_6 | 30a859f44ef8ab4dc8f84b03ed586fd16ccf9d74 | library | yes | no | no | no |
+| smp\_svr / hal\_nordic | 44fd3d44b15cb75f80a25b4679f91d2787e28664 | library | yes | no | no | yes |
+| smp\_svr / mbedtls | a3e190fe44c78d1ba67f55979e1257328cc7d0d8 | library | yes | yes | no | no |
+| smp\_svr / mcuboot | 6d3b3d2c38ab20c242e5b9abb04d050086383eb2 | library | yes | no | no | yes |
+| smp\_svr / tf-psa-crypto | dc575a2ddcc8cb16275d24c42a52eaf79ebe2231 | library | yes | yes | no | no |
+| smp\_svr / zcbor | 9164bd18dcd88ff9d9ef98279501fc1093571017 | library | yes | no | no | yes |
+| smp\_svr / zephyr | 4.4.2 | operating-system | yes | yes | no | yes |
+| smp\_svr / zephyr / dfu | 4.4.2 | library | yes | no | no | no |
+| smp\_svr / zephyr / logging | 4.4.2 | library | yes | no | no | no |
+| smp\_svr / zephyr / mcumgr | 4.4.2 | library | yes | no | no | no |
+
+## Unresolved modules
+
+None: every module is in the identifier database and every component has a PURL or CPE.
+
+## Findings
+
+No vulnerability scan was supplied (`--scan`); vulnerabilities were not assessed.
+
+## VEX coverage
+
+No VEX document was supplied (`--vex`).
+
+## Validation
+
+- CycloneDX 1.6 schema: valid.
+- Profiles `cisa-2026`, `cra`: failed, 33 error(s), 0 warning(s).
+
+| Severity | Check | Item | Problem |
+| --- | --- | --- | --- |
+| error | component.hash | smp\_svr (product) | no hash |
+| error | component.identifier | smp\_svr (product) | no unique identifier (cpe, purl missing) |
+| error | component.supplier | smp\_svr (product) | no supplier (manufacturer.name and supplier.name missing) |
+| error | component.version | smp\_svr (product) | no version |
+| error | component.hash | mcuboot (image) | no hash |
+| error | component.identifier | mcuboot (image) | no unique identifier (cpe, purl missing) |
+| error | component.supplier | mcuboot (image) | no supplier (manufacturer.name and supplier.name missing) |
+| error | component.version | mcuboot (image) | no version |
+| error | component.hash | mcuboot / cmsis | no hash |
+| error | component.hash | mcuboot / cmsis\_6 | no hash |
+| error | component.hash | mcuboot / hal\_nordic | no hash |
+| error | component.hash | mcuboot / mbedtls | no hash |
+| error | component.hash | mcuboot / mcuboot | no hash |
+| error | component.hash | mcuboot / tf-psa-crypto | no hash |
+| error | component.hash | mcuboot / zcbor | no hash |
+| error | component.hash | mcuboot / zephyr | no hash |
+| error | component.hash | mcuboot / zephyr / logging | no hash |
+| error | component.hash | mcuboot / zephyr / mbedtls-integration | no hash |
+| error | component.hash | smp\_svr (image) | no hash |
+| error | component.identifier | smp\_svr (image) | no unique identifier (cpe, purl missing) |
+| error | component.supplier | smp\_svr (image) | no supplier (manufacturer.name and supplier.name missing) |
+| error | component.version | smp\_svr (image) | no version |
+| error | component.hash | smp\_svr / cmsis | no hash |
+| error | component.hash | smp\_svr / cmsis\_6 | no hash |
+| error | component.hash | smp\_svr / hal\_nordic | no hash |
+| error | component.hash | smp\_svr / mbedtls | no hash |
+| error | component.hash | smp\_svr / mcuboot | no hash |
+| error | component.hash | smp\_svr / tf-psa-crypto | no hash |
+| error | component.hash | smp\_svr / zcbor | no hash |
+| error | component.hash | smp\_svr / zephyr | no hash |
+| error | component.hash | smp\_svr / zephyr / dfu | no hash |
+| error | component.hash | smp\_svr / zephyr / logging | no hash |
+| error | component.hash | smp\_svr / zephyr / mcumgr | no hash |
+
+## Warnings
+
+None.

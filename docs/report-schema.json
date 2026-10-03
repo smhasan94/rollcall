@@ -1,0 +1,666 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/smhasan94/rollcall/blob/main/docs/report-schema.json",
+  "title": "rollcall-report/1",
+  "description": "A rollcall readiness report (`rollcall report --format json`). Version 1: every field is always present (absent values are null) and no other field is allowed; a change to that is a new schema version. Score: integer basis points, rounded down. Categories (weight): identified 25 (share of items with a purl or CPE), hashed 15 (with a hash), licensed 15 (with a licence), validation 25 (with no cisa-2026 or cra profile finding, a document-level finding counting against the product; 0 if the SBOM breaks the CycloneDX 1.6 schema), modules 10 (share of Zephyr modules the identifier database resolved; full marks when none), vulnerabilities 10 (share of findings in the SBOM closed by VEX; full marks when none; not assessed without a scan). Items are the product, each image and every component. score.basis_points = sum(earned) / sum(weight of assessed categories); score.value = basis_points / 100, both rounded down. See docs/report.md.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "generated",
+    "tool",
+    "product",
+    "summary",
+    "score",
+    "coverage",
+    "components",
+    "unresolved",
+    "findings",
+    "vex",
+    "validation",
+    "warnings"
+  ],
+  "properties": {
+    "schema": {
+      "const": "rollcall-report/1"
+    },
+    "generated": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "tool": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "version"
+      ],
+      "properties": {
+        "name": {
+          "const": "rollcall"
+        },
+        "version": {
+          "type": "string"
+        }
+      }
+    },
+    "product": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "version"
+      ],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "version": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "summary": {
+      "type": "string",
+      "minLength": 1
+    },
+    "score": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "value",
+        "basis_points",
+        "weight_assessed",
+        "scan_supplied",
+        "categories"
+      ],
+      "properties": {
+        "value": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "basis_points": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10000
+        },
+        "weight_assessed": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "scan_supplied": {
+          "type": "boolean"
+        },
+        "categories": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/category"
+          },
+          "minItems": 6,
+          "maxItems": 6
+        }
+      }
+    },
+    "coverage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "nodes",
+        "purl",
+        "cpe",
+        "identified",
+        "hash",
+        "licence"
+      ],
+      "properties": {
+        "nodes": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "purl": {
+          "$ref": "#/$defs/share"
+        },
+        "cpe": {
+          "$ref": "#/$defs/share"
+        },
+        "identified": {
+          "$ref": "#/$defs/share"
+        },
+        "hash": {
+          "$ref": "#/$defs/share"
+        },
+        "licence": {
+          "$ref": "#/$defs/share"
+        }
+      }
+    },
+    "components": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/component"
+      }
+    },
+    "unresolved": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/unresolved"
+      }
+    },
+    "findings": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/findings"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "vex": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/vex"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "validation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "profiles"
+      ],
+      "properties": {
+        "schema": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "valid",
+            "violations"
+          ],
+          "properties": {
+            "valid": {
+              "type": "boolean"
+            },
+            "violations": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "path",
+                  "message"
+                ],
+                "properties": {
+                  "path": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "profiles": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "profiles",
+            "passed",
+            "errors",
+            "warnings",
+            "findings"
+          ],
+          "properties": {
+            "profiles": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "passed": {
+              "type": "boolean"
+            },
+            "errors": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "warnings": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "findings": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/profile_finding"
+              }
+            }
+          }
+        }
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/warning"
+      }
+    }
+  },
+  "$defs": {
+    "share": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "count",
+        "basis_points"
+      ],
+      "properties": {
+        "count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "basis_points": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10000
+        }
+      },
+      "description": "A count and its share of the total in basis points, rounded down (0 when the total is 0)."
+    },
+    "category": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "weight",
+        "assessed",
+        "numerator",
+        "denominator",
+        "earned"
+      ],
+      "properties": {
+        "id": {
+          "enum": [
+            "identified",
+            "hashed",
+            "licensed",
+            "validation",
+            "modules",
+            "vulnerabilities"
+          ]
+        },
+        "weight": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "assessed": {
+          "type": "boolean"
+        },
+        "numerator": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "denominator": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "earned": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000000,
+          "description": "Units of 1/10000 point: weight x 10000 x numerator / denominator, rounded down; the full weight when the denominator is 0; 0 when not assessed (and for validation when the SBOM breaks the CycloneDX 1.6 schema)."
+        }
+      }
+    },
+    "component": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "level",
+        "path",
+        "type",
+        "name",
+        "version",
+        "bom_ref",
+        "purl",
+        "cpe",
+        "hash",
+        "licence"
+      ],
+      "properties": {
+        "level": {
+          "enum": [
+            "product",
+            "image",
+            "component"
+          ]
+        },
+        "path": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "version": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "bom_ref": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "purl": {
+          "type": "boolean"
+        },
+        "cpe": {
+          "type": "boolean"
+        },
+        "hash": {
+          "type": "boolean"
+        },
+        "licence": {
+          "type": "boolean"
+        }
+      }
+    },
+    "unresolved": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "name",
+        "version",
+        "reason",
+        "hint"
+      ],
+      "properties": {
+        "path": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "version": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "reason": {
+          "enum": [
+            "module-not-in-identifier-db",
+            "no-identifier"
+          ]
+        },
+        "hint": {
+          "type": "string"
+        }
+      }
+    },
+    "by_severity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "critical",
+        "high",
+        "medium",
+        "low",
+        "unknown"
+      ],
+      "properties": {
+        "critical": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "high": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "medium": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "low": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "unknown": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "finding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "aliases",
+        "severity",
+        "scanner_severity",
+        "component",
+        "bom_ref",
+        "package",
+        "status",
+        "vex_status"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "aliases": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "severity": {
+          "enum": [
+            "critical",
+            "high",
+            "medium",
+            "low",
+            "unknown"
+          ]
+        },
+        "scanner_severity": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "component": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "bom_ref": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "package": {
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "open",
+            "closed",
+            "not-in-sbom"
+          ]
+        },
+        "vex_status": {
+          "enum": [
+            "not_affected",
+            "affected",
+            "fixed",
+            "under_investigation",
+            null
+          ]
+        }
+      }
+    },
+    "findings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "total",
+        "in_sbom",
+        "not_in_sbom",
+        "open",
+        "closed",
+        "open_by_severity",
+        "items"
+      ],
+      "properties": {
+        "total": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "in_sbom": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "not_in_sbom": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "open": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "closed": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "open_by_severity": {
+          "$ref": "#/$defs/by_severity"
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/finding"
+          }
+        }
+      }
+    },
+    "vex": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "statements",
+        "unmatched_statements",
+        "findings_covered"
+      ],
+      "properties": {
+        "statements": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "unmatched_statements": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "findings_covered": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/share"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "profile_finding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "check",
+        "severity",
+        "profiles",
+        "component",
+        "level",
+        "pointer",
+        "message"
+      ],
+      "properties": {
+        "check": {
+          "type": "string"
+        },
+        "severity": {
+          "enum": [
+            "error",
+            "warning"
+          ]
+        },
+        "profiles": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "component": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "level": {
+          "enum": [
+            "product",
+            "image",
+            "component",
+            null
+          ]
+        },
+        "pointer": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "message": {
+          "type": "string"
+        }
+      }
+    },
+    "warning": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "location",
+        "message"
+      ],
+      "properties": {
+        "location": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

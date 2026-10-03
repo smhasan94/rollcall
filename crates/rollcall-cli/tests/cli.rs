@@ -4,7 +4,7 @@ use assert_cmd::Command;
 use predicates::prelude::*;
 
 /// Every subcommand with its one-line `--help` description.
-const SUBCOMMANDS: [(&str, &str); 7] = [
+const SUBCOMMANDS: [(&str, &str); 8] = [
     (
         "generate",
         "Generate a CycloneDX SBOM from firmware build metadata",
@@ -24,6 +24,10 @@ const SUBCOMMANDS: [(&str, &str); 7] = [
         "Produce a CycloneDX CBOM (cryptographic inventory) for a build",
     ),
     ("identifiers", "Inspect and lint the identifier database"),
+    (
+        "report",
+        "Produce a readiness report (Markdown or JSON) for an SBOM",
+    ),
 ];
 
 fn rollcall() -> Command {
@@ -56,7 +60,7 @@ fn help_lists_every_subcommand_with_description() {
         );
     }
 
-    // The "Commands:" section lists exactly our seven subcommands plus clap's own `help`.
+    // The "Commands:" section lists exactly our eight subcommands plus clap's own `help`.
     let listed: Vec<&str> = stdout
         .lines()
         .skip_while(|l| l.trim_end() != "Commands:")

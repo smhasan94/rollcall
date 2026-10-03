@@ -1,0 +1,751 @@
+{
+  "schema": "rollcall-report/1",
+  "generated": "2026-01-02T03:04:05Z",
+  "tool": {
+    "name": "rollcall",
+    "version": "0.0.1"
+  },
+  "product": {
+    "name": "beacon",
+    "version": null
+  },
+  "summary": "This report checks how ready the software bill of materials (SBOM) of beacon is to hand to a customer or regulator. Its readiness score is 41 out of 100. The SBOM lists 22 items in total: the product, 2 firmware images and 19 software components. 19 of them carry an identifier (a PURL or CPE) that vulnerability databases can match, 0 a file hash that proves exactly which file was shipped, and 9 a licence. No unresolved modules. The SBOM is valid CycloneDX 1.6; the CISA 2026 and EU Cyber Resilience Act checks found 31 problems to fix and 0 recommendations. No vulnerability scan was supplied, so known vulnerabilities were not checked and are not part of the score.",
+  "score": {
+    "value": 41,
+    "basis_points": 4191,
+    "weight_assessed": 90,
+    "scan_supplied": false,
+    "categories": [
+      {
+        "id": "identified",
+        "weight": 25,
+        "assessed": true,
+        "numerator": 19,
+        "denominator": 22,
+        "earned": 215909
+      },
+      {
+        "id": "hashed",
+        "weight": 15,
+        "assessed": true,
+        "numerator": 0,
+        "denominator": 22,
+        "earned": 0
+      },
+      {
+        "id": "licensed",
+        "weight": 15,
+        "assessed": true,
+        "numerator": 9,
+        "denominator": 22,
+        "earned": 61363
+      },
+      {
+        "id": "validation",
+        "weight": 25,
+        "assessed": true,
+        "numerator": 0,
+        "denominator": 22,
+        "earned": 0
+      },
+      {
+        "id": "modules",
+        "weight": 10,
+        "assessed": true,
+        "numerator": 12,
+        "denominator": 12,
+        "earned": 100000
+      },
+      {
+        "id": "vulnerabilities",
+        "weight": 10,
+        "assessed": false,
+        "numerator": 0,
+        "denominator": 0,
+        "earned": 0
+      }
+    ]
+  },
+  "coverage": {
+    "nodes": 22,
+    "purl": {
+      "count": 19,
+      "basis_points": 8636
+    },
+    "cpe": {
+      "count": 6,
+      "basis_points": 2727
+    },
+    "identified": {
+      "count": 19,
+      "basis_points": 8636
+    },
+    "hash": {
+      "count": 0,
+      "basis_points": 0
+    },
+    "licence": {
+      "count": 9,
+      "basis_points": 4090
+    }
+  },
+  "components": [
+    {
+      "level": "product",
+      "path": "beacon",
+      "type": "firmware",
+      "name": "beacon",
+      "version": null,
+      "bom_ref": "product:67eabb8dbc93be76cca8d4b370739ef6",
+      "purl": false,
+      "cpe": false,
+      "hash": false,
+      "licence": false
+    },
+    {
+      "level": "image",
+      "path": "mcuboot",
+      "type": "firmware",
+      "name": "mcuboot",
+      "version": null,
+      "bom_ref": "image:6d4f09959e6e07cfebdb514fd43d61f7",
+      "purl": false,
+      "cpe": false,
+      "hash": false,
+      "licence": true
+    },
+    {
+      "level": "component",
+      "path": "mcuboot / cmsis",
+      "type": "library",
+      "name": "cmsis",
+      "version": "512cc7e895e8491696b61f7ba8066b4a182569b8",
+      "bom_ref": "component:e236ca776a37f69bba61ccb11bc326a7",
+      "purl": true,
+      "cpe": false,
+      "hash": false,
+      "licence": false
+    },
+    {
+      "level": "component",
+      "path": "mcuboot / cmsis_6",
+      "type": "library",
+      "name": "cmsis_6",
+      "version": "30a859f44ef8ab4dc8f84b03ed586fd16ccf9d74",
+      "bom_ref": "component:0caddb0709acc8b504b3770d2b541109",
+      "purl": true,
+      "cpe": false,
+      "hash": false,
+      "licence": false
+    },
+    {
+      "level": "component",
+      "path": "mcuboot / hal_nordic",
+      "type": "library",
+      "name": "hal_nordic",
+      "version": "44fd3d44b15cb75f80a25b4679f91d2787e28664",
+      "bom_ref": "component:b80e1e18d0211c9d3689e5477c3dde05",
+      "purl": true,
+      "cpe": false,
+      "hash": false,
+      "licence": true
+    },
+    {
+      "level": "component",
+      "path": "mcuboot / mbedtls",
+      "type": "library",
+      "name": "mbedtls",
+      "version": "a3e190fe44c78d1ba67f55979e1257328cc7d0d8",
+      "bom_ref": "component:8ff18d5b0728339660d88d6a297b295c",
+      "purl": true,
+      "cpe": true,
+      "hash": false,
+      "licence": true
+    },
+    {
+      "level": "component",
+      "path": "mcuboot / mcuboot",
+      "type": "library",
+      "name": "mcuboot",
+      "version": "6d3b3d2c38ab20c242e5b9abb04d050086383eb2",
+      "bom_ref": "component:d1089665c2f6a732f5b46fb7742c9123",
+      "purl": true,
+      "cpe": false,
+      "hash": false,
+      "licence": true
+    },
+    {
+      "level": "component",
+      "path": "mcuboot / tf-psa-crypto",
+      "type": "library",
+      "name": "tf-psa-crypto",
+      "version": "dc575a2ddcc8cb16275d24c42a52eaf79ebe2231",
+      "bom_ref": "component:487e51d5c3664c261d44a127a2ef9ec1",
+      "purl": true,
+      "cpe": true,
+      "hash": false,
+      "licence": true
+    },
+    {
+      "level": "component",
+      "path": "mcuboot / zephyr",
+      "type": "operating-system",
+      "name": "zephyr",
+      "version": "4.4.2",
+      "bom_ref": "component:07248014f59f9bc04d71c59f20fe2b63",
+      "purl": true,
+      "cpe": true,
+      "hash": false,
+      "licence": true
+    },
+    {
+      "level": "component",
+      "path": "mcuboot / zephyr / logging",
+      "type": "library",
+      "name": "logging",
+      "version": "4.4.2",
+      "bom_ref": "component:f277d5855fc98e278aaf35b37bdceb6d",
+      "purl": true,
+      "cpe": false,
+      "hash": false,
+      "licence": false
+    },
+    {
+      "level": "component",
+      "path": "mcuboot / zephyr / mbedtls-integration",
+      "type": "library",
+      "name": "mbedtls-integration",
+      "version": "4.4.2",
+      "bom_ref": "component:b9a0776c6135146843b677512aa4e043",
+      "purl": true,
+      "cpe": false,
+      "hash": false,
+      "licence": false
+    },
+    {
+      "level": "image",
+      "path": "beacon",
+      "type": "firmware",
+      "name": "beacon",
+      "version": null,
+      "bom_ref": "image:241f01b7d562c8b7ae09bfb157af89b4",
+      "purl": false,
+      "cpe": false,
+      "hash": false,
+      "licence": true
+    },
+    {
+      "level": "component",
+      "path": "beacon / cmsis",
+      "type": "library",
+      "name": "cmsis",
+      "version": "512cc7e895e8491696b61f7ba8066b4a182569b8",
+      "bom_ref": "component:f57fdab356ff262fa74b8cf0ac4daad8",
+      "purl": true,
+      "cpe": false,
+      "hash": false,
+      "licence": false
+    },
+    {
+      "level": "component",
+      "path": "beacon / cmsis_6",
+      "type": "library",
+      "name": "cmsis_6",
+      "version": "30a859f44ef8ab4dc8f84b03ed586fd16ccf9d74",
+      "bom_ref": "component:b4829966d0cd7073dd2f9f6a8b941bfa",
+      "purl": true,
+      "cpe": false,
+      "hash": false,
+      "licence": false
+    },
+    {
+      "level": "component",
+      "path": "beacon / hal_nordic",
+      "type": "library",
+      "name": "hal_nordic",
+      "version": "44fd3d44b15cb75f80a25b4679f91d2787e28664",
+      "bom_ref": "component:161737196150f613325b799a3dbb481b",
+      "purl": true,
+      "cpe": false,
+      "hash": false,
+      "licence": true
+    },
+    {
+      "level": "component",
+      "path": "beacon / mbedtls",
+      "type": "library",
+      "name": "mbedtls",
+      "version": "a3e190fe44c78d1ba67f55979e1257328cc7d0d8",
+      "bom_ref": "component:62a61d6c7e00dd1376c05259e4b3767b",
+      "purl": true,
+      "cpe": true,
+      "hash": false,
+      "licence": false
+    },
+    {
+      "level": "component",
+      "path": "beacon / mcuboot",
+      "type": "library",
+      "name": "mcuboot",
+      "version": "6d3b3d2c38ab20c242e5b9abb04d050086383eb2",
+      "bom_ref": "component:178dad0f028d1ae4ec5dab0cd7c48bdb",
+      "purl": true,
+      "cpe": false,
+      "hash": false,
+      "licence": false
+    },
+    {
+      "level": "component",
+      "path": "beacon / tf-psa-crypto",
+      "type": "library",
+      "name": "tf-psa-crypto",
+      "version": "dc575a2ddcc8cb16275d24c42a52eaf79ebe2231",
+      "bom_ref": "component:8c9f887e7e4b97bd1112fb4894bdd55f",
+      "purl": true,
+      "cpe": true,
+      "hash": false,
+      "licence": false
+    },
+    {
+      "level": "component",
+      "path": "beacon / zephyr",
+      "type": "operating-system",
+      "name": "zephyr",
+      "version": "4.4.2",
+      "bom_ref": "component:13ff81e8abff85ff33972f0733c24740",
+      "purl": true,
+      "cpe": true,
+      "hash": false,
+      "licence": true
+    },
+    {
+      "level": "component",
+      "path": "beacon / zephyr / bluetooth-controller",
+      "type": "library",
+      "name": "bluetooth-controller",
+      "version": "4.4.2",
+      "bom_ref": "component:d4f5392e43d6bc21fe8d24f0af7f3415",
+      "purl": true,
+      "cpe": false,
+      "hash": false,
+      "licence": false
+    },
+    {
+      "level": "component",
+      "path": "beacon / zephyr / bluetooth-host",
+      "type": "library",
+      "name": "bluetooth-host",
+      "version": "4.4.2",
+      "bom_ref": "component:6d77f54195a6d745815bb7906824c862",
+      "purl": true,
+      "cpe": false,
+      "hash": false,
+      "licence": false
+    },
+    {
+      "level": "component",
+      "path": "beacon / zephyr / logging",
+      "type": "library",
+      "name": "logging",
+      "version": "4.4.2",
+      "bom_ref": "component:52d2288569985796c140d33096cb9966",
+      "purl": true,
+      "cpe": false,
+      "hash": false,
+      "licence": false
+    }
+  ],
+  "unresolved": [],
+  "findings": null,
+  "vex": null,
+  "validation": {
+    "schema": {
+      "valid": true,
+      "violations": []
+    },
+    "profiles": {
+      "profiles": [
+        "cisa-2026",
+        "cra"
+      ],
+      "passed": false,
+      "errors": 31,
+      "warnings": 0,
+      "findings": [
+        {
+          "check": "component.hash",
+          "severity": "error",
+          "profiles": [
+            "cisa-2026",
+            "cra"
+          ],
+          "component": "beacon",
+          "level": "product",
+          "pointer": null,
+          "message": "no hash"
+        },
+        {
+          "check": "component.identifier",
+          "severity": "error",
+          "profiles": [
+            "cisa-2026",
+            "cra"
+          ],
+          "component": "beacon",
+          "level": "product",
+          "pointer": null,
+          "message": "no unique identifier (cpe, purl missing)"
+        },
+        {
+          "check": "component.supplier",
+          "severity": "error",
+          "profiles": [
+            "cisa-2026",
+            "cra"
+          ],
+          "component": "beacon",
+          "level": "product",
+          "pointer": null,
+          "message": "no supplier (manufacturer.name and supplier.name missing)"
+        },
+        {
+          "check": "component.version",
+          "severity": "error",
+          "profiles": [
+            "cisa-2026",
+            "cra"
+          ],
+          "component": "beacon",
+          "level": "product",
+          "pointer": null,
+          "message": "no version"
+        },
+        {
+          "check": "component.hash",
+          "severity": "error",
+          "profiles": [
+            "cisa-2026",
+            "cra"
+          ],
+          "component": "mcuboot",
+          "level": "image",
+          "pointer": null,
+          "message": "no hash"
+        },
+        {
+          "check": "component.identifier",
+          "severity": "error",
+          "profiles": [
+            "cisa-2026",
+            "cra"
+          ],
+          "component": "mcuboot",
+          "level": "image",
+          "pointer": null,
+          "message": "no unique identifier (cpe, purl missing)"
+        },
+        {
+          "check": "component.supplier",
+          "severity": "error",
+          "profiles": [
+            "cisa-2026",
+            "cra"
+          ],
+          "component": "mcuboot",
+          "level": "image",
+          "pointer": null,
+          "message": "no supplier (manufacturer.name and supplier.name missing)"
+        },
+        {
+          "check": "component.version",
+          "severity": "error",
+          "profiles": [
+            "cisa-2026",
+            "cra"
+          ],
+          "component": "mcuboot",
+          "level": "image",
+          "pointer": null,
+          "message": "no version"
+        },
+        {
+          "check": "component.hash",
+          "severity": "error",
+          "profiles": [
+            "cisa-2026",
+            "cra"
+          ],
+          "component": "mcuboot / cmsis",
+          "level": "component",
+          "pointer": null,
+          "message": "no hash"
+        },
+        {
+          "check": "component.hash",
+          "severity": "error",
+          "profiles": [
+            "cisa-2026",
+            "cra"
+          ],
+          "component": "mcuboot / cmsis_6",
+          "level": "component",
+          "pointer": null,
+          "message": "no hash"
+        },
+        {
+          "check": "component.hash",
+          "severity": "error",
+          "profiles": [
+            "cisa-2026",
+            "cra"
+          ],
+          "component": "mcuboot / hal_nordic",
+          "level": "component",
+          "pointer": null,
+          "message": "no hash"
+        },
+        {
+          "check": "component.hash",
+          "severity": "error",
+          "profiles": [
+            "cisa-2026",
+            "cra"
+          ],
+          "component": "mcuboot / mbedtls",
+          "level": "component",
+          "pointer": null,
+          "message": "no hash"
+        },
+        {
+          "check": "component.hash",
+          "severity": "error",
+          "profiles": [
+            "cisa-2026",
+            "cra"
+          ],
+          "component": "mcuboot / mcuboot",
+          "level": "component",
+          "pointer": null,
+          "message": "no hash"
+        },
+        {
+          "check": "component.hash",
+          "severity": "error",
+          "profiles": [
+            "cisa-2026",
+            "cra"
+          ],
+          "component": "mcuboot / tf-psa-crypto",
+          "level": "component",
+          "pointer": null,
+          "message": "no hash"
+        },
+        {
+          "check": "component.hash",
+          "severity": "error",
+          "profiles": [
+            "cisa-2026",
+            "cra"
+          ],
+          "component": "mcuboot / zephyr",
+          "level": "component",
+          "pointer": null,
+          "message": "no hash"
+        },
+        {
+          "check": "component.hash",
+          "severity": "error",
+          "profiles": [
+            "cisa-2026",
+            "cra"
+          ],
+          "component": "mcuboot / zephyr / logging",
+          "level": "component",
+          "pointer": null,
+          "message": "no hash"
+        },
+        {
+          "check": "component.hash",
+          "severity": "error",
+          "profiles": [
+            "cisa-2026",
+            "cra"
+          ],
+          "component": "mcuboot / zephyr / mbedtls-integration",
+          "level": "component",
+          "pointer": null,
+          "message": "no hash"
+        },
+        {
+          "check": "component.hash",
+          "severity": "error",
+          "profiles": [
+            "cisa-2026",
+            "cra"
+          ],
+          "component": "beacon",
+          "level": "image",
+          "pointer": null,
+          "message": "no hash"
+        },
+        {
+          "check": "component.identifier",
+          "severity": "error",
+          "profiles": [
+            "cisa-2026",
+            "cra"
+          ],
+          "component": "beacon",
+          "level": "image",
+          "pointer": null,
+          "message": "no unique identifier (cpe, purl missing)"
+        },
+        {
+          "check": "component.supplier",
+          "severity": "error",
+          "profiles": [
+            "cisa-2026",
+            "cra"
+          ],
+          "component": "beacon",
+          "level": "image",
+          "pointer": null,
+          "message": "no supplier (manufacturer.name and supplier.name missing)"
+        },
+        {
+          "check": "component.version",
+          "severity": "error",
+          "profiles": [
+            "cisa-2026",
+            "cra"
+          ],
+          "component": "beacon",
+          "level": "image",
+          "pointer": null,
+          "message": "no version"
+        },
+        {
+          "check": "component.hash",
+          "severity": "error",
+          "profiles": [
+            "cisa-2026",
+            "cra"
+          ],
+          "component": "beacon / cmsis",
+          "level": "component",
+          "pointer": null,
+          "message": "no hash"
+        },
+        {
+          "check": "component.hash",
+          "severity": "error",
+          "profiles": [
+            "cisa-2026",
+            "cra"
+          ],
+          "component": "beacon / cmsis_6",
+          "level": "component",
+          "pointer": null,
+          "message": "no hash"
+        },
+        {
+          "check": "component.hash",
+          "severity": "error",
+          "profiles": [
+            "cisa-2026",
+            "cra"
+          ],
+          "component": "beacon / hal_nordic",
+          "level": "component",
+          "pointer": null,
+          "message": "no hash"
+        },
+        {
+          "check": "component.hash",
+          "severity": "error",
+          "profiles": [
+            "cisa-2026",
+            "cra"
+          ],
+          "component": "beacon / mbedtls",
+          "level": "component",
+          "pointer": null,
+          "message": "no hash"
+        },
+        {
+          "check": "component.hash",
+          "severity": "error",
+          "profiles": [
+            "cisa-2026",
+            "cra"
+          ],
+          "component": "beacon / mcuboot",
+          "level": "component",
+          "pointer": null,
+          "message": "no hash"
+        },
+        {
+          "check": "component.hash",
+          "severity": "error",
+          "profiles": [
+            "cisa-2026",
+            "cra"
+          ],
+          "component": "beacon / tf-psa-crypto",
+          "level": "component",
+          "pointer": null,
+          "message": "no hash"
+        },
+        {
+          "check": "component.hash",
+          "severity": "error",
+          "profiles": [
+            "cisa-2026",
+            "cra"
+          ],
+          "component": "beacon / zephyr",
+          "level": "component",
+          "pointer": null,
+          "message": "no hash"
+        },
+        {
+          "check": "component.hash",
+          "severity": "error",
+          "profiles": [
+            "cisa-2026",
+            "cra"
+          ],
+          "component": "beacon / zephyr / bluetooth-controller",
+          "level": "component",
+          "pointer": null,
+          "message": "no hash"
+        },
+        {
+          "check": "component.hash",
+          "severity": "error",
+          "profiles": [
+            "cisa-2026",
+            "cra"
+          ],
+          "component": "beacon / zephyr / bluetooth-host",
+          "level": "component",
+          "pointer": null,
+          "message": "no hash"
+        },
+        {
+          "check": "component.hash",
+          "severity": "error",
+          "profiles": [
+            "cisa-2026",
+            "cra"
+          ],
+          "component": "beacon / zephyr / logging",
+          "level": "component",
+          "pointer": null,
+          "message": "no hash"
+        }
+      ]
+    }
+  },
+  "warnings": []
+}

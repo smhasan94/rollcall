@@ -1,0 +1,311 @@
+{
+  "schema": "rollcall-report/1",
+  "generated": "2026-01-02T03:04:05Z",
+  "tool": {
+    "name": "rollcall",
+    "version": "0.0.1"
+  },
+  "product": {
+    "name": "rust-node",
+    "version": "1.0.0"
+  },
+  "summary": "This report checks how ready the software bill of materials (SBOM) of rust-node 1.0.0 is to hand to a customer or regulator. Its readiness score is 23 out of 100. The SBOM lists 3 items in total: the product, 1 firmware image and 1 software component. 1 of them carry an identifier (a PURL or CPE) that vulnerability databases can match, 0 a file hash that proves exactly which file was shipped, and 1 a licence. No unresolved modules. The SBOM is valid CycloneDX 1.6; the CISA 2026 and EU Cyber Resilience Act checks found 11 problems to fix and 0 recommendations. A vulnerability scan was supplied: 1 known vulnerability affects this product's components; 1 is still open (0 critical, 1 high) and 0 closed by VEX statements (not affected or fixed).",
+  "score": {
+    "value": 23,
+    "basis_points": 2333,
+    "weight_assessed": 100,
+    "scan_supplied": true,
+    "categories": [
+      {
+        "id": "identified",
+        "weight": 25,
+        "assessed": true,
+        "numerator": 1,
+        "denominator": 3,
+        "earned": 83333
+      },
+      {
+        "id": "hashed",
+        "weight": 15,
+        "assessed": true,
+        "numerator": 0,
+        "denominator": 3,
+        "earned": 0
+      },
+      {
+        "id": "licensed",
+        "weight": 15,
+        "assessed": true,
+        "numerator": 1,
+        "denominator": 3,
+        "earned": 50000
+      },
+      {
+        "id": "validation",
+        "weight": 25,
+        "assessed": true,
+        "numerator": 0,
+        "denominator": 3,
+        "earned": 0
+      },
+      {
+        "id": "modules",
+        "weight": 10,
+        "assessed": true,
+        "numerator": 0,
+        "denominator": 0,
+        "earned": 100000
+      },
+      {
+        "id": "vulnerabilities",
+        "weight": 10,
+        "assessed": true,
+        "numerator": 0,
+        "denominator": 1,
+        "earned": 0
+      }
+    ]
+  },
+  "coverage": {
+    "nodes": 3,
+    "purl": {
+      "count": 1,
+      "basis_points": 3333
+    },
+    "cpe": {
+      "count": 0,
+      "basis_points": 0
+    },
+    "identified": {
+      "count": 1,
+      "basis_points": 3333
+    },
+    "hash": {
+      "count": 0,
+      "basis_points": 0
+    },
+    "licence": {
+      "count": 1,
+      "basis_points": 3333
+    }
+  },
+  "components": [
+    {
+      "level": "product",
+      "path": "rust-node",
+      "type": "firmware",
+      "name": "rust-node",
+      "version": "1.0.0",
+      "bom_ref": "product:448059ca4bed3a0f40b3864ef013cb1d",
+      "purl": false,
+      "cpe": false,
+      "hash": false,
+      "licence": false
+    },
+    {
+      "level": "image",
+      "path": "rust-app",
+      "type": "firmware",
+      "name": "rust-app",
+      "version": "1.0.0",
+      "bom_ref": "image:c1db5f5de80e84ede7a9499018880eba",
+      "purl": false,
+      "cpe": false,
+      "hash": false,
+      "licence": false
+    },
+    {
+      "level": "component",
+      "path": "rust-app / heapless",
+      "type": "library",
+      "name": "heapless",
+      "version": "0.5.0",
+      "bom_ref": "component:62647f2322484e243234bf35c4beee2e",
+      "purl": true,
+      "cpe": false,
+      "hash": false,
+      "licence": true
+    }
+  ],
+  "unresolved": [],
+  "findings": {
+    "total": 1,
+    "in_sbom": 1,
+    "not_in_sbom": 0,
+    "open": 1,
+    "closed": 0,
+    "open_by_severity": {
+      "critical": 0,
+      "high": 1,
+      "medium": 0,
+      "low": 0,
+      "unknown": 0
+    },
+    "items": [
+      {
+        "id": "CVE-2020-36464",
+        "aliases": [
+          "GHSA-qgwf-r2jj-2ccv",
+          "RUSTSEC-2020-0145"
+        ],
+        "severity": "high",
+        "scanner_severity": "HIGH",
+        "component": "rust-app / heapless",
+        "bom_ref": "component:62647f2322484e243234bf35c4beee2e",
+        "package": "heapless@0.5.0",
+        "status": "open",
+        "vex_status": null
+      }
+    ]
+  },
+  "vex": null,
+  "validation": {
+    "schema": {
+      "valid": true,
+      "violations": []
+    },
+    "profiles": {
+      "profiles": [
+        "cisa-2026",
+        "cra"
+      ],
+      "passed": false,
+      "errors": 11,
+      "warnings": 0,
+      "findings": [
+        {
+          "check": "component.hash",
+          "severity": "error",
+          "profiles": [
+            "cisa-2026",
+            "cra"
+          ],
+          "component": "rust-node",
+          "level": "product",
+          "pointer": null,
+          "message": "no hash"
+        },
+        {
+          "check": "component.identifier",
+          "severity": "error",
+          "profiles": [
+            "cisa-2026",
+            "cra"
+          ],
+          "component": "rust-node",
+          "level": "product",
+          "pointer": null,
+          "message": "no unique identifier (cpe, purl missing)"
+        },
+        {
+          "check": "component.supplier",
+          "severity": "error",
+          "profiles": [
+            "cisa-2026",
+            "cra"
+          ],
+          "component": "rust-node",
+          "level": "product",
+          "pointer": null,
+          "message": "no supplier (manufacturer.name and supplier.name missing)"
+        },
+        {
+          "check": "component.hash",
+          "severity": "error",
+          "profiles": [
+            "cisa-2026",
+            "cra"
+          ],
+          "component": "rust-app",
+          "level": "image",
+          "pointer": null,
+          "message": "no hash"
+        },
+        {
+          "check": "component.identifier",
+          "severity": "error",
+          "profiles": [
+            "cisa-2026",
+            "cra"
+          ],
+          "component": "rust-app",
+          "level": "image",
+          "pointer": null,
+          "message": "no unique identifier (cpe, purl missing)"
+        },
+        {
+          "check": "component.supplier",
+          "severity": "error",
+          "profiles": [
+            "cisa-2026",
+            "cra"
+          ],
+          "component": "rust-app",
+          "level": "image",
+          "pointer": null,
+          "message": "no supplier (manufacturer.name and supplier.name missing)"
+        },
+        {
+          "check": "graph.reachable",
+          "severity": "error",
+          "profiles": [
+            "cisa-2026",
+            "cra"
+          ],
+          "component": "rust-app",
+          "level": "image",
+          "pointer": null,
+          "message": "not reachable from the root product:448059ca4bed3a0f40b3864ef013cb1d through dependencies or nesting"
+        },
+        {
+          "check": "graph.top-level-complete",
+          "severity": "error",
+          "profiles": [
+            "cra"
+          ],
+          "component": "rust-app",
+          "level": "image",
+          "pointer": null,
+          "message": "top-level component is not listed in the root's dependsOn"
+        },
+        {
+          "check": "component.hash",
+          "severity": "error",
+          "profiles": [
+            "cisa-2026",
+            "cra"
+          ],
+          "component": "rust-app / heapless",
+          "level": "component",
+          "pointer": null,
+          "message": "no hash"
+        },
+        {
+          "check": "component.supplier",
+          "severity": "error",
+          "profiles": [
+            "cisa-2026",
+            "cra"
+          ],
+          "component": "rust-app / heapless",
+          "level": "component",
+          "pointer": null,
+          "message": "no supplier (manufacturer.name and supplier.name missing)"
+        },
+        {
+          "check": "graph.reachable",
+          "severity": "error",
+          "profiles": [
+            "cisa-2026",
+            "cra"
+          ],
+          "component": "rust-app / heapless",
+          "level": "component",
+          "pointer": null,
+          "message": "not reachable from the root product:448059ca4bed3a0f40b3864ef013cb1d through dependencies or nesting"
+        }
+      ]
+    }
+  },
+  "warnings": []
+}

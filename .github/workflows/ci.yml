@@ -54,6 +54,10 @@ jobs:
       - uses: Swatinem/rust-cache@v2
       - run: cargo build --workspace --locked
       - run: cargo test --workspace --locked
+      # Every fixture's `rollcall report --format json` against docs/report-schema.json
+      # (also run by the step above; named here so a schema failure is visible on its own).
+      - name: Report schema
+        run: cargo test -p rollcall-core --test report json_validates_against_schema_for_every_fixture --locked
       # Offline checks of the identifier-database version-table generator.
       - run: python3 scripts/version-tables.py --self-test
 
@@ -105,6 +109,18 @@ jobs:
       # On a cache miss the script clones the pinned tag (retrying the clone once).
       - name: Verify the subsystem table
         run: scripts/verify-subsystems.sh
+
+  # Every readiness-report Markdown golden (crates/rollcall-core/tests/golden/report/*.md)
+  # rendered by GitHub's own Markdown renderer (POST /markdown, mode gfm): one H1, every
+  # section heading, and every pipe table rendered as a table. Needs the network.
+  report-markdown:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Render the report goldens with GitHub's renderer
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: scripts/check-report-markdown.sh
 
   # grype and osv-scanner (pinned, SHA-256-verified) must load the generated CycloneDX
   # documents without warnings, and find nothing in the minimal fixture. Needs the network.

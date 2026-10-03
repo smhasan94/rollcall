@@ -8,7 +8,9 @@
 //! (enabling Kconfig symbols and source paths) used to split the kernel package, and
 //! [`linker_map`] parses the GNU ld map that split is cross-checked against. [`vex`]
 //! evaluates VEX rules against scanner findings and build evidence. [`validate`] checks a
-//! CycloneDX document against regulators' SBOM profiles (CISA 2026, CRA).
+//! CycloneDX document against regulators' SBOM profiles (CISA 2026, CRA). [`report`] builds
+//! the readiness report (Markdown and JSON) for an SBOM, with [`severity`] normalising
+//! scanners' severity words.
 
 #![deny(missing_docs)]
 #![deny(
@@ -33,6 +35,8 @@ pub mod identify;
 pub mod linker_map;
 pub mod merge;
 pub mod model;
+pub mod report;
+pub mod severity;
 pub mod subsystems;
 pub mod validate;
 pub mod vex;

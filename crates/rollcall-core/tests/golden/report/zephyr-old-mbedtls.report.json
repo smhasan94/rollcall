@@ -1,0 +1,828 @@
+{
+  "schema": "rollcall-report/1",
+  "generated": "2026-01-02T03:04:05Z",
+  "tool": {
+    "name": "rollcall",
+    "version": "0.0.1"
+  },
+  "product": {
+    "name": "mbedtls",
+    "version": null
+  },
+  "summary": "This report checks how ready the software bill of materials (SBOM) of mbedtls is to hand to a customer or regulator. Its readiness score is 37 out of 100. The SBOM lists 19 items in total: the product, 2 firmware images and 16 software components. 16 of them carry an identifier (a PURL or CPE) that vulnerability databases can match, 0 a file hash that proves exactly which file was shipped, and 9 a licence. 4 modules are not in rollcall's identifier database, so their identity may be incomplete (see Unresolved modules). The SBOM is valid CycloneDX 1.6; the CISA 2026 and EU Cyber Resilience Act checks found 38 problems to fix and 0 recommendations. No vulnerability scan was supplied, so known vulnerabilities were not checked and are not part of the score.",
+  "score": {
+    "value": 37,
+    "basis_points": 3795,
+    "weight_assessed": 90,
+    "scan_supplied": false,
+    "categories": [
+      {
+        "id": "identified",
+        "weight": 25,
+        "assessed": true,
+        "numerator": 16,
+        "denominator": 19,
+        "earned": 210526
+      },
+      {
+        "id": "hashed",
+        "weight": 15,
+        "assessed": true,
+        "numerator": 0,
+        "denominator": 19,
+        "earned": 0
+      },
+      {
+        "id": "licensed",
+        "weight": 15,
+        "assessed": true,
+        "numerator": 9,
+        "denominator": 19,
+        "earned": 71052
+      },
+      {
+        "id": "validation",
+        "weight": 25,
+        "assessed": true,
+        "numerator": 0,
+        "denominator": 19,
+        "earned": 0
+      },
+      {
+        "id": "modules",
+        "weight": 10,
+        "assessed": true,
+        "numerator": 6,
+        "denominator": 10,
+        "earned": 60000
+      },
+      {
+        "id": "vulnerabilities",
+        "weight": 10,
+        "assessed": false,
+        "numerator": 0,
+        "denominator": 0,
+        "earned": 0
+      }
+    ]
+  },
+  "coverage": {
+    "nodes": 19,
+    "purl": {
+      "count": 16,
+      "basis_points": 8421
+    },
+    "cpe": {
+      "count": 4,
+      "basis_points": 2105
+    },
+    "identified": {
+      "count": 16,
+      "basis_points": 8421
+    },
+    "hash": {
+      "count": 0,
+      "basis_points": 0
+    },
+    "licence": {
+      "count": 9,
+      "basis_points": 4736
+    }
+  },
+  "components": [
+    {
+      "level": "product",
+      "path": "mbedtls",
+      "type": "firmware",
+      "name": "mbedtls",
+      "version": null,
+      "bom_ref": "product:4e552361e62f88fbdd9274675f3e6b64",
+      "purl": false,
+      "cpe": false,
+      "hash": false,
+      "licence": false
+    },
+    {
+      "level": "image",
+      "path": "mcuboot",
+      "type": "firmware",
+      "name": "mcuboot",
+      "version": null,
+      "bom_ref": "image:db05cebc08c8cb4451b3e5a44b527ade",
+      "purl": false,
+      "cpe": false,
+      "hash": false,
+      "licence": true
+    },
+    {
+      "level": "component",
+      "path": "mcuboot / cmsis",
+      "type": "library",
+      "name": "cmsis",
+      "version": "512cc7e895e8491696b61f7ba8066b4a182569b8",
+      "bom_ref": "component:714042833219eb80010191e688d014ef",
+      "purl": true,
+      "cpe": false,
+      "hash": false,
+      "licence": false
+    },
+    {
+      "level": "component",
+      "path": "mcuboot / cmsis-6",
+      "type": "library",
+      "name": "cmsis-6",
+      "version": "06d952b6713a2ca41c9224a62075e4059402a151",
+      "bom_ref": "component:9be083e8fff40f0ccee044f45f624fb8",
+      "purl": true,
+      "cpe": false,
+      "hash": false,
+      "licence": false
+    },
+    {
+      "level": "component",
+      "path": "mcuboot / hal-nordic",
+      "type": "library",
+      "name": "hal-nordic",
+      "version": "9587b1dcb83d24ab74e89837843a5f7d573f7059",
+      "bom_ref": "component:bf597365e954d3e08e4eb594640d5695",
+      "purl": true,
+      "cpe": false,
+      "hash": false,
+      "licence": true
+    },
+    {
+      "level": "component",
+      "path": "mcuboot / mbedtls",
+      "type": "library",
+      "name": "mbedtls",
+      "version": "85440ef5fffa95d0e9971e9163719189cf34d979",
+      "bom_ref": "component:f6a5290999a9bc5d42de7513e489e9bb",
+      "purl": true,
+      "cpe": true,
+      "hash": false,
+      "licence": true
+    },
+    {
+      "level": "component",
+      "path": "mcuboot / mcuboot",
+      "type": "library",
+      "name": "mcuboot",
+      "version": "4eba8087fa606db801455f14d185255bc8c49467",
+      "bom_ref": "component:e14aa442ab68c5e64d1d4177653f91e8",
+      "purl": true,
+      "cpe": false,
+      "hash": false,
+      "licence": true
+    },
+    {
+      "level": "component",
+      "path": "mcuboot / zephyr",
+      "type": "operating-system",
+      "name": "zephyr",
+      "version": "4.2.0",
+      "bom_ref": "component:e087b96a6754c58bb0aac97d4d4038be",
+      "purl": true,
+      "cpe": true,
+      "hash": false,
+      "licence": true
+    },
+    {
+      "level": "component",
+      "path": "mcuboot / zephyr / logging",
+      "type": "library",
+      "name": "logging",
+      "version": "4.2.0",
+      "bom_ref": "component:75bc67bc4d70303b453a05d1f92a0eec",
+      "purl": true,
+      "cpe": false,
+      "hash": false,
+      "licence": false
+    },
+    {
+      "level": "component",
+      "path": "mcuboot / zephyr / mbedtls-integration",
+      "type": "library",
+      "name": "mbedtls-integration",
+      "version": "4.2.0",
+      "bom_ref": "component:eb4ede833e32306e5aaae1bf14cdc1c0",
+      "purl": true,
+      "cpe": false,
+      "hash": false,
+      "licence": false
+    },
+    {
+      "level": "image",
+      "path": "mbedtls",
+      "type": "firmware",
+      "name": "mbedtls",
+      "version": null,
+      "bom_ref": "image:0538b3b3ba656e55760d51155ca3c745",
+      "purl": false,
+      "cpe": false,
+      "hash": false,
+      "licence": true
+    },
+    {
+      "level": "component",
+      "path": "mbedtls / cmsis",
+      "type": "library",
+      "name": "cmsis",
+      "version": "512cc7e895e8491696b61f7ba8066b4a182569b8",
+      "bom_ref": "component:06688716e24334a74314980e76093ffc",
+      "purl": true,
+      "cpe": false,
+      "hash": false,
+      "licence": false
+    },
+    {
+      "level": "component",
+      "path": "mbedtls / cmsis-6",
+      "type": "library",
+      "name": "cmsis-6",
+      "version": "06d952b6713a2ca41c9224a62075e4059402a151",
+      "bom_ref": "component:abd3052392c3080ec4b94305997dea17",
+      "purl": true,
+      "cpe": false,
+      "hash": false,
+      "licence": false
+    },
+    {
+      "level": "component",
+      "path": "mbedtls / hal-nordic",
+      "type": "library",
+      "name": "hal-nordic",
+      "version": "9587b1dcb83d24ab74e89837843a5f7d573f7059",
+      "bom_ref": "component:fbcb76c267a4337914217aa86ea3e4c8",
+      "purl": true,
+      "cpe": false,
+      "hash": false,
+      "licence": true
+    },
+    {
+      "level": "component",
+      "path": "mbedtls / mbedtls",
+      "type": "library",
+      "name": "mbedtls",
+      "version": "85440ef5fffa95d0e9971e9163719189cf34d979",
+      "bom_ref": "component:8cba6d890525e9fb6c673e92d1b335f3",
+      "purl": true,
+      "cpe": true,
+      "hash": false,
+      "licence": true
+    },
+    {
+      "level": "component",
+      "path": "mbedtls / mcuboot",
+      "type": "library",
+      "name": "mcuboot",
+      "version": "4eba8087fa606db801455f14d185255bc8c49467",
+      "bom_ref": "component:93ec6a6fb4b04312635b003b061512f2",
+      "purl": true,
+      "cpe": false,
+      "hash": false,
+      "licence": false
+    },
+    {
+      "level": "component",
+      "path": "mbedtls / zephyr",
+      "type": "operating-system",
+      "name": "zephyr",
+      "version": "4.2.0",
+      "bom_ref": "component:0fd57106afdc1eb2b45ab326c45a2e50",
+      "purl": true,
+      "cpe": true,
+      "hash": false,
+      "licence": true
+    },
+    {
+      "level": "component",
+      "path": "mbedtls / zephyr / logging",
+      "type": "library",
+      "name": "logging",
+      "version": "4.2.0",
+      "bom_ref": "component:bd5133d0e1134aa10e167a841cd2fa0a",
+      "purl": true,
+      "cpe": false,
+      "hash": false,
+      "licence": false
+    },
+    {
+      "level": "component",
+      "path": "mbedtls / zephyr / mbedtls-integration",
+      "type": "library",
+      "name": "mbedtls-integration",
+      "version": "4.2.0",
+      "bom_ref": "component:b16b687cfa142c4eff4309cd91629ca0",
+      "purl": true,
+      "cpe": false,
+      "hash": false,
+      "licence": false
+    }
+  ],
+  "unresolved": [
+    {
+      "path": "mbedtls / cmsis-6",
+      "name": "cmsis-6",
+      "version": "06d952b6713a2ca41c9224a62075e4059402a151",
+      "reason": "module-not-in-identifier-db",
+      "hint": "  cmsis-6:\n    upstream:\n      name: \"\"        # upstream project name\n      homepage: \"\"    # project homepage URL (or delete this line)\n      supplier: \"\"    # who publishes it upstream (or delete this line)\n    purl: \"pkg:github/zephyrproject-rtos/cmsis_6@v{version}\"    # from the module URL: point it at the upstream repository, not a Zephyr fork\n    cpe: \"cpe:2.3:a:<vendor>:<product>:{version}:*:*:*:*:*:*:*\"    # NVD vendor and product (or delete this line)\n    version_rule:\n      kind: manual\n      table:\n        \"06d952b6713a2ca41c9224a62075e4059402a151\": \"\"    # the upstream release this revision corresponds to\n"
+    },
+    {
+      "path": "mbedtls / hal-nordic",
+      "name": "hal-nordic",
+      "version": "9587b1dcb83d24ab74e89837843a5f7d573f7059",
+      "reason": "module-not-in-identifier-db",
+      "hint": "  hal-nordic:\n    upstream:\n      name: \"\"        # upstream project name\n      homepage: \"\"    # project homepage URL (or delete this line)\n      supplier: \"\"    # who publishes it upstream (or delete this line)\n    purl: \"pkg:github/zephyrproject-rtos/hal_nordic@v{version}\"    # from the module URL: point it at the upstream repository, not a Zephyr fork\n    cpe: \"cpe:2.3:a:<vendor>:<product>:{version}:*:*:*:*:*:*:*\"    # NVD vendor and product (or delete this line)\n    version_rule:\n      kind: manual\n      table:\n        \"9587b1dcb83d24ab74e89837843a5f7d573f7059\": \"\"    # the upstream release this revision corresponds to\n"
+    },
+    {
+      "path": "mcuboot / cmsis-6",
+      "name": "cmsis-6",
+      "version": "06d952b6713a2ca41c9224a62075e4059402a151",
+      "reason": "module-not-in-identifier-db",
+      "hint": "  cmsis-6:\n    upstream:\n      name: \"\"        # upstream project name\n      homepage: \"\"    # project homepage URL (or delete this line)\n      supplier: \"\"    # who publishes it upstream (or delete this line)\n    purl: \"pkg:github/zephyrproject-rtos/cmsis_6@v{version}\"    # from the module URL: point it at the upstream repository, not a Zephyr fork\n    cpe: \"cpe:2.3:a:<vendor>:<product>:{version}:*:*:*:*:*:*:*\"    # NVD vendor and product (or delete this line)\n    version_rule:\n      kind: manual\n      table:\n        \"06d952b6713a2ca41c9224a62075e4059402a151\": \"\"    # the upstream release this revision corresponds to\n"
+    },
+    {
+      "path": "mcuboot / hal-nordic",
+      "name": "hal-nordic",
+      "version": "9587b1dcb83d24ab74e89837843a5f7d573f7059",
+      "reason": "module-not-in-identifier-db",
+      "hint": "  hal-nordic:\n    upstream:\n      name: \"\"        # upstream project name\n      homepage: \"\"    # project homepage URL (or delete this line)\n      supplier: \"\"    # who publishes it upstream (or delete this line)\n    purl: \"pkg:github/zephyrproject-rtos/hal_nordic@v{version}\"    # from the module URL: point it at the upstream repository, not a Zephyr fork\n    cpe: \"cpe:2.3:a:<vendor>:<product>:{version}:*:*:*:*:*:*:*\"    # NVD vendor and product (or delete this line)\n    version_rule:\n      kind: manual\n      table:\n        \"9587b1dcb83d24ab74e89837843a5f7d573f7059\": \"\"    # the upstream release this revision corresponds to\n"
+    }
+  ],
+  "findings": null,
+  "vex": null,
+  "validation": {
+    "schema": {
+      "valid": true,
+      "violations": []
+    },
+    "profiles": {
+      "profiles": [
+        "cisa-2026",
+        "cra"
+      ],
+      "passed": false,
+      "errors": 38,
+      "warnings": 0,
+      "findings": [
+        {
+          "check": "component.hash",
+          "severity": "error",
+          "profiles": [
+            "cisa-2026",
+            "cra"
+          ],
+          "component": "mbedtls",
+          "level": "product",
+          "pointer": null,
+          "message": "no hash"
+        },
+        {
+          "check": "component.identifier",
+          "severity": "error",
+          "profiles": [
+            "cisa-2026",
+            "cra"
+          ],
+          "component": "mbedtls",
+          "level": "product",
+          "pointer": null,
+          "message": "no unique identifier (cpe, purl missing)"
+        },
+        {
+          "check": "component.supplier",
+          "severity": "error",
+          "profiles": [
+            "cisa-2026",
+            "cra"
+          ],
+          "component": "mbedtls",
+          "level": "product",
+          "pointer": null,
+          "message": "no supplier (manufacturer.name and supplier.name missing)"
+        },
+        {
+          "check": "component.version",
+          "severity": "error",
+          "profiles": [
+            "cisa-2026",
+            "cra"
+          ],
+          "component": "mbedtls",
+          "level": "product",
+          "pointer": null,
+          "message": "no version"
+        },
+        {
+          "check": "component.hash",
+          "severity": "error",
+          "profiles": [
+            "cisa-2026",
+            "cra"
+          ],
+          "component": "mcuboot",
+          "level": "image",
+          "pointer": null,
+          "message": "no hash"
+        },
+        {
+          "check": "component.identifier",
+          "severity": "error",
+          "profiles": [
+            "cisa-2026",
+            "cra"
+          ],
+          "component": "mcuboot",
+          "level": "image",
+          "pointer": null,
+          "message": "no unique identifier (cpe, purl missing)"
+        },
+        {
+          "check": "component.supplier",
+          "severity": "error",
+          "profiles": [
+            "cisa-2026",
+            "cra"
+          ],
+          "component": "mcuboot",
+          "level": "image",
+          "pointer": null,
+          "message": "no supplier (manufacturer.name and supplier.name missing)"
+        },
+        {
+          "check": "component.version",
+          "severity": "error",
+          "profiles": [
+            "cisa-2026",
+            "cra"
+          ],
+          "component": "mcuboot",
+          "level": "image",
+          "pointer": null,
+          "message": "no version"
+        },
+        {
+          "check": "component.hash",
+          "severity": "error",
+          "profiles": [
+            "cisa-2026",
+            "cra"
+          ],
+          "component": "mcuboot / cmsis",
+          "level": "component",
+          "pointer": null,
+          "message": "no hash"
+        },
+        {
+          "check": "component.hash",
+          "severity": "error",
+          "profiles": [
+            "cisa-2026",
+            "cra"
+          ],
+          "component": "mcuboot / cmsis-6",
+          "level": "component",
+          "pointer": null,
+          "message": "no hash"
+        },
+        {
+          "check": "component.supplier",
+          "severity": "error",
+          "profiles": [
+            "cisa-2026",
+            "cra"
+          ],
+          "component": "mcuboot / cmsis-6",
+          "level": "component",
+          "pointer": null,
+          "message": "no supplier (manufacturer.name and supplier.name missing)"
+        },
+        {
+          "check": "component.hash",
+          "severity": "error",
+          "profiles": [
+            "cisa-2026",
+            "cra"
+          ],
+          "component": "mcuboot / hal-nordic",
+          "level": "component",
+          "pointer": null,
+          "message": "no hash"
+        },
+        {
+          "check": "component.supplier",
+          "severity": "error",
+          "profiles": [
+            "cisa-2026",
+            "cra"
+          ],
+          "component": "mcuboot / hal-nordic",
+          "level": "component",
+          "pointer": null,
+          "message": "no supplier (manufacturer.name and supplier.name missing)"
+        },
+        {
+          "check": "component.hash",
+          "severity": "error",
+          "profiles": [
+            "cisa-2026",
+            "cra"
+          ],
+          "component": "mcuboot / mbedtls",
+          "level": "component",
+          "pointer": null,
+          "message": "no hash"
+        },
+        {
+          "check": "component.hash",
+          "severity": "error",
+          "profiles": [
+            "cisa-2026",
+            "cra"
+          ],
+          "component": "mcuboot / mcuboot",
+          "level": "component",
+          "pointer": null,
+          "message": "no hash"
+        },
+        {
+          "check": "component.hash",
+          "severity": "error",
+          "profiles": [
+            "cisa-2026",
+            "cra"
+          ],
+          "component": "mcuboot / zephyr",
+          "level": "component",
+          "pointer": null,
+          "message": "no hash"
+        },
+        {
+          "check": "component.supplier",
+          "severity": "error",
+          "profiles": [
+            "cisa-2026",
+            "cra"
+          ],
+          "component": "mcuboot / zephyr",
+          "level": "component",
+          "pointer": null,
+          "message": "no supplier (manufacturer.name and supplier.name missing)"
+        },
+        {
+          "check": "component.hash",
+          "severity": "error",
+          "profiles": [
+            "cisa-2026",
+            "cra"
+          ],
+          "component": "mcuboot / zephyr / logging",
+          "level": "component",
+          "pointer": null,
+          "message": "no hash"
+        },
+        {
+          "check": "component.supplier",
+          "severity": "error",
+          "profiles": [
+            "cisa-2026",
+            "cra"
+          ],
+          "component": "mcuboot / zephyr / logging",
+          "level": "component",
+          "pointer": null,
+          "message": "no supplier (manufacturer.name and supplier.name missing)"
+        },
+        {
+          "check": "component.hash",
+          "severity": "error",
+          "profiles": [
+            "cisa-2026",
+            "cra"
+          ],
+          "component": "mcuboot / zephyr / mbedtls-integration",
+          "level": "component",
+          "pointer": null,
+          "message": "no hash"
+        },
+        {
+          "check": "component.supplier",
+          "severity": "error",
+          "profiles": [
+            "cisa-2026",
+            "cra"
+          ],
+          "component": "mcuboot / zephyr / mbedtls-integration",
+          "level": "component",
+          "pointer": null,
+          "message": "no supplier (manufacturer.name and supplier.name missing)"
+        },
+        {
+          "check": "component.hash",
+          "severity": "error",
+          "profiles": [
+            "cisa-2026",
+            "cra"
+          ],
+          "component": "mbedtls",
+          "level": "image",
+          "pointer": null,
+          "message": "no hash"
+        },
+        {
+          "check": "component.identifier",
+          "severity": "error",
+          "profiles": [
+            "cisa-2026",
+            "cra"
+          ],
+          "component": "mbedtls",
+          "level": "image",
+          "pointer": null,
+          "message": "no unique identifier (cpe, purl missing)"
+        },
+        {
+          "check": "component.supplier",
+          "severity": "error",
+          "profiles": [
+            "cisa-2026",
+            "cra"
+          ],
+          "component": "mbedtls",
+          "level": "image",
+          "pointer": null,
+          "message": "no supplier (manufacturer.name and supplier.name missing)"
+        },
+        {
+          "check": "component.version",
+          "severity": "error",
+          "profiles": [
+            "cisa-2026",
+            "cra"
+          ],
+          "component": "mbedtls",
+          "level": "image",
+          "pointer": null,
+          "message": "no version"
+        },
+        {
+          "check": "component.hash",
+          "severity": "error",
+          "profiles": [
+            "cisa-2026",
+            "cra"
+          ],
+          "component": "mbedtls / cmsis",
+          "level": "component",
+          "pointer": null,
+          "message": "no hash"
+        },
+        {
+          "check": "component.hash",
+          "severity": "error",
+          "profiles": [
+            "cisa-2026",
+            "cra"
+          ],
+          "component": "mbedtls / cmsis-6",
+          "level": "component",
+          "pointer": null,
+          "message": "no hash"
+        },
+        {
+          "check": "component.supplier",
+          "severity": "error",
+          "profiles": [
+            "cisa-2026",
+            "cra"
+          ],
+          "component": "mbedtls / cmsis-6",
+          "level": "component",
+          "pointer": null,
+          "message": "no supplier (manufacturer.name and supplier.name missing)"
+        },
+        {
+          "check": "component.hash",
+          "severity": "error",
+          "profiles": [
+            "cisa-2026",
+            "cra"
+          ],
+          "component": "mbedtls / hal-nordic",
+          "level": "component",
+          "pointer": null,
+          "message": "no hash"
+        },
+        {
+          "check": "component.supplier",
+          "severity": "error",
+          "profiles": [
+            "cisa-2026",
+            "cra"
+          ],
+          "component": "mbedtls / hal-nordic",
+          "level": "component",
+          "pointer": null,
+          "message": "no supplier (manufacturer.name and supplier.name missing)"
+        },
+        {
+          "check": "component.hash",
+          "severity": "error",
+          "profiles": [
+            "cisa-2026",
+            "cra"
+          ],
+          "component": "mbedtls / mbedtls",
+          "level": "component",
+          "pointer": null,
+          "message": "no hash"
+        },
+        {
+          "check": "component.hash",
+          "severity": "error",
+          "profiles": [
+            "cisa-2026",
+            "cra"
+          ],
+          "component": "mbedtls / mcuboot",
+          "level": "component",
+          "pointer": null,
+          "message": "no hash"
+        },
+        {
+          "check": "component.hash",
+          "severity": "error",
+          "profiles": [
+            "cisa-2026",
+            "cra"
+          ],
+          "component": "mbedtls / zephyr",
+          "level": "component",
+          "pointer": null,
+          "message": "no hash"
+        },
+        {
+          "check": "component.supplier",
+          "severity": "error",
+          "profiles": [
+            "cisa-2026",
+            "cra"
+          ],
+          "component": "mbedtls / zephyr",
+          "level": "component",
+          "pointer": null,
+          "message": "no supplier (manufacturer.name and supplier.name missing)"
+        },
+        {
+          "check": "component.hash",
+          "severity": "error",
+          "profiles": [
+            "cisa-2026",
+            "cra"
+          ],
+          "component": "mbedtls / zephyr / logging",
+          "level": "component",
+          "pointer": null,
+          "message": "no hash"
+        },
+        {
+          "check": "component.supplier",
+          "severity": "error",
+          "profiles": [
+            "cisa-2026",
+            "cra"
+          ],
+          "component": "mbedtls / zephyr / logging",
+          "level": "component",
+          "pointer": null,
+          "message": "no supplier (manufacturer.name and supplier.name missing)"
+        },
+        {
+          "check": "component.hash",
+          "severity": "error",
+          "profiles": [
+            "cisa-2026",
+            "cra"
+          ],
+          "component": "mbedtls / zephyr / mbedtls-integration",
+          "level": "component",
+          "pointer": null,
+          "message": "no hash"
+        },
+        {
+          "check": "component.supplier",
+          "severity": "error",
+          "profiles": [
+            "cisa-2026",
+            "cra"
+          ],
+          "component": "mbedtls / zephyr / mbedtls-integration",
+          "level": "component",
+          "pointer": null,
+          "message": "no supplier (manufacturer.name and supplier.name missing)"
+        }
+      ]
+    }
+  },
+  "warnings": []
+}
