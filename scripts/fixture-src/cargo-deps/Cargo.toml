@@ -1,0 +1,29 @@
+# Hand-written fixture source (SHA-127), not real-build output: scripts/regen-fixtures-cargo.sh
+# builds it with `cargo auditable` into fixtures/cargo-deps/ (see ../README.md).
+[package]
+name = "rollcall-cargo-deps"
+version = "0.1.0"
+edition = "2021"
+license = "Apache-2.0"
+publish = false
+
+# Its own workspace root, not a member of the rollcall workspace.
+[workspace]
+
+[dependencies]
+cortex-m-rt = "=0.7.5"
+# A git dependency, pinned to a full commit.
+panic-halt = { git = "https://github.com/korken89/panic-halt", rev = "5505dccc8162d36ae260a12c7d9de870fadcf783" }
+# A path dependency.
+board-support = { path = "crates/board-support" }
+
+# A host-only dependency: in unfiltered `cargo metadata`, never built for thumbv7em.
+[target.'cfg(unix)'.dependencies]
+itoa = "=1.0.15"
+
+# A dev-dependency: in `cargo metadata`, never linked into the binary.
+[dev-dependencies]
+static_assertions = "=1.1.0"
+
+[profile.release]
+opt-level = "s"

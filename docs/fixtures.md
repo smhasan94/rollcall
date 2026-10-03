@@ -386,3 +386,76 @@ CycloneDX 1.6, and compares the module set and revisions against each variant's
    `scripts/regen-fixtures.sh --check-stable` locally until it passes.
 4. Update the pins asserted in `crates/rollcall-core/tests/fixtures.rs` and in this document.
 5. Push, run the `regen-fixtures` workflow, download its artifact as above and commit it.
+
+## Cargo fixtures
+
+`fixtures/cargo-*/` hold real `cargo auditable` builds for `thumbv7em-none-eabihf` (SHA-127),
+one tree per variant, produced only by `scripts/regen-fixtures-cargo.sh` (which
+`scripts/regen-fixtures.sh --variant cargo-…` hands over to) and never edited by hand. As for
+the Zephyr trees, the copy built by the `regen-fixtures` workflow's `regen-cargo` job on
+`ubuntu-24.04` (artifact `cargo-fixtures`) is canonical.
+
+| Tree | Built from | What it exercises |
+|------|------------|-------------------|
+| `fixtures/cargo-keelsign/` | keelsign's `examples/nrf52840-hello` at the pinned `KEELSIGN_COMMIT`, read with `git archive` (a local clone is never checked out or modified) | the real app: 82 crates plus the root, every one linked; flip-link as the linker |
+| `fixtures/cargo-deps/` | `scripts/fixture-src/cargo-deps/` (hand-written source, see its README) | a git dependency (`panic-halt` at a pinned commit), a path dependency (`board-support`), a dev-dependency (`static_assertions`, in the metadata but not in `.dep-v0`) and a `cfg(unix)` dependency (`itoa`, only in the unfiltered metadata) |
+| `fixtures/cargo-old-heapless/` | `scripts/fixture-src/cargo-old-heapless/` (hand-written source) | `heapless =0.5.6`, which grype and osv-scanner report as GHSA-qgwf-r2jj-2ccv (CI job `grype-cargo-advisory`) |
+
+The keelsign bootloader is a follow-up: it does not exist yet.
+
+Each tree holds `firmware.elf` (the release ELF), `dep-v0.json` (`rust-audit-info
+firmware.elf`), `cargo-metadata.json` (`cargo metadata --format-version 1 --filter-platform
+thumbv7em-none-eabihf`), `cargo-metadata.all.json` (unfiltered), `cargo-tree.txt` (`cargo tree
+--target thumbv7em-none-eabihf -e normal,build --prefix none --format {p}`) and
+`MANIFEST.json` (pins, commands, and the size and SHA-256 of every file).
+
+Pins, at the top of the script: Rust `1.91.1` (`RUSTUP_TOOLCHAIN`, which also overrides
+keelsign's own `stable` toolchain file), cargo-auditable `0.7.7`, rust-audit-info `0.5.4` and
+flip-link `0.1.12` (installed with `cargo install --locked` into `.cache/tools`), and the
+keelsign URL, commit and path. cargo-auditable 0.7.6 cannot link keelsign's app: it passes
+`-Wl,-u,…` to flip-link, which rust-lld rejects; 0.7.7 recognises flip-link as a bare linker.
+
+How the builds are kept deterministic and free of host paths:
+
+- the projects are built in a temporary directory outside `$HOME` and the repository
+  (`mktemp -d`), and the run fails if any directory above a build holds a `.cargo/config` or
+  `.cargo/config.toml`, so no user or repository cargo config applies; `CARGO_HOME` is an
+  isolated directory (`.cache/cargo-fixtures-home`, no config); the caller's `RUSTFLAGS`,
+  `CARGO_TARGET_DIR`, `RUSTC_WRAPPER`, `RUSTC_WORKSPACE_WRAPPER` and similar are unset, and
+  `cargo --version` in that environment must be the pinned toolchain's;
+- `cargo auditable build` sets `RUSTC_WORKSPACE_WRAPPER` to its own absolute path, and cargo
+  hashes that path into the root crate's `-C metadata`, so the ELF would change with where the
+  tools are installed (verified: two copies of cargo-auditable 0.7.7 in different directories
+  gave different ELFs). The script instead does what `cargo auditable build` does
+  (cargo-auditable 0.7.7, `src/cargo_auditable.rs`), with the wrapper as the bare name
+  `cargo-auditable`: `RUSTC_WORKSPACE_WRAPPER=cargo-auditable`, `CARGO_AUDITABLE_ORIG_ARGS`
+  (the cargo flags the wrapper reads back) and `cargo build --release --locked --offline`.
+  Cargo finds the name on `PATH`, and the script checks it resolves to the pinned binary. The
+  ELF then does not depend on the tools path; `MANIFEST.json` records this under `build_env`;
+- `CARGO_PROFILE_RELEASE_DEBUG=0` and `CARGO_PROFILE_RELEASE_STRIP=debuginfo` (keelsign's
+  profile asks for full debug info);
+- the path remapping (`--remap-path-prefix` of the project directory to
+  `/cargo-fixture/<package>` and of `CARGO_HOME` to `/cargo-home`) goes in the target-scoped
+  `CARGO_TARGET_THUMBV7EM_NONE_EABIHF_RUSTFLAGS`, which merges with the project's own
+  `target.<triple>.rustflags` (keelsign's `-C linker=flip-link`). A global `RUSTFLAGS` would
+  replace those, and would also reach the host build scripts;
+- `cargo fetch --locked` runs without `--target` first, so the unfiltered `cargo metadata`
+  works `--offline`;
+- the same two paths are replaced in the metadata and tree text (`normalise-paths` in the
+  manifest), and the run fails if any build-machine path (`$HOME`, the repository, the tools
+  and build directories, `CARGO_HOME`, `/Users/`, `/home/`, `/private/`, `/var/folders/`,
+  `/tmp/`) is left in any file, the ELF included;
+- paths with whitespace (project, tools, `CARGO_HOME`, the temporary directory) are refused.
+
+`--check-stable` builds every tree twice and requires byte-identical results. The second run
+uses other project directories, a copy of the tools in another directory and a fresh
+`CARGO_HOME` (downloading every crate again), so a pass shows the output does not depend on
+those paths on this host. It does not show the output is the same on another host or
+operating system: the `MANIFEST.json` host field differs by construction, and the canonical
+copy is the one the CI job builds.
+
+`crates/rollcall-core/tests/fixtures_cargo.rs` checks each committed tree, or the tree named
+by `ROLLCALL_CARGO_FIXTURES_DIR` (the script runs it on the staged tree before installing it):
+the file set, the manifest's sizes and SHA-256s, the script's pins, no build-machine paths,
+that `firmware.elf`'s `.dep-v0` section reads back to exactly `dep-v0.json`, and that both
+metadata files parse with the package as their root.

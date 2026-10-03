@@ -17,6 +17,7 @@
 //! - `syft:cpe23` properties are a component's additional CPEs; on a product or image, on a
 //!   component without a `cpe`, or when the value is not a CPE 2.3 name, they are dropped
 //!   (one repeating the `cpe` is ignored silently);
+//! - a `scope` on a product or image (the model holds scope on components only) is dropped;
 //! - components nested under `metadata.component` are dropped, and so is every dependency
 //!   edge to or from one of them or to or from a `services[]` entry.
 //!
@@ -36,7 +37,7 @@ use super::document::Property;
 use super::writer::{ADDITIONAL_CPE, EVIDENCE_PROPERTY, IMAGE_KIND};
 use crate::model::{
     BomRef, Component, ComponentKind, Cpe, Evidence, EvidenceSet, Hash, HashAlgorithm, IdError,
-    Image, ImageKind, ImageType, License, MergeError, NodePath, PathSegment, Product, Purl,
+    Image, ImageKind, ImageType, License, MergeError, NodePath, PathSegment, Product, Purl, Scope,
     Supplier, ValidationError,
 };
 use crate::warning::Warning;
@@ -84,6 +85,14 @@ pub enum ReadError {
         at: String,
         /// The rejected type.
         kind: String,
+    },
+    /// A component's `scope` is not `required`, `optional` or `excluded`.
+    #[error("{at}: unknown scope {scope:?} (expected required, optional or excluded)")]
+    UnknownScope {
+        /// The component.
+        at: String,
+        /// The rejected scope.
+        scope: String,
     },
     /// A `rollcall:image-kind` property is not `bootloader`, `application` or `blob`.
     #[error("{at}: unknown {IMAGE_KIND} {kind:?}")]
@@ -160,6 +169,8 @@ struct RawComponent {
     name: String,
     #[serde(default)]
     version: Option<String>,
+    #[serde(default)]
+    scope: Option<String>,
     #[serde(default)]
     supplier: Option<RawSupplier>,
     #[serde(default)]
@@ -322,6 +333,16 @@ impl Reader {
         }
     }
 
+    /// Products and images have no scope: warns when the document gives one.
+    fn drop_scope(&mut self, raw: &RawComponent, at: &str) {
+        if let Some(scope) = &raw.scope {
+            self.warn(
+                at,
+                format!("scope {scope:?} on a product or image is not read; dropped"),
+            );
+        }
+    }
+
     fn facts(&mut self, raw: &RawComponent, at: &str) -> Result<Facts, ReadError> {
         let id = |source: IdError| ReadError::Id {
             at: at.to_owned(),
@@ -459,6 +480,18 @@ impl Reader {
         self.bind(raw, &path)?;
         let facts = self.facts(raw, &at)?;
         component.additional_cpes = self.additional_cpes(raw, facts.cpe.as_ref(), &at);
+        component.scope = raw
+            .scope
+            .as_deref()
+            .map(|scope| {
+                Scope::deserialize(scope.into_deserializer()).map_err(
+                    |_: serde::de::value::Error| ReadError::UnknownScope {
+                        at: at.clone(),
+                        scope: scope.to_owned(),
+                    },
+                )
+            })
+            .transpose()?;
         apply_facts!(component, facts);
         for child in &raw.components {
             let child = self.component(child, &path)?;
@@ -534,6 +567,7 @@ impl Reader {
         self.bind(raw, &path)?;
         let facts = self.facts(raw, &at)?;
         self.drop_additional_cpes(raw, &at);
+        self.drop_scope(raw, &at);
         apply_facts!(image, facts);
         for child in &raw.components {
             let child = self.component(child, &path)?;
@@ -615,6 +649,7 @@ pub fn read(document: &Value) -> Result<Read, ReadError> {
     reader.bind(root_raw, &root)?;
     let facts = reader.facts(root_raw, &at)?;
     reader.drop_additional_cpes(root_raw, &at);
+    reader.drop_scope(root_raw, &at);
     apply_facts!(product, facts);
     if !root_raw.components.is_empty() {
         reader.warn(

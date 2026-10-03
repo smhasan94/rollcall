@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # Smoke test: pinned grype and osv-scanner load rollcall's CycloneDX 1.6 output without
-# warnings, see every component, and report zero findings for the minimal fixture; and grype
-# reports the expected CVEs for the old-mbedTLS Zephyr build.
+# warnings, see every component, and report zero findings for the minimal fixture; grype
+# reports the expected CVEs for the old-mbedTLS Zephyr build; and grype reports the expected
+# advisories for the old-heapless Cargo build.
 #
 # NEEDS THE NETWORK: `--install` downloads the pinned scanner releases, grype downloads its
 # vulnerability database, and osv-scanner queries osv.dev.
@@ -11,8 +12,9 @@
 #   --install   download the pinned grype and osv-scanner into $ROLLCALL_TOOLS_DIR
 #               (default .cache/tools), verifying each download's SHA-256.
 #               Without it, the tools are taken from $ROLLCALL_TOOLS_DIR, then from PATH.
-#   --only F    check only fixture F: minimal, widget, or old-mbedtls (which runs only when
-#               named here; CI runs it in its own job, grype-expected-cves).
+#   --only F    check only fixture F: minimal, widget, old-mbedtls or cargo-old-heapless (the
+#               last two run only when named here; CI runs them in their own jobs,
+#               grype-expected-cves and grype-cargo-advisory).
 #
 # Either way, a tool whose reported version is not the pinned one is refused.
 #
@@ -36,7 +38,12 @@
 #      cpe:2.3:a:arm:mbed_tls:3.6.4 (the build's own cpe) and
 #      cpe:2.3:a:trustedfirmware:mbed_tls:3.6.4 (the database's, a syft:cpe23 additional CPE):
 #      NVD files 3.6.4's CVEs under both vendors.
-#   3. osv-scanner: exits 0, prints nothing on stderr, scans one package per component that
+#      For cargo-old-heapless (generated from fixtures/cargo-old-heapless/: its
+#      cargo-metadata.json and the `cargo auditable` firmware.elf), every advisory in
+#      crates/rollcall-core/tests/data/cargo-old-heapless-expected-advisories.txt is reported
+#      for heapless (pkg:cargo/heapless@0.5.6).
+#   3. osv-scanner: exits 0 (for cargo-old-heapless: 1, findings, and every expected advisory
+#      reported for heapless), prints nothing on stderr, scans one package per component that
 #      has a purl or cpe; for minimal, no package has a vulnerability.
 # Prints a PASS/FAIL table; exits 1 if anything failed, 2 on a setup error.
 set -euo pipefail
@@ -47,7 +54,9 @@ GRYPE_VERSION=0.119.0
 OSV_SCANNER_VERSION=2.6.0
 GOLDEN_TIMESTAMP=2026-01-02T03:04:05Z
 FIXTURES=(minimal widget)
-ALL_FIXTURES=(minimal widget old-mbedtls)
+ALL_FIXTURES=(minimal widget old-mbedtls cargo-old-heapless)
+OLD_HEAPLESS_FIXTURE=fixtures/cargo-old-heapless
+OLD_HEAPLESS_EXPECTED=crates/rollcall-core/tests/data/cargo-old-heapless-expected-advisories.txt
 OLD_MBEDTLS_VARIANT=fixtures/zephyr-old-mbedtls/old-mbedtls
 OLD_MBEDTLS_EXPECTED=crates/rollcall-core/tests/data/old-mbedtls-expected-cves.txt
 OLD_MBEDTLS_CPES=('cpe:2.3:a:trustedfirmware:mbed_tls:3.6.4:*:*:*:*:*:*:*'
@@ -244,6 +253,10 @@ for f in "${FIXTURES[@]}"; do
         golden="crates/rollcall-core/tests/golden/zephyr/$f.cdx.json"
         input=(--zephyr "$OLD_MBEDTLS_VARIANT/mbedtls" --west-list "$OLD_MBEDTLS_VARIANT/west-list.txt"
             --identifier-db "$IDENTIFIER_DB")
+    elif [[ "$f" == cargo-old-heapless ]]; then
+        golden="crates/rollcall-core/tests/golden/cargo/old-heapless.cdx.json"
+        input=(--cargo-metadata "$OLD_HEAPLESS_FIXTURE/cargo-metadata.json"
+            --elf "$OLD_HEAPLESS_FIXTURE/firmware.elf")
     else
         golden="crates/rollcall-core/tests/golden/$f.cdx.json"
         input=(--model "crates/rollcall-core/tests/data/$f.model.json")
@@ -322,11 +335,39 @@ for f in "${FIXTURES[@]}"; do
         done
     fi
 
+    if [[ "$f" == cargo-old-heapless ]]; then
+        jq -r '[.matches[] | select(.artifact.name == "heapless" and .artifact.version == "0.5.6") | .vulnerability.id] | unique | .[]' \
+            "$OUT/$f.grype.json" >"$OUT/$f.reported-advisories.txt" 2>/dev/null || true
+        grep -Ev '^[[:space:]]*(#|$)' "$OLD_HEAPLESS_EXPECTED" | sort -u >"$OUT/$f.expected-advisories.txt"
+        missing="$(comm -23 "$OUT/$f.expected-advisories.txt" <(sort -u "$OUT/$f.reported-advisories.txt") | tr '\n' ' ')"
+        reported="$(wc -l <"$OUT/$f.reported-advisories.txt" | tr -d ' ')"
+        expected="$(wc -l <"$OUT/$f.expected-advisories.txt" | tr -d ' ')"
+        detail="heapless@0.5.6 reported=$reported expected=$expected missing=[${missing% }]"
+        if [[ -z "$missing" && "$expected" -gt 0 ]]; then
+            record "$f" "grype expected advisories" PASS "$detail"
+        else
+            record "$f" "grype expected advisories" FAIL "$detail"
+        fi
+    fi
+
     # 3. osv-scanner.
     rc=0
     "$OSV_SCANNER" scan source -L "$sbom" --format json --all-packages \
         --output-file "$OUT/$f.osv.json" --verbosity warn 2>"$OUT/$f.osv.stderr" || rc=$?
-    check "$f" "osv-scanner exit 0" "exit $rc" test "$rc" -eq 0
+    if [[ "$f" == cargo-old-heapless ]]; then
+        # osv-scanner exits 1 when it finds vulnerabilities, which it must here.
+        check "$f" "osv-scanner exit 1 (findings)" "exit $rc" test "$rc" -eq 1
+        jq -r '.results[]?.packages[]? | select(.package.name == "heapless") | .vulnerabilities[]? | .id, (.aliases // [])[]' \
+            "$OUT/$f.osv.json" 2>/dev/null | sort -u >"$OUT/$f.osv-advisories.txt" || true
+        missing="$(comm -23 "$OUT/$f.expected-advisories.txt" "$OUT/$f.osv-advisories.txt" | tr '\n' ' ')"
+        if [[ -z "$missing" ]]; then
+            record "$f" "osv expected advisories" PASS "heapless@0.5.6 missing=[]"
+        else
+            record "$f" "osv expected advisories" FAIL "heapless@0.5.6 missing=[${missing% }]"
+        fi
+    else
+        check "$f" "osv-scanner exit 0" "exit $rc" test "$rc" -eq 0
+    fi
     stderr_bytes="$(wc -c <"$OUT/$f.osv.stderr" | tr -d ' ')"
     check "$f" "osv-scanner empty stderr" "$stderr_bytes byte(s)" test "$stderr_bytes" -eq 0
     scanned="$(jq '[.results[]?.packages[]?] | length' "$OUT/$f.osv.json" 2>/dev/null || echo error)"

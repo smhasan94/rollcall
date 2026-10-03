@@ -24,6 +24,7 @@ time.workspace = true
 yaml_serde.workspace = true
 regex.workspace = true
 semver.workspace = true
+auditable-info.workspace = true
 rollcall-identifiers.workspace = true
 
 [dev-dependencies]

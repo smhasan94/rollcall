@@ -9,7 +9,8 @@ use super::bom_ref::{BomRef, NodePath, PathSegment};
 use super::confidence::Confidence;
 use super::evidence::{EvidenceField, EvidenceSet};
 use super::ids::{
-    ComponentKind, Cpe, Hash, HashAlgorithm, IdError, ImageKind, ImageType, License, Purl, Supplier,
+    ComponentKind, Cpe, Hash, HashAlgorithm, IdError, ImageKind, ImageType, License, Purl, Scope,
+    Supplier,
 };
 
 /// The internal JSON form's schema tag. Serialises as the constant `"rollcall-model/1"`;
@@ -162,6 +163,12 @@ pub struct Component {
     /// The component's SPDX licence expression.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub licence: Option<License>,
+    /// Whether the component ships ([`Scope`], the CycloneDX `scope`). `None` is CycloneDX's
+    /// default, `required`; [`Scope::Excluded`] marks a component that is known but not in
+    /// the shipped binary. Merging never conflicts: the scope that ships wins (see
+    /// [`Component::merge`]), because under-reporting what ships is the worse failure.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub scope: Option<Scope>,
     /// Where each fact above came from, and how sure each source is.
     #[serde(default, skip_serializing_if = "EvidenceSet::is_empty")]
     pub evidence: EvidenceSet,
@@ -324,6 +331,23 @@ fn merge_option<T: PartialEq + fmt::Display>(
     }
 }
 
+/// Merges two scopes: the one that ships wins, `None` counting as `required` (CycloneDX's
+/// default). Commutative and associative (a maximum), so merge order never matters: explicit
+/// `required` > `None` > `optional` > `excluded`.
+fn merge_scope(existing: Option<Scope>, incoming: Option<Scope>) -> Option<Scope> {
+    let rank = |s: Option<Scope>| match s {
+        Some(Scope::Excluded) => 0,
+        Some(Scope::Optional) => 1,
+        None => 2,
+        Some(Scope::Required) => 3,
+    };
+    if rank(incoming) > rank(existing) {
+        incoming
+    } else {
+        existing
+    }
+}
+
 /// Adds hashes for new algorithms; errors if an algorithm is present with another digest.
 fn merge_hashes(
     path: &NodePath,
@@ -435,6 +459,7 @@ impl Component {
             additional_cpes: BTreeSet::new(),
             hashes: BTreeSet::new(),
             licence: None,
+            scope: None,
             evidence: EvidenceSet::new(),
             components: BTreeSet::new(),
         })
@@ -476,6 +501,9 @@ impl Component {
     /// - Hashes for new algorithms are added; the same algorithm with another digest is a
     ///   conflict.
     /// - Evidence is the union (keeping the higher confidence for the same observation).
+    /// - Scope never conflicts: the one that ships wins, with `None` read as `required`
+    ///   (CycloneDX's default). In order: explicit `required`, `None`, `optional`,
+    ///   `excluded`, so a component seen as shipped by any source stays shipped.
     /// - Subcomponents merge recursively by identity.
     ///
     /// Atomic: on error `self` is unchanged.
@@ -492,6 +520,7 @@ impl Component {
         same_identity(path, "name", &self.name, &other.name)?;
         same_identity(path, "version", &self.version, &other.version)?;
         let additional = other.additional_cpes.clone();
+        self.scope = merge_scope(self.scope, other.scope);
         merge_facts!(path, self, other);
         self.additional_cpes.extend(additional);
         if let Some(cpe) = &self.cpe {
@@ -1046,6 +1075,53 @@ mod tests {
             "application:app / operating-system:zephyr@3.7.0 / library:kernel"
         );
         assert_eq!(image, before);
+    }
+
+    #[test]
+    fn scope_merge_lets_the_shipping_scope_win_in_any_order() {
+        let with = |scope: Option<Scope>| {
+            let mut c = lib("a", "1");
+            c.scope = scope;
+            c
+        };
+        let cases = [
+            (None, Some(Scope::Excluded), None),
+            (
+                Some(Scope::Required),
+                Some(Scope::Excluded),
+                Some(Scope::Required),
+            ),
+            (
+                Some(Scope::Optional),
+                Some(Scope::Excluded),
+                Some(Scope::Optional),
+            ),
+            (None, Some(Scope::Optional), None),
+            (None, Some(Scope::Required), Some(Scope::Required)),
+            (
+                Some(Scope::Optional),
+                Some(Scope::Required),
+                Some(Scope::Required),
+            ),
+            (
+                Some(Scope::Excluded),
+                Some(Scope::Excluded),
+                Some(Scope::Excluded),
+            ),
+            (None, None, None),
+        ];
+        for (x, y, want) in cases {
+            for (first, second) in [(x, y), (y, x)] {
+                let mut c = with(first);
+                c.merge(with(second)).unwrap();
+                assert_eq!(c.scope, want, "{first:?} + {second:?}");
+                // And through the image, as ingesters add components.
+                let mut image = app();
+                image.add_component(with(first)).unwrap();
+                image.add_component(with(second)).unwrap();
+                assert_eq!(image.components.first().unwrap().scope, want);
+            }
+        }
     }
 
     #[test]

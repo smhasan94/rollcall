@@ -1,0 +1,80 @@
+{
+  "build_command": [
+    "cargo",
+    "build",
+    "--release",
+    "--locked",
+    "--offline",
+    "--target",
+    "thumbv7em-none-eabihf"
+  ],
+  "build_env": {
+    "CARGO_AUDITABLE_ORIG_ARGS": "{\"offline\":true,\"locked\":true,\"frozen\":false,\"config\":[]}",
+    "CARGO_HOME": "an isolated directory, remapped to /cargo-home",
+    "CARGO_PROFILE_RELEASE_DEBUG": "0",
+    "CARGO_PROFILE_RELEASE_STRIP": "debuginfo",
+    "CARGO_TARGET_THUMBV7EM_NONE_EABIHF_RUSTFLAGS": "--remap-path-prefix=<project dir>=/cargo-fixture/rollcall-cargo-old-heapless --remap-path-prefix=<CARGO_HOME>=/cargo-home",
+    "PATH": "<tools>/bin first: the pinned cargo-auditable, rust-audit-info and flip-link (the tools path does not affect the output)",
+    "RUSTC_WORKSPACE_WRAPPER": "cargo-auditable",
+    "RUSTUP_TOOLCHAIN": "1.91.1"
+  },
+  "commands": {
+    "cargo-metadata.all.json": "cargo metadata --format-version 1 --locked --offline",
+    "cargo-metadata.json": "cargo metadata --format-version 1 --locked --offline --filter-platform thumbv7em-none-eabihf",
+    "cargo-tree.txt": "cargo tree --locked --offline --target thumbv7em-none-eabihf -e normal,build --prefix none --format {p}",
+    "dep-v0.json": "rust-audit-info firmware.elf"
+  },
+  "ecosystem": "cargo",
+  "files": [
+    {
+      "bytes": 64942,
+      "path": "cargo-metadata.all.json",
+      "sha256": "feebc3d966b505fb608a1ea0b39ec0cf40e5a6404ecff8d1c47c4fbb3e203a40",
+      "transform": "normalise-paths"
+    },
+    {
+      "bytes": 64942,
+      "path": "cargo-metadata.json",
+      "sha256": "feebc3d966b505fb608a1ea0b39ec0cf40e5a6404ecff8d1c47c4fbb3e203a40",
+      "transform": "normalise-paths"
+    },
+    {
+      "bytes": 592,
+      "path": "cargo-tree.txt",
+      "sha256": "78e8f6d0c95a8660b7f19c44ab7f86a17cdb36cb49a2792b5bf1287b7bd41ca7",
+      "transform": "normalise-paths"
+    },
+    {
+      "bytes": 1525,
+      "path": "dep-v0.json",
+      "sha256": "7d1b0decd3945b01c83b65f00a3da2d476a025f7cf208b4874b320741f2cce59"
+    },
+    {
+      "bytes": 70732,
+      "path": "firmware.elf",
+      "sha256": "de743608f070c2b34532e7db94f8419b6dc6c91b705ee7670d13719f4b224992"
+    }
+  ],
+  "format": "rollcall-fixtures/1",
+  "generator": "scripts/regen-fixtures-cargo.sh",
+  "host": {
+    "arch": "arm64",
+    "os": "darwin"
+  },
+  "package": "rollcall-cargo-old-heapless",
+  "path_placeholders": {
+    "/cargo-fixture/rollcall-cargo-old-heapless": "the project directory",
+    "/cargo-home": "CARGO_HOME (registry and git checkouts)"
+  },
+  "pins": {
+    "cargo_auditable": "0.7.7",
+    "flip_link": "0.1.12",
+    "rust_audit_info": "0.5.4",
+    "rust_toolchain": "1.91.1",
+    "rustc": "rustc 1.91.1 (ed61e7d7e 2025-11-07)",
+    "target": "thumbv7em-none-eabihf"
+  },
+  "source": "scripts/fixture-src/cargo-old-heapless",
+  "total_bytes": 202733,
+  "variant": "cargo-old-heapless"
+}

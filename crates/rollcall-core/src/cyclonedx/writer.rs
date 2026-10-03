@@ -9,7 +9,7 @@ use super::document::{
 use super::{SerialNumber, WriteError, WriteOptions};
 use crate::model::{
     self, BomRef, Cpe, EvidenceField, EvidenceSet, ImageKind, License, NodePath, PathSegment,
-    Product, Purl,
+    Product, Purl, Scope,
 };
 
 /// CycloneDX component type used for the product. Each image is written with its own
@@ -51,6 +51,7 @@ struct Facts<'a> {
     additional_cpes: &'a BTreeSet<Cpe>,
     hashes: &'a BTreeSet<model::Hash>,
     licence: Option<&'a License>,
+    scope: Option<Scope>,
     evidence: &'a EvidenceSet,
 }
 
@@ -65,6 +66,7 @@ impl<'a> Facts<'a> {
             additional_cpes: &NO_CPES,
             hashes: &p.hashes,
             licence: p.licence.as_ref(),
+            scope: None,
             evidence: &p.evidence,
         }
     }
@@ -79,6 +81,7 @@ impl<'a> Facts<'a> {
             additional_cpes: &NO_CPES,
             hashes: &i.hashes,
             licence: i.licence.as_ref(),
+            scope: None,
             evidence: &i.evidence,
         }
     }
@@ -93,6 +96,7 @@ impl<'a> Facts<'a> {
             additional_cpes: &c.additional_cpes,
             hashes: &c.hashes,
             licence: c.licence.as_ref(),
+            scope: c.scope,
             evidence: &c.evidence,
         }
     }
@@ -141,6 +145,7 @@ impl<'a> Facts<'a> {
             bom_ref: bom_ref.as_str().to_owned(),
             name: self.name.to_owned(),
             version: self.version.map(str::to_owned),
+            scope: self.scope.map(Scope::as_str),
             supplier: self.supplier.map(|s| Supplier {
                 name: s.name().to_owned(),
                 url: s.urls().iter().cloned().collect(),

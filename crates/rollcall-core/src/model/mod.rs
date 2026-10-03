@@ -19,7 +19,9 @@
 //!   kernel package broken down into subsystems).
 //!
 //! Every node carries the same facts: name, version, supplier, [`Purl`], [`Cpe`], [`Hash`](struct@Hash)es
-//! (at most one per algorithm), a [`License`] expression, and an [`EvidenceSet`].
+//! (at most one per algorithm), a [`License`] expression, and an [`EvidenceSet`]. A component
+//! may also carry a [`Scope`] (the CycloneDX `scope`): [`Scope::Excluded`] marks one that is
+//! known but not in the shipped binary.
 //!
 //! A node's *identity* is `(kind, name, version)` ([`Component::key`], [`Image::key`]).
 //! Siblings never share an identity: [`Product::add_image`], [`Image::add_component`] and
@@ -151,7 +153,8 @@ pub use confidence::Confidence;
 pub use evidence::{Evidence, EvidenceField, EvidenceKey, EvidenceSet, Occurrence, Technique};
 pub use graph::{Component, Image, MergeError, NodeRef, Product, Schema, ValidationError};
 pub use ids::{
-    ComponentKind, Cpe, Hash, HashAlgorithm, IdError, ImageKind, ImageType, License, Purl, Supplier,
+    ComponentKind, Cpe, Hash, HashAlgorithm, IdError, ImageKind, ImageType, License, Purl, Scope,
+    Supplier,
 };
 pub use json::{ModelError, to_canonical_json};
 

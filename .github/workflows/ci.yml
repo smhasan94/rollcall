@@ -47,10 +47,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      # Keep in sync with rust-toolchain.toml.
+      # Keep in sync with rust-toolchain.toml. The Cargo ingestion tests run `cargo metadata`
+      # and `cargo tree` for thumbv7em-none-eabihf (SHA-127).
       - uses: dtolnay/rust-toolchain@master
         with:
           toolchain: "1.91.1"
+          targets: thumbv7em-none-eabihf
       - uses: Swatinem/rust-cache@v2
       - run: cargo build --workspace --locked
       - run: cargo test --workspace --locked
@@ -179,6 +181,36 @@ jobs:
           path: |
             .cache/grype-cves-attempt-1
             .cache/grype-cves-attempt-2
+          if-no-files-found: warn
+
+  # grype (pinned, SHA-256-verified) on the SBOM rollcall generates from the real
+  # `cargo auditable` build in fixtures/cargo-old-heapless/ (heapless 0.5.6) must report every
+  # advisory in crates/rollcall-core/tests/data/cargo-old-heapless-expected-advisories.txt, and
+  # osv-scanner must report them too (SHA-127). Needs the network.
+  grype-cargo-advisory:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # Keep in sync with rust-toolchain.toml.
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: "1.91.1"
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo build -p rollcall-cli --locked
+      # One retry, as in the smoke job; each attempt keeps its own logs.
+      - name: grype expected advisories (old heapless)
+        run: |
+          ROLLCALL_SMOKE_OUT=.cache/grype-cargo-attempt-1 scripts/smoke-scan.sh --install --only cargo-old-heapless || {
+            echo "grype expected-advisory check failed; retrying once"
+            ROLLCALL_SMOKE_OUT=.cache/grype-cargo-attempt-2 scripts/smoke-scan.sh --install --only cargo-old-heapless
+          }
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: grype-cargo-advisory
+          path: |
+            .cache/grype-cargo-attempt-1
+            .cache/grype-cargo-attempt-2
           if-no-files-found: warn
 
   # rollcall's VEX output against the reference tooling (SHA-113): vexctl (pinned,

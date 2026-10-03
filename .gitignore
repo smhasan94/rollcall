@@ -6,3 +6,5 @@ python/build/
 .DS_Store
 # Downloaded tools, scanner databases and smoke-test output (scripts/smoke-scan.sh).
 /.cache/
+# Build output of the hand-written Cargo fixture sources, if built in place.
+/scripts/fixture-src/*/target/

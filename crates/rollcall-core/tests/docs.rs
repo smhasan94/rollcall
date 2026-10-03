@@ -463,3 +463,29 @@ fn vex_docs_have_mapping_signing_and_determinism_sections() {
         );
     }
 }
+
+const CARGO_DOCS: &str = include_str!("../src/cargo/mod.rs");
+
+#[test]
+fn cargo_docs_have_inputs_mapping_warnings_and_determinism_sections() {
+    for heading in [
+        "//! # Inputs",
+        "//! # Mapping",
+        "//! # Warnings",
+        "//! # Determinism",
+    ] {
+        assert!(
+            CARGO_DOCS.contains(heading),
+            "missing section {heading:?} in cargo/mod.rs"
+        );
+    }
+    // The purl forms and the scope the ticket fixes are documented.
+    for needle in [
+        "pkg:cargo/<name>@<version>",
+        "pkg:generic/<name>@<version>?vcs_url=git+<url>@<commit>",
+        "Scope::Excluded",
+        "unified features",
+    ] {
+        assert!(CARGO_DOCS.contains(needle), "cargo/mod.rs lacks {needle:?}");
+    }
+}
