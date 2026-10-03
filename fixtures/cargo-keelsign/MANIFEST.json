@@ -50,16 +50,16 @@
       "sha256": "a91d5ed304aab4ef559f092d0c1a8d0adf7bb66532a70ab4a21742dac98a1fdb"
     },
     {
-      "bytes": 33812,
+      "bytes": 33800,
       "path": "firmware.elf",
-      "sha256": "7bbe1bc9c67a0aaff62a8c66de8fff3ff7110aacdf99e16747f8593dd36e1faf"
+      "sha256": "c46b4133de59ba9ae488ad337383066aaf73a13ddc156b89d140f8becfc21a1d"
     }
   ],
   "format": "rollcall-fixtures/1",
   "generator": "scripts/regen-fixtures-cargo.sh",
   "host": {
-    "arch": "arm64",
-    "os": "darwin"
+    "arch": "x86_64",
+    "os": "linux"
   },
   "keelsign": {
     "commit": "9db3bab149f057a1063d6f12a88453f1986929c5",
@@ -80,6 +80,6 @@
     "target": "thumbv7em-none-eabihf"
   },
   "source": "https://github.com/smhasan94/keelsign@9db3bab149f057a1063d6f12a88453f1986929c5:examples/nrf52840-hello",
-  "total_bytes": 868157,
+  "total_bytes": 868145,
   "variant": "cargo-keelsign"
 }

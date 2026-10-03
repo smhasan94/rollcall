@@ -50,16 +50,16 @@
       "sha256": "7d1b0decd3945b01c83b65f00a3da2d476a025f7cf208b4874b320741f2cce59"
     },
     {
-      "bytes": 70732,
+      "bytes": 70716,
       "path": "firmware.elf",
-      "sha256": "de743608f070c2b34532e7db94f8419b6dc6c91b705ee7670d13719f4b224992"
+      "sha256": "c1dd5b37eb69dcd33f4298a78ac222fad2b8efd88505a5e378484b750d82f68b"
     }
   ],
   "format": "rollcall-fixtures/1",
   "generator": "scripts/regen-fixtures-cargo.sh",
   "host": {
-    "arch": "arm64",
-    "os": "darwin"
+    "arch": "x86_64",
+    "os": "linux"
   },
   "package": "rollcall-cargo-old-heapless",
   "path_placeholders": {
@@ -75,6 +75,6 @@
     "target": "thumbv7em-none-eabihf"
   },
   "source": "scripts/fixture-src/cargo-old-heapless",
-  "total_bytes": 202733,
+  "total_bytes": 202717,
   "variant": "cargo-old-heapless"
 }

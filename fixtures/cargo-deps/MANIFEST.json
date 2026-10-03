@@ -50,16 +50,16 @@
       "sha256": "53ad4273201d526ed818e878d07b203139593f291e9d312a69225f9903550aa9"
     },
     {
-      "bytes": 70592,
+      "bytes": 70580,
       "path": "firmware.elf",
-      "sha256": "2cc8ab119964e965eed1de0424ccc8586afd3d43549603c6ecbe3a50b1e3952b"
+      "sha256": "bb53edba28de9c89b3020b280e4015f94cf6de6ab7c69f7b292df0af62d517d4"
     }
   ],
   "format": "rollcall-fixtures/1",
   "generator": "scripts/regen-fixtures-cargo.sh",
   "host": {
-    "arch": "arm64",
-    "os": "darwin"
+    "arch": "x86_64",
+    "os": "linux"
   },
   "package": "rollcall-cargo-deps",
   "path_placeholders": {
@@ -75,6 +75,6 @@
     "target": "thumbv7em-none-eabihf"
   },
   "source": "scripts/fixture-src/cargo-deps",
-  "total_bytes": 157125,
+  "total_bytes": 157113,
   "variant": "cargo-deps"
 }
