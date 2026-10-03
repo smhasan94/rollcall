@@ -426,6 +426,14 @@ rules:
 
 Unresolved findings and conflicts are summarised on stderr; the exit code stays 0.
 
+`--starter-rules` adds rollcall's starter rule pack (`vex-rules.yaml`, shipped with the
+identifier database): Mbed TLS modules compiled out, Bluetooth, the MCUmgr serial transports
+and file systems switched off, and the TLS client or server side not linked. `rollcall vex
+lint RULES… --kconfig FILE | --zephyr-tree DIR` warns about any `kconfig_off` symbol that does
+not exist (a misspelt symbol makes a rule silently never apply); exit 1 on any warning. The
+rule format, the starter pack and five worked examples are in
+[docs/vex-rules.md](docs/vex-rules.md).
+
 ### VEX documents and signing
 
 `--format` picks what `rollcall vex` writes: `rollcall` (the default, the report above),

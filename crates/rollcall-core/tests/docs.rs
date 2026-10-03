@@ -463,3 +463,211 @@ fn vex_docs_have_mapping_signing_and_determinism_sections() {
         );
     }
 }
+
+/// `docs/vex-rules.md` (SHA-115), read from the repository.
+fn vex_rules_doc() -> String {
+    let path = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../../docs/vex-rules.md");
+    std::fs::read_to_string(&path).unwrap_or_else(|e| panic!("{}: {e}", path.display()))
+}
+
+/// The lines of `doc` from the heading `start` up to the next heading of the same or a
+/// higher level.
+fn md_section<'a>(doc: &'a str, start: &str) -> Vec<&'a str> {
+    let level = start.chars().take_while(|c| *c == '#').count();
+    let mut lines = doc.lines().skip_while(|l| *l != start);
+    let Some(_) = lines.next() else {
+        panic!("missing heading {start:?}")
+    };
+    lines
+        .take_while(|l| {
+            let hashes = l.chars().take_while(|c| *c == '#').count();
+            !(hashes > 0 && hashes <= level && l.chars().nth(hashes) == Some(' '))
+        })
+        .collect()
+}
+
+/// The fenced blocks of `lang` in `lines`.
+fn fenced(lines: &[&str], lang: &str) -> Vec<String> {
+    let mut blocks = Vec::new();
+    let mut current: Option<Vec<&str>> = None;
+    for line in lines {
+        match &mut current {
+            None if *line == format!("```{lang}") => current = Some(Vec::new()),
+            Some(block) if *line == "```" => {
+                blocks.push(block.join("\n") + "\n");
+                current = None;
+            }
+            Some(block) => block.push(line),
+            None => {}
+        }
+    }
+    blocks
+}
+
+/// The rule reference, the starter pack, the lint and the glossary are there, and exactly five
+/// worked examples each show their input, the rule and the resulting statement, the
+/// statement as `rollcall vex` commands with their output (which
+/// `scripts/check-doc-examples.sh` runs and checks). Whether the prose is plain is for a
+/// human reviewer.
+#[test]
+fn vex_rules_doc_has_reference_and_five_worked_examples() {
+    let doc = vex_rules_doc();
+    for heading in [
+        "# VEX rules",
+        "## Running `rollcall vex`",
+        "## Rule format",
+        "### How rules are applied",
+        "### Missing evidence is never \"off\"",
+        "## Starter pack",
+        "## Checking your rules",
+        "## Worked examples",
+        "## Glossary",
+    ] {
+        assert!(doc.lines().any(|l| l == heading), "missing {heading:?}");
+    }
+    let format = md_section(&doc, "## Rule format").join("\n");
+    for field in [
+        "`id`",
+        "`priority`",
+        "`match.name`",
+        "`match.purl`",
+        "`match.subsystem`",
+        "`match.cves`",
+        "`match.versions`",
+        "`when`",
+        "`status`",
+        "`justification`",
+        "`detail`",
+        "`kconfig_off: CONFIG_X`",
+        "`kconfig_equals: {CONFIG_X: value}`",
+        "`symbol_not_linked: name`",
+        "`cargo_feature_off: name`",
+        "`version_in: \"<range>\"`",
+    ] {
+        assert!(format.contains(field), "Rule format lacks {field}");
+    }
+    let examples: Vec<&str> = doc
+        .lines()
+        .filter(|l| l.starts_with("### Example "))
+        .collect();
+    assert_eq!(examples.len(), 5, "{examples:?}");
+    for (i, heading) in examples.iter().enumerate() {
+        assert!(
+            heading.starts_with(&format!("### Example {}: ", i + 1)),
+            "{heading}"
+        );
+        let body = md_section(&doc, heading);
+        let subs: Vec<&str> = body
+            .iter()
+            .copied()
+            .filter(|l| l.starts_with("#### "))
+            .collect();
+        assert_eq!(
+            subs,
+            ["#### Input", "#### Rule", "#### Resulting statement"],
+            "{heading}"
+        );
+        let rule = md_section(&doc, heading)
+            .into_iter()
+            .skip_while(|l| *l != "#### Rule")
+            .collect::<Vec<_>>();
+        assert_eq!(fenced(&rule, "yaml").len(), 1, "{heading}: one rule");
+        let result = body
+            .iter()
+            .copied()
+            .skip_while(|l| *l != "#### Resulting statement")
+            .collect::<Vec<_>>();
+        let consoles = fenced(&result, "console");
+        assert!(!consoles.is_empty(), "{heading}: no console example");
+        assert!(
+            consoles.iter().any(|c| c.contains("$ rollcall vex ")),
+            "{heading}: no rollcall vex command"
+        );
+    }
+    // The starter pack table lists every rule, and the Bluetooth snapshot is dated.
+    let pack = md_section(&doc, "## Starter pack").join("\n");
+    let rules = rollcall_core::vex::parse_rules(
+        rollcall_identifiers::VEX_RULES_YAML,
+        rollcall_identifiers::VEX_RULES_FILE_NAME,
+    )
+    .unwrap();
+    for rule in &rules.rules {
+        assert!(
+            pack.contains(&format!("| `{}` |", rule.id)),
+            "{} not in the table",
+            rule.id
+        );
+    }
+    assert!(
+        pack.contains("2026-09-29") && pack.contains("2026-10-03 (UTC)"),
+        "undated snapshot"
+    );
+    assert!(
+        pack.contains("scripts/capture-findings.sh --bluetooth-cves"),
+        "the snapshot must say how to re-run it"
+    );
+    let glossary = md_section(&doc, "## Glossary").join("\n");
+    for term in [
+        "**SBOM**",
+        "**Sysbuild**",
+        "**purl**",
+        "**CPE**",
+        "**PSA Crypto**",
+    ] {
+        assert!(glossary.contains(term), "Glossary lacks {term}");
+    }
+}
+
+/// Each example's rule is the rule the pack (or `typo.rules.yml`) really has, so the docs do
+/// not drift from the data. The Bluetooth example shows one CVE of the rule's list.
+#[test]
+fn vex_rules_doc_example_rules_match_the_pack() {
+    use rollcall_core::vex::{RuleSet, parse_rules};
+    let doc = vex_rules_doc();
+    let pack = parse_rules(
+        rollcall_identifiers::VEX_RULES_YAML,
+        rollcall_identifiers::VEX_RULES_FILE_NAME,
+    )
+    .unwrap();
+    let typo_path =
+        std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/data/vex/typo.rules.yml");
+    let typo = parse_rules(
+        &std::fs::read_to_string(typo_path).unwrap(),
+        "typo.rules.yml",
+    )
+    .unwrap();
+    let mut known = RuleSet::default();
+    known.rules.extend(pack.rules);
+    known.rules.extend(typo.rules);
+    let headings: Vec<&str> = doc
+        .lines()
+        .filter(|l| l.starts_with("### Example "))
+        .collect();
+    for heading in headings {
+        let rule_lines: Vec<&str> = md_section(&doc, heading)
+            .into_iter()
+            .skip_while(|l| *l != "#### Rule")
+            .collect();
+        let [yaml] = fenced(&rule_lines, "yaml")
+            .try_into()
+            .unwrap_or_else(|v: Vec<String>| panic!("{heading}: {} yaml blocks", v.len()));
+        let shown = parse_rules(&format!("version: 1\nrules:\n{yaml}"), heading)
+            .unwrap_or_else(|e| panic!("{e}"));
+        let [shown] = shown.rules.as_slice() else {
+            panic!("{heading}: one rule expected")
+        };
+        let real = known
+            .rules
+            .iter()
+            .find(|r| r.id == shown.id)
+            .unwrap_or_else(|| panic!("{heading}: no rule {}", shown.id));
+        if shown.id == "zephyr-bluetooth-off" {
+            assert!(shown.target.cves.is_subset(&real.target.cves), "{heading}");
+            let mut trimmed = real.clone();
+            trimmed.target.cves = shown.target.cves.clone();
+            assert_eq!(shown, &trimmed, "{heading}");
+        } else {
+            assert_eq!(shown, real, "{heading}");
+        }
+    }
+}

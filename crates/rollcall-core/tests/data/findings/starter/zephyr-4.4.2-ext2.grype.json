@@ -1,0 +1,18 @@
+{
+  "_comment": "HAND-WRITTEN, not scanner output (SHA-115): one grype-format match, CVE-2026-7007 against Zephyr 4.4.2 as rollcall's SBOM names it, for the worked examples in docs/vex-rules.md. NVD lists CVE-2026-7007 as affecting Zephyr 4.4.2. grype does not report Zephyr CVEs for these SBOMs today, because rollcall types the zephyr component operating-system.",
+  "matches": [
+    {
+      "vulnerability": {
+        "id": "CVE-2026-7007"
+      },
+      "artifact": {
+        "name": "zephyr",
+        "version": "4.4.2",
+        "purl": "pkg:github/zephyrproject-rtos/zephyr@v4.4.2",
+        "cpes": [
+          "cpe:2.3:o:zephyrproject:zephyr:4.4.2:-:*:*:*:*:*:*"
+        ]
+      }
+    }
+  ]
+}
