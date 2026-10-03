@@ -12,8 +12,8 @@ use proptest::prelude::*;
 use proptest::sample::select;
 use rollcall_core::model::{
     BomRef, Component, ComponentKind, Confidence, Cpe, Evidence, EvidenceField, Hash,
-    HashAlgorithm, Image, ImageKind, License, Occurrence, PathSegment, Product, Purl, Supplier,
-    Technique,
+    HashAlgorithm, Image, ImageKind, License, Occurrence, PathSegment, Product, Purl, Scope,
+    Supplier, Technique,
 };
 
 /// The fixed `--timestamp` the CycloneDX golden files are rendered with.
@@ -343,6 +343,7 @@ pub const ALGORITHMS: &[HashAlgorithm] = &[
     HashAlgorithm::Sha256,
 ];
 pub const LICENCES: &[&str] = &["MIT", "Apache-2.0", "BSD-3-Clause OR MIT"];
+pub const SCOPES: &[Scope] = &[Scope::Required, Scope::Optional, Scope::Excluded];
 
 /// A digest that depends only on the component identity and algorithm, so that two copies
 /// of the same component never conflict whichever facts each carries.
@@ -395,8 +396,9 @@ pub fn arb_facts(
         any::<bool>(),
         proptest::sample::subsequence(ALGORITHMS.to_vec(), 0..=ALGORITHMS.len()),
         proptest::collection::vec(arb_evidence(), 0..=4),
+        proptest::option::of(select(SCOPES.to_vec())),
     )
-        .prop_map(move |(licence, purl, cpe, algorithms, evidence)| {
+        .prop_map(move |(licence, purl, cpe, algorithms, evidence, scope)| {
             let mut c = Component::new(kind, name).unwrap();
             c.version = version.map(str::to_owned);
             let index = NAMES
@@ -426,6 +428,9 @@ pub fn arb_facts(
                     Hash::new(algorithm, &digest_for(kind, name, version, algorithm)).unwrap(),
                 );
             }
+            // Scopes vary independently of the identity, so the same component is merged
+            // with mixed scopes; merging is a maximum, so the order still never matters.
+            c.scope = scope;
             c.evidence = evidence.into_iter().collect();
             c
         })

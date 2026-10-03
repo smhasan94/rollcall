@@ -715,3 +715,57 @@ fn identifier_db_provenance_round_trips() {
     doc["metadata"]["properties"] = json!("not a list");
     assert!(cyclonedx::read_str(&doc.to_string()).is_err());
 }
+
+#[test]
+fn component_scope_round_trips_and_bad_or_misplaced_scope_is_handled() {
+    use rollcall_core::model::{Component, ComponentKind, Image, Scope};
+    let mut product = Product::new("p").unwrap();
+    let mut image = Image::new(ImageKind::Application, "app").unwrap();
+    for (name, scope) in [
+        ("a", None),
+        ("b", Some(Scope::Required)),
+        ("c", Some(Scope::Optional)),
+        ("d", Some(Scope::Excluded)),
+    ] {
+        let mut c = Component::new(ComponentKind::Library, name).unwrap();
+        c.scope = scope;
+        image.add_component(c).unwrap();
+    }
+    product.add_image(image).unwrap();
+    assert_round_trips("scopes", &product);
+    let doc: Value = serde_json::from_str(&render(&product)).unwrap();
+    let scopes: Vec<Value> = doc["components"][0]["components"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|c| c.get("scope").cloned().unwrap_or(Value::Null))
+        .collect();
+    assert_eq!(
+        scopes,
+        [
+            json!(null),
+            json!("required"),
+            json!("optional"),
+            json!("excluded")
+        ]
+    );
+
+    // An unknown scope is an error; a scope on an image is dropped with a warning.
+    let mut bad = doc.clone();
+    bad["components"][0]["components"][0]["scope"] = json!("sometimes");
+    assert!(matches!(
+        cyclonedx::read(&bad),
+        Err(ReadError::UnknownScope { .. })
+    ));
+    let mut on_image = doc;
+    on_image["components"][0]["scope"] = json!("excluded");
+    let read = cyclonedx::read(&on_image).unwrap();
+    assert_eq!(read.product, product);
+    assert!(
+        read.warnings
+            .iter()
+            .any(|w| w.message.contains("scope") && w.message.contains("dropped")),
+        "{:?}",
+        read.warnings
+    );
+}

@@ -10,7 +10,9 @@ crypto-inventory module ships as `rollcall assay` and emits a CycloneDX 1.6 CBOM
 Early development. `rollcall generate --zephyr <build-dir>` ingests a Zephyr image build
 directory (`west spdx` documents, `west list` output, Kconfig `.config`, `build_info.yml`) and
 writes a CycloneDX 1.6 JSON SBOM; with `--sysbuild` it ingests every image of a sysbuild
-build (the MCUboot bootloader and the application) into one product. `rollcall merge`
+build (the MCUboot bootloader and the application) into one product. `rollcall generate
+--cargo` lists a Rust firmware binary's crates from `cargo metadata` and, for a binary built
+with `cargo auditable`, its embedded `.dep-v0` list (see [Cargo ingestion](#cargo-ingestion)). `rollcall merge`
 combines separately generated SBOMs, and opaque binary blobs listed in a `--blob-manifest`,
 into one product hierarchy. `rollcall generate --model` renders a rollcall model (the
 internal `rollcall-model/1` JSON form) the same way; and `rollcall validate --schema` checks a
@@ -89,6 +91,14 @@ rollcall identifiers lint
 
 # Add opaque binary blobs (radio firmware, vendor libraries) from a manifest.
 rollcall merge product.cdx.json --blob-manifest blobs.yaml --product widget@1.2.0 -o widget.cdx.json
+
+# A Rust firmware binary built with `cargo auditable build --release`: cargo metadata
+# resolved for its target, and the crates its .dep-v0 section says were linked.
+rollcall generate --cargo . --target thumbv7em-none-eabihf \
+  --elf target/thumbv7em-none-eabihf/release/app -o app.cdx.json
+# ...from captured `cargo metadata --format-version 1 --filter-platform <target>` output,
+# also listing the crates the binary does not link, as `scope: excluded`.
+rollcall generate --cargo-metadata cargo-metadata.json --elf app.elf --include-unlinked
 ```
 
 `generate --format spdx` is reserved and not implemented yet. The same model and options
@@ -96,9 +106,11 @@ always produce byte-identical output; changing only `--timestamp` changes only t
 `timestamp` line. How each model field maps to CycloneDX is documented in the
 `rollcall_core::cyclonedx` module docs (`cargo doc -p rollcall-core --open`).
 
-Exactly one of `--model` and `--zephyr` is required; `--west-list`, `--include-sdk`,
-`--sysbuild`, `--product`, `--identifier-db`, `--identify` and `-v`/`--verbose` only go with
-`--zephyr`, and `--workspace` needs `--west-list` and one of `--identifier-db` or `--identify`.
+Exactly one of `--model`, `--zephyr`, `--cargo` and `--cargo-metadata` is required;
+`--west-list`, `--include-sdk`, `--sysbuild`, `--product`, `--identifier-db`, `--identify`
+and `-v`/`--verbose` only go with `--zephyr`, and `--workspace` needs `--west-list` and one of
+`--identifier-db` or `--identify`. `--target` only goes with `--cargo`, `--elf` with `--cargo`
+or `--cargo-metadata`, and `--include-unlinked` needs `--elf`.
 
 With `--zephyr`, the `zephyr` component is split into one `library` subcomponent per Zephyr
 subsystem (Bluetooth host, IP stack, USB, logging, …) that the build's `zephyr/.config`
@@ -229,6 +241,44 @@ build and `west spdx -d <build>` after it to create `spdx/`.
 
 Every fact carries evidence naming the file and line it came from. The full mapping is in the
 `rollcall_core::zephyr` module docs.
+
+### Cargo ingestion
+
+`--cargo DIR` runs `cargo metadata --format-version 1 --locked [--filter-platform TRIPLE]` in
+the package directory, so its own `.cargo/config.toml` applies (`$CARGO`, else `cargo` on
+PATH; it needs a `Cargo.lock`). Cargo may use the network to resolve sources it has not
+cached; set `CARGO_NET_OFFLINE=true` to forbid that. `--cargo-metadata FILE` reads that output
+from a file instead (capture it with
+`--filter-platform` so it is resolved for the binary's target). The root package is the
+product and its one `application` image; every crate is a `library` component.
+
+- With `--elf FILE`, a binary built with `cargo auditable`, the crates its `.dep-v0` section
+  lists are the components: exactly what went into the binary, build-only crates (proc macros,
+  build-script dependencies) included. Crates only in the metadata (dev-dependencies, crates of
+  other platforms, crates the build did not need) are left out, or, with
+  `--include-unlinked`, listed with CycloneDX `scope: excluded`. grype and osv-scanner ignore
+  `scope`, so they still report vulnerabilities in crates marked excluded. An ELF without `.dep-v0`
+  ("not built with `cargo auditable`") or built from another package is an error (exit 65).
+- Without `--elf`, the components are the normal and build dependencies the metadata
+  resolves (what `cargo tree -e normal,build` lists), with a warning. Without `--target`,
+  `--cargo` lists every platform's dependencies, with a warning.
+- Purls: crates.io `pkg:cargo/<name>@<version>`; git
+  `pkg:generic/<name>@<version>?vcs_url=git%2B<url>%40<commit>`; path
+  `pkg:generic/<name>@<version>` (no host path). A git source whose revision is not a full
+  commit sha (a branch, say) gets a `vcs_url` without one, and a warning. Two crates with the
+  same name and version from different sources are an error (exit 65). The licence is the
+  crate's `license` field (the legacy `MIT/Apache-2.0` form read as `MIT OR Apache-2.0`).
+- Evidence: `cargo-metadata` (name, version, purl, licence, and one `feature:<name>` name
+  entry per enabled feature) and `cargo-auditable` (name and version, for each crate the
+  binary lists), located at the input's file name. Features are cargo's unified set, so with
+  resolver 2 a crate built for both host and target shows the union.
+- A workspace without a root package (a virtual workspace) is an error: run it in the
+  binary's package. One application image per run; a bootloader and an application are two
+  runs combined with `merge`.
+
+The full mapping is in the `rollcall_core::cargo` module docs. `fixtures/cargo-*/` hold real
+`cargo auditable` builds, among them keelsign's `examples/nrf52840-hello`
+([docs/fixtures.md](docs/fixtures.md)).
 
 ### Identifier database
 
@@ -503,9 +553,9 @@ the score.
 | 0    | Success (including `--help`, `--version`)                                |
 | 1    | `validate`: the document has schema violations or error-severity profile findings; `vex verify`: the signature does not verify; `identifiers lint`: the database has findings |
 | 64   | Usage error (bad arguments, `validate` without `--schema` or `--profile` or with an unknown profile name, bad `--timestamp`, `--serial-number` or `--product`, `report` without `--format`, `merge --blob-manifest` without inputs or `--product`, a `vex --kconfig` that names no image of the product, names one twice, or omits `IMAGE=` for a multi-image product; `vex` flags that do not combine, such as `--embed` without `--format cyclonedx`, `--format cyclonedx` without `--sbom`, or `--sign` without `-o`), or subcommand/format not implemented |
-| 65   | Input is malformed: not JSON, not UTF-8, too deeply nested, or an invalid model; or a Zephyr input (SPDX, `west list`, `.config`, `build_info.yml`) or the identifier database (`--identifier-db`, `--identifiers`, `$ROLLCALL_IDENTIFIERS`, also for `--version`) is malformed or has a `db_version` this rollcall does not accept, or `--zephyr` names a sysbuild top-level directory without `--sysbuild` (or an image directory with it); or a `merge` input is not a readable CycloneDX 1.6 document, the inputs conflict (including different product names or versions without `--product`), or the blob manifest is malformed; or a `vex` input (SBOM, model, `--kconfig`, findings, rules, signing key, signature file) is malformed, with `file:line:column` for rules, or the SBOM cannot take the requested VEX output (no `serialNumber` for `--format cyclonedx`, a `serialNumber` that is not a lowercase `urn:uuid:` or a `version` below 1, a non-empty `vulnerabilities` for `--embed`); or a `validate --profile` file is malformed; or a `report` input (the SBOM, a `--scan` or a `--vex` file) is malformed or not a format it reads |
-| 66   | Input file missing or unreadable (including a directory), including a required Zephyr input, the `--west-list` file or an explicit identifier database (`--identifier-db`, `--identifiers` or `$ROLLCALL_IDENTIFIERS`, also for `--version`), a `merge` input, the blob manifest or a blob it lists, a `vex` input, a `report` input, or a `validate --profile` file |
-| 69   | `vex --sign cosign` / `vex verify --cosign`: cosign is not installed, or keyless signing failed (no OIDC identity) |
+| 65   | Input is malformed: not JSON, not UTF-8, too deeply nested, or an invalid model; or a Zephyr input (SPDX, `west list`, `.config`, `build_info.yml`) or the identifier database (`--identifier-db`, `--identifiers`, `$ROLLCALL_IDENTIFIERS`, also for `--version`) is malformed or has a `db_version` this rollcall does not accept, or `--zephyr` names a sysbuild top-level directory without `--sysbuild` (or an image directory with it); or a `merge` input is not a readable CycloneDX 1.6 document, the inputs conflict (including different product names or versions without `--product`), or the blob manifest is malformed; or a `vex` input (SBOM, model, `--kconfig`, findings, rules, signing key, signature file) is malformed, with `file:line:column` for rules, or the SBOM cannot take the requested VEX output (no `serialNumber` for `--format cyclonedx`, a `serialNumber` that is not a lowercase `urn:uuid:` or a `version` below 1, a non-empty `vulnerabilities` for `--embed`); or a `validate --profile` file is malformed; or a `report` input (the SBOM, a `--scan` or a `--vex` file) is malformed or not a format it reads; or `cargo metadata` output (`--cargo-metadata`, or `--cargo` when cargo fails) is malformed, has no root package or names two packages the binary's list cannot tell apart, or the `--elf` has no `.dep-v0` section, a malformed one, or was built from another package |
+| 66   | Input file missing or unreadable (including a directory), including a required Zephyr input, the `--west-list` file or an explicit identifier database (`--identifier-db`, `--identifiers` or `$ROLLCALL_IDENTIFIERS`, also for `--version`), a `merge` input, the blob manifest or a blob it lists, a `vex` input, a `report` input, or a `validate --profile` file, or the `--cargo-metadata` file, the `--elf` file or `--cargo DIR`'s `Cargo.toml` |
+| 69   | `vex --sign cosign` / `vex verify --cosign`: cosign is not installed, or keyless signing failed (no OIDC identity); `generate --cargo`: cargo cannot be run (`$CARGO`, else `cargo` on PATH) |
 | 70   | Internal error (`vex`, `validate --json`, `report --format json`: the report cannot be serialised) |
 | 74   | Output cannot be written                                                 |
 
@@ -546,6 +596,12 @@ built for `nrf52840dk/nrf52840` with sysbuild and MCUboot, in three variants (ba
 Bluetooth, TLS). `MANIFEST.json` there records the pins and the SHA-256 of every file. They
 are produced only by `scripts/regen-fixtures.sh`; the committed copy comes from the
 `regen-fixtures` workflow. See [docs/fixtures.md](docs/fixtures.md).
+
+`fixtures/cargo-*/` hold real `cargo auditable` builds for `thumbv7em-none-eabihf`
+(`cargo metadata`, `cargo tree`, the ELF and its `.dep-v0` list): keelsign's
+`examples/nrf52840-hello` at a pinned commit, and the hand-written projects in
+`scripts/fixture-src/`. They are produced only by `scripts/regen-fixtures-cargo.sh`
+(`scripts/regen-fixtures.sh --variant cargo-…`).
 
 ## Publishing the placeholders
 

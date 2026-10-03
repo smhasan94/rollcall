@@ -1,0 +1,26 @@
+rollcall-cargo-old-heapless v0.1.0 (/cargo-fixture/rollcall-cargo-old-heapless)
+cortex-m-rt v0.7.5
+cortex-m-rt-macros v0.7.5 (proc-macro)
+proc-macro2 v1.0.107
+unicode-ident v1.0.26
+quote v1.0.47
+proc-macro2 v1.0.107 (*)
+syn v2.0.119
+proc-macro2 v1.0.107 (*)
+quote v1.0.47 (*)
+unicode-ident v1.0.26
+heapless v0.5.6
+as-slice v0.1.5
+generic-array v0.12.4
+typenum v1.20.1
+generic-array v0.13.3
+typenum v1.20.1
+generic-array v0.14.9
+typenum v1.20.1
+version_check v0.9.5
+stable_deref_trait v1.2.1
+generic-array v0.13.3 (*)
+hash32 v0.1.1
+byteorder v1.5.0
+stable_deref_trait v1.2.1
+panic-halt v1.0.0

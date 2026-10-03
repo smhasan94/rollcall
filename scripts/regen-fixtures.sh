@@ -8,6 +8,11 @@
 # Usage:
 #   scripts/regen-fixtures.sh [--variant V]... [--check-stable] [--skip-setup] [--keep-build]
 #   scripts/regen-fixtures.sh compare DIR_A DIR_B
+#   scripts/regen-fixtures.sh --variant cargo-… [--check-stable] [--skip-setup]
+#
+#   A `cargo-*` variant (cargo-keelsign, cargo-deps, cargo-old-heapless) hands the whole
+#   command line to scripts/regen-fixtures-cargo.sh, which builds the Cargo fixtures
+#   (fixtures/cargo-*/); see that script.
 #
 #   --variant V      build only variant V (baseline, bt or tls); repeatable. Default: all.
 #                    Unselected variants already in the output are carried over unchanged,
@@ -980,6 +985,13 @@ if [[ "${1:-}" == compare ]]; then
     compare_trees "$2" "$3"
     exit $?
 fi
+
+# The Cargo fixtures have their own script and pins (SHA-127).
+for arg in "$@"; do
+    case "$arg" in
+        cargo-*) exec "$REPO_ROOT/scripts/regen-fixtures-cargo.sh" "$@" ;;
+    esac
+done
 
 SELECTED=()
 CHECK_STABLE=0

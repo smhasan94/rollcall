@@ -103,6 +103,7 @@ pub enum Format {
 #[derive(Debug, Args)]
 #[command(group = ArgGroup::new("input").required(true).multiple(false))]
 #[command(group = ArgGroup::new("db").multiple(false))]
+#[command(group = ArgGroup::new("cargo_input").args(["cargo", "cargo_metadata"]).multiple(false))]
 pub struct GenerateArgs {
     /// The rollcall model (`rollcall-model/1` JSON) to render
     #[arg(long, value_name = "FILE", group = "input")]
@@ -110,6 +111,39 @@ pub struct GenerateArgs {
     /// Zephyr image build directory (the one holding build_info.yml and spdx/)
     #[arg(long, value_name = "DIR", group = "input")]
     pub zephyr: Option<PathBuf>,
+    /// Rust package directory (holding Cargo.toml): run `cargo metadata` there ($CARGO, else
+    /// cargo on PATH) and list its crates. Needs a Cargo.lock (cargo runs with --locked)
+    #[arg(long, value_name = "DIR", group = "input")]
+    pub cargo: Option<PathBuf>,
+    /// `cargo metadata --format-version 1` output to read instead of running cargo; capture it
+    /// with --filter-platform TRIPLE so it is resolved for the binary's target
+    #[arg(long, value_name = "FILE", group = "input")]
+    pub cargo_metadata: Option<PathBuf>,
+    /// Target triple to resolve the crates for, passed to `cargo metadata --filter-platform`
+    /// (with --cargo). Without it, every platform's dependencies are listed
+    // `conflicts_with_all` is not redundant: `requires` alone lets an `input` group member
+    // through (as with --verbose below).
+    #[arg(
+        long,
+        value_name = "TRIPLE",
+        requires = "cargo",
+        conflicts_with_all = ["model", "zephyr", "cargo_metadata"]
+    )]
+    pub target: Option<String>,
+    /// ELF built with `cargo auditable`: the crates its .dep-v0 section lists are the
+    /// components, and crates only in the metadata are left out (with --cargo or
+    /// --cargo-metadata)
+    #[arg(
+        long,
+        value_name = "FILE",
+        requires = "cargo_input",
+        conflicts_with_all = ["model", "zephyr"]
+    )]
+    pub elf: Option<PathBuf>,
+    /// Also list the crates in the metadata that the ELF does not link, with CycloneDX
+    /// `scope: excluded` (with --elf)
+    #[arg(long, requires = "elf", conflicts_with_all = ["model", "zephyr"])]
+    pub include_unlinked: bool,
     /// Output of `west list -f "{name} {path} {revision} {url}"`, for module revisions and
     /// URLs (with --zephyr)
     #[arg(

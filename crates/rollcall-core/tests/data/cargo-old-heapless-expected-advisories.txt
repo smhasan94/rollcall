@@ -1,0 +1,7 @@
+# Hand-written list (SHA-127): advisories grype must report for heapless 0.5.6 in the SBOM
+# rendered from fixtures/cargo-old-heapless/ (scripts/smoke-scan.sh --only cargo-old-heapless,
+# CI job grype-cargo-advisory). More findings are fine: the database grows.
+#
+# GHSA-qgwf-r2jj-2ccv (RUSTSEC-2020-0145): use-after-free when cloning a partially consumed
+# heapless::Vec iterator; affects heapless < 0.6.1. Verified with grype 0.119.0 on 2026-10-02.
+GHSA-qgwf-r2jj-2ccv

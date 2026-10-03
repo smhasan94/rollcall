@@ -3,7 +3,8 @@ name: Regenerate Zephyr fixtures
 # Rebuilds the Zephyr fixtures from their pinned releases on a clean runner (see
 # docs/fixtures.md), one job per pin set: fixtures/zephyr (artifact `zephyr-fixtures`),
 # fixtures/zephyr-old-mbedtls (artifact `zephyr-old-mbedtls-fixtures`) and fixtures/zephyr-smp
-# (artifact `zephyr-smp-fixtures`). The uploaded artifacts
+# (artifact `zephyr-smp-fixtures`), and the Cargo fixtures fixtures/cargo-* (job regen-cargo,
+# artifact `cargo-fixtures`, scripts/regen-fixtures-cargo.sh). The uploaded artifacts
 # are the canonical fixture sets: they are downloaded and committed by hand, never pushed by
 # this workflow.
 
@@ -17,6 +18,8 @@ on:
   pull_request:
     paths:
       - scripts/regen-fixtures.sh
+      - scripts/regen-fixtures-cargo.sh
+      - scripts/fixture-src/**
       - .github/workflows/regen-fixtures.yml
 
 permissions:
@@ -141,5 +144,72 @@ jobs:
         if: always()
         with:
           name: ${{ matrix.artifact }}-reports
+          path: regen-reports
+          if-no-files-found: warn
+
+  # The Cargo fixtures (SHA-127): real `cargo auditable` builds of keelsign's nrf52840-hello and
+  # the hand-written projects in scripts/fixture-src/, for thumbv7em-none-eabihf. The script
+  # installs its pinned tools (cargo-auditable, rust-audit-info, flip-link) and clones keelsign
+  # at its pinned commit. This runner's artifact is canonical.
+  regen-cargo:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      # Keep in sync with rust-toolchain.toml and RUST_TOOLCHAIN in the script.
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: "1.91.1"
+          targets: thumbv7em-none-eabihf
+      - uses: Swatinem/rust-cache@v2
+      - name: Regenerate Cargo fixtures
+        env:
+          CHECK_STABLE: ${{ github.event_name != 'workflow_dispatch' || inputs.check_stable }}
+          # Explicit, for the record: the script runs cargo-auditable by its bare name, so
+          # the tools path does not reach the output (--check-stable proves it with a copy
+          # elsewhere).
+          ROLLCALL_CARGO_TOOLS: ${{ github.workspace }}/.cache/tools
+        run: |
+          args=()
+          if [[ "$CHECK_STABLE" == true ]]; then
+            args+=(--check-stable)
+          fi
+          scripts/regen-fixtures-cargo.sh "${args[@]}"
+      - name: Compare with the committed fixtures
+        continue-on-error: true
+        run: |
+          {
+            echo "### Regenerated fixtures/cargo-* vs committed"
+            echo
+            if git diff --quiet --exit-code -- fixtures; then
+              echo "**PASS**: byte-identical to the committed fixtures."
+            else
+              echo "**DIFFERENT** (informational):"
+              echo
+              echo '```'
+              git status --short -- fixtures | head -50
+              echo '```'
+            fi
+          } >>"$GITHUB_STEP_SUMMARY"
+      - name: Collect reports and logs
+        if: always()
+        run: |
+          mkdir -p regen-reports
+          cp .cache/cargo-fixtures-staging/compare-stable.txt regen-reports/ 2>/dev/null || true
+          cp -R .cache/cargo-fixtures-logs regen-reports/logs 2>/dev/null || true
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cargo-fixtures
+          path: |
+            fixtures/cargo-keelsign
+            fixtures/cargo-deps
+            fixtures/cargo-old-heapless
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cargo-fixtures-reports
           path: regen-reports
           if-no-files-found: warn

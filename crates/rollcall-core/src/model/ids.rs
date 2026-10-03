@@ -746,6 +746,42 @@ impl fmt::Display for ComponentKind {
     }
 }
 
+/// Whether a component is part of what ships, as the CycloneDX 1.6 component `scope`.
+///
+/// A component without a scope is `required` by CycloneDX's default. rollcall sets
+/// [`Scope::Excluded`] on a component it knows of but that is not in the shipped binary, e.g.
+/// a crate in `cargo metadata` that the `cargo auditable` ELF does not list (`rollcall
+/// generate --cargo … --include-unlinked`).
+#[derive(
+    Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, std::hash::Hash, Serialize, Deserialize,
+)]
+#[serde(rename_all = "lowercase")]
+pub enum Scope {
+    /// The component is required at runtime (CycloneDX's default).
+    Required,
+    /// The component is optional at runtime.
+    Optional,
+    /// The component is not part of the shipped artefact.
+    Excluded,
+}
+
+impl Scope {
+    /// The serialised (CycloneDX) name.
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::Required => "required",
+            Self::Optional => "optional",
+            Self::Excluded => "excluded",
+        }
+    }
+}
+
+impl fmt::Display for Scope {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str(self.as_str())
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

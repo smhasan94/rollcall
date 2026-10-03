@@ -80,6 +80,10 @@ pub struct Component {
     /// The version.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub version: Option<String>,
+    /// `required`, `optional` or `excluded`; omitted when the model has none (CycloneDX's
+    /// default is `required`).
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub scope: Option<&'static str>,
     /// The supplier.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub supplier: Option<Supplier>,

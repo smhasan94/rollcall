@@ -1,0 +1,2244 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.6",
+  "serialNumber": "urn:uuid:7e81788d-2c84-881d-b7fa-ca4cbe2d2a18",
+  "version": 1,
+  "metadata": {
+    "timestamp": "2026-01-02T03:04:05Z",
+    "tools": {
+      "components": [
+        {
+          "type": "application",
+          "name": "rollcall",
+          "version": "0.0.1"
+        }
+      ]
+    },
+    "component": {
+      "type": "firmware",
+      "bom-ref": "product:025910dc6e8950b2d088876454222f3b",
+      "name": "rollcall-cargo-old-heapless",
+      "version": "0.1.0",
+      "licenses": [
+        {
+          "expression": "Apache-2.0"
+        }
+      ]
+    }
+  },
+  "components": [
+    {
+      "type": "firmware",
+      "bom-ref": "image:ee56546c674398c3b784c9e25426961d",
+      "name": "rollcall-cargo-old-heapless",
+      "version": "0.1.0",
+      "purl": "pkg:generic/rollcall-cargo-old-heapless@0.1.0",
+      "licenses": [
+        {
+          "expression": "Apache-2.0"
+        }
+      ],
+      "evidence": {
+        "identity": [
+          {
+            "field": "name",
+            "confidence": 0.95,
+            "concludedValue": "rollcall-cargo-old-heapless",
+            "methods": [
+              {
+                "technique": "binary-analysis",
+                "confidence": 0.95,
+                "value": "rollcall-cargo-old-heapless"
+              },
+              {
+                "technique": "manifest-analysis",
+                "confidence": 0.9,
+                "value": "rollcall-cargo-old-heapless"
+              }
+            ]
+          },
+          {
+            "field": "version",
+            "confidence": 0.95,
+            "concludedValue": "0.1.0",
+            "methods": [
+              {
+                "technique": "binary-analysis",
+                "confidence": 0.95,
+                "value": "0.1.0"
+              },
+              {
+                "technique": "manifest-analysis",
+                "confidence": 0.9,
+                "value": "0.1.0"
+              }
+            ]
+          },
+          {
+            "field": "purl",
+            "confidence": 0.9,
+            "concludedValue": "pkg:generic/rollcall-cargo-old-heapless@0.1.0",
+            "methods": [
+              {
+                "technique": "manifest-analysis",
+                "confidence": 0.9,
+                "value": "pkg:generic/rollcall-cargo-old-heapless@0.1.0"
+              }
+            ]
+          }
+        ],
+        "occurrences": [
+          {
+            "location": "cargo-metadata.json"
+          },
+          {
+            "location": "firmware.elf"
+          }
+        ],
+        "licenses": [
+          {
+            "expression": "Apache-2.0"
+          }
+        ]
+      },
+      "properties": [
+        {
+          "name": "rollcall:evidence",
+          "value": "{\"field\":\"licence\",\"technique\":\"manifest-analysis\",\"source\":\"cargo-metadata\",\"occurrence\":{\"location\":\"cargo-metadata.json\"},\"value\":\"Apache-2.0\",\"confidence\":9000}"
+        },
+        {
+          "name": "rollcall:evidence",
+          "value": "{\"field\":\"name\",\"technique\":\"binary-analysis\",\"source\":\"cargo-auditable\",\"occurrence\":{\"location\":\"firmware.elf\"},\"value\":\"rollcall-cargo-old-heapless\",\"confidence\":9500}"
+        },
+        {
+          "name": "rollcall:evidence",
+          "value": "{\"field\":\"name\",\"technique\":\"manifest-analysis\",\"source\":\"cargo-metadata\",\"occurrence\":{\"location\":\"cargo-metadata.json\"},\"value\":\"rollcall-cargo-old-heapless\",\"confidence\":9000}"
+        },
+        {
+          "name": "rollcall:evidence",
+          "value": "{\"field\":\"purl\",\"technique\":\"manifest-analysis\",\"source\":\"cargo-metadata\",\"occurrence\":{\"location\":\"cargo-metadata.json\"},\"value\":\"pkg:generic/rollcall-cargo-old-heapless@0.1.0\",\"confidence\":9000}"
+        },
+        {
+          "name": "rollcall:evidence",
+          "value": "{\"field\":\"version\",\"technique\":\"binary-analysis\",\"source\":\"cargo-auditable\",\"occurrence\":{\"location\":\"firmware.elf\"},\"value\":\"0.1.0\",\"confidence\":9500}"
+        },
+        {
+          "name": "rollcall:evidence",
+          "value": "{\"field\":\"version\",\"technique\":\"manifest-analysis\",\"source\":\"cargo-metadata\",\"occurrence\":{\"location\":\"cargo-metadata.json\"},\"value\":\"0.1.0\",\"confidence\":9000}"
+        },
+        {
+          "name": "rollcall:evidence-source",
+          "value": "cargo-auditable"
+        },
+        {
+          "name": "rollcall:evidence-source",
+          "value": "cargo-metadata"
+        },
+        {
+          "name": "rollcall:image-kind",
+          "value": "application"
+        }
+      ],
+      "components": [
+        {
+          "type": "library",
+          "bom-ref": "component:14548a6a108fc8c9e67e47c4793b30d9",
+          "name": "as-slice",
+          "version": "0.1.5",
+          "purl": "pkg:cargo/as-slice@0.1.5",
+          "licenses": [
+            {
+              "expression": "MIT OR Apache-2.0"
+            }
+          ],
+          "evidence": {
+            "identity": [
+              {
+                "field": "name",
+                "confidence": 0.95,
+                "concludedValue": "as-slice",
+                "methods": [
+                  {
+                    "technique": "binary-analysis",
+                    "confidence": 0.95,
+                    "value": "as-slice"
+                  },
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.9,
+                    "value": "as-slice"
+                  }
+                ]
+              },
+              {
+                "field": "version",
+                "confidence": 0.95,
+                "concludedValue": "0.1.5",
+                "methods": [
+                  {
+                    "technique": "binary-analysis",
+                    "confidence": 0.95,
+                    "value": "0.1.5"
+                  },
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.9,
+                    "value": "0.1.5"
+                  }
+                ]
+              },
+              {
+                "field": "purl",
+                "confidence": 0.9,
+                "concludedValue": "pkg:cargo/as-slice@0.1.5",
+                "methods": [
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.9,
+                    "value": "pkg:cargo/as-slice@0.1.5"
+                  }
+                ]
+              }
+            ],
+            "occurrences": [
+              {
+                "location": "cargo-metadata.json"
+              },
+              {
+                "location": "firmware.elf"
+              }
+            ],
+            "licenses": [
+              {
+                "expression": "MIT OR Apache-2.0"
+              }
+            ]
+          },
+          "properties": [
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"licence\",\"technique\":\"manifest-analysis\",\"source\":\"cargo-metadata\",\"occurrence\":{\"location\":\"cargo-metadata.json\"},\"value\":\"MIT OR Apache-2.0\",\"confidence\":9000}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"name\",\"technique\":\"binary-analysis\",\"source\":\"cargo-auditable\",\"occurrence\":{\"location\":\"firmware.elf\"},\"value\":\"as-slice\",\"confidence\":9500}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"name\",\"technique\":\"manifest-analysis\",\"source\":\"cargo-metadata\",\"occurrence\":{\"location\":\"cargo-metadata.json\"},\"value\":\"as-slice\",\"confidence\":9000}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"purl\",\"technique\":\"manifest-analysis\",\"source\":\"cargo-metadata\",\"occurrence\":{\"location\":\"cargo-metadata.json\"},\"value\":\"pkg:cargo/as-slice@0.1.5\",\"confidence\":9000}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"version\",\"technique\":\"binary-analysis\",\"source\":\"cargo-auditable\",\"occurrence\":{\"location\":\"firmware.elf\"},\"value\":\"0.1.5\",\"confidence\":9500}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"version\",\"technique\":\"manifest-analysis\",\"source\":\"cargo-metadata\",\"occurrence\":{\"location\":\"cargo-metadata.json\"},\"value\":\"0.1.5\",\"confidence\":9000}"
+            },
+            {
+              "name": "rollcall:evidence-source",
+              "value": "cargo-auditable"
+            },
+            {
+              "name": "rollcall:evidence-source",
+              "value": "cargo-metadata"
+            }
+          ]
+        },
+        {
+          "type": "library",
+          "bom-ref": "component:ad3a12ce4d2fc54e878022dab267b7ef",
+          "name": "byteorder",
+          "version": "1.5.0",
+          "purl": "pkg:cargo/byteorder@1.5.0",
+          "licenses": [
+            {
+              "expression": "Unlicense OR MIT"
+            }
+          ],
+          "evidence": {
+            "identity": [
+              {
+                "field": "name",
+                "confidence": 0.95,
+                "concludedValue": "byteorder",
+                "methods": [
+                  {
+                    "technique": "binary-analysis",
+                    "confidence": 0.95,
+                    "value": "byteorder"
+                  },
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.9,
+                    "value": "byteorder"
+                  }
+                ]
+              },
+              {
+                "field": "version",
+                "confidence": 0.95,
+                "concludedValue": "1.5.0",
+                "methods": [
+                  {
+                    "technique": "binary-analysis",
+                    "confidence": 0.95,
+                    "value": "1.5.0"
+                  },
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.9,
+                    "value": "1.5.0"
+                  }
+                ]
+              },
+              {
+                "field": "purl",
+                "confidence": 0.9,
+                "concludedValue": "pkg:cargo/byteorder@1.5.0",
+                "methods": [
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.9,
+                    "value": "pkg:cargo/byteorder@1.5.0"
+                  }
+                ]
+              }
+            ],
+            "occurrences": [
+              {
+                "location": "cargo-metadata.json"
+              },
+              {
+                "location": "firmware.elf"
+              }
+            ],
+            "licenses": [
+              {
+                "expression": "Unlicense OR MIT"
+              }
+            ]
+          },
+          "properties": [
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"licence\",\"technique\":\"manifest-analysis\",\"source\":\"cargo-metadata\",\"occurrence\":{\"location\":\"cargo-metadata.json\"},\"value\":\"Unlicense OR MIT\",\"confidence\":9000}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"name\",\"technique\":\"binary-analysis\",\"source\":\"cargo-auditable\",\"occurrence\":{\"location\":\"firmware.elf\"},\"value\":\"byteorder\",\"confidence\":9500}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"name\",\"technique\":\"manifest-analysis\",\"source\":\"cargo-metadata\",\"occurrence\":{\"location\":\"cargo-metadata.json\"},\"value\":\"byteorder\",\"confidence\":9000}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"purl\",\"technique\":\"manifest-analysis\",\"source\":\"cargo-metadata\",\"occurrence\":{\"location\":\"cargo-metadata.json\"},\"value\":\"pkg:cargo/byteorder@1.5.0\",\"confidence\":9000}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"version\",\"technique\":\"binary-analysis\",\"source\":\"cargo-auditable\",\"occurrence\":{\"location\":\"firmware.elf\"},\"value\":\"1.5.0\",\"confidence\":9500}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"version\",\"technique\":\"manifest-analysis\",\"source\":\"cargo-metadata\",\"occurrence\":{\"location\":\"cargo-metadata.json\"},\"value\":\"1.5.0\",\"confidence\":9000}"
+            },
+            {
+              "name": "rollcall:evidence-source",
+              "value": "cargo-auditable"
+            },
+            {
+              "name": "rollcall:evidence-source",
+              "value": "cargo-metadata"
+            }
+          ]
+        },
+        {
+          "type": "library",
+          "bom-ref": "component:70807de2ceaa2f884053b43556b14f7f",
+          "name": "cortex-m-rt",
+          "version": "0.7.5",
+          "purl": "pkg:cargo/cortex-m-rt@0.7.5",
+          "licenses": [
+            {
+              "expression": "MIT OR Apache-2.0"
+            }
+          ],
+          "evidence": {
+            "identity": [
+              {
+                "field": "name",
+                "confidence": 0.95,
+                "concludedValue": "cortex-m-rt",
+                "methods": [
+                  {
+                    "technique": "binary-analysis",
+                    "confidence": 0.95,
+                    "value": "cortex-m-rt"
+                  },
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.9,
+                    "value": "cortex-m-rt"
+                  }
+                ]
+              },
+              {
+                "field": "version",
+                "confidence": 0.95,
+                "concludedValue": "0.7.5",
+                "methods": [
+                  {
+                    "technique": "binary-analysis",
+                    "confidence": 0.95,
+                    "value": "0.7.5"
+                  },
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.9,
+                    "value": "0.7.5"
+                  }
+                ]
+              },
+              {
+                "field": "purl",
+                "confidence": 0.9,
+                "concludedValue": "pkg:cargo/cortex-m-rt@0.7.5",
+                "methods": [
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.9,
+                    "value": "pkg:cargo/cortex-m-rt@0.7.5"
+                  }
+                ]
+              }
+            ],
+            "occurrences": [
+              {
+                "location": "cargo-metadata.json"
+              },
+              {
+                "location": "firmware.elf"
+              }
+            ],
+            "licenses": [
+              {
+                "expression": "MIT OR Apache-2.0"
+              }
+            ]
+          },
+          "properties": [
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"licence\",\"technique\":\"manifest-analysis\",\"source\":\"cargo-metadata\",\"occurrence\":{\"location\":\"cargo-metadata.json\"},\"value\":\"MIT OR Apache-2.0\",\"confidence\":9000}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"name\",\"technique\":\"binary-analysis\",\"source\":\"cargo-auditable\",\"occurrence\":{\"location\":\"firmware.elf\"},\"value\":\"cortex-m-rt\",\"confidence\":9500}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"name\",\"technique\":\"manifest-analysis\",\"source\":\"cargo-metadata\",\"occurrence\":{\"location\":\"cargo-metadata.json\"},\"value\":\"cortex-m-rt\",\"confidence\":9000}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"purl\",\"technique\":\"manifest-analysis\",\"source\":\"cargo-metadata\",\"occurrence\":{\"location\":\"cargo-metadata.json\"},\"value\":\"pkg:cargo/cortex-m-rt@0.7.5\",\"confidence\":9000}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"version\",\"technique\":\"binary-analysis\",\"source\":\"cargo-auditable\",\"occurrence\":{\"location\":\"firmware.elf\"},\"value\":\"0.7.5\",\"confidence\":9500}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"version\",\"technique\":\"manifest-analysis\",\"source\":\"cargo-metadata\",\"occurrence\":{\"location\":\"cargo-metadata.json\"},\"value\":\"0.7.5\",\"confidence\":9000}"
+            },
+            {
+              "name": "rollcall:evidence-source",
+              "value": "cargo-auditable"
+            },
+            {
+              "name": "rollcall:evidence-source",
+              "value": "cargo-metadata"
+            }
+          ]
+        },
+        {
+          "type": "library",
+          "bom-ref": "component:3f65739f00c78eccf226d749e076ecc6",
+          "name": "cortex-m-rt-macros",
+          "version": "0.7.5",
+          "purl": "pkg:cargo/cortex-m-rt-macros@0.7.5",
+          "licenses": [
+            {
+              "expression": "MIT OR Apache-2.0"
+            }
+          ],
+          "evidence": {
+            "identity": [
+              {
+                "field": "name",
+                "confidence": 0.95,
+                "concludedValue": "cortex-m-rt-macros",
+                "methods": [
+                  {
+                    "technique": "binary-analysis",
+                    "confidence": 0.95,
+                    "value": "cortex-m-rt-macros"
+                  },
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.9,
+                    "value": "cortex-m-rt-macros"
+                  }
+                ]
+              },
+              {
+                "field": "version",
+                "confidence": 0.95,
+                "concludedValue": "0.7.5",
+                "methods": [
+                  {
+                    "technique": "binary-analysis",
+                    "confidence": 0.95,
+                    "value": "0.7.5"
+                  },
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.9,
+                    "value": "0.7.5"
+                  }
+                ]
+              },
+              {
+                "field": "purl",
+                "confidence": 0.9,
+                "concludedValue": "pkg:cargo/cortex-m-rt-macros@0.7.5",
+                "methods": [
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.9,
+                    "value": "pkg:cargo/cortex-m-rt-macros@0.7.5"
+                  }
+                ]
+              }
+            ],
+            "occurrences": [
+              {
+                "location": "cargo-metadata.json"
+              },
+              {
+                "location": "firmware.elf"
+              }
+            ],
+            "licenses": [
+              {
+                "expression": "MIT OR Apache-2.0"
+              }
+            ]
+          },
+          "properties": [
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"licence\",\"technique\":\"manifest-analysis\",\"source\":\"cargo-metadata\",\"occurrence\":{\"location\":\"cargo-metadata.json\"},\"value\":\"MIT OR Apache-2.0\",\"confidence\":9000}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"name\",\"technique\":\"binary-analysis\",\"source\":\"cargo-auditable\",\"occurrence\":{\"location\":\"firmware.elf\"},\"value\":\"cortex-m-rt-macros\",\"confidence\":9500}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"name\",\"technique\":\"manifest-analysis\",\"source\":\"cargo-metadata\",\"occurrence\":{\"location\":\"cargo-metadata.json\"},\"value\":\"cortex-m-rt-macros\",\"confidence\":9000}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"purl\",\"technique\":\"manifest-analysis\",\"source\":\"cargo-metadata\",\"occurrence\":{\"location\":\"cargo-metadata.json\"},\"value\":\"pkg:cargo/cortex-m-rt-macros@0.7.5\",\"confidence\":9000}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"version\",\"technique\":\"binary-analysis\",\"source\":\"cargo-auditable\",\"occurrence\":{\"location\":\"firmware.elf\"},\"value\":\"0.7.5\",\"confidence\":9500}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"version\",\"technique\":\"manifest-analysis\",\"source\":\"cargo-metadata\",\"occurrence\":{\"location\":\"cargo-metadata.json\"},\"value\":\"0.7.5\",\"confidence\":9000}"
+            },
+            {
+              "name": "rollcall:evidence-source",
+              "value": "cargo-auditable"
+            },
+            {
+              "name": "rollcall:evidence-source",
+              "value": "cargo-metadata"
+            }
+          ]
+        },
+        {
+          "type": "library",
+          "bom-ref": "component:c5ae649c8dbd7c3acbedcd87e1a44e9d",
+          "name": "generic-array",
+          "version": "0.12.4",
+          "purl": "pkg:cargo/generic-array@0.12.4",
+          "licenses": [
+            {
+              "expression": "MIT"
+            }
+          ],
+          "evidence": {
+            "identity": [
+              {
+                "field": "name",
+                "confidence": 0.95,
+                "concludedValue": "generic-array",
+                "methods": [
+                  {
+                    "technique": "binary-analysis",
+                    "confidence": 0.95,
+                    "value": "generic-array"
+                  },
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.9,
+                    "value": "generic-array"
+                  }
+                ]
+              },
+              {
+                "field": "version",
+                "confidence": 0.95,
+                "concludedValue": "0.12.4",
+                "methods": [
+                  {
+                    "technique": "binary-analysis",
+                    "confidence": 0.95,
+                    "value": "0.12.4"
+                  },
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.9,
+                    "value": "0.12.4"
+                  }
+                ]
+              },
+              {
+                "field": "purl",
+                "confidence": 0.9,
+                "concludedValue": "pkg:cargo/generic-array@0.12.4",
+                "methods": [
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.9,
+                    "value": "pkg:cargo/generic-array@0.12.4"
+                  }
+                ]
+              }
+            ],
+            "occurrences": [
+              {
+                "location": "cargo-metadata.json"
+              },
+              {
+                "location": "firmware.elf"
+              }
+            ],
+            "licenses": [
+              {
+                "expression": "MIT"
+              }
+            ]
+          },
+          "properties": [
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"licence\",\"technique\":\"manifest-analysis\",\"source\":\"cargo-metadata\",\"occurrence\":{\"location\":\"cargo-metadata.json\"},\"value\":\"MIT\",\"confidence\":9000}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"name\",\"technique\":\"binary-analysis\",\"source\":\"cargo-auditable\",\"occurrence\":{\"location\":\"firmware.elf\"},\"value\":\"generic-array\",\"confidence\":9500}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"name\",\"technique\":\"manifest-analysis\",\"source\":\"cargo-metadata\",\"occurrence\":{\"location\":\"cargo-metadata.json\"},\"value\":\"generic-array\",\"confidence\":9000}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"purl\",\"technique\":\"manifest-analysis\",\"source\":\"cargo-metadata\",\"occurrence\":{\"location\":\"cargo-metadata.json\"},\"value\":\"pkg:cargo/generic-array@0.12.4\",\"confidence\":9000}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"version\",\"technique\":\"binary-analysis\",\"source\":\"cargo-auditable\",\"occurrence\":{\"location\":\"firmware.elf\"},\"value\":\"0.12.4\",\"confidence\":9500}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"version\",\"technique\":\"manifest-analysis\",\"source\":\"cargo-metadata\",\"occurrence\":{\"location\":\"cargo-metadata.json\"},\"value\":\"0.12.4\",\"confidence\":9000}"
+            },
+            {
+              "name": "rollcall:evidence-source",
+              "value": "cargo-auditable"
+            },
+            {
+              "name": "rollcall:evidence-source",
+              "value": "cargo-metadata"
+            }
+          ]
+        },
+        {
+          "type": "library",
+          "bom-ref": "component:b0834b4e94eb68402738c7765f648f04",
+          "name": "generic-array",
+          "version": "0.13.3",
+          "purl": "pkg:cargo/generic-array@0.13.3",
+          "licenses": [
+            {
+              "expression": "MIT"
+            }
+          ],
+          "evidence": {
+            "identity": [
+              {
+                "field": "name",
+                "confidence": 0.95,
+                "concludedValue": "generic-array",
+                "methods": [
+                  {
+                    "technique": "binary-analysis",
+                    "confidence": 0.95,
+                    "value": "generic-array"
+                  },
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.9,
+                    "value": "generic-array"
+                  }
+                ]
+              },
+              {
+                "field": "version",
+                "confidence": 0.95,
+                "concludedValue": "0.13.3",
+                "methods": [
+                  {
+                    "technique": "binary-analysis",
+                    "confidence": 0.95,
+                    "value": "0.13.3"
+                  },
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.9,
+                    "value": "0.13.3"
+                  }
+                ]
+              },
+              {
+                "field": "purl",
+                "confidence": 0.9,
+                "concludedValue": "pkg:cargo/generic-array@0.13.3",
+                "methods": [
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.9,
+                    "value": "pkg:cargo/generic-array@0.13.3"
+                  }
+                ]
+              }
+            ],
+            "occurrences": [
+              {
+                "location": "cargo-metadata.json"
+              },
+              {
+                "location": "firmware.elf"
+              }
+            ],
+            "licenses": [
+              {
+                "expression": "MIT"
+              }
+            ]
+          },
+          "properties": [
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"licence\",\"technique\":\"manifest-analysis\",\"source\":\"cargo-metadata\",\"occurrence\":{\"location\":\"cargo-metadata.json\"},\"value\":\"MIT\",\"confidence\":9000}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"name\",\"technique\":\"binary-analysis\",\"source\":\"cargo-auditable\",\"occurrence\":{\"location\":\"firmware.elf\"},\"value\":\"generic-array\",\"confidence\":9500}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"name\",\"technique\":\"manifest-analysis\",\"source\":\"cargo-metadata\",\"occurrence\":{\"location\":\"cargo-metadata.json\"},\"value\":\"generic-array\",\"confidence\":9000}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"purl\",\"technique\":\"manifest-analysis\",\"source\":\"cargo-metadata\",\"occurrence\":{\"location\":\"cargo-metadata.json\"},\"value\":\"pkg:cargo/generic-array@0.13.3\",\"confidence\":9000}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"version\",\"technique\":\"binary-analysis\",\"source\":\"cargo-auditable\",\"occurrence\":{\"location\":\"firmware.elf\"},\"value\":\"0.13.3\",\"confidence\":9500}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"version\",\"technique\":\"manifest-analysis\",\"source\":\"cargo-metadata\",\"occurrence\":{\"location\":\"cargo-metadata.json\"},\"value\":\"0.13.3\",\"confidence\":9000}"
+            },
+            {
+              "name": "rollcall:evidence-source",
+              "value": "cargo-auditable"
+            },
+            {
+              "name": "rollcall:evidence-source",
+              "value": "cargo-metadata"
+            }
+          ]
+        },
+        {
+          "type": "library",
+          "bom-ref": "component:047bd8f84868a3e475a032811bc2fb09",
+          "name": "generic-array",
+          "version": "0.14.9",
+          "purl": "pkg:cargo/generic-array@0.14.9",
+          "licenses": [
+            {
+              "expression": "MIT"
+            }
+          ],
+          "evidence": {
+            "identity": [
+              {
+                "field": "name",
+                "confidence": 0.95,
+                "concludedValue": "generic-array",
+                "methods": [
+                  {
+                    "technique": "binary-analysis",
+                    "confidence": 0.95,
+                    "value": "generic-array"
+                  },
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.9,
+                    "value": "generic-array"
+                  }
+                ]
+              },
+              {
+                "field": "version",
+                "confidence": 0.95,
+                "concludedValue": "0.14.9",
+                "methods": [
+                  {
+                    "technique": "binary-analysis",
+                    "confidence": 0.95,
+                    "value": "0.14.9"
+                  },
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.9,
+                    "value": "0.14.9"
+                  }
+                ]
+              },
+              {
+                "field": "purl",
+                "confidence": 0.9,
+                "concludedValue": "pkg:cargo/generic-array@0.14.9",
+                "methods": [
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.9,
+                    "value": "pkg:cargo/generic-array@0.14.9"
+                  }
+                ]
+              }
+            ],
+            "occurrences": [
+              {
+                "location": "cargo-metadata.json"
+              },
+              {
+                "location": "firmware.elf"
+              }
+            ],
+            "licenses": [
+              {
+                "expression": "MIT"
+              }
+            ]
+          },
+          "properties": [
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"licence\",\"technique\":\"manifest-analysis\",\"source\":\"cargo-metadata\",\"occurrence\":{\"location\":\"cargo-metadata.json\"},\"value\":\"MIT\",\"confidence\":9000}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"name\",\"technique\":\"binary-analysis\",\"source\":\"cargo-auditable\",\"occurrence\":{\"location\":\"firmware.elf\"},\"value\":\"generic-array\",\"confidence\":9500}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"name\",\"technique\":\"manifest-analysis\",\"source\":\"cargo-metadata\",\"occurrence\":{\"location\":\"cargo-metadata.json\"},\"value\":\"generic-array\",\"confidence\":9000}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"purl\",\"technique\":\"manifest-analysis\",\"source\":\"cargo-metadata\",\"occurrence\":{\"location\":\"cargo-metadata.json\"},\"value\":\"pkg:cargo/generic-array@0.14.9\",\"confidence\":9000}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"version\",\"technique\":\"binary-analysis\",\"source\":\"cargo-auditable\",\"occurrence\":{\"location\":\"firmware.elf\"},\"value\":\"0.14.9\",\"confidence\":9500}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"version\",\"technique\":\"manifest-analysis\",\"source\":\"cargo-metadata\",\"occurrence\":{\"location\":\"cargo-metadata.json\"},\"value\":\"0.14.9\",\"confidence\":9000}"
+            },
+            {
+              "name": "rollcall:evidence-source",
+              "value": "cargo-auditable"
+            },
+            {
+              "name": "rollcall:evidence-source",
+              "value": "cargo-metadata"
+            }
+          ]
+        },
+        {
+          "type": "library",
+          "bom-ref": "component:76518544e025afd270c82b548bb190e8",
+          "name": "hash32",
+          "version": "0.1.1",
+          "purl": "pkg:cargo/hash32@0.1.1",
+          "licenses": [
+            {
+              "expression": "MIT OR Apache-2.0"
+            }
+          ],
+          "evidence": {
+            "identity": [
+              {
+                "field": "name",
+                "confidence": 0.95,
+                "concludedValue": "hash32",
+                "methods": [
+                  {
+                    "technique": "binary-analysis",
+                    "confidence": 0.95,
+                    "value": "hash32"
+                  },
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.9,
+                    "value": "hash32"
+                  }
+                ]
+              },
+              {
+                "field": "version",
+                "confidence": 0.95,
+                "concludedValue": "0.1.1",
+                "methods": [
+                  {
+                    "technique": "binary-analysis",
+                    "confidence": 0.95,
+                    "value": "0.1.1"
+                  },
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.9,
+                    "value": "0.1.1"
+                  }
+                ]
+              },
+              {
+                "field": "purl",
+                "confidence": 0.9,
+                "concludedValue": "pkg:cargo/hash32@0.1.1",
+                "methods": [
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.9,
+                    "value": "pkg:cargo/hash32@0.1.1"
+                  }
+                ]
+              }
+            ],
+            "occurrences": [
+              {
+                "location": "cargo-metadata.json"
+              },
+              {
+                "location": "firmware.elf"
+              }
+            ],
+            "licenses": [
+              {
+                "expression": "MIT OR Apache-2.0"
+              }
+            ]
+          },
+          "properties": [
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"licence\",\"technique\":\"manifest-analysis\",\"source\":\"cargo-metadata\",\"occurrence\":{\"location\":\"cargo-metadata.json\"},\"value\":\"MIT OR Apache-2.0\",\"confidence\":9000}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"name\",\"technique\":\"binary-analysis\",\"source\":\"cargo-auditable\",\"occurrence\":{\"location\":\"firmware.elf\"},\"value\":\"hash32\",\"confidence\":9500}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"name\",\"technique\":\"manifest-analysis\",\"source\":\"cargo-metadata\",\"occurrence\":{\"location\":\"cargo-metadata.json\"},\"value\":\"hash32\",\"confidence\":9000}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"purl\",\"technique\":\"manifest-analysis\",\"source\":\"cargo-metadata\",\"occurrence\":{\"location\":\"cargo-metadata.json\"},\"value\":\"pkg:cargo/hash32@0.1.1\",\"confidence\":9000}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"version\",\"technique\":\"binary-analysis\",\"source\":\"cargo-auditable\",\"occurrence\":{\"location\":\"firmware.elf\"},\"value\":\"0.1.1\",\"confidence\":9500}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"version\",\"technique\":\"manifest-analysis\",\"source\":\"cargo-metadata\",\"occurrence\":{\"location\":\"cargo-metadata.json\"},\"value\":\"0.1.1\",\"confidence\":9000}"
+            },
+            {
+              "name": "rollcall:evidence-source",
+              "value": "cargo-auditable"
+            },
+            {
+              "name": "rollcall:evidence-source",
+              "value": "cargo-metadata"
+            }
+          ]
+        },
+        {
+          "type": "library",
+          "bom-ref": "component:b328c03697d6fc786d3d17c7db33c7a2",
+          "name": "heapless",
+          "version": "0.5.6",
+          "purl": "pkg:cargo/heapless@0.5.6",
+          "licenses": [
+            {
+              "expression": "MIT OR Apache-2.0"
+            }
+          ],
+          "evidence": {
+            "identity": [
+              {
+                "field": "name",
+                "confidence": 0.95,
+                "concludedValue": "heapless",
+                "methods": [
+                  {
+                    "technique": "binary-analysis",
+                    "confidence": 0.95,
+                    "value": "heapless"
+                  },
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.9,
+                    "value": "feature:cas"
+                  },
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.9,
+                    "value": "feature:default"
+                  },
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.9,
+                    "value": "heapless"
+                  }
+                ]
+              },
+              {
+                "field": "version",
+                "confidence": 0.95,
+                "concludedValue": "0.5.6",
+                "methods": [
+                  {
+                    "technique": "binary-analysis",
+                    "confidence": 0.95,
+                    "value": "0.5.6"
+                  },
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.9,
+                    "value": "0.5.6"
+                  }
+                ]
+              },
+              {
+                "field": "purl",
+                "confidence": 0.9,
+                "concludedValue": "pkg:cargo/heapless@0.5.6",
+                "methods": [
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.9,
+                    "value": "pkg:cargo/heapless@0.5.6"
+                  }
+                ]
+              }
+            ],
+            "occurrences": [
+              {
+                "location": "cargo-metadata.json"
+              },
+              {
+                "location": "firmware.elf"
+              }
+            ],
+            "licenses": [
+              {
+                "expression": "MIT OR Apache-2.0"
+              }
+            ]
+          },
+          "properties": [
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"licence\",\"technique\":\"manifest-analysis\",\"source\":\"cargo-metadata\",\"occurrence\":{\"location\":\"cargo-metadata.json\"},\"value\":\"MIT OR Apache-2.0\",\"confidence\":9000}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"name\",\"technique\":\"binary-analysis\",\"source\":\"cargo-auditable\",\"occurrence\":{\"location\":\"firmware.elf\"},\"value\":\"heapless\",\"confidence\":9500}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"name\",\"technique\":\"manifest-analysis\",\"source\":\"cargo-metadata\",\"occurrence\":{\"location\":\"cargo-metadata.json\"},\"value\":\"feature:cas\",\"confidence\":9000}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"name\",\"technique\":\"manifest-analysis\",\"source\":\"cargo-metadata\",\"occurrence\":{\"location\":\"cargo-metadata.json\"},\"value\":\"feature:default\",\"confidence\":9000}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"name\",\"technique\":\"manifest-analysis\",\"source\":\"cargo-metadata\",\"occurrence\":{\"location\":\"cargo-metadata.json\"},\"value\":\"heapless\",\"confidence\":9000}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"purl\",\"technique\":\"manifest-analysis\",\"source\":\"cargo-metadata\",\"occurrence\":{\"location\":\"cargo-metadata.json\"},\"value\":\"pkg:cargo/heapless@0.5.6\",\"confidence\":9000}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"version\",\"technique\":\"binary-analysis\",\"source\":\"cargo-auditable\",\"occurrence\":{\"location\":\"firmware.elf\"},\"value\":\"0.5.6\",\"confidence\":9500}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"version\",\"technique\":\"manifest-analysis\",\"source\":\"cargo-metadata\",\"occurrence\":{\"location\":\"cargo-metadata.json\"},\"value\":\"0.5.6\",\"confidence\":9000}"
+            },
+            {
+              "name": "rollcall:evidence-source",
+              "value": "cargo-auditable"
+            },
+            {
+              "name": "rollcall:evidence-source",
+              "value": "cargo-metadata"
+            }
+          ]
+        },
+        {
+          "type": "library",
+          "bom-ref": "component:fa9b7ff2166abf325df80969f4ce817d",
+          "name": "panic-halt",
+          "version": "1.0.0",
+          "purl": "pkg:cargo/panic-halt@1.0.0",
+          "licenses": [
+            {
+              "expression": "MIT OR Apache-2.0"
+            }
+          ],
+          "evidence": {
+            "identity": [
+              {
+                "field": "name",
+                "confidence": 0.95,
+                "concludedValue": "panic-halt",
+                "methods": [
+                  {
+                    "technique": "binary-analysis",
+                    "confidence": 0.95,
+                    "value": "panic-halt"
+                  },
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.9,
+                    "value": "panic-halt"
+                  }
+                ]
+              },
+              {
+                "field": "version",
+                "confidence": 0.95,
+                "concludedValue": "1.0.0",
+                "methods": [
+                  {
+                    "technique": "binary-analysis",
+                    "confidence": 0.95,
+                    "value": "1.0.0"
+                  },
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.9,
+                    "value": "1.0.0"
+                  }
+                ]
+              },
+              {
+                "field": "purl",
+                "confidence": 0.9,
+                "concludedValue": "pkg:cargo/panic-halt@1.0.0",
+                "methods": [
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.9,
+                    "value": "pkg:cargo/panic-halt@1.0.0"
+                  }
+                ]
+              }
+            ],
+            "occurrences": [
+              {
+                "location": "cargo-metadata.json"
+              },
+              {
+                "location": "firmware.elf"
+              }
+            ],
+            "licenses": [
+              {
+                "expression": "MIT OR Apache-2.0"
+              }
+            ]
+          },
+          "properties": [
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"licence\",\"technique\":\"manifest-analysis\",\"source\":\"cargo-metadata\",\"occurrence\":{\"location\":\"cargo-metadata.json\"},\"value\":\"MIT OR Apache-2.0\",\"confidence\":9000}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"name\",\"technique\":\"binary-analysis\",\"source\":\"cargo-auditable\",\"occurrence\":{\"location\":\"firmware.elf\"},\"value\":\"panic-halt\",\"confidence\":9500}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"name\",\"technique\":\"manifest-analysis\",\"source\":\"cargo-metadata\",\"occurrence\":{\"location\":\"cargo-metadata.json\"},\"value\":\"panic-halt\",\"confidence\":9000}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"purl\",\"technique\":\"manifest-analysis\",\"source\":\"cargo-metadata\",\"occurrence\":{\"location\":\"cargo-metadata.json\"},\"value\":\"pkg:cargo/panic-halt@1.0.0\",\"confidence\":9000}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"version\",\"technique\":\"binary-analysis\",\"source\":\"cargo-auditable\",\"occurrence\":{\"location\":\"firmware.elf\"},\"value\":\"1.0.0\",\"confidence\":9500}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"version\",\"technique\":\"manifest-analysis\",\"source\":\"cargo-metadata\",\"occurrence\":{\"location\":\"cargo-metadata.json\"},\"value\":\"1.0.0\",\"confidence\":9000}"
+            },
+            {
+              "name": "rollcall:evidence-source",
+              "value": "cargo-auditable"
+            },
+            {
+              "name": "rollcall:evidence-source",
+              "value": "cargo-metadata"
+            }
+          ]
+        },
+        {
+          "type": "library",
+          "bom-ref": "component:34d4a92a06ca258c694895821bc055b7",
+          "name": "proc-macro2",
+          "version": "1.0.107",
+          "purl": "pkg:cargo/proc-macro2@1.0.107",
+          "licenses": [
+            {
+              "expression": "MIT OR Apache-2.0"
+            }
+          ],
+          "evidence": {
+            "identity": [
+              {
+                "field": "name",
+                "confidence": 0.95,
+                "concludedValue": "proc-macro2",
+                "methods": [
+                  {
+                    "technique": "binary-analysis",
+                    "confidence": 0.95,
+                    "value": "proc-macro2"
+                  },
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.9,
+                    "value": "feature:default"
+                  },
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.9,
+                    "value": "feature:proc-macro"
+                  },
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.9,
+                    "value": "proc-macro2"
+                  }
+                ]
+              },
+              {
+                "field": "version",
+                "confidence": 0.95,
+                "concludedValue": "1.0.107",
+                "methods": [
+                  {
+                    "technique": "binary-analysis",
+                    "confidence": 0.95,
+                    "value": "1.0.107"
+                  },
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.9,
+                    "value": "1.0.107"
+                  }
+                ]
+              },
+              {
+                "field": "purl",
+                "confidence": 0.9,
+                "concludedValue": "pkg:cargo/proc-macro2@1.0.107",
+                "methods": [
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.9,
+                    "value": "pkg:cargo/proc-macro2@1.0.107"
+                  }
+                ]
+              }
+            ],
+            "occurrences": [
+              {
+                "location": "cargo-metadata.json"
+              },
+              {
+                "location": "firmware.elf"
+              }
+            ],
+            "licenses": [
+              {
+                "expression": "MIT OR Apache-2.0"
+              }
+            ]
+          },
+          "properties": [
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"licence\",\"technique\":\"manifest-analysis\",\"source\":\"cargo-metadata\",\"occurrence\":{\"location\":\"cargo-metadata.json\"},\"value\":\"MIT OR Apache-2.0\",\"confidence\":9000}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"name\",\"technique\":\"binary-analysis\",\"source\":\"cargo-auditable\",\"occurrence\":{\"location\":\"firmware.elf\"},\"value\":\"proc-macro2\",\"confidence\":9500}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"name\",\"technique\":\"manifest-analysis\",\"source\":\"cargo-metadata\",\"occurrence\":{\"location\":\"cargo-metadata.json\"},\"value\":\"feature:default\",\"confidence\":9000}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"name\",\"technique\":\"manifest-analysis\",\"source\":\"cargo-metadata\",\"occurrence\":{\"location\":\"cargo-metadata.json\"},\"value\":\"feature:proc-macro\",\"confidence\":9000}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"name\",\"technique\":\"manifest-analysis\",\"source\":\"cargo-metadata\",\"occurrence\":{\"location\":\"cargo-metadata.json\"},\"value\":\"proc-macro2\",\"confidence\":9000}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"purl\",\"technique\":\"manifest-analysis\",\"source\":\"cargo-metadata\",\"occurrence\":{\"location\":\"cargo-metadata.json\"},\"value\":\"pkg:cargo/proc-macro2@1.0.107\",\"confidence\":9000}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"version\",\"technique\":\"binary-analysis\",\"source\":\"cargo-auditable\",\"occurrence\":{\"location\":\"firmware.elf\"},\"value\":\"1.0.107\",\"confidence\":9500}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"version\",\"technique\":\"manifest-analysis\",\"source\":\"cargo-metadata\",\"occurrence\":{\"location\":\"cargo-metadata.json\"},\"value\":\"1.0.107\",\"confidence\":9000}"
+            },
+            {
+              "name": "rollcall:evidence-source",
+              "value": "cargo-auditable"
+            },
+            {
+              "name": "rollcall:evidence-source",
+              "value": "cargo-metadata"
+            }
+          ]
+        },
+        {
+          "type": "library",
+          "bom-ref": "component:a4dfd65e3ada4ca75ae7cf3fbcc13cac",
+          "name": "quote",
+          "version": "1.0.47",
+          "purl": "pkg:cargo/quote@1.0.47",
+          "licenses": [
+            {
+              "expression": "MIT OR Apache-2.0"
+            }
+          ],
+          "evidence": {
+            "identity": [
+              {
+                "field": "name",
+                "confidence": 0.95,
+                "concludedValue": "quote",
+                "methods": [
+                  {
+                    "technique": "binary-analysis",
+                    "confidence": 0.95,
+                    "value": "quote"
+                  },
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.9,
+                    "value": "feature:default"
+                  },
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.9,
+                    "value": "feature:proc-macro"
+                  },
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.9,
+                    "value": "quote"
+                  }
+                ]
+              },
+              {
+                "field": "version",
+                "confidence": 0.95,
+                "concludedValue": "1.0.47",
+                "methods": [
+                  {
+                    "technique": "binary-analysis",
+                    "confidence": 0.95,
+                    "value": "1.0.47"
+                  },
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.9,
+                    "value": "1.0.47"
+                  }
+                ]
+              },
+              {
+                "field": "purl",
+                "confidence": 0.9,
+                "concludedValue": "pkg:cargo/quote@1.0.47",
+                "methods": [
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.9,
+                    "value": "pkg:cargo/quote@1.0.47"
+                  }
+                ]
+              }
+            ],
+            "occurrences": [
+              {
+                "location": "cargo-metadata.json"
+              },
+              {
+                "location": "firmware.elf"
+              }
+            ],
+            "licenses": [
+              {
+                "expression": "MIT OR Apache-2.0"
+              }
+            ]
+          },
+          "properties": [
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"licence\",\"technique\":\"manifest-analysis\",\"source\":\"cargo-metadata\",\"occurrence\":{\"location\":\"cargo-metadata.json\"},\"value\":\"MIT OR Apache-2.0\",\"confidence\":9000}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"name\",\"technique\":\"binary-analysis\",\"source\":\"cargo-auditable\",\"occurrence\":{\"location\":\"firmware.elf\"},\"value\":\"quote\",\"confidence\":9500}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"name\",\"technique\":\"manifest-analysis\",\"source\":\"cargo-metadata\",\"occurrence\":{\"location\":\"cargo-metadata.json\"},\"value\":\"feature:default\",\"confidence\":9000}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"name\",\"technique\":\"manifest-analysis\",\"source\":\"cargo-metadata\",\"occurrence\":{\"location\":\"cargo-metadata.json\"},\"value\":\"feature:proc-macro\",\"confidence\":9000}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"name\",\"technique\":\"manifest-analysis\",\"source\":\"cargo-metadata\",\"occurrence\":{\"location\":\"cargo-metadata.json\"},\"value\":\"quote\",\"confidence\":9000}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"purl\",\"technique\":\"manifest-analysis\",\"source\":\"cargo-metadata\",\"occurrence\":{\"location\":\"cargo-metadata.json\"},\"value\":\"pkg:cargo/quote@1.0.47\",\"confidence\":9000}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"version\",\"technique\":\"binary-analysis\",\"source\":\"cargo-auditable\",\"occurrence\":{\"location\":\"firmware.elf\"},\"value\":\"1.0.47\",\"confidence\":9500}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"version\",\"technique\":\"manifest-analysis\",\"source\":\"cargo-metadata\",\"occurrence\":{\"location\":\"cargo-metadata.json\"},\"value\":\"1.0.47\",\"confidence\":9000}"
+            },
+            {
+              "name": "rollcall:evidence-source",
+              "value": "cargo-auditable"
+            },
+            {
+              "name": "rollcall:evidence-source",
+              "value": "cargo-metadata"
+            }
+          ]
+        },
+        {
+          "type": "library",
+          "bom-ref": "component:222a2e91f4b6e95e4c2c22e54c436133",
+          "name": "stable_deref_trait",
+          "version": "1.2.1",
+          "purl": "pkg:cargo/stable_deref_trait@1.2.1",
+          "licenses": [
+            {
+              "expression": "MIT OR Apache-2.0"
+            }
+          ],
+          "evidence": {
+            "identity": [
+              {
+                "field": "name",
+                "confidence": 0.95,
+                "concludedValue": "stable_deref_trait",
+                "methods": [
+                  {
+                    "technique": "binary-analysis",
+                    "confidence": 0.95,
+                    "value": "stable_deref_trait"
+                  },
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.9,
+                    "value": "stable_deref_trait"
+                  }
+                ]
+              },
+              {
+                "field": "version",
+                "confidence": 0.95,
+                "concludedValue": "1.2.1",
+                "methods": [
+                  {
+                    "technique": "binary-analysis",
+                    "confidence": 0.95,
+                    "value": "1.2.1"
+                  },
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.9,
+                    "value": "1.2.1"
+                  }
+                ]
+              },
+              {
+                "field": "purl",
+                "confidence": 0.9,
+                "concludedValue": "pkg:cargo/stable_deref_trait@1.2.1",
+                "methods": [
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.9,
+                    "value": "pkg:cargo/stable_deref_trait@1.2.1"
+                  }
+                ]
+              }
+            ],
+            "occurrences": [
+              {
+                "location": "cargo-metadata.json"
+              },
+              {
+                "location": "firmware.elf"
+              }
+            ],
+            "licenses": [
+              {
+                "expression": "MIT OR Apache-2.0"
+              }
+            ]
+          },
+          "properties": [
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"licence\",\"technique\":\"manifest-analysis\",\"source\":\"cargo-metadata\",\"occurrence\":{\"location\":\"cargo-metadata.json\"},\"value\":\"MIT OR Apache-2.0\",\"confidence\":9000}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"name\",\"technique\":\"binary-analysis\",\"source\":\"cargo-auditable\",\"occurrence\":{\"location\":\"firmware.elf\"},\"value\":\"stable_deref_trait\",\"confidence\":9500}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"name\",\"technique\":\"manifest-analysis\",\"source\":\"cargo-metadata\",\"occurrence\":{\"location\":\"cargo-metadata.json\"},\"value\":\"stable_deref_trait\",\"confidence\":9000}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"purl\",\"technique\":\"manifest-analysis\",\"source\":\"cargo-metadata\",\"occurrence\":{\"location\":\"cargo-metadata.json\"},\"value\":\"pkg:cargo/stable_deref_trait@1.2.1\",\"confidence\":9000}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"version\",\"technique\":\"binary-analysis\",\"source\":\"cargo-auditable\",\"occurrence\":{\"location\":\"firmware.elf\"},\"value\":\"1.2.1\",\"confidence\":9500}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"version\",\"technique\":\"manifest-analysis\",\"source\":\"cargo-metadata\",\"occurrence\":{\"location\":\"cargo-metadata.json\"},\"value\":\"1.2.1\",\"confidence\":9000}"
+            },
+            {
+              "name": "rollcall:evidence-source",
+              "value": "cargo-auditable"
+            },
+            {
+              "name": "rollcall:evidence-source",
+              "value": "cargo-metadata"
+            }
+          ]
+        },
+        {
+          "type": "library",
+          "bom-ref": "component:85a2ef849bbfb93e295ff3048b4769ee",
+          "name": "syn",
+          "version": "2.0.119",
+          "purl": "pkg:cargo/syn@2.0.119",
+          "licenses": [
+            {
+              "expression": "MIT OR Apache-2.0"
+            }
+          ],
+          "evidence": {
+            "identity": [
+              {
+                "field": "name",
+                "confidence": 0.95,
+                "concludedValue": "syn",
+                "methods": [
+                  {
+                    "technique": "binary-analysis",
+                    "confidence": 0.95,
+                    "value": "syn"
+                  },
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.9,
+                    "value": "feature:clone-impls"
+                  },
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.9,
+                    "value": "feature:default"
+                  },
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.9,
+                    "value": "feature:derive"
+                  },
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.9,
+                    "value": "feature:extra-traits"
+                  },
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.9,
+                    "value": "feature:full"
+                  },
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.9,
+                    "value": "feature:parsing"
+                  },
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.9,
+                    "value": "feature:printing"
+                  },
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.9,
+                    "value": "feature:proc-macro"
+                  },
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.9,
+                    "value": "syn"
+                  }
+                ]
+              },
+              {
+                "field": "version",
+                "confidence": 0.95,
+                "concludedValue": "2.0.119",
+                "methods": [
+                  {
+                    "technique": "binary-analysis",
+                    "confidence": 0.95,
+                    "value": "2.0.119"
+                  },
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.9,
+                    "value": "2.0.119"
+                  }
+                ]
+              },
+              {
+                "field": "purl",
+                "confidence": 0.9,
+                "concludedValue": "pkg:cargo/syn@2.0.119",
+                "methods": [
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.9,
+                    "value": "pkg:cargo/syn@2.0.119"
+                  }
+                ]
+              }
+            ],
+            "occurrences": [
+              {
+                "location": "cargo-metadata.json"
+              },
+              {
+                "location": "firmware.elf"
+              }
+            ],
+            "licenses": [
+              {
+                "expression": "MIT OR Apache-2.0"
+              }
+            ]
+          },
+          "properties": [
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"licence\",\"technique\":\"manifest-analysis\",\"source\":\"cargo-metadata\",\"occurrence\":{\"location\":\"cargo-metadata.json\"},\"value\":\"MIT OR Apache-2.0\",\"confidence\":9000}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"name\",\"technique\":\"binary-analysis\",\"source\":\"cargo-auditable\",\"occurrence\":{\"location\":\"firmware.elf\"},\"value\":\"syn\",\"confidence\":9500}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"name\",\"technique\":\"manifest-analysis\",\"source\":\"cargo-metadata\",\"occurrence\":{\"location\":\"cargo-metadata.json\"},\"value\":\"feature:clone-impls\",\"confidence\":9000}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"name\",\"technique\":\"manifest-analysis\",\"source\":\"cargo-metadata\",\"occurrence\":{\"location\":\"cargo-metadata.json\"},\"value\":\"feature:default\",\"confidence\":9000}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"name\",\"technique\":\"manifest-analysis\",\"source\":\"cargo-metadata\",\"occurrence\":{\"location\":\"cargo-metadata.json\"},\"value\":\"feature:derive\",\"confidence\":9000}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"name\",\"technique\":\"manifest-analysis\",\"source\":\"cargo-metadata\",\"occurrence\":{\"location\":\"cargo-metadata.json\"},\"value\":\"feature:extra-traits\",\"confidence\":9000}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"name\",\"technique\":\"manifest-analysis\",\"source\":\"cargo-metadata\",\"occurrence\":{\"location\":\"cargo-metadata.json\"},\"value\":\"feature:full\",\"confidence\":9000}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"name\",\"technique\":\"manifest-analysis\",\"source\":\"cargo-metadata\",\"occurrence\":{\"location\":\"cargo-metadata.json\"},\"value\":\"feature:parsing\",\"confidence\":9000}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"name\",\"technique\":\"manifest-analysis\",\"source\":\"cargo-metadata\",\"occurrence\":{\"location\":\"cargo-metadata.json\"},\"value\":\"feature:printing\",\"confidence\":9000}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"name\",\"technique\":\"manifest-analysis\",\"source\":\"cargo-metadata\",\"occurrence\":{\"location\":\"cargo-metadata.json\"},\"value\":\"feature:proc-macro\",\"confidence\":9000}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"name\",\"technique\":\"manifest-analysis\",\"source\":\"cargo-metadata\",\"occurrence\":{\"location\":\"cargo-metadata.json\"},\"value\":\"syn\",\"confidence\":9000}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"purl\",\"technique\":\"manifest-analysis\",\"source\":\"cargo-metadata\",\"occurrence\":{\"location\":\"cargo-metadata.json\"},\"value\":\"pkg:cargo/syn@2.0.119\",\"confidence\":9000}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"version\",\"technique\":\"binary-analysis\",\"source\":\"cargo-auditable\",\"occurrence\":{\"location\":\"firmware.elf\"},\"value\":\"2.0.119\",\"confidence\":9500}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"version\",\"technique\":\"manifest-analysis\",\"source\":\"cargo-metadata\",\"occurrence\":{\"location\":\"cargo-metadata.json\"},\"value\":\"2.0.119\",\"confidence\":9000}"
+            },
+            {
+              "name": "rollcall:evidence-source",
+              "value": "cargo-auditable"
+            },
+            {
+              "name": "rollcall:evidence-source",
+              "value": "cargo-metadata"
+            }
+          ]
+        },
+        {
+          "type": "library",
+          "bom-ref": "component:56a2c3c5bba6f223d98b16ab81120e6c",
+          "name": "typenum",
+          "version": "1.20.1",
+          "purl": "pkg:cargo/typenum@1.20.1",
+          "licenses": [
+            {
+              "expression": "MIT OR Apache-2.0"
+            }
+          ],
+          "evidence": {
+            "identity": [
+              {
+                "field": "name",
+                "confidence": 0.95,
+                "concludedValue": "typenum",
+                "methods": [
+                  {
+                    "technique": "binary-analysis",
+                    "confidence": 0.95,
+                    "value": "typenum"
+                  },
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.9,
+                    "value": "typenum"
+                  }
+                ]
+              },
+              {
+                "field": "version",
+                "confidence": 0.95,
+                "concludedValue": "1.20.1",
+                "methods": [
+                  {
+                    "technique": "binary-analysis",
+                    "confidence": 0.95,
+                    "value": "1.20.1"
+                  },
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.9,
+                    "value": "1.20.1"
+                  }
+                ]
+              },
+              {
+                "field": "purl",
+                "confidence": 0.9,
+                "concludedValue": "pkg:cargo/typenum@1.20.1",
+                "methods": [
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.9,
+                    "value": "pkg:cargo/typenum@1.20.1"
+                  }
+                ]
+              }
+            ],
+            "occurrences": [
+              {
+                "location": "cargo-metadata.json"
+              },
+              {
+                "location": "firmware.elf"
+              }
+            ],
+            "licenses": [
+              {
+                "expression": "MIT OR Apache-2.0"
+              }
+            ]
+          },
+          "properties": [
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"licence\",\"technique\":\"manifest-analysis\",\"source\":\"cargo-metadata\",\"occurrence\":{\"location\":\"cargo-metadata.json\"},\"value\":\"MIT OR Apache-2.0\",\"confidence\":9000}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"name\",\"technique\":\"binary-analysis\",\"source\":\"cargo-auditable\",\"occurrence\":{\"location\":\"firmware.elf\"},\"value\":\"typenum\",\"confidence\":9500}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"name\",\"technique\":\"manifest-analysis\",\"source\":\"cargo-metadata\",\"occurrence\":{\"location\":\"cargo-metadata.json\"},\"value\":\"typenum\",\"confidence\":9000}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"purl\",\"technique\":\"manifest-analysis\",\"source\":\"cargo-metadata\",\"occurrence\":{\"location\":\"cargo-metadata.json\"},\"value\":\"pkg:cargo/typenum@1.20.1\",\"confidence\":9000}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"version\",\"technique\":\"binary-analysis\",\"source\":\"cargo-auditable\",\"occurrence\":{\"location\":\"firmware.elf\"},\"value\":\"1.20.1\",\"confidence\":9500}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"version\",\"technique\":\"manifest-analysis\",\"source\":\"cargo-metadata\",\"occurrence\":{\"location\":\"cargo-metadata.json\"},\"value\":\"1.20.1\",\"confidence\":9000}"
+            },
+            {
+              "name": "rollcall:evidence-source",
+              "value": "cargo-auditable"
+            },
+            {
+              "name": "rollcall:evidence-source",
+              "value": "cargo-metadata"
+            }
+          ]
+        },
+        {
+          "type": "library",
+          "bom-ref": "component:ccc4c691d5defc279dbcb57708ee8b38",
+          "name": "unicode-ident",
+          "version": "1.0.26",
+          "purl": "pkg:cargo/unicode-ident@1.0.26",
+          "licenses": [
+            {
+              "expression": "(MIT OR Apache-2.0) AND Unicode-3.0"
+            }
+          ],
+          "evidence": {
+            "identity": [
+              {
+                "field": "name",
+                "confidence": 0.95,
+                "concludedValue": "unicode-ident",
+                "methods": [
+                  {
+                    "technique": "binary-analysis",
+                    "confidence": 0.95,
+                    "value": "unicode-ident"
+                  },
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.9,
+                    "value": "unicode-ident"
+                  }
+                ]
+              },
+              {
+                "field": "version",
+                "confidence": 0.95,
+                "concludedValue": "1.0.26",
+                "methods": [
+                  {
+                    "technique": "binary-analysis",
+                    "confidence": 0.95,
+                    "value": "1.0.26"
+                  },
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.9,
+                    "value": "1.0.26"
+                  }
+                ]
+              },
+              {
+                "field": "purl",
+                "confidence": 0.9,
+                "concludedValue": "pkg:cargo/unicode-ident@1.0.26",
+                "methods": [
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.9,
+                    "value": "pkg:cargo/unicode-ident@1.0.26"
+                  }
+                ]
+              }
+            ],
+            "occurrences": [
+              {
+                "location": "cargo-metadata.json"
+              },
+              {
+                "location": "firmware.elf"
+              }
+            ],
+            "licenses": [
+              {
+                "expression": "(MIT OR Apache-2.0) AND Unicode-3.0"
+              }
+            ]
+          },
+          "properties": [
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"licence\",\"technique\":\"manifest-analysis\",\"source\":\"cargo-metadata\",\"occurrence\":{\"location\":\"cargo-metadata.json\"},\"value\":\"(MIT OR Apache-2.0) AND Unicode-3.0\",\"confidence\":9000}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"name\",\"technique\":\"binary-analysis\",\"source\":\"cargo-auditable\",\"occurrence\":{\"location\":\"firmware.elf\"},\"value\":\"unicode-ident\",\"confidence\":9500}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"name\",\"technique\":\"manifest-analysis\",\"source\":\"cargo-metadata\",\"occurrence\":{\"location\":\"cargo-metadata.json\"},\"value\":\"unicode-ident\",\"confidence\":9000}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"purl\",\"technique\":\"manifest-analysis\",\"source\":\"cargo-metadata\",\"occurrence\":{\"location\":\"cargo-metadata.json\"},\"value\":\"pkg:cargo/unicode-ident@1.0.26\",\"confidence\":9000}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"version\",\"technique\":\"binary-analysis\",\"source\":\"cargo-auditable\",\"occurrence\":{\"location\":\"firmware.elf\"},\"value\":\"1.0.26\",\"confidence\":9500}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"version\",\"technique\":\"manifest-analysis\",\"source\":\"cargo-metadata\",\"occurrence\":{\"location\":\"cargo-metadata.json\"},\"value\":\"1.0.26\",\"confidence\":9000}"
+            },
+            {
+              "name": "rollcall:evidence-source",
+              "value": "cargo-auditable"
+            },
+            {
+              "name": "rollcall:evidence-source",
+              "value": "cargo-metadata"
+            }
+          ]
+        },
+        {
+          "type": "library",
+          "bom-ref": "component:5c6a254bdd703d23debcc41780337b96",
+          "name": "version_check",
+          "version": "0.9.5",
+          "purl": "pkg:cargo/version_check@0.9.5",
+          "licenses": [
+            {
+              "expression": "MIT OR Apache-2.0"
+            }
+          ],
+          "evidence": {
+            "identity": [
+              {
+                "field": "name",
+                "confidence": 0.95,
+                "concludedValue": "version_check",
+                "methods": [
+                  {
+                    "technique": "binary-analysis",
+                    "confidence": 0.95,
+                    "value": "version_check"
+                  },
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.9,
+                    "value": "version_check"
+                  }
+                ]
+              },
+              {
+                "field": "version",
+                "confidence": 0.95,
+                "concludedValue": "0.9.5",
+                "methods": [
+                  {
+                    "technique": "binary-analysis",
+                    "confidence": 0.95,
+                    "value": "0.9.5"
+                  },
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.9,
+                    "value": "0.9.5"
+                  }
+                ]
+              },
+              {
+                "field": "purl",
+                "confidence": 0.9,
+                "concludedValue": "pkg:cargo/version_check@0.9.5",
+                "methods": [
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.9,
+                    "value": "pkg:cargo/version_check@0.9.5"
+                  }
+                ]
+              }
+            ],
+            "occurrences": [
+              {
+                "location": "cargo-metadata.json"
+              },
+              {
+                "location": "firmware.elf"
+              }
+            ],
+            "licenses": [
+              {
+                "license": {
+                  "name": "MIT/Apache-2.0"
+                }
+              }
+            ]
+          },
+          "properties": [
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"licence\",\"technique\":\"manifest-analysis\",\"source\":\"cargo-metadata\",\"occurrence\":{\"location\":\"cargo-metadata.json\"},\"value\":\"MIT/Apache-2.0\",\"confidence\":9000}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"name\",\"technique\":\"binary-analysis\",\"source\":\"cargo-auditable\",\"occurrence\":{\"location\":\"firmware.elf\"},\"value\":\"version_check\",\"confidence\":9500}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"name\",\"technique\":\"manifest-analysis\",\"source\":\"cargo-metadata\",\"occurrence\":{\"location\":\"cargo-metadata.json\"},\"value\":\"version_check\",\"confidence\":9000}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"purl\",\"technique\":\"manifest-analysis\",\"source\":\"cargo-metadata\",\"occurrence\":{\"location\":\"cargo-metadata.json\"},\"value\":\"pkg:cargo/version_check@0.9.5\",\"confidence\":9000}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"version\",\"technique\":\"binary-analysis\",\"source\":\"cargo-auditable\",\"occurrence\":{\"location\":\"firmware.elf\"},\"value\":\"0.9.5\",\"confidence\":9500}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"version\",\"technique\":\"manifest-analysis\",\"source\":\"cargo-metadata\",\"occurrence\":{\"location\":\"cargo-metadata.json\"},\"value\":\"0.9.5\",\"confidence\":9000}"
+            },
+            {
+              "name": "rollcall:evidence-source",
+              "value": "cargo-auditable"
+            },
+            {
+              "name": "rollcall:evidence-source",
+              "value": "cargo-metadata"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "dependencies": [
+    {
+      "ref": "product:025910dc6e8950b2d088876454222f3b",
+      "dependsOn": [
+        "image:ee56546c674398c3b784c9e25426961d"
+      ]
+    },
+    {
+      "ref": "image:ee56546c674398c3b784c9e25426961d",
+      "dependsOn": [
+        "component:70807de2ceaa2f884053b43556b14f7f",
+        "component:b328c03697d6fc786d3d17c7db33c7a2",
+        "component:fa9b7ff2166abf325df80969f4ce817d"
+      ]
+    },
+    {
+      "ref": "component:14548a6a108fc8c9e67e47c4793b30d9",
+      "dependsOn": [
+        "component:047bd8f84868a3e475a032811bc2fb09",
+        "component:222a2e91f4b6e95e4c2c22e54c436133",
+        "component:b0834b4e94eb68402738c7765f648f04",
+        "component:c5ae649c8dbd7c3acbedcd87e1a44e9d"
+      ]
+    },
+    {
+      "ref": "component:ad3a12ce4d2fc54e878022dab267b7ef",
+      "dependsOn": []
+    },
+    {
+      "ref": "component:70807de2ceaa2f884053b43556b14f7f",
+      "dependsOn": [
+        "component:3f65739f00c78eccf226d749e076ecc6"
+      ]
+    },
+    {
+      "ref": "component:3f65739f00c78eccf226d749e076ecc6",
+      "dependsOn": [
+        "component:34d4a92a06ca258c694895821bc055b7",
+        "component:85a2ef849bbfb93e295ff3048b4769ee",
+        "component:a4dfd65e3ada4ca75ae7cf3fbcc13cac"
+      ]
+    },
+    {
+      "ref": "component:c5ae649c8dbd7c3acbedcd87e1a44e9d",
+      "dependsOn": [
+        "component:56a2c3c5bba6f223d98b16ab81120e6c"
+      ]
+    },
+    {
+      "ref": "component:b0834b4e94eb68402738c7765f648f04",
+      "dependsOn": [
+        "component:56a2c3c5bba6f223d98b16ab81120e6c"
+      ]
+    },
+    {
+      "ref": "component:047bd8f84868a3e475a032811bc2fb09",
+      "dependsOn": [
+        "component:56a2c3c5bba6f223d98b16ab81120e6c",
+        "component:5c6a254bdd703d23debcc41780337b96"
+      ]
+    },
+    {
+      "ref": "component:76518544e025afd270c82b548bb190e8",
+      "dependsOn": [
+        "component:ad3a12ce4d2fc54e878022dab267b7ef"
+      ]
+    },
+    {
+      "ref": "component:b328c03697d6fc786d3d17c7db33c7a2",
+      "dependsOn": [
+        "component:14548a6a108fc8c9e67e47c4793b30d9",
+        "component:222a2e91f4b6e95e4c2c22e54c436133",
+        "component:76518544e025afd270c82b548bb190e8",
+        "component:b0834b4e94eb68402738c7765f648f04"
+      ]
+    },
+    {
+      "ref": "component:fa9b7ff2166abf325df80969f4ce817d",
+      "dependsOn": []
+    },
+    {
+      "ref": "component:34d4a92a06ca258c694895821bc055b7",
+      "dependsOn": [
+        "component:ccc4c691d5defc279dbcb57708ee8b38"
+      ]
+    },
+    {
+      "ref": "component:a4dfd65e3ada4ca75ae7cf3fbcc13cac",
+      "dependsOn": [
+        "component:34d4a92a06ca258c694895821bc055b7"
+      ]
+    },
+    {
+      "ref": "component:222a2e91f4b6e95e4c2c22e54c436133",
+      "dependsOn": []
+    },
+    {
+      "ref": "component:85a2ef849bbfb93e295ff3048b4769ee",
+      "dependsOn": [
+        "component:34d4a92a06ca258c694895821bc055b7",
+        "component:a4dfd65e3ada4ca75ae7cf3fbcc13cac",
+        "component:ccc4c691d5defc279dbcb57708ee8b38"
+      ]
+    },
+    {
+      "ref": "component:56a2c3c5bba6f223d98b16ab81120e6c",
+      "dependsOn": []
+    },
+    {
+      "ref": "component:ccc4c691d5defc279dbcb57708ee8b38",
+      "dependsOn": []
+    },
+    {
+      "ref": "component:5c6a254bdd703d23debcc41780337b96",
+      "dependsOn": []
+    }
+  ]
+}
