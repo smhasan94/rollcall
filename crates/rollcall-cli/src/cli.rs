@@ -497,8 +497,9 @@ pub struct ReportArgs {
     /// The CycloneDX 1.6 SBOM to report on (e.g. from `rollcall generate`)
     #[arg(value_name = "FILE")]
     pub file: PathBuf,
-    /// Scanner output for the SBOM: grype `-o json` or osv-scanner `--format json` (detected
-    /// from the content). Repeatable. Without it, vulnerabilities are not assessed
+    /// Scanner output for the SBOM: grype `-o json`, osv-scanner `--format json` or
+    /// `rollcall scan --json` (rollcall-scan/1; its VEX triage is not used, pass --vex)
+    /// (detected from the content). Repeatable. Without it, vulnerabilities are not assessed
     #[arg(long, value_name = "FILE")]
     pub scan: Vec<PathBuf>,
     /// VEX statements for the SBOM: `rollcall vex` output in any format (rollcall-vex/1,

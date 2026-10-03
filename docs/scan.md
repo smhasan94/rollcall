@@ -116,6 +116,9 @@ no host paths (a VEX document is cited by its file name), so two runs with the s
 databases diff cleanly. On exit 3 the report is still printed, with what the other scanners
 found.
 
+`rollcall report --scan` reads this JSON too (see [report.md](report.md)); it closes
+findings only with its own `--vex`, not with the scan's triage.
+
 ## Exit codes
 
 | Exit | Meaning |

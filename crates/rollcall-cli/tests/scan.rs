@@ -866,3 +866,35 @@ fn table_escapes_control_characters_from_scanner_output() {
     assert!(!text.contains('\u{1b}'), "{text:?}");
     assert!(text.contains("9.9\\u{1b}[2J"), "{text}");
 }
+
+#[test]
+fn report_reads_scan_json_like_raw_scanner_output() {
+    let (env, sbom) = old_mbedtls_env();
+    let out = env.scan(&sbom, &["--json"]);
+    assert_eq!(code(&out), 0, "{}", stderr(&out));
+    let scan_json = env.path("scan.json");
+    std::fs::write(&scan_json, &out.stdout).unwrap();
+    let grype = env.write_json("grype.json", &capture("old-mbedtls.grype.json"));
+    let osv = env.write_json("osv.json", &capture("old-mbedtls.osv.json"));
+    let report = |scans: &[&Path], format: &str| {
+        let mut cmd = rollcall();
+        cmd.arg("report")
+            .arg(&sbom)
+            .args(["--format", format, "--timestamp", GOLDEN_TIMESTAMP, "--vex"])
+            .arg(golden_openvex());
+        for scan in scans {
+            cmd.arg("--scan").arg(scan);
+        }
+        let out = cmd.output().unwrap();
+        assert_eq!(code(&out), 0, "{}", stderr(&out));
+        assert!(stderr(&out).is_empty(), "{}", stderr(&out));
+        stdout(&out)
+    };
+    for format in ["json", "md"] {
+        assert_eq!(
+            report(&[&scan_json], format),
+            report(&[&grype, &osv], format),
+            "--format {format}"
+        );
+    }
+}
