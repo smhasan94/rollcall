@@ -17,6 +17,7 @@ internal `rollcall-model/1` JSON form) the same way; and `rollcall validate --sc
 document against the official CycloneDX 1.6 JSON schema, and `--profile` against the CISA 2026
 and EU CRA SBOM profiles. `rollcall vex` triages grype or
 osv-scanner findings for an SBOM with VEX rules and Kconfig evidence (see [VEX rules](#vex-rules)).
+`rollcall report` writes a readiness report for an SBOM (see [Readiness report](#readiness-report)).
 `scan` and `assay` are not implemented yet; they print `not implemented` and exit 64. The 0.0.1 releases of `rollcall`,
 `rollcall-core`, `rollcall-cli` and `rollcall-assay` on crates.io and `rollcall` on PyPI are
 placeholders that reserve the names.
@@ -44,6 +45,7 @@ placeholders that reserve the names.
 | `rollcall scan`     | Scan an SBOM for known vulnerabilities                                   |
 | `rollcall assay`    | Produce a CycloneDX CBOM (cryptographic inventory) for a build           |
 | `rollcall identifiers` | Inspect and lint the identifier database                              |
+| `rollcall report`   | Produce a readiness report (Markdown or JSON) for an SBOM                |
 
 ## Usage
 
@@ -469,17 +471,42 @@ grype (verified with 0.119.0) silently ignores CycloneDX components of type
 them for vulnerabilities. rollcall labels components accurately anyway: how an RTOS kernel
 such as Zephyr is typed is decided at ingestion. osv-scanner is unaffected.
 
+## Readiness report
+
+`rollcall report` says how ready an SBOM is to hand over, as Markdown for people
+(`--format md`) or `rollcall-report/1` JSON for machines (`--format json`, schema
+[`docs/report-schema.json`](docs/report-schema.json)):
+
+```sh
+rollcall generate --zephyr build --sysbuild --west-list west-list.txt --identify -o product.cdx.json
+rollcall report product.cdx.json --format md \
+  --scan grype.json --vex vex.cdx.json --timestamp 2026-01-02T03:04:05Z -o report.md
+```
+
+It opens with a plain-language summary, then gives a score out of 100, coverage (the share
+of the product, images and components with a PURL, CPE, hash and licence), one row per
+component, unresolved modules with a paste-ready identifier-database stub each, open
+findings by severity (`--scan`: grype or osv-scanner JSON, repeatable), VEX coverage
+(`--vex`: any `rollcall vex` output format, repeatable), and the CycloneDX schema and
+`cisa-2026`/`cra` profile results. The score is integer basis points rounded down, so only
+a perfect SBOM scores 100: identified 25, hashed 15, licensed 15, validation 25, modules
+resolved 10, vulnerabilities closed 10 (not assessed without `--scan`, and left out of the
+total). [`docs/report.md`](docs/report.md) documents the formula and every input. The output
+is deterministic and leaves out the SBOM's serial number, timestamp and the input paths, so
+two builds' reports diff cleanly. The exit code is 0 whenever a report is written, whatever
+the score.
+
 ## Exit codes
 
 | Code | Meaning                                                                  |
 |------|--------------------------------------------------------------------------|
 | 0    | Success (including `--help`, `--version`)                                |
 | 1    | `validate`: the document has schema violations or error-severity profile findings; `vex verify`: the signature does not verify; `identifiers lint`: the database has findings |
-| 64   | Usage error (bad arguments, `validate` without `--schema` or `--profile` or with an unknown profile name, bad `--timestamp`, `--serial-number` or `--product`, `merge --blob-manifest` without inputs or `--product`, a `vex --kconfig` that names no image of the product, names one twice, or omits `IMAGE=` for a multi-image product; `vex` flags that do not combine, such as `--embed` without `--format cyclonedx`, `--format cyclonedx` without `--sbom`, or `--sign` without `-o`), or subcommand/format not implemented |
-| 65   | Input is malformed: not JSON, not UTF-8, too deeply nested, or an invalid model; or a Zephyr input (SPDX, `west list`, `.config`, `build_info.yml`) or the identifier database (`--identifier-db`, `--identifiers`, `$ROLLCALL_IDENTIFIERS`, also for `--version`) is malformed or has a `db_version` this rollcall does not accept, or `--zephyr` names a sysbuild top-level directory without `--sysbuild` (or an image directory with it); or a `merge` input is not a readable CycloneDX 1.6 document, the inputs conflict (including different product names or versions without `--product`), or the blob manifest is malformed; or a `vex` input (SBOM, model, `--kconfig`, findings, rules, signing key, signature file) is malformed, with `file:line:column` for rules, or the SBOM cannot take the requested VEX output (no `serialNumber` for `--format cyclonedx`, a `serialNumber` that is not a lowercase `urn:uuid:` or a `version` below 1, a non-empty `vulnerabilities` for `--embed`); or a `validate --profile` file is malformed |
-| 66   | Input file missing or unreadable (including a directory), including a required Zephyr input, the `--west-list` file or an explicit identifier database (`--identifier-db`, `--identifiers` or `$ROLLCALL_IDENTIFIERS`, also for `--version`), a `merge` input, the blob manifest or a blob it lists, a `vex` input, or a `validate --profile` file |
+| 64   | Usage error (bad arguments, `validate` without `--schema` or `--profile` or with an unknown profile name, bad `--timestamp`, `--serial-number` or `--product`, `report` without `--format`, `merge --blob-manifest` without inputs or `--product`, a `vex --kconfig` that names no image of the product, names one twice, or omits `IMAGE=` for a multi-image product; `vex` flags that do not combine, such as `--embed` without `--format cyclonedx`, `--format cyclonedx` without `--sbom`, or `--sign` without `-o`), or subcommand/format not implemented |
+| 65   | Input is malformed: not JSON, not UTF-8, too deeply nested, or an invalid model; or a Zephyr input (SPDX, `west list`, `.config`, `build_info.yml`) or the identifier database (`--identifier-db`, `--identifiers`, `$ROLLCALL_IDENTIFIERS`, also for `--version`) is malformed or has a `db_version` this rollcall does not accept, or `--zephyr` names a sysbuild top-level directory without `--sysbuild` (or an image directory with it); or a `merge` input is not a readable CycloneDX 1.6 document, the inputs conflict (including different product names or versions without `--product`), or the blob manifest is malformed; or a `vex` input (SBOM, model, `--kconfig`, findings, rules, signing key, signature file) is malformed, with `file:line:column` for rules, or the SBOM cannot take the requested VEX output (no `serialNumber` for `--format cyclonedx`, a `serialNumber` that is not a lowercase `urn:uuid:` or a `version` below 1, a non-empty `vulnerabilities` for `--embed`); or a `validate --profile` file is malformed; or a `report` input (the SBOM, a `--scan` or a `--vex` file) is malformed or not a format it reads |
+| 66   | Input file missing or unreadable (including a directory), including a required Zephyr input, the `--west-list` file or an explicit identifier database (`--identifier-db`, `--identifiers` or `$ROLLCALL_IDENTIFIERS`, also for `--version`), a `merge` input, the blob manifest or a blob it lists, a `vex` input, a `report` input, or a `validate --profile` file |
 | 69   | `vex --sign cosign` / `vex verify --cosign`: cosign is not installed, or keyless signing failed (no OIDC identity) |
-| 70   | Internal error (`vex`, `validate --json`: the report cannot be serialised) |
+| 70   | Internal error (`vex`, `validate --json`, `report --format json`: the report cannot be serialised) |
 | 74   | Output cannot be written                                                 |
 
 ## CycloneDX schema

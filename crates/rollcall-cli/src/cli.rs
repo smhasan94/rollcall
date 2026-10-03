@@ -70,6 +70,8 @@ pub enum Command {
     Assay,
     /// Inspect and lint the identifier database
     Identifiers(IdentifiersArgs),
+    /// Produce a readiness report (Markdown or JSON) for an SBOM
+    Report(ReportArgs),
 }
 
 impl Command {
@@ -83,6 +85,7 @@ impl Command {
             Command::Scan => "scan",
             Command::Assay => "assay",
             Command::Identifiers(_) => "identifiers",
+            Command::Report(_) => "report",
         }
     }
 }
@@ -400,4 +403,40 @@ pub struct LintArgs {
     /// version)
     #[arg(long, value_name = "VERSION", value_parser = DbVersion::from_str)]
     pub expect_version: Option<DbVersion>,
+}
+
+/// Output formats for `rollcall report`.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, ValueEnum)]
+pub enum ReportFormat {
+    /// GitHub-flavoured Markdown, for people.
+    Md,
+    /// `rollcall-report/1` JSON (docs/report-schema.json), for machines.
+    Json,
+}
+
+/// Arguments of `rollcall report`.
+#[derive(Debug, Args)]
+pub struct ReportArgs {
+    /// The CycloneDX 1.6 SBOM to report on (e.g. from `rollcall generate`)
+    #[arg(value_name = "FILE")]
+    pub file: PathBuf,
+    /// Scanner output for the SBOM: grype `-o json` or osv-scanner `--format json` (detected
+    /// from the content). Repeatable. Without it, vulnerabilities are not assessed
+    #[arg(long, value_name = "FILE")]
+    pub scan: Vec<PathBuf>,
+    /// VEX statements for the SBOM: `rollcall vex` output in any format (rollcall-vex/1,
+    /// OpenVEX, CycloneDX VEX, or an SBOM with --embed'ed vulnerabilities; detected from the
+    /// content). Repeatable
+    #[arg(long, value_name = "FILE")]
+    pub vex: Vec<PathBuf>,
+    /// Output format
+    #[arg(long, value_enum)]
+    pub format: ReportFormat,
+    /// Report timestamp, RFC 3339 (e.g. 2026-01-02T03:04:05Z); normalised to UTC. Defaults
+    /// to the current time
+    #[arg(long, value_name = "RFC3339", value_parser = Timestamp::from_str)]
+    pub timestamp: Option<Timestamp>,
+    /// Write the report here instead of to stdout
+    #[arg(short, long, value_name = "FILE")]
+    pub output: Option<PathBuf>,
 }

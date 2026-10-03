@@ -1,0 +1,199 @@
+{
+  "schema": "rollcall-report/1",
+  "generated": "2026-01-02T03:04:05Z",
+  "tool": {
+    "name": "rollcall",
+    "version": "0.0.1"
+  },
+  "product": {
+    "name": "blobs-demo",
+    "version": "1.0.0"
+  },
+  "summary": "This report checks how ready the software bill of materials (SBOM) of blobs-demo 1.0.0 is to hand to a customer or regulator. Its readiness score is 51 out of 100. The SBOM lists 3 items in total: the product, 2 firmware images and 0 software components. 1 of them carry an identifier (a PURL or CPE) that vulnerability databases can match, 2 a file hash that proves exactly which file was shipped, and 2 a licence. No unresolved modules. The SBOM is valid CycloneDX 1.6; the CISA 2026 and EU Cyber Resilience Act checks found 4 problems to fix and 0 recommendations. No vulnerability scan was supplied, so known vulnerabilities were not checked and are not part of the score.",
+  "score": {
+    "value": 51,
+    "basis_points": 5185,
+    "weight_assessed": 90,
+    "scan_supplied": false,
+    "categories": [
+      {
+        "id": "identified",
+        "weight": 25,
+        "assessed": true,
+        "numerator": 1,
+        "denominator": 3,
+        "earned": 83333
+      },
+      {
+        "id": "hashed",
+        "weight": 15,
+        "assessed": true,
+        "numerator": 2,
+        "denominator": 3,
+        "earned": 100000
+      },
+      {
+        "id": "licensed",
+        "weight": 15,
+        "assessed": true,
+        "numerator": 2,
+        "denominator": 3,
+        "earned": 100000
+      },
+      {
+        "id": "validation",
+        "weight": 25,
+        "assessed": true,
+        "numerator": 1,
+        "denominator": 3,
+        "earned": 83333
+      },
+      {
+        "id": "modules",
+        "weight": 10,
+        "assessed": true,
+        "numerator": 0,
+        "denominator": 0,
+        "earned": 100000
+      },
+      {
+        "id": "vulnerabilities",
+        "weight": 10,
+        "assessed": false,
+        "numerator": 0,
+        "denominator": 0,
+        "earned": 0
+      }
+    ]
+  },
+  "coverage": {
+    "nodes": 3,
+    "purl": {
+      "count": 1,
+      "basis_points": 3333
+    },
+    "cpe": {
+      "count": 0,
+      "basis_points": 0
+    },
+    "identified": {
+      "count": 1,
+      "basis_points": 3333
+    },
+    "hash": {
+      "count": 2,
+      "basis_points": 6666
+    },
+    "licence": {
+      "count": 2,
+      "basis_points": 6666
+    }
+  },
+  "components": [
+    {
+      "level": "product",
+      "path": "blobs-demo",
+      "type": "firmware",
+      "name": "blobs-demo",
+      "version": "1.0.0",
+      "bom_ref": "product:125ed3bbbd0b373a6dc19ed32f485e51",
+      "purl": false,
+      "cpe": false,
+      "hash": false,
+      "licence": false
+    },
+    {
+      "level": "image",
+      "path": "libphy",
+      "type": "library",
+      "name": "libphy",
+      "version": "5.2.1",
+      "bom_ref": "image:4e2950b4e2f76422443048196f305245",
+      "purl": true,
+      "cpe": false,
+      "hash": true,
+      "licence": true
+    },
+    {
+      "level": "image",
+      "path": "s140_nrf52_softdevice",
+      "type": "firmware",
+      "name": "s140_nrf52_softdevice",
+      "version": "7.3.0",
+      "bom_ref": "image:7c3595fcc41645fe961735eb6eeab222",
+      "purl": false,
+      "cpe": false,
+      "hash": true,
+      "licence": true
+    }
+  ],
+  "unresolved": [],
+  "findings": null,
+  "vex": null,
+  "validation": {
+    "schema": {
+      "valid": true,
+      "violations": []
+    },
+    "profiles": {
+      "profiles": [
+        "cisa-2026",
+        "cra"
+      ],
+      "passed": false,
+      "errors": 4,
+      "warnings": 0,
+      "findings": [
+        {
+          "check": "component.hash",
+          "severity": "error",
+          "profiles": [
+            "cisa-2026",
+            "cra"
+          ],
+          "component": "blobs-demo",
+          "level": "product",
+          "pointer": null,
+          "message": "no hash"
+        },
+        {
+          "check": "component.identifier",
+          "severity": "error",
+          "profiles": [
+            "cisa-2026",
+            "cra"
+          ],
+          "component": "blobs-demo",
+          "level": "product",
+          "pointer": null,
+          "message": "no unique identifier (cpe, purl missing)"
+        },
+        {
+          "check": "component.supplier",
+          "severity": "error",
+          "profiles": [
+            "cisa-2026",
+            "cra"
+          ],
+          "component": "blobs-demo",
+          "level": "product",
+          "pointer": null,
+          "message": "no supplier (manufacturer.name and supplier.name missing)"
+        },
+        {
+          "check": "component.identifier",
+          "severity": "error",
+          "profiles": [
+            "cisa-2026",
+            "cra"
+          ],
+          "component": "s140_nrf52_softdevice",
+          "level": "image",
+          "pointer": null,
+          "message": "no unique identifier (cpe, purl missing)"
+        }
+      ]
+    }
+  },
+  "warnings": []
+}

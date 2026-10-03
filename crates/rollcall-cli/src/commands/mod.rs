@@ -4,6 +4,7 @@ pub mod generate;
 pub mod identifiers;
 pub mod merge;
 pub mod output;
+pub mod report;
 pub mod validate;
 pub mod version;
 pub mod vex;

@@ -1,0 +1,605 @@
+{
+  "schema": "rollcall-report/1",
+  "generated": "2026-01-02T03:04:05Z",
+  "tool": {
+    "name": "rollcall",
+    "version": "0.0.1"
+  },
+  "product": {
+    "name": "old-tls-node",
+    "version": "1.0.0"
+  },
+  "summary": "This report checks how ready the software bill of materials (SBOM) of old-tls-node 1.0.0 is to hand to a customer or regulator. Its readiness score is 31 out of 100. The SBOM lists 4 items in total: the product, 1 firmware image and 2 software components. 2 of them carry an identifier (a PURL or CPE) that vulnerability databases can match, 0 a file hash that proves exactly which file was shipped, and 2 a licence. No unresolved modules. The SBOM is valid CycloneDX 1.6; the CISA 2026 and EU Cyber Resilience Act checks found 14 problems to fix and 0 recommendations. A vulnerability scan was supplied: 23 known vulnerabilities affect this product's components; 20 are still open (3 critical, 8 high) and 3 closed by VEX statements (not affected or fixed).",
+  "score": {
+    "value": 31,
+    "basis_points": 3130,
+    "weight_assessed": 100,
+    "scan_supplied": true,
+    "categories": [
+      {
+        "id": "identified",
+        "weight": 25,
+        "assessed": true,
+        "numerator": 2,
+        "denominator": 4,
+        "earned": 125000
+      },
+      {
+        "id": "hashed",
+        "weight": 15,
+        "assessed": true,
+        "numerator": 0,
+        "denominator": 4,
+        "earned": 0
+      },
+      {
+        "id": "licensed",
+        "weight": 15,
+        "assessed": true,
+        "numerator": 2,
+        "denominator": 4,
+        "earned": 75000
+      },
+      {
+        "id": "validation",
+        "weight": 25,
+        "assessed": true,
+        "numerator": 0,
+        "denominator": 4,
+        "earned": 0
+      },
+      {
+        "id": "modules",
+        "weight": 10,
+        "assessed": true,
+        "numerator": 0,
+        "denominator": 0,
+        "earned": 100000
+      },
+      {
+        "id": "vulnerabilities",
+        "weight": 10,
+        "assessed": true,
+        "numerator": 3,
+        "denominator": 23,
+        "earned": 13043
+      }
+    ]
+  },
+  "coverage": {
+    "nodes": 4,
+    "purl": {
+      "count": 2,
+      "basis_points": 5000
+    },
+    "cpe": {
+      "count": 2,
+      "basis_points": 5000
+    },
+    "identified": {
+      "count": 2,
+      "basis_points": 5000
+    },
+    "hash": {
+      "count": 0,
+      "basis_points": 0
+    },
+    "licence": {
+      "count": 2,
+      "basis_points": 5000
+    }
+  },
+  "components": [
+    {
+      "level": "product",
+      "path": "old-tls-node",
+      "type": "firmware",
+      "name": "old-tls-node",
+      "version": "1.0.0",
+      "bom_ref": "product:cb91904541becd528b35755f21604693",
+      "purl": false,
+      "cpe": false,
+      "hash": false,
+      "licence": false
+    },
+    {
+      "level": "image",
+      "path": "old-tls-app",
+      "type": "firmware",
+      "name": "old-tls-app",
+      "version": "1.0.0",
+      "bom_ref": "image:be3761a0a392e54d71f0486a3a1ee0e4",
+      "purl": false,
+      "cpe": false,
+      "hash": false,
+      "licence": false
+    },
+    {
+      "level": "component",
+      "path": "old-tls-app / mbedtls",
+      "type": "library",
+      "name": "mbedtls",
+      "version": "2.28.0",
+      "bom_ref": "component:9404b57b22a8bf72df5b6d6c93f4defd",
+      "purl": true,
+      "cpe": true,
+      "hash": false,
+      "licence": true
+    },
+    {
+      "level": "component",
+      "path": "old-tls-app / zephyr",
+      "type": "operating-system",
+      "name": "zephyr",
+      "version": "3.7.0",
+      "bom_ref": "component:6caab9ee8bc7b61fc5c32954f127d553",
+      "purl": true,
+      "cpe": true,
+      "hash": false,
+      "licence": true
+    }
+  ],
+  "unresolved": [],
+  "findings": {
+    "total": 23,
+    "in_sbom": 23,
+    "not_in_sbom": 0,
+    "open": 20,
+    "closed": 3,
+    "open_by_severity": {
+      "critical": 3,
+      "high": 8,
+      "medium": 9,
+      "low": 0,
+      "unknown": 0
+    },
+    "items": [
+      {
+        "id": "CVE-2022-35409",
+        "aliases": [],
+        "severity": "critical",
+        "scanner_severity": "Critical",
+        "component": "old-tls-app / mbedtls",
+        "bom_ref": "component:9404b57b22a8bf72df5b6d6c93f4defd",
+        "package": "pkg:github/mbed-tls/mbedtls@v2.28.0",
+        "status": "closed",
+        "vex_status": "not_affected"
+      },
+      {
+        "id": "CVE-2022-46393",
+        "aliases": [],
+        "severity": "critical",
+        "scanner_severity": "Critical",
+        "component": "old-tls-app / mbedtls",
+        "bom_ref": "component:9404b57b22a8bf72df5b6d6c93f4defd",
+        "package": "pkg:github/mbed-tls/mbedtls@v2.28.0",
+        "status": "closed",
+        "vex_status": "not_affected"
+      },
+      {
+        "id": "CVE-2025-47917",
+        "aliases": [],
+        "severity": "critical",
+        "scanner_severity": "Critical",
+        "component": "old-tls-app / mbedtls",
+        "bom_ref": "component:9404b57b22a8bf72df5b6d6c93f4defd",
+        "package": "pkg:github/mbed-tls/mbedtls@v2.28.0",
+        "status": "open",
+        "vex_status": "under_investigation"
+      },
+      {
+        "id": "CVE-2026-34872",
+        "aliases": [],
+        "severity": "critical",
+        "scanner_severity": "Critical",
+        "component": "old-tls-app / mbedtls",
+        "bom_ref": "component:9404b57b22a8bf72df5b6d6c93f4defd",
+        "package": "pkg:github/mbed-tls/mbedtls@v2.28.0",
+        "status": "open",
+        "vex_status": "under_investigation"
+      },
+      {
+        "id": "CVE-2026-34877",
+        "aliases": [],
+        "severity": "critical",
+        "scanner_severity": "Critical",
+        "component": "old-tls-app / mbedtls",
+        "bom_ref": "component:9404b57b22a8bf72df5b6d6c93f4defd",
+        "package": "pkg:github/mbed-tls/mbedtls@v2.28.0",
+        "status": "open",
+        "vex_status": "under_investigation"
+      },
+      {
+        "id": "CVE-2021-43666",
+        "aliases": [],
+        "severity": "high",
+        "scanner_severity": "High",
+        "component": "old-tls-app / mbedtls",
+        "bom_ref": "component:9404b57b22a8bf72df5b6d6c93f4defd",
+        "package": "pkg:github/mbed-tls/mbedtls@v2.28.0",
+        "status": "open",
+        "vex_status": null
+      },
+      {
+        "id": "CVE-2021-45451",
+        "aliases": [],
+        "severity": "high",
+        "scanner_severity": "High",
+        "component": "old-tls-app / mbedtls",
+        "bom_ref": "component:9404b57b22a8bf72df5b6d6c93f4defd",
+        "package": "pkg:github/mbed-tls/mbedtls@v2.28.0",
+        "status": "open",
+        "vex_status": "under_investigation"
+      },
+      {
+        "id": "CVE-2023-43615",
+        "aliases": [],
+        "severity": "high",
+        "scanner_severity": "High",
+        "component": "old-tls-app / mbedtls",
+        "bom_ref": "component:9404b57b22a8bf72df5b6d6c93f4defd",
+        "package": "pkg:github/mbed-tls/mbedtls@v2.28.0",
+        "status": "open",
+        "vex_status": "under_investigation"
+      },
+      {
+        "id": "CVE-2023-52353",
+        "aliases": [],
+        "severity": "high",
+        "scanner_severity": "High",
+        "component": "old-tls-app / mbedtls",
+        "bom_ref": "component:9404b57b22a8bf72df5b6d6c93f4defd",
+        "package": "pkg:github/mbed-tls/mbedtls@v2.28.0",
+        "status": "open",
+        "vex_status": "under_investigation"
+      },
+      {
+        "id": "CVE-2024-23775",
+        "aliases": [],
+        "severity": "high",
+        "scanner_severity": "High",
+        "component": "old-tls-app / mbedtls",
+        "bom_ref": "component:9404b57b22a8bf72df5b6d6c93f4defd",
+        "package": "pkg:github/mbed-tls/mbedtls@v2.28.0",
+        "status": "closed",
+        "vex_status": "not_affected"
+      },
+      {
+        "id": "CVE-2024-28960",
+        "aliases": [],
+        "severity": "high",
+        "scanner_severity": "High",
+        "component": "old-tls-app / mbedtls",
+        "bom_ref": "component:9404b57b22a8bf72df5b6d6c93f4defd",
+        "package": "pkg:github/mbed-tls/mbedtls@v2.28.0",
+        "status": "open",
+        "vex_status": "under_investigation"
+      },
+      {
+        "id": "CVE-2025-48965",
+        "aliases": [],
+        "severity": "high",
+        "scanner_severity": "High",
+        "component": "old-tls-app / mbedtls",
+        "bom_ref": "component:9404b57b22a8bf72df5b6d6c93f4defd",
+        "package": "pkg:github/mbed-tls/mbedtls@v2.28.0",
+        "status": "open",
+        "vex_status": "under_investigation"
+      },
+      {
+        "id": "CVE-2025-52496",
+        "aliases": [],
+        "severity": "high",
+        "scanner_severity": "High",
+        "component": "old-tls-app / mbedtls",
+        "bom_ref": "component:9404b57b22a8bf72df5b6d6c93f4defd",
+        "package": "pkg:github/mbed-tls/mbedtls@v2.28.0",
+        "status": "open",
+        "vex_status": "under_investigation"
+      },
+      {
+        "id": "CVE-2026-25835",
+        "aliases": [],
+        "severity": "high",
+        "scanner_severity": "High",
+        "component": "old-tls-app / mbedtls",
+        "bom_ref": "component:9404b57b22a8bf72df5b6d6c93f4defd",
+        "package": "pkg:github/mbed-tls/mbedtls@v2.28.0",
+        "status": "open",
+        "vex_status": "under_investigation"
+      },
+      {
+        "id": "CVE-2022-46392",
+        "aliases": [],
+        "severity": "medium",
+        "scanner_severity": "Medium",
+        "component": "old-tls-app / mbedtls",
+        "bom_ref": "component:9404b57b22a8bf72df5b6d6c93f4defd",
+        "package": "pkg:github/mbed-tls/mbedtls@v2.28.0",
+        "status": "open",
+        "vex_status": "affected"
+      },
+      {
+        "id": "CVE-2024-23170",
+        "aliases": [],
+        "severity": "medium",
+        "scanner_severity": "Medium",
+        "component": "old-tls-app / mbedtls",
+        "bom_ref": "component:9404b57b22a8bf72df5b6d6c93f4defd",
+        "package": "pkg:github/mbed-tls/mbedtls@v2.28.0",
+        "status": "open",
+        "vex_status": "under_investigation"
+      },
+      {
+        "id": "CVE-2025-27809",
+        "aliases": [],
+        "severity": "medium",
+        "scanner_severity": "Medium",
+        "component": "old-tls-app / mbedtls",
+        "bom_ref": "component:9404b57b22a8bf72df5b6d6c93f4defd",
+        "package": "pkg:github/mbed-tls/mbedtls@v2.28.0",
+        "status": "open",
+        "vex_status": "under_investigation"
+      },
+      {
+        "id": "CVE-2025-27810",
+        "aliases": [],
+        "severity": "medium",
+        "scanner_severity": "Medium",
+        "component": "old-tls-app / mbedtls",
+        "bom_ref": "component:9404b57b22a8bf72df5b6d6c93f4defd",
+        "package": "pkg:github/mbed-tls/mbedtls@v2.28.0",
+        "status": "open",
+        "vex_status": "under_investigation"
+      },
+      {
+        "id": "CVE-2025-52497",
+        "aliases": [],
+        "severity": "medium",
+        "scanner_severity": "Medium",
+        "component": "old-tls-app / mbedtls",
+        "bom_ref": "component:9404b57b22a8bf72df5b6d6c93f4defd",
+        "package": "pkg:github/mbed-tls/mbedtls@v2.28.0",
+        "status": "open",
+        "vex_status": "under_investigation"
+      },
+      {
+        "id": "CVE-2025-54764",
+        "aliases": [],
+        "severity": "medium",
+        "scanner_severity": "Medium",
+        "component": "old-tls-app / mbedtls",
+        "bom_ref": "component:9404b57b22a8bf72df5b6d6c93f4defd",
+        "package": "pkg:github/mbed-tls/mbedtls@v2.28.0",
+        "status": "open",
+        "vex_status": "under_investigation"
+      },
+      {
+        "id": "CVE-2025-59438",
+        "aliases": [],
+        "severity": "medium",
+        "scanner_severity": "Medium",
+        "component": "old-tls-app / mbedtls",
+        "bom_ref": "component:9404b57b22a8bf72df5b6d6c93f4defd",
+        "package": "pkg:github/mbed-tls/mbedtls@v2.28.0",
+        "status": "open",
+        "vex_status": "under_investigation"
+      },
+      {
+        "id": "CVE-2025-66442",
+        "aliases": [],
+        "severity": "medium",
+        "scanner_severity": "Medium",
+        "component": "old-tls-app / mbedtls",
+        "bom_ref": "component:9404b57b22a8bf72df5b6d6c93f4defd",
+        "package": "pkg:github/mbed-tls/mbedtls@v2.28.0",
+        "status": "open",
+        "vex_status": "under_investigation"
+      },
+      {
+        "id": "CVE-2026-34871",
+        "aliases": [],
+        "severity": "medium",
+        "scanner_severity": "Medium",
+        "component": "old-tls-app / mbedtls",
+        "bom_ref": "component:9404b57b22a8bf72df5b6d6c93f4defd",
+        "package": "pkg:github/mbed-tls/mbedtls@v2.28.0",
+        "status": "open",
+        "vex_status": "under_investigation"
+      }
+    ]
+  },
+  "vex": {
+    "statements": 22,
+    "unmatched_statements": 0,
+    "findings_covered": {
+      "count": 22,
+      "basis_points": 9565
+    }
+  },
+  "validation": {
+    "schema": {
+      "valid": true,
+      "violations": []
+    },
+    "profiles": {
+      "profiles": [
+        "cisa-2026",
+        "cra"
+      ],
+      "passed": false,
+      "errors": 14,
+      "warnings": 0,
+      "findings": [
+        {
+          "check": "component.hash",
+          "severity": "error",
+          "profiles": [
+            "cisa-2026",
+            "cra"
+          ],
+          "component": "old-tls-node",
+          "level": "product",
+          "pointer": null,
+          "message": "no hash"
+        },
+        {
+          "check": "component.identifier",
+          "severity": "error",
+          "profiles": [
+            "cisa-2026",
+            "cra"
+          ],
+          "component": "old-tls-node",
+          "level": "product",
+          "pointer": null,
+          "message": "no unique identifier (cpe, purl missing)"
+        },
+        {
+          "check": "component.supplier",
+          "severity": "error",
+          "profiles": [
+            "cisa-2026",
+            "cra"
+          ],
+          "component": "old-tls-node",
+          "level": "product",
+          "pointer": null,
+          "message": "no supplier (manufacturer.name and supplier.name missing)"
+        },
+        {
+          "check": "component.hash",
+          "severity": "error",
+          "profiles": [
+            "cisa-2026",
+            "cra"
+          ],
+          "component": "old-tls-app",
+          "level": "image",
+          "pointer": null,
+          "message": "no hash"
+        },
+        {
+          "check": "component.identifier",
+          "severity": "error",
+          "profiles": [
+            "cisa-2026",
+            "cra"
+          ],
+          "component": "old-tls-app",
+          "level": "image",
+          "pointer": null,
+          "message": "no unique identifier (cpe, purl missing)"
+        },
+        {
+          "check": "component.supplier",
+          "severity": "error",
+          "profiles": [
+            "cisa-2026",
+            "cra"
+          ],
+          "component": "old-tls-app",
+          "level": "image",
+          "pointer": null,
+          "message": "no supplier (manufacturer.name and supplier.name missing)"
+        },
+        {
+          "check": "graph.reachable",
+          "severity": "error",
+          "profiles": [
+            "cisa-2026",
+            "cra"
+          ],
+          "component": "old-tls-app",
+          "level": "image",
+          "pointer": null,
+          "message": "not reachable from the root product:cb91904541becd528b35755f21604693 through dependencies or nesting"
+        },
+        {
+          "check": "graph.top-level-complete",
+          "severity": "error",
+          "profiles": [
+            "cra"
+          ],
+          "component": "old-tls-app",
+          "level": "image",
+          "pointer": null,
+          "message": "top-level component is not listed in the root's dependsOn"
+        },
+        {
+          "check": "component.hash",
+          "severity": "error",
+          "profiles": [
+            "cisa-2026",
+            "cra"
+          ],
+          "component": "old-tls-app / mbedtls",
+          "level": "component",
+          "pointer": null,
+          "message": "no hash"
+        },
+        {
+          "check": "component.supplier",
+          "severity": "error",
+          "profiles": [
+            "cisa-2026",
+            "cra"
+          ],
+          "component": "old-tls-app / mbedtls",
+          "level": "component",
+          "pointer": null,
+          "message": "no supplier (manufacturer.name and supplier.name missing)"
+        },
+        {
+          "check": "graph.reachable",
+          "severity": "error",
+          "profiles": [
+            "cisa-2026",
+            "cra"
+          ],
+          "component": "old-tls-app / mbedtls",
+          "level": "component",
+          "pointer": null,
+          "message": "not reachable from the root product:cb91904541becd528b35755f21604693 through dependencies or nesting"
+        },
+        {
+          "check": "component.hash",
+          "severity": "error",
+          "profiles": [
+            "cisa-2026",
+            "cra"
+          ],
+          "component": "old-tls-app / zephyr",
+          "level": "component",
+          "pointer": null,
+          "message": "no hash"
+        },
+        {
+          "check": "component.supplier",
+          "severity": "error",
+          "profiles": [
+            "cisa-2026",
+            "cra"
+          ],
+          "component": "old-tls-app / zephyr",
+          "level": "component",
+          "pointer": null,
+          "message": "no supplier (manufacturer.name and supplier.name missing)"
+        },
+        {
+          "check": "graph.reachable",
+          "severity": "error",
+          "profiles": [
+            "cisa-2026",
+            "cra"
+          ],
+          "component": "old-tls-app / zephyr",
+          "level": "component",
+          "pointer": null,
+          "message": "not reachable from the root product:cb91904541becd528b35755f21604693 through dependencies or nesting"
+        }
+      ]
+    }
+  },
+  "warnings": []
+}

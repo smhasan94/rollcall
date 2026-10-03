@@ -43,6 +43,7 @@ fn main() -> ExitCode {
         Command::Merge(args) => commands::merge::run(args),
         Command::Vex(args) => commands::vex::run(args),
         Command::Identifiers(args) => commands::identifiers::run(args),
+        Command::Report(args) => commands::report::run(args),
         other @ (Command::Scan | Command::Assay) => {
             eprintln!("rollcall {}: not implemented", other.name());
             EXIT_USAGE
