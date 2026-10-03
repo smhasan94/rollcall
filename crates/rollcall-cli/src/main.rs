@@ -44,7 +44,8 @@ fn main() -> ExitCode {
         Command::Vex(args) => commands::vex::run(args),
         Command::Identifiers(args) => commands::identifiers::run(args),
         Command::Report(args) => commands::report::run(args),
-        other @ (Command::Scan | Command::Assay) => {
+        Command::Scan(args) => commands::scan::run(args),
+        other @ Command::Assay => {
             eprintln!("rollcall {}: not implemented", other.name());
             EXIT_USAGE
         }

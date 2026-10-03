@@ -1,0 +1,793 @@
+{
+  "schema": "rollcall-scan/1",
+  "sbom": {
+    "serialNumber": "urn:uuid:69f2589c-ad74-860e-9e94-8014f9de18a7",
+    "version": 1
+  },
+  "scanners": [
+    {
+      "name": "grype",
+      "version": "0.119.0",
+      "status": "ok",
+      "offline": false
+    },
+    {
+      "name": "osv-scanner",
+      "version": "2.6.0",
+      "status": "ok",
+      "offline": false
+    }
+  ],
+  "findings": [
+    {
+      "id": "CVE-2022-35409",
+      "aliases": [],
+      "component": {
+        "bom-ref": "component:9404b57b22a8bf72df5b6d6c93f4defd",
+        "name": "mbedtls",
+        "version": "2.28.0",
+        "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0"
+      },
+      "package": {
+        "name": "mbedtls",
+        "version": "2.28.0",
+        "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0"
+      },
+      "severity": "critical",
+      "fixed_versions": [
+        "2.28.1"
+      ],
+      "sources": [
+        {
+          "scanner": "grype",
+          "id": "CVE-2022-35409",
+          "severity": "Critical"
+        }
+      ],
+      "triage": "suppressed",
+      "vex": [
+        {
+          "document": "old-mbedtls.openvex.json",
+          "status": "not_affected",
+          "justification": "vulnerable_code_not_present"
+        }
+      ]
+    },
+    {
+      "id": "CVE-2022-46393",
+      "aliases": [],
+      "component": {
+        "bom-ref": "component:9404b57b22a8bf72df5b6d6c93f4defd",
+        "name": "mbedtls",
+        "version": "2.28.0",
+        "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0"
+      },
+      "package": {
+        "name": "mbedtls",
+        "version": "2.28.0",
+        "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0"
+      },
+      "severity": "critical",
+      "fixed_versions": [
+        "2.28.2"
+      ],
+      "sources": [
+        {
+          "scanner": "grype",
+          "id": "CVE-2022-46393",
+          "severity": "Critical"
+        }
+      ],
+      "triage": "suppressed",
+      "vex": [
+        {
+          "document": "old-mbedtls.openvex.json",
+          "status": "not_affected",
+          "justification": "vulnerable_code_not_present"
+        }
+      ]
+    },
+    {
+      "id": "CVE-2025-47917",
+      "aliases": [],
+      "component": {
+        "bom-ref": "component:9404b57b22a8bf72df5b6d6c93f4defd",
+        "name": "mbedtls",
+        "version": "2.28.0",
+        "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0"
+      },
+      "package": {
+        "name": "mbedtls",
+        "version": "2.28.0",
+        "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0"
+      },
+      "severity": "critical",
+      "fixed_versions": [
+        "3.6.4"
+      ],
+      "sources": [
+        {
+          "scanner": "grype",
+          "id": "CVE-2025-47917",
+          "severity": "Critical"
+        }
+      ],
+      "triage": "unresolved",
+      "vex": [
+        {
+          "document": "old-mbedtls.openvex.json",
+          "status": "under_investigation"
+        }
+      ]
+    },
+    {
+      "id": "CVE-2026-34872",
+      "aliases": [],
+      "component": {
+        "bom-ref": "component:9404b57b22a8bf72df5b6d6c93f4defd",
+        "name": "mbedtls",
+        "version": "2.28.0",
+        "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0"
+      },
+      "package": {
+        "name": "mbedtls",
+        "version": "2.28.0",
+        "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0"
+      },
+      "severity": "critical",
+      "fixed_versions": [
+        "3.6.6"
+      ],
+      "sources": [
+        {
+          "scanner": "grype",
+          "id": "CVE-2026-34872",
+          "severity": "Critical"
+        }
+      ],
+      "triage": "unresolved",
+      "vex": [
+        {
+          "document": "old-mbedtls.openvex.json",
+          "status": "under_investigation"
+        }
+      ]
+    },
+    {
+      "id": "CVE-2026-34877",
+      "aliases": [],
+      "component": {
+        "bom-ref": "component:9404b57b22a8bf72df5b6d6c93f4defd",
+        "name": "mbedtls",
+        "version": "2.28.0",
+        "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0"
+      },
+      "package": {
+        "name": "mbedtls",
+        "version": "2.28.0",
+        "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0"
+      },
+      "severity": "critical",
+      "fixed_versions": [
+        "3.6.6"
+      ],
+      "sources": [
+        {
+          "scanner": "grype",
+          "id": "CVE-2026-34877",
+          "severity": "Critical"
+        }
+      ],
+      "triage": "unresolved",
+      "vex": [
+        {
+          "document": "old-mbedtls.openvex.json",
+          "status": "under_investigation"
+        }
+      ]
+    },
+    {
+      "id": "CVE-2021-43666",
+      "aliases": [],
+      "component": {
+        "bom-ref": "component:9404b57b22a8bf72df5b6d6c93f4defd",
+        "name": "mbedtls",
+        "version": "2.28.0",
+        "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0"
+      },
+      "package": {
+        "name": "mbedtls",
+        "version": "2.28.0",
+        "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0"
+      },
+      "severity": "high",
+      "fixed_versions": [],
+      "sources": [
+        {
+          "scanner": "grype",
+          "id": "CVE-2021-43666",
+          "severity": "High"
+        }
+      ],
+      "triage": "unresolved",
+      "vex": []
+    },
+    {
+      "id": "CVE-2021-45451",
+      "aliases": [],
+      "component": {
+        "bom-ref": "component:9404b57b22a8bf72df5b6d6c93f4defd",
+        "name": "mbedtls",
+        "version": "2.28.0",
+        "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0"
+      },
+      "package": {
+        "name": "mbedtls",
+        "version": "2.28.0",
+        "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0"
+      },
+      "severity": "high",
+      "fixed_versions": [
+        "3.1.0"
+      ],
+      "sources": [
+        {
+          "scanner": "grype",
+          "id": "CVE-2021-45451",
+          "severity": "High"
+        }
+      ],
+      "triage": "unresolved",
+      "vex": [
+        {
+          "document": "old-mbedtls.openvex.json",
+          "status": "under_investigation"
+        }
+      ]
+    },
+    {
+      "id": "CVE-2023-43615",
+      "aliases": [],
+      "component": {
+        "bom-ref": "component:9404b57b22a8bf72df5b6d6c93f4defd",
+        "name": "mbedtls",
+        "version": "2.28.0",
+        "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0"
+      },
+      "package": {
+        "name": "mbedtls",
+        "version": "2.28.0",
+        "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0"
+      },
+      "severity": "high",
+      "fixed_versions": [
+        "2.28.5"
+      ],
+      "sources": [
+        {
+          "scanner": "grype",
+          "id": "CVE-2023-43615",
+          "severity": "High"
+        }
+      ],
+      "triage": "unresolved",
+      "vex": [
+        {
+          "document": "old-mbedtls.openvex.json",
+          "status": "under_investigation"
+        }
+      ]
+    },
+    {
+      "id": "CVE-2023-52353",
+      "aliases": [],
+      "component": {
+        "bom-ref": "component:9404b57b22a8bf72df5b6d6c93f4defd",
+        "name": "mbedtls",
+        "version": "2.28.0",
+        "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0"
+      },
+      "package": {
+        "name": "mbedtls",
+        "version": "2.28.0",
+        "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0"
+      },
+      "severity": "high",
+      "fixed_versions": [
+        "3.5.2"
+      ],
+      "sources": [
+        {
+          "scanner": "grype",
+          "id": "CVE-2023-52353",
+          "severity": "High"
+        }
+      ],
+      "triage": "unresolved",
+      "vex": [
+        {
+          "document": "old-mbedtls.openvex.json",
+          "status": "under_investigation"
+        }
+      ]
+    },
+    {
+      "id": "CVE-2024-23775",
+      "aliases": [],
+      "component": {
+        "bom-ref": "component:9404b57b22a8bf72df5b6d6c93f4defd",
+        "name": "mbedtls",
+        "version": "2.28.0",
+        "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0"
+      },
+      "package": {
+        "name": "mbedtls",
+        "version": "2.28.0",
+        "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0"
+      },
+      "severity": "high",
+      "fixed_versions": [
+        "2.28.7"
+      ],
+      "sources": [
+        {
+          "scanner": "grype",
+          "id": "CVE-2024-23775",
+          "severity": "High"
+        }
+      ],
+      "triage": "suppressed",
+      "vex": [
+        {
+          "document": "old-mbedtls.openvex.json",
+          "status": "not_affected",
+          "justification": "vulnerable_code_not_present"
+        }
+      ]
+    },
+    {
+      "id": "CVE-2024-28960",
+      "aliases": [],
+      "component": {
+        "bom-ref": "component:9404b57b22a8bf72df5b6d6c93f4defd",
+        "name": "mbedtls",
+        "version": "2.28.0",
+        "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0"
+      },
+      "package": {
+        "name": "mbedtls",
+        "version": "2.28.0",
+        "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0"
+      },
+      "severity": "high",
+      "fixed_versions": [
+        "2.28.8",
+        "3.6.0"
+      ],
+      "sources": [
+        {
+          "scanner": "grype",
+          "id": "CVE-2024-28960",
+          "severity": "High"
+        }
+      ],
+      "triage": "unresolved",
+      "vex": [
+        {
+          "document": "old-mbedtls.openvex.json",
+          "status": "under_investigation"
+        }
+      ]
+    },
+    {
+      "id": "CVE-2025-48965",
+      "aliases": [],
+      "component": {
+        "bom-ref": "component:9404b57b22a8bf72df5b6d6c93f4defd",
+        "name": "mbedtls",
+        "version": "2.28.0",
+        "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0"
+      },
+      "package": {
+        "name": "mbedtls",
+        "version": "2.28.0",
+        "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0"
+      },
+      "severity": "high",
+      "fixed_versions": [
+        "3.6.4"
+      ],
+      "sources": [
+        {
+          "scanner": "grype",
+          "id": "CVE-2025-48965",
+          "severity": "High"
+        }
+      ],
+      "triage": "unresolved",
+      "vex": [
+        {
+          "document": "old-mbedtls.openvex.json",
+          "status": "under_investigation"
+        }
+      ]
+    },
+    {
+      "id": "CVE-2025-52496",
+      "aliases": [],
+      "component": {
+        "bom-ref": "component:9404b57b22a8bf72df5b6d6c93f4defd",
+        "name": "mbedtls",
+        "version": "2.28.0",
+        "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0"
+      },
+      "package": {
+        "name": "mbedtls",
+        "version": "2.28.0",
+        "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0"
+      },
+      "severity": "high",
+      "fixed_versions": [
+        "3.6.4"
+      ],
+      "sources": [
+        {
+          "scanner": "grype",
+          "id": "CVE-2025-52496",
+          "severity": "High"
+        }
+      ],
+      "triage": "unresolved",
+      "vex": [
+        {
+          "document": "old-mbedtls.openvex.json",
+          "status": "under_investigation"
+        }
+      ]
+    },
+    {
+      "id": "CVE-2026-25835",
+      "aliases": [],
+      "component": {
+        "bom-ref": "component:9404b57b22a8bf72df5b6d6c93f4defd",
+        "name": "mbedtls",
+        "version": "2.28.0",
+        "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0"
+      },
+      "package": {
+        "name": "mbedtls",
+        "version": "2.28.0",
+        "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0"
+      },
+      "severity": "high",
+      "fixed_versions": [
+        "3.6.6"
+      ],
+      "sources": [
+        {
+          "scanner": "grype",
+          "id": "CVE-2026-25835",
+          "severity": "High"
+        }
+      ],
+      "triage": "unresolved",
+      "vex": [
+        {
+          "document": "old-mbedtls.openvex.json",
+          "status": "under_investigation"
+        }
+      ]
+    },
+    {
+      "id": "CVE-2022-46392",
+      "aliases": [],
+      "component": {
+        "bom-ref": "component:9404b57b22a8bf72df5b6d6c93f4defd",
+        "name": "mbedtls",
+        "version": "2.28.0",
+        "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0"
+      },
+      "package": {
+        "name": "mbedtls",
+        "version": "2.28.0",
+        "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0"
+      },
+      "severity": "medium",
+      "fixed_versions": [
+        "2.28.2"
+      ],
+      "sources": [
+        {
+          "scanner": "grype",
+          "id": "CVE-2022-46392",
+          "severity": "Medium"
+        }
+      ],
+      "triage": "affected",
+      "vex": [
+        {
+          "document": "old-mbedtls.openvex.json",
+          "status": "affected"
+        }
+      ]
+    },
+    {
+      "id": "CVE-2024-23170",
+      "aliases": [],
+      "component": {
+        "bom-ref": "component:9404b57b22a8bf72df5b6d6c93f4defd",
+        "name": "mbedtls",
+        "version": "2.28.0",
+        "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0"
+      },
+      "package": {
+        "name": "mbedtls",
+        "version": "2.28.0",
+        "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0"
+      },
+      "severity": "medium",
+      "fixed_versions": [
+        "2.28.7"
+      ],
+      "sources": [
+        {
+          "scanner": "grype",
+          "id": "CVE-2024-23170",
+          "severity": "Medium"
+        }
+      ],
+      "triage": "unresolved",
+      "vex": [
+        {
+          "document": "old-mbedtls.openvex.json",
+          "status": "under_investigation"
+        }
+      ]
+    },
+    {
+      "id": "CVE-2025-27809",
+      "aliases": [],
+      "component": {
+        "bom-ref": "component:9404b57b22a8bf72df5b6d6c93f4defd",
+        "name": "mbedtls",
+        "version": "2.28.0",
+        "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0"
+      },
+      "package": {
+        "name": "mbedtls",
+        "version": "2.28.0",
+        "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0"
+      },
+      "severity": "medium",
+      "fixed_versions": [
+        "2.28.10",
+        "3.6.3"
+      ],
+      "sources": [
+        {
+          "scanner": "grype",
+          "id": "CVE-2025-27809",
+          "severity": "Medium"
+        }
+      ],
+      "triage": "unresolved",
+      "vex": [
+        {
+          "document": "old-mbedtls.openvex.json",
+          "status": "under_investigation"
+        }
+      ]
+    },
+    {
+      "id": "CVE-2025-27810",
+      "aliases": [],
+      "component": {
+        "bom-ref": "component:9404b57b22a8bf72df5b6d6c93f4defd",
+        "name": "mbedtls",
+        "version": "2.28.0",
+        "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0"
+      },
+      "package": {
+        "name": "mbedtls",
+        "version": "2.28.0",
+        "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0"
+      },
+      "severity": "medium",
+      "fixed_versions": [
+        "2.28.10",
+        "3.6.3"
+      ],
+      "sources": [
+        {
+          "scanner": "grype",
+          "id": "CVE-2025-27810",
+          "severity": "Medium"
+        }
+      ],
+      "triage": "unresolved",
+      "vex": [
+        {
+          "document": "old-mbedtls.openvex.json",
+          "status": "under_investigation"
+        }
+      ]
+    },
+    {
+      "id": "CVE-2025-52497",
+      "aliases": [],
+      "component": {
+        "bom-ref": "component:9404b57b22a8bf72df5b6d6c93f4defd",
+        "name": "mbedtls",
+        "version": "2.28.0",
+        "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0"
+      },
+      "package": {
+        "name": "mbedtls",
+        "version": "2.28.0",
+        "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0"
+      },
+      "severity": "medium",
+      "fixed_versions": [
+        "3.6.4"
+      ],
+      "sources": [
+        {
+          "scanner": "grype",
+          "id": "CVE-2025-52497",
+          "severity": "Medium"
+        }
+      ],
+      "triage": "unresolved",
+      "vex": [
+        {
+          "document": "old-mbedtls.openvex.json",
+          "status": "under_investigation"
+        }
+      ]
+    },
+    {
+      "id": "CVE-2025-54764",
+      "aliases": [],
+      "component": {
+        "bom-ref": "component:9404b57b22a8bf72df5b6d6c93f4defd",
+        "name": "mbedtls",
+        "version": "2.28.0",
+        "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0"
+      },
+      "package": {
+        "name": "mbedtls",
+        "version": "2.28.0",
+        "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0"
+      },
+      "severity": "medium",
+      "fixed_versions": [
+        "3.6.5"
+      ],
+      "sources": [
+        {
+          "scanner": "grype",
+          "id": "CVE-2025-54764",
+          "severity": "Medium"
+        }
+      ],
+      "triage": "unresolved",
+      "vex": [
+        {
+          "document": "old-mbedtls.openvex.json",
+          "status": "under_investigation"
+        }
+      ]
+    },
+    {
+      "id": "CVE-2025-59438",
+      "aliases": [],
+      "component": {
+        "bom-ref": "component:9404b57b22a8bf72df5b6d6c93f4defd",
+        "name": "mbedtls",
+        "version": "2.28.0",
+        "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0"
+      },
+      "package": {
+        "name": "mbedtls",
+        "version": "2.28.0",
+        "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0"
+      },
+      "severity": "medium",
+      "fixed_versions": [
+        "3.6.5"
+      ],
+      "sources": [
+        {
+          "scanner": "grype",
+          "id": "CVE-2025-59438",
+          "severity": "Medium"
+        }
+      ],
+      "triage": "unresolved",
+      "vex": [
+        {
+          "document": "old-mbedtls.openvex.json",
+          "status": "under_investigation"
+        }
+      ]
+    },
+    {
+      "id": "CVE-2025-66442",
+      "aliases": [],
+      "component": {
+        "bom-ref": "component:9404b57b22a8bf72df5b6d6c93f4defd",
+        "name": "mbedtls",
+        "version": "2.28.0",
+        "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0"
+      },
+      "package": {
+        "name": "mbedtls",
+        "version": "2.28.0",
+        "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0"
+      },
+      "severity": "medium",
+      "fixed_versions": [],
+      "sources": [
+        {
+          "scanner": "grype",
+          "id": "CVE-2025-66442",
+          "severity": "Medium"
+        }
+      ],
+      "triage": "unresolved",
+      "vex": [
+        {
+          "document": "old-mbedtls.openvex.json",
+          "status": "under_investigation"
+        }
+      ]
+    },
+    {
+      "id": "CVE-2026-34871",
+      "aliases": [],
+      "component": {
+        "bom-ref": "component:9404b57b22a8bf72df5b6d6c93f4defd",
+        "name": "mbedtls",
+        "version": "2.28.0",
+        "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0"
+      },
+      "package": {
+        "name": "mbedtls",
+        "version": "2.28.0",
+        "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0"
+      },
+      "severity": "medium",
+      "fixed_versions": [
+        "3.6.6"
+      ],
+      "sources": [
+        {
+          "scanner": "grype",
+          "id": "CVE-2026-34871",
+          "severity": "Medium"
+        }
+      ],
+      "triage": "unresolved",
+      "vex": [
+        {
+          "document": "old-mbedtls.openvex.json",
+          "status": "under_investigation"
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "total": 23,
+    "suppressed": 3,
+    "affected": 1,
+    "unresolved": 19,
+    "open_by_severity": {
+      "critical": 3,
+      "high": 8,
+      "medium": 9,
+      "low": 0,
+      "unknown": 0
+    }
+  },
+  "warnings": []
+}

@@ -161,8 +161,13 @@ fn vex_without_inputs_is_usage_error_exit_64() {
 }
 
 #[test]
-fn scan_exits_64_not_implemented() {
-    assert_not_implemented("scan");
+fn scan_without_sbom_is_usage_error_exit_64() {
+    rollcall()
+        .arg("scan")
+        .assert()
+        .code(64)
+        .stdout(predicate::str::is_empty())
+        .stderr(predicate::str::contains("<SBOM>"));
 }
 
 #[test]
