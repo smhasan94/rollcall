@@ -11,8 +11,11 @@
 //! - **SBOM**: a CycloneDX 1.6 JSON document, read with [`cyclonedx::read_bytes`] (documents
 //!   rollcall did not write are read leniently; the reader's warnings become report
 //!   warnings).
-//! - **Scans** (`--scan`, repeatable): grype `-o json` or osv-scanner `--format json`, told
-//!   apart by content ([`vex::parse_findings`]). Findings are joined to components exactly as
+//! - **Scans** (`--scan`, repeatable): grype `-o json`, osv-scanner `--format json` or
+//!   `rollcall scan --json` (`rollcall-scan/1`, by its `schema`), told apart by content
+//!   ([`vex::parse_findings`]). A `rollcall-scan/1` finding is read as one scanner finding on
+//!   the component it was joined to; its VEX triage is not used (only `--vex` closes
+//!   findings), with a warning when the scan suppressed any. Findings are joined to components exactly as
 //!   `rollcall vex` joins them (by purl, then CPE, then name and version) and merged across
 //!   scanners; a finding for a package that is not in the SBOM is counted as `not-in-sbom`.
 //!   Severities are normalised with [`normalise_severity`](crate::severity::normalise_severity).
@@ -74,6 +77,7 @@ mod coverage;
 mod findings;
 mod markdown;
 mod model;
+mod scan_input;
 mod score;
 mod summary;
 mod unresolved;
@@ -187,15 +191,21 @@ pub fn build(
     // Scans.
     let mut findings_all = Vec::new();
     for scan in scans {
-        let parsed = vex::parse_findings(scan.bytes).map_err(|source| ReportError::Scan {
+        let parsed = match serde_json::from_slice::<Value>(scan.bytes) {
+            Ok(value) if scan_input::is_scan_report(&value) => {
+                scan_input::parse_scan_report(&value)
+            }
+            _ => vex::parse_findings(scan.bytes).map(|f| (f.findings, f.warnings)),
+        };
+        let (found, found_warnings) = parsed.map_err(|source| ReportError::Scan {
             name: scan.name.to_owned(),
             source,
         })?;
-        warnings.extend(parsed.warnings.iter().map(|w| ReportWarning {
+        warnings.extend(found_warnings.iter().map(|w| ReportWarning {
             location: scan.name.to_owned(),
             message: format!("{}: {}", w.location, w.message),
         }));
-        findings_all.extend(parsed.findings);
+        findings_all.extend(found);
     }
 
     // VEX.

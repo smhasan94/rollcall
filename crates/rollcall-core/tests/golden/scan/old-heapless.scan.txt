@@ -1,0 +1,5 @@
+SEVERITY  ID              COMPONENT  VERSION  FIXED  TRIAGE      VEX  SOURCES
+high      CVE-2020-36464  heapless   0.5.0    0.6.1  unresolved  -    grype,osv-scanner
+
+1 finding(s): 0 suppressed, 0 affected, 1 unresolved; open: 0 critical, 1 high, 0 medium, 0 low, 0 unknown
+scanners: grype 0.119.0 (ok), osv-scanner 2.6.0 (ok)

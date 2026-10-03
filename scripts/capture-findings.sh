@@ -8,10 +8,13 @@
 # GRYPE_DB_AUTO_UPDATE=true to fetch the latest one), so the grype capture is reproducible
 # for a given database.
 #
-# Usage: scripts/capture-findings.sh [--install]
+# Usage: scripts/capture-findings.sh [--install] [--only NAME]
 #
 #   --install   install the pinned grype and osv-scanner first, by running
 #               scripts/smoke-scan.sh --install (which also smoke-tests them).
+#   --only NAME capture only findings/NAME.json (NAME is one of the captures below, e.g.
+#               old-heapless.grype); the other captures are left exactly as they are, and
+#               CAPTURE.txt keeps their capture dates.
 #
 # Environment:
 #   ROLLCALL_TOOLS_DIR      where the scanners live (default .cache/tools), else PATH
@@ -26,10 +29,13 @@
 #                            them to "GitHub Actions" and finds nothing)
 #   old-heapless.osv.json    osv-scanner on old-heapless (pkg:cargo/heapless@0.5.0, which has
 #                            RUSTSEC/GHSA advisories)
+#   old-heapless.grype.json  grype on old-heapless (the same advisory by its GHSA id, related
+#                            CVE-2020-36464; the grype/osv-scanner overlap `rollcall scan`
+#                            is tested on, SHA-117)
 #
 # Every absolute path in the scanner output (the temporary capture directory, the repository
 # root, $HOME) is replaced with a fixed placeholder, so the committed files do not depend on
-# the machine. Tool versions, the grype database and the capture date are written to
+# the machine. Tool versions, the grype database and each file's capture date are written to
 # findings/CAPTURE.txt.
 set -euo pipefail
 
@@ -54,17 +60,32 @@ die() {
     exit 2
 }
 
+CAPTURES=(old-mbedtls.grype old-mbedtls.osv old-heapless.osv old-heapless.grype)
+
 install=0
-for arg in "$@"; do
-    case "$arg" in
+only=""
+while [[ $# -gt 0 ]]; do
+    case "$1" in
         --install) install=1 ;;
+        --only)
+            [[ $# -ge 2 ]] || die "--only needs a capture name"
+            only="$2"
+            shift
+            ;;
         -h | --help)
             sed -n '2,/^set -euo/p' "$0" | sed '$d' | sed 's/^# \{0,1\}//'
             exit 0
             ;;
-        *) die "unknown argument: $arg" ;;
+        *) die "unknown argument: $1" ;;
     esac
+    shift
 done
+if [[ -n "$only" ]]; then
+    case " ${CAPTURES[*]} " in
+        *" $only "*) CAPTURES=("$only") ;;
+        *) die "unknown capture for --only: $only (one of: ${CAPTURES[*]})" ;;
+    esac
+fi
 
 command -v jq >/dev/null 2>&1 || die "jq is required"
 
@@ -155,25 +176,64 @@ osv_capture() {
     echo "captured $OUT_DIR/$1.osv.json ($(jq '[.results[]?.packages[]?.vulnerabilities[]?] | length' "$OUT_DIR/$1.osv.json") vulnerabilities)"
 }
 
-generate old-mbedtls
-generate old-heapless
-grype_capture old-mbedtls
-osv_capture old-mbedtls
-osv_capture old-heapless
+generated=" "
+grype_ran=0
+for capture in "${CAPTURES[@]}"; do
+    model="${capture%.*}"
+    if [[ "$generated" != *" $model "* ]]; then
+        generate "$model"
+        generated="$generated$model "
+    fi
+    case "$capture" in
+        *.grype)
+            grype_capture "$model"
+            grype_ran=1
+            ;;
+        *.osv) osv_capture "$model" ;;
+    esac
+done
+
+# The capture date of every file: today for the ones captured now, else the date the
+# previous CAPTURE.txt records (its per-file line, or the single `captured:` line older
+# versions of this script wrote).
+OLD_CAPTURE="$OUT_DIR/CAPTURE.txt"
+previous_date() {
+    [[ -f "$OLD_CAPTURE" ]] || return 0
+    local line
+    line="$(awk -v f="$1.json:" '$1 == f && $2 == "captured" {print $3}' "$OLD_CAPTURE")"
+    if [[ -z "$line" ]]; then
+        line="$(awk '$1 == "captured:" && NF == 2 {print $2}' "$OLD_CAPTURE")"
+    fi
+    echo "${line:-unknown}"
+}
+today="$(date -u +%Y-%m-%d)"
+dates=()
+for capture in old-heapless.grype old-heapless.osv old-mbedtls.grype old-mbedtls.osv; do
+    case " ${CAPTURES[*]} " in
+        *" $capture "*) dates+=("$capture.json: captured $today") ;;
+        *) dates+=("$capture.json: captured $(previous_date "$capture")") ;;
+    esac
+done
 
 # sed_escape <text>: <text> as a literal sed pattern (with `|` as the delimiter).
 sed_escape() {
     printf '%s' "$1" | sed -e 's/[]\/$*.^[|]/\\&/g'
 }
-db_status="$("$GRYPE" db status 2>/dev/null |
-    sed "s|$(sed_escape "$ROOT")|<repo>|g; s|$(sed_escape "$SCRUB_HOME")|<home>|g" ||
-    echo "unavailable")"
+if [[ "$grype_ran" -eq 1 || ! -f "$OLD_CAPTURE" ]]; then
+    db_status="$("$GRYPE" db status 2>/dev/null |
+        sed "s|$(sed_escape "$ROOT")|<repo>|g; s|$(sed_escape "$SCRUB_HOME")|<home>|g" |
+        sed 's/^/  /' || echo "  unavailable")"
+else
+    # No grype capture this time: keep the database the grype captures were made with.
+    db_status="$(sed -n '/^grype db status:$/,$p' "$OLD_CAPTURE" | sed '1d')"
+fi
 {
     echo "# Written by scripts/capture-findings.sh; do not edit."
-    echo "captured: $(date -u +%Y-%m-%d)"
     echo "grype: $GRYPE_VERSION"
     echo "osv-scanner: $OSV_SCANNER_VERSION (queries osv.dev at capture time)"
+    printf '%s\n' "${dates[@]}"
     echo "grype db status:"
-    sed 's/^/  /' <<<"$db_status"
-} >"$OUT_DIR/CAPTURE.txt"
-echo "wrote $OUT_DIR/CAPTURE.txt"
+    echo "$db_status"
+} >"$WORK/CAPTURE.txt"
+mv "$WORK/CAPTURE.txt" "$OLD_CAPTURE"
+echo "wrote $OLD_CAPTURE"
