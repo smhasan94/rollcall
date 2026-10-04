@@ -8,10 +8,12 @@
 # under tests/golden/validate/: the clean document stripped of two components' supplier and
 # hashes, and its expected `--profile all` findings), the readiness reports under
 # tests/golden/report/ (Markdown and JSON for every model fixture, the blob manifest and every
-# real Zephyr build under fixtures/), and the Cargo ingestion goldens under tests/golden/cargo/
-# rendered from fixtures/cargo-*/ (SHA-127), then re-runs the golden tests and the reader round
-# trips against them, and the CLI tests that compare `rollcall generate`, `rollcall merge`,
-# `rollcall vex`, `rollcall validate` and `rollcall report` output with them.
+# real Zephyr build under fixtures/), the scan reports under tests/golden/scan/ normalised
+# from tests/data/findings/ and triaged with the VEX goldens, and the Cargo ingestion goldens
+# under tests/golden/cargo/ rendered from fixtures/cargo-*/ (SHA-127), then re-runs the golden
+# tests and the reader round trips against them, and the CLI tests that compare
+# `rollcall generate`, `rollcall merge`, `rollcall vex`, `rollcall validate`,
+# `rollcall report` and `rollcall scan` output with them.
 #
 # Golden files are only ever produced by this script, never edited by hand. Review the
 # resulting diff like code.
@@ -26,10 +28,11 @@ ROLLCALL_BLESS=1 cargo test -p rollcall-core --test golden --test cyclonedx --te
 # The validation goldens are derived from tests/golden/clean.cdx.json, so they are blessed
 # after it.
 ROLLCALL_BLESS=1 cargo test -p rollcall-core --test validate
-# The report goldens read the VEX goldens (tests/golden/vex/), so they are blessed after them.
-ROLLCALL_BLESS=1 cargo test -p rollcall-core --test report
-cargo test -p rollcall-core --test golden --test cyclonedx --test zephyr --test cargo --test blob --test reader --test vex --test validate --test report
-cargo test -p rollcall-cli --test generate --test generate_zephyr --test generate_cargo --test merge --test vex --test validate_profile --test report
+# The report and scan goldens read the VEX goldens (tests/golden/vex/), so they are blessed
+# after them.
+ROLLCALL_BLESS=1 cargo test -p rollcall-core --test report --test scan
+cargo test -p rollcall-core --test golden --test cyclonedx --test zephyr --test cargo --test blob --test reader --test vex --test validate --test report --test scan
+cargo test -p rollcall-cli --test generate --test generate_zephyr --test generate_cargo --test merge --test vex --test validate_profile --test report --test scan
 
 git status --short -- crates/rollcall-core/tests/golden
 git diff --stat -- crates/rollcall-core/tests/golden

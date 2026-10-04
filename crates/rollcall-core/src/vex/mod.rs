@@ -24,6 +24,7 @@
 //!       versions: ">=2.28.0, <2.28.5"       # optional semver range (Cargo syntax)
 //!     when:                                 # optional; every condition must hold
 //!       - kconfig_off: CONFIG_MBEDTLS_SSL_PROTO_DTLS
+//!       - kconfig_equals: {CONFIG_MBEDTLS_CFG_FILE: config-mbedtls.h}
 //!       - cargo_feature_off: dtls
 //!       - symbol_not_linked: mbedtls_ssl_parse_client_hello
 //!       - version_in: "<2.28.1"
@@ -32,7 +33,10 @@
 //!     detail: "DTLS is compiled out."
 //! ```
 //!
-//! Each condition is a one-key mapping. `justification` accepts the CycloneDX 1.6 values and
+//! Each condition is a one-key mapping. `kconfig_equals` compares the symbol's value exactly
+//! as the `.config` writes it (`y`, `n` for `is not set`, `m`, a number, a hex number as text
+//! such as `0x10`, or a string's contents without its quotes); the rule's value is taken as
+//! the text written, and a duplicate key is an error. `justification` accepts the CycloneDX 1.6 values and
 //! the OpenVEX ones and keeps the word written; it is mapped to the other vocabulary only when
 //! rendered (see [`Justification`]). Unknown keys, statuses, justifications and conditions are
 //! errors located at their line ([`RuleError`]). `match.name` and `match.subsystem` are
@@ -55,10 +59,17 @@
 //! `match.subsystem` rule never applies to them; it applies to findings that target a
 //! subsystem's purl.
 //!
-//! Evidence for `cargo_feature_off` and `symbol_not_linked` ([`BuildEvidence`]'s feature and
-//! linked-symbol sets) can be given through the library but not yet through `rollcall vex`,
+//! Evidence for `cargo_feature_off` and `symbol_not_linked` ([`BuildEvidence`]'s feature set
+//! and per-image linked-symbol sets) can be given through the library but not yet through
+//! `rollcall vex`,
 //! so from the CLI those conditions are always unknown and their rules leave findings
-//! unresolved (needs evidence).
+//! unresolved (needs evidence). [`linked_functions`](crate::linker_map::linked_functions)
+//! reads a linked-symbol set from a GNU ld map.
+//!
+//! Because a `kconfig_off` symbol missing from the `.config` is unknown, a misspelt symbol
+//! never yields a statement; [`lint_rules`] reports such symbols (see the [`lint`] module).
+//! rollcall ships a starter rule pack, `rollcall_identifiers::VEX_RULES_YAML` (`rollcall vex
+//! --starter-rules`); `docs/vex-rules.md` describes it with worked examples.
 //!
 //! Versions (`match.versions`, `version_in`) compare the component's *effective version*
 //! ([`effective_version`]): its `version` if that is a release version (`v` prefix and a short
@@ -81,8 +92,9 @@
 //! 3. **Match.** A rule applies when every given `match` field matches and no `when`
 //!    condition is false. A condition whose evidence is missing is *unknown*, never true: a
 //!    `.config` without the symbol, or no `.config` for the component's image, does not prove
-//!    anything is off. Kconfig is per image: a component is judged only by the `.config` of
-//!    its own image (MCUboot's mbedtls by MCUboot's `.config`, not the application's).
+//!    anything is off. Kconfig and linked symbols are per image: a component is judged only
+//!    by the evidence of its own image (MCUboot's mbedtls by MCUboot's `.config` and map, not
+//!    the application's).
 //! 4. **Precedence.** Among applicable rules, the most specific win ([`Specificity`]: naming
 //!    CVEs beats not; then a version range beats none; then exact purl beats purl glob beats
 //!    name or subsystem); among equally specific rules the highest `priority` wins.
@@ -154,6 +166,7 @@
 mod evaluate;
 mod evidence;
 mod findings;
+pub mod lint;
 mod pattern;
 mod render;
 mod rules;
@@ -168,6 +181,9 @@ pub use evaluate::{
 pub use evidence::{BuildEvidence, Verdict, kconfig_label};
 pub use findings::{
     Finding, Findings, FindingsError, Scanner, parse_findings, parse_grype, parse_osv,
+};
+pub use lint::{
+    KconfigSymbols, LintFinding, LintKind, SymbolReference, lint_duplicate_ids, lint_rules,
 };
 pub use pattern::{PurlPattern, Specificity};
 pub use render::{

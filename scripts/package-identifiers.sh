@@ -3,6 +3,7 @@
 #
 #   ${CARGO_TARGET_DIR:-target}/identifiers/rollcall-identifiers-<db_version>.tar.gz
 #     <db_version>/identifiers.yaml
+#     <db_version>/vex-rules.yaml      the starter VEX rule pack (docs/vex-rules.md)
 #
 # The layout is the cache layout, so installing a database without a rollcall release is
 #
@@ -35,14 +36,19 @@ python3 - "$version" "$out" <<'PY'
 import gzip, io, sys, tarfile
 
 version, out = sys.argv[1], sys.argv[2]
-with open("crates/rollcall-identifiers/db/identifiers.yaml", "rb") as f:
-    data = f.read()
+def read(name):
+    with open(f"crates/rollcall-identifiers/db/{name}", "rb") as f:
+        return f.read()
+
+entries = [(version, None)] + [
+    (f"{version}/{name}", read(name)) for name in ("identifiers.yaml", "vex-rules.yaml")
+]
 buf = io.BytesIO()
 with tarfile.open(fileobj=buf, mode="w", format=tarfile.USTAR_FORMAT) as tar:
-    for name, is_dir in ((version, True), (f"{version}/identifiers.yaml", False)):
+    for name, data in entries:
         info = tarfile.TarInfo(name)
         info.mtime, info.uid, info.gid, info.uname, info.gname = 0, 0, 0, "", ""
-        if is_dir:
+        if data is None:
             info.type, info.mode = tarfile.DIRTYPE, 0o755
             tar.addfile(info)
         else:

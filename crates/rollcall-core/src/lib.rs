@@ -11,8 +11,9 @@
 //! [`linker_map`] parses the GNU ld map that split is cross-checked against. [`vex`]
 //! evaluates VEX rules against scanner findings and build evidence. [`validate`] checks a
 //! CycloneDX document against regulators' SBOM profiles (CISA 2026, CRA). [`report`] builds
-//! the readiness report (Markdown and JSON) for an SBOM, with [`severity`] normalising
-//! scanners' severity words.
+//! the readiness report (Markdown and JSON) for an SBOM. [`scan`] normalises grype and
+//! osv-scanner findings for an SBOM, triages them with VEX documents and decides
+//! `rollcall scan`'s exit code. Both use [`severity`] to normalise scanners' severity words.
 
 #![deny(missing_docs)]
 #![deny(
@@ -39,6 +40,7 @@ pub mod linker_map;
 pub mod merge;
 pub mod model;
 pub mod report;
+pub mod scan;
 pub mod severity;
 pub mod subsystems;
 pub mod validate;

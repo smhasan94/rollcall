@@ -1,0 +1,76 @@
+{
+  "schema": "rollcall-scan/1",
+  "sbom": {
+    "serialNumber": "urn:uuid:8e0be035-e3e2-8b15-92b4-4540a576be49",
+    "version": 1
+  },
+  "scanners": [
+    {
+      "name": "grype",
+      "version": "0.119.0",
+      "status": "ok",
+      "offline": false
+    },
+    {
+      "name": "osv-scanner",
+      "version": "2.6.0",
+      "status": "ok",
+      "offline": false
+    }
+  ],
+  "findings": [
+    {
+      "id": "CVE-2020-36464",
+      "aliases": [
+        "GHSA-qgwf-r2jj-2ccv",
+        "RUSTSEC-2020-0145"
+      ],
+      "component": {
+        "bom-ref": "component:62647f2322484e243234bf35c4beee2e",
+        "name": "heapless",
+        "version": "0.5.0",
+        "purl": "pkg:cargo/heapless@0.5.0"
+      },
+      "package": {
+        "name": "heapless",
+        "version": "0.5.0"
+      },
+      "severity": "high",
+      "fixed_versions": [
+        "0.6.1"
+      ],
+      "sources": [
+        {
+          "scanner": "grype",
+          "id": "GHSA-qgwf-r2jj-2ccv",
+          "severity": "High"
+        },
+        {
+          "scanner": "osv-scanner",
+          "id": "GHSA-qgwf-r2jj-2ccv",
+          "severity": "HIGH"
+        },
+        {
+          "scanner": "osv-scanner",
+          "id": "RUSTSEC-2020-0145"
+        }
+      ],
+      "triage": "unresolved",
+      "vex": []
+    }
+  ],
+  "summary": {
+    "total": 1,
+    "suppressed": 0,
+    "affected": 0,
+    "unresolved": 1,
+    "open_by_severity": {
+      "critical": 0,
+      "high": 1,
+      "medium": 0,
+      "low": 0,
+      "unknown": 0
+    }
+  },
+  "warnings": []
+}

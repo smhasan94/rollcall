@@ -1,0 +1,27 @@
+SEVERITY  ID              COMPONENT  VERSION  FIXED          TRIAGE      VEX  SOURCES
+critical  CVE-2022-35409  mbedtls    2.28.0   2.28.1         unresolved  -    grype
+critical  CVE-2022-46393  mbedtls    2.28.0   2.28.2         unresolved  -    grype
+critical  CVE-2025-47917  mbedtls    2.28.0   3.6.4          unresolved  -    grype
+critical  CVE-2026-34872  mbedtls    2.28.0   3.6.6          unresolved  -    grype
+critical  CVE-2026-34877  mbedtls    2.28.0   3.6.6          unresolved  -    grype
+high      CVE-2021-43666  mbedtls    2.28.0   -              unresolved  -    grype
+high      CVE-2021-45451  mbedtls    2.28.0   3.1.0          unresolved  -    grype
+high      CVE-2023-43615  mbedtls    2.28.0   2.28.5         unresolved  -    grype
+high      CVE-2023-52353  mbedtls    2.28.0   3.5.2          unresolved  -    grype
+high      CVE-2024-23775  mbedtls    2.28.0   2.28.7         unresolved  -    grype
+high      CVE-2024-28960  mbedtls    2.28.0   2.28.8,3.6.0   unresolved  -    grype
+high      CVE-2025-48965  mbedtls    2.28.0   3.6.4          unresolved  -    grype
+high      CVE-2025-52496  mbedtls    2.28.0   3.6.4          unresolved  -    grype
+high      CVE-2026-25835  mbedtls    2.28.0   3.6.6          unresolved  -    grype
+medium    CVE-2022-46392  mbedtls    2.28.0   2.28.2         unresolved  -    grype
+medium    CVE-2024-23170  mbedtls    2.28.0   2.28.7         unresolved  -    grype
+medium    CVE-2025-27809  mbedtls    2.28.0   2.28.10,3.6.3  unresolved  -    grype
+medium    CVE-2025-27810  mbedtls    2.28.0   2.28.10,3.6.3  unresolved  -    grype
+medium    CVE-2025-52497  mbedtls    2.28.0   3.6.4          unresolved  -    grype
+medium    CVE-2025-54764  mbedtls    2.28.0   3.6.5          unresolved  -    grype
+medium    CVE-2025-59438  mbedtls    2.28.0   3.6.5          unresolved  -    grype
+medium    CVE-2025-66442  mbedtls    2.28.0   -              unresolved  -    grype
+medium    CVE-2026-34871  mbedtls    2.28.0   3.6.6          unresolved  -    grype
+
+23 finding(s): 0 suppressed, 0 affected, 23 unresolved; open: 5 critical, 9 high, 9 medium, 0 low, 0 unknown
+scanners: grype 0.119.0 (ok), osv-scanner 2.6.0 (ok)

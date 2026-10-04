@@ -1440,3 +1440,88 @@ fn scan_matching_nothing_warns_and_product_type_is_kept() {
     // The reader requires `type`, so an SBOM without one is malformed input, not a guess.
     assert!(matches!(r, Err(ReportError::Sbom { .. })));
 }
+
+/// A `rollcall scan --json` golden (`tests/golden/scan/`), as a `--scan` input.
+fn scan_golden(name: &str) -> (String, Vec<u8>) {
+    file(&manifest_dir().join("tests/golden/scan").join(name))
+}
+
+#[test]
+fn rollcall_scan_json_gives_the_same_report_as_raw_scanner_output() {
+    // tests/golden/scan/old-mbedtls.scan.json is `rollcall scan --json` on the same SBOM with
+    // the same grype and osv-scanner captures the old-mbedtls case reads raw.
+    let c = case("old-mbedtls");
+    let raw = build(&c.sbom, &c.scans, &c.vex);
+    let via_scan = build(&c.sbom, &[scan_golden("old-mbedtls.scan.json")], &c.vex);
+    assert_eq!(
+        report::to_json(&via_scan).unwrap(),
+        report::to_json(&raw).unwrap()
+    );
+    assert_eq!(report::to_markdown(&via_scan), report::to_markdown(&raw));
+    // Without VEX too.
+    let raw = build(&c.sbom, &c.scans, &[]);
+    let via_scan = build(&c.sbom, &[scan_golden("old-mbedtls.scan.json")], &[]);
+    assert_eq!(
+        report::to_json(&via_scan).unwrap(),
+        report::to_json(&raw).unwrap()
+    );
+}
+
+#[test]
+fn rollcall_scan_triage_is_not_used_and_is_warned_about() {
+    let c = case("old-mbedtls");
+    // Triaged with the OpenVEX golden: 3 suppressed in the scan.
+    let triaged = [scan_golden("old-mbedtls.openvex.scan.json")];
+    let without = build(&c.sbom, &triaged, &[]);
+    let findings = without.findings.as_ref().unwrap();
+    assert_eq!((findings.closed, findings.open), (0, 23));
+    assert!(
+        without
+            .warnings
+            .iter()
+            .any(|w| w.location == "old-mbedtls.openvex.scan.json"
+                && w.message.contains("suppressed 3 finding(s)")
+                && w.message.contains("--vex")),
+        "{:?}",
+        without.warnings
+    );
+    // With the VEX given to the report, the findings close as they do from raw output; the
+    // only difference is that warning.
+    let raw = build(&c.sbom, &c.scans, &c.vex);
+    let with = build(&c.sbom, &triaged, &c.vex);
+    assert_eq!(with.findings, raw.findings);
+    assert_eq!(with.vex, raw.vex);
+    assert_eq!(with.score, raw.score);
+    assert_eq!(with.warnings.len(), raw.warnings.len() + 1);
+}
+
+#[test]
+fn malformed_rollcall_scan_input_is_an_error_never_a_panic() {
+    let c = case("old-mbedtls");
+    let golden = scan_golden("old-mbedtls.scan.json").1;
+    let bad: Vec<Vec<u8>> = vec![
+        br#"{"schema": "rollcall-scan/1"}"#.to_vec(),
+        br#"{"schema": "rollcall-scan/1", "findings": [{"id": 7}]}"#.to_vec(),
+        br#"{"schema": "rollcall-scan/1", "findings": [{"id": "C", "severity": "severe", "package": {"name": "x"}}]}"#.to_vec(),
+        golden[..golden.len() / 2].to_vec(),
+    ];
+    for bytes in bad {
+        let result = report::build(
+            Input {
+                name: "sbom.cdx.json",
+                bytes: c.sbom.as_bytes(),
+            },
+            &[Input {
+                name: "scan.json",
+                bytes: &bytes,
+            }],
+            &[],
+            &timestamp(),
+        );
+        assert!(
+            matches!(result, Err(ReportError::Scan { .. })),
+            "{}",
+            String::from_utf8_lossy(&bytes)
+        );
+    }
+}
