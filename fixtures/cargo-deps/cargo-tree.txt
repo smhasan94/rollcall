@@ -1,0 +1,13 @@
+rollcall-cargo-deps v0.1.0 (/cargo-fixture/rollcall-cargo-deps)
+board-support v0.1.0 (/cargo-fixture/rollcall-cargo-deps/crates/board-support)
+cortex-m-rt v0.7.5
+cortex-m-rt-macros v0.7.5 (proc-macro)
+proc-macro2 v1.0.107
+unicode-ident v1.0.26
+quote v1.0.47
+proc-macro2 v1.0.107 (*)
+syn v2.0.119
+proc-macro2 v1.0.107 (*)
+quote v1.0.47 (*)
+unicode-ident v1.0.26
+panic-halt v1.0.0 (https://github.com/korken89/panic-halt?rev=5505dccc8162d36ae260a12c7d9de870fadcf783#5505dccc)

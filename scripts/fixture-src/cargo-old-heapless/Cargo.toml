@@ -1,0 +1,20 @@
+# Hand-written fixture source (SHA-127), not real-build output: scripts/regen-fixtures-cargo.sh
+# builds it with `cargo auditable` into fixtures/cargo-old-heapless/ (see ../README.md).
+# heapless 0.5.6 is deliberately old: GHSA-qgwf-r2jj-2ccv (RUSTSEC-2020-0145), fixed in 0.6.1.
+[package]
+name = "rollcall-cargo-old-heapless"
+version = "0.1.0"
+edition = "2021"
+license = "Apache-2.0"
+publish = false
+
+# Its own workspace root, not a member of the rollcall workspace.
+[workspace]
+
+[dependencies]
+cortex-m-rt = "=0.7.5"
+panic-halt = "=1.0.0"
+heapless = "=0.5.6"
+
+[profile.release]
+opt-level = "s"

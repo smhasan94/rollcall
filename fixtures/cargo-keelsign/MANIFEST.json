@@ -1,0 +1,85 @@
+{
+  "build_command": [
+    "cargo",
+    "build",
+    "--release",
+    "--locked",
+    "--offline",
+    "--target",
+    "thumbv7em-none-eabihf"
+  ],
+  "build_env": {
+    "CARGO_AUDITABLE_ORIG_ARGS": "{\"offline\":true,\"locked\":true,\"frozen\":false,\"config\":[]}",
+    "CARGO_HOME": "an isolated directory, remapped to /cargo-home",
+    "CARGO_PROFILE_RELEASE_DEBUG": "0",
+    "CARGO_PROFILE_RELEASE_STRIP": "debuginfo",
+    "CARGO_TARGET_THUMBV7EM_NONE_EABIHF_RUSTFLAGS": "--remap-path-prefix=<project dir>=/cargo-fixture/nrf52840-hello --remap-path-prefix=<CARGO_HOME>=/cargo-home",
+    "PATH": "<tools>/bin first: the pinned cargo-auditable, rust-audit-info and flip-link (the tools path does not affect the output)",
+    "RUSTC_WORKSPACE_WRAPPER": "cargo-auditable",
+    "RUSTUP_TOOLCHAIN": "1.91.1"
+  },
+  "commands": {
+    "cargo-metadata.all.json": "cargo metadata --format-version 1 --locked --offline",
+    "cargo-metadata.json": "cargo metadata --format-version 1 --locked --offline --filter-platform thumbv7em-none-eabihf",
+    "cargo-tree.txt": "cargo tree --locked --offline --target thumbv7em-none-eabihf -e normal,build --prefix none --format {p}",
+    "dep-v0.json": "rust-audit-info firmware.elf"
+  },
+  "ecosystem": "cargo",
+  "files": [
+    {
+      "bytes": 480334,
+      "path": "cargo-metadata.all.json",
+      "sha256": "f461002557491308283aa73229caf633ad4c9a131ec26b02220f33472283598c",
+      "transform": "normalise-paths"
+    },
+    {
+      "bytes": 343538,
+      "path": "cargo-metadata.json",
+      "sha256": "f8b8d43c381004e270eaf90238a8944ab960b763bcef2d3192f2454f3eadc7a9",
+      "transform": "normalise-paths"
+    },
+    {
+      "bytes": 3678,
+      "path": "cargo-tree.txt",
+      "sha256": "790c877221bd8e940c1f874a6b47e50817022595309cd421b2361cc0bc625a0e",
+      "transform": "normalise-paths"
+    },
+    {
+      "bytes": 6795,
+      "path": "dep-v0.json",
+      "sha256": "a91d5ed304aab4ef559f092d0c1a8d0adf7bb66532a70ab4a21742dac98a1fdb"
+    },
+    {
+      "bytes": 33800,
+      "path": "firmware.elf",
+      "sha256": "c46b4133de59ba9ae488ad337383066aaf73a13ddc156b89d140f8becfc21a1d"
+    }
+  ],
+  "format": "rollcall-fixtures/1",
+  "generator": "scripts/regen-fixtures-cargo.sh",
+  "host": {
+    "arch": "x86_64",
+    "os": "linux"
+  },
+  "keelsign": {
+    "commit": "9db3bab149f057a1063d6f12a88453f1986929c5",
+    "path": "examples/nrf52840-hello",
+    "url": "https://github.com/smhasan94/keelsign"
+  },
+  "package": "nrf52840-hello",
+  "path_placeholders": {
+    "/cargo-fixture/nrf52840-hello": "the project directory",
+    "/cargo-home": "CARGO_HOME (registry and git checkouts)"
+  },
+  "pins": {
+    "cargo_auditable": "0.7.7",
+    "flip_link": "0.1.12",
+    "rust_audit_info": "0.5.4",
+    "rust_toolchain": "1.91.1",
+    "rustc": "rustc 1.91.1 (ed61e7d7e 2025-11-07)",
+    "target": "thumbv7em-none-eabihf"
+  },
+  "source": "https://github.com/smhasan94/keelsign@9db3bab149f057a1063d6f12a88453f1986929c5:examples/nrf52840-hello",
+  "total_bytes": 868145,
+  "variant": "cargo-keelsign"
+}

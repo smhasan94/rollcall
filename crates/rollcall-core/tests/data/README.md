@@ -99,3 +99,13 @@ table change.
 **Generated** by `scripts/regen-version-tables.sh` from the `west.yml` of Zephyr v4.2.0 to
 v4.4.2 (never edited by hand): one line per pinned project and commit, with the releases
 pinning it. `identify::seed` checks the seed database against it offline.
+
+## `cargo-old-heapless-expected-advisories.txt` — hand-written expected advisories (SHA-127)
+
+A **hand-written** list, not real-build output: the advisories grype (and osv-scanner) must
+report for `heapless 0.5.6` in the SBOM rendered from the real `cargo auditable` build in
+`fixtures/cargo-old-heapless/`.
+
+| File | What it is | Used by |
+|------|------------|---------|
+| `cargo-old-heapless-expected-advisories.txt` | `GHSA-qgwf-r2jj-2ccv` (RUSTSEC-2020-0145), verified with grype 0.119.0 | `scripts/smoke-scan.sh --only cargo-old-heapless` (CI job `grype-cargo-advisory`), `tests/cargo.rs` (`old_heapless_fixture_lists_the_old_crate`) |

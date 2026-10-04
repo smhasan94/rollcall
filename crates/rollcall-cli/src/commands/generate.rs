@@ -1,16 +1,17 @@
-//! `rollcall generate`: render a model, or a Zephyr image or sysbuild build directory, as
-//! CycloneDX 1.6 JSON.
+//! `rollcall generate`: render a model, a Zephyr image or sysbuild build directory, or a Rust
+//! package (`cargo metadata` and a `cargo auditable` ELF), as CycloneDX 1.6 JSON.
 
 use std::io::Write;
 use std::path::Path;
 
+use rollcall_core::cargo::{self, CargoOptions};
 use rollcall_core::identify::{self, DbSource, LoadedDbs};
 use rollcall_core::merge::{self, ProductSpec};
 use rollcall_core::model::Product;
 use rollcall_core::zephyr::{self, IngestOptions, Note, UnknownModule, Warning};
 
 use super::output::write_document;
-use crate::cli::{EXIT_DATAERR, EXIT_NOINPUT, EXIT_USAGE, Format, GenerateArgs};
+use crate::cli::{EXIT_DATAERR, EXIT_NOINPUT, EXIT_UNAVAILABLE, EXIT_USAGE, Format, GenerateArgs};
 
 /// Runs `rollcall generate`, returning the exit code. `identifiers` is the global
 /// `--identifiers` path.
@@ -135,6 +136,9 @@ fn select_db(
 /// the product, any warnings and modules missing from the identifier database, or the exit
 /// code and message to fail with.
 fn load_product(args: &GenerateArgs, dbs: Option<&LoadedDbs>) -> Result<Loaded, (u8, String)> {
+    if args.cargo.is_some() || args.cargo_metadata.is_some() {
+        return load_cargo(args);
+    }
     if let Some(dir) = &args.zephyr {
         let mut options = IngestOptions::new(dir)
             .with_include_sdk(args.include_sdk)
@@ -163,11 +167,11 @@ fn load_product(args: &GenerateArgs, dbs: Option<&LoadedDbs>) -> Result<Loaded, 
             Err(e) => Err((EXIT_DATAERR, e.to_string())),
         };
     }
-    // clap guarantees exactly one of --model / --zephyr.
+    // clap guarantees exactly one of --model / --zephyr / --cargo / --cargo-metadata.
     let Some(model) = &args.model else {
         return Err((
             EXIT_USAGE,
-            "one of --model or --zephyr is required".to_owned(),
+            "one of --model, --zephyr, --cargo or --cargo-metadata is required".to_owned(),
         ));
     };
     let bytes =
@@ -178,6 +182,103 @@ fn load_product(args: &GenerateArgs, dbs: Option<&LoadedDbs>) -> Result<Loaded, 
         warnings: Vec::new(),
         unknown_modules: Vec::new(),
         notes: Vec::new(),
+    })
+}
+
+/// Reads a Rust package: `--cargo-metadata FILE`, or `cargo metadata` run in `--cargo DIR`
+/// (for `--target`), and the `--elf` binary's `.dep-v0` list if given.
+fn load_cargo(args: &GenerateArgs) -> Result<Loaded, (u8, String)> {
+    let (options, unfiltered) = match (&args.cargo_metadata, &args.cargo) {
+        (Some(file), _) => (CargoOptions::from_metadata_file(file), None),
+        (None, Some(dir)) => {
+            let text = run_cargo_metadata(dir, args.target.as_deref())?;
+            let options = CargoOptions::from_metadata_text(text, cargo::LOCKFILE_LOCATION);
+            (options, args.target.is_none().then_some(dir))
+        }
+        (None, None) => {
+            return Err((
+                EXIT_USAGE,
+                "one of --cargo or --cargo-metadata is required".to_owned(),
+            ));
+        }
+    };
+    let mut options = options.with_include_unlinked(args.include_unlinked);
+    if let Some(elf) = &args.elf {
+        options = options.with_elf(elf);
+    }
+    let ingest = cargo::ingest(&options).map_err(|e| {
+        let code = if e.is_read_error() {
+            EXIT_NOINPUT
+        } else {
+            EXIT_DATAERR
+        };
+        (code, e.to_string())
+    })?;
+    let mut warnings = Vec::new();
+    if let Some(dir) = unfiltered {
+        warnings.push(Warning::new(
+            dir.join("Cargo.toml").display().to_string(),
+            "no --target: cargo metadata lists every platform's dependencies; pass the \
+             binary's target triple to resolve for it",
+        ));
+    }
+    warnings.extend(ingest.warnings);
+    Ok(Loaded {
+        product: ingest.product,
+        warnings,
+        unknown_modules: Vec::new(),
+        notes: Vec::new(),
+    })
+}
+
+/// Runs `cargo metadata` for the package in `dir` ([`cargo::metadata_command`], in `dir` so its
+/// `.cargo/config.toml` applies) with `$CARGO`, else `cargo` on PATH: its stdout, or exit 66
+/// (no `Cargo.toml`), 69 (cargo cannot be run) or 65 (cargo failed, with the end of its
+/// stderr). Cargo may use the network; it honours `CARGO_NET_OFFLINE`.
+fn run_cargo_metadata(dir: &Path, target: Option<&str>) -> Result<String, (u8, String)> {
+    let manifest = dir.join("Cargo.toml");
+    if !manifest.is_file() {
+        return Err((
+            EXIT_NOINPUT,
+            format!("{}: no such file", manifest.display()),
+        ));
+    }
+    let cargo_bin = std::env::var_os("CARGO").unwrap_or_else(|| "cargo".into());
+    let output = cargo::metadata_command(&cargo_bin, dir, target)
+        .output()
+        .map_err(|e| {
+            (
+                EXIT_UNAVAILABLE,
+                format!(
+                    "cannot run {}: {e} (install cargo, or set $CARGO to it)",
+                    cargo_bin.to_string_lossy()
+                ),
+            )
+        })?;
+    if !output.status.success() {
+        let stderr = String::from_utf8_lossy(&output.stderr);
+        let lines: Vec<&str> = stderr.lines().collect();
+        let tail = lines
+            .get(lines.len().saturating_sub(20)..)
+            .unwrap_or_default()
+            .join("\n");
+        return Err((
+            EXIT_DATAERR,
+            format!(
+                "{}: cargo metadata failed ({}):\n{tail}",
+                manifest.display(),
+                output.status
+            ),
+        ));
+    }
+    String::from_utf8(output.stdout).map_err(|_| {
+        (
+            EXIT_DATAERR,
+            format!(
+                "{}: cargo metadata printed non-UTF-8 output",
+                manifest.display()
+            ),
+        )
     })
 }
 
