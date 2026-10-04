@@ -1,10 +1,15 @@
 //! `rollcall validate`: check a document against the CycloneDX 1.6 JSON schema (`--schema`)
 //! and/or regulator profiles (`--profile cisa-2026|cra|all|PATH`).
+//!
+//! `--schema` tells a CSAF document (one with `document.csaf_version`) from CycloneDX by
+//! content, and checks it against the vendored CSAF 2.0 schema and the mandatory tests
+//! rollcall implements ([`rollcall_core::csaf::validate`]) instead.
 
 use std::io::Write;
 use std::path::Path;
 
 use rollcall_core::SchemaViolation;
+use rollcall_core::csaf;
 use rollcall_core::cyclonedx::validate_cyclonedx_1_6;
 use rollcall_core::validate::{
     Profile, ProfileError, Report, builtin_ids, builtin_profiles, validate_profiles,
@@ -71,9 +76,15 @@ pub fn run(args: ValidateArgs) -> u8 {
         Ok(document) => document,
         Err(e) => return fail(EXIT_DATAERR, &format!("{file}: not valid JSON: {e}")),
     };
-    let violations = args
-        .schema
-        .then(|| validate_cyclonedx_1_6(&document).err().unwrap_or_default());
+    let is_csaf = csaf::is_csaf(&document);
+    let schema_name = if is_csaf { "CSAF 2.0" } else { "CycloneDX 1.6" };
+    let violations = args.schema.then(|| {
+        if is_csaf {
+            csaf::validate(&document).err().unwrap_or_default()
+        } else {
+            validate_cyclonedx_1_6(&document).err().unwrap_or_default()
+        }
+    });
     let report = profiles.map(|p| validate_profiles(&document, &p));
     let failed = violations.as_ref().is_some_and(|v| !v.is_empty())
         || report.as_ref().is_some_and(|r| !r.passed());
@@ -81,7 +92,7 @@ pub fn run(args: ValidateArgs) -> u8 {
     let written = if args.json {
         write_json(&file, violations.as_deref(), report.as_ref())
     } else {
-        write_text(&file, violations.as_deref(), report.as_ref())
+        write_text(&file, schema_name, violations.as_deref(), report.as_ref())
     };
     match written {
         Ok(()) => code,
@@ -138,6 +149,7 @@ fn plural(n: usize, noun: &str) -> String {
 /// Text: passes on stdout; violations, findings and warnings on stderr.
 fn write_text(
     file: &str,
+    schema_name: &str,
     violations: Option<&[SchemaViolation]>,
     report: Option<&Report>,
 ) -> Result<(), u8> {
@@ -146,7 +158,7 @@ fn write_text(
     // carries the result.
     let mut stderr = std::io::stderr().lock();
     match violations {
-        Some([]) => out.push(format!("{file}: valid CycloneDX 1.6")),
+        Some([]) => out.push(format!("{file}: valid {schema_name}")),
         Some(violations) => {
             let _ = writeln!(stderr, "{file}: {} schema violation(s)", violations.len());
             for violation in violations {

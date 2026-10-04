@@ -1,6 +1,6 @@
 //! Applying VEX claims to normalised findings. See the [module docs](super) for the rules.
 
-use std::collections::BTreeSet;
+use std::collections::{BTreeMap, BTreeSet};
 
 use serde::{Serialize, Serializer};
 
@@ -54,6 +54,15 @@ pub struct AppliedClaim {
     /// The claimed justification, as written.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub justification: Option<String>,
+    /// The claim's free-text detail ([`Claim::detail`]). Not part of `rollcall-scan/1`:
+    /// never serialised, and claims that differ only in it (or in `response`) are reported
+    /// once, so the scan report is unchanged by them.
+    #[serde(skip)]
+    pub detail: Option<String>,
+    /// The claim's CycloneDX `analysis.response` ([`Claim::response`]). Not serialised, as
+    /// `detail`.
+    #[serde(skip)]
+    pub response: Vec<String>,
 }
 
 /// A normalised finding with its triage.
@@ -218,11 +227,35 @@ pub fn apply(
                         document: label.clone(),
                         status: claim.status,
                         justification: claim.justification.clone(),
+                        detail: claim.detail.clone(),
+                        response: claim.response.clone(),
                     });
                 }
             }
         }
-        let statuses: BTreeSet<ClaimStatus> = matched.iter().map(|c| c.status).collect();
+        // Claims that differ only in their detail or response are one claim to the report.
+        // The detail kept is the lexicographically greatest (a detail always beats none):
+        // arbitrary, but deterministic. The responses are the union of all of them, so none
+        // is lost.
+        let mut merged: BTreeMap<(String, ClaimStatus, Option<String>), AppliedClaim> =
+            BTreeMap::new();
+        for claim in matched {
+            let key = (
+                claim.document.clone(),
+                claim.status,
+                claim.justification.clone(),
+            );
+            // `matched` is sorted, so a later claim has the greater detail.
+            let mut claim = claim;
+            if let Some(earlier) = merged.remove(&key) {
+                let union: BTreeSet<String> =
+                    earlier.response.into_iter().chain(claim.response).collect();
+                claim.response = union.into_iter().collect();
+            }
+            merged.insert(key, claim);
+        }
+        let matched = merged;
+        let statuses: BTreeSet<ClaimStatus> = matched.values().map(|c| c.status).collect();
         let triage = match statuses.iter().collect::<Vec<_>>().as_slice() {
             [] => Triage::Unresolved,
             [one] => match one {
@@ -234,7 +267,7 @@ pub fn apply(
             },
             _ => {
                 let described: Vec<String> = matched
-                    .iter()
+                    .values()
                     .map(|c| format!("{} ({})", c.status, c.document))
                     .collect();
                 let component = finding.component.as_ref().map_or_else(
@@ -254,7 +287,7 @@ pub fn apply(
         out.push(ScanFinding {
             finding,
             triage,
-            vex: matched.into_iter().collect(),
+            vex: matched.into_values().collect(),
         });
     }
     Applied {

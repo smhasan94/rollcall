@@ -1,0 +1,457 @@
+{
+  "document": {
+    "category": "csaf_vex",
+    "csaf_version": "2.0",
+    "lang": "en",
+    "publisher": {
+      "category": "vendor",
+      "name": "Example Devices Ltd",
+      "namespace": "https://devices.example"
+    },
+    "title": "VEX for old-tls-node 1.0.0",
+    "tracking": {
+      "current_release_date": "2026-01-02T03:04:05Z",
+      "generator": {
+        "date": "2026-01-02T03:04:05Z",
+        "engine": {
+          "name": "rollcall",
+          "version": "0.0.1"
+        }
+      },
+      "id": "rollcall-csaf-d9ec7f187e7bd531",
+      "initial_release_date": "2026-01-02T03:04:05Z",
+      "revision_history": [
+        {
+          "date": "2026-01-02T03:04:05Z",
+          "number": "1",
+          "summary": "Initial version."
+        }
+      ],
+      "status": "final",
+      "version": "1"
+    }
+  },
+  "product_tree": {
+    "branches": [
+      {
+        "branches": [
+          {
+            "category": "product_version",
+            "name": "1.0.0",
+            "product": {
+              "name": "old-tls-node 1.0.0",
+              "product_id": "product:cb91904541becd528b35755f21604693"
+            }
+          }
+        ],
+        "category": "product_name",
+        "name": "old-tls-node"
+      }
+    ],
+    "full_product_names": [
+      {
+        "name": "mbedtls 2.28.0",
+        "product_id": "component:9404b57b22a8bf72df5b6d6c93f4defd",
+        "product_identification_helper": {
+          "cpe": "cpe:2.3:a:arm:mbed_tls:2.28.0:*:*:*:*:*:*:*",
+          "purl": "pkg:github/mbed-tls/mbedtls@v2.28.0"
+        }
+      }
+    ],
+    "relationships": [
+      {
+        "category": "default_component_of",
+        "full_product_name": {
+          "name": "mbedtls 2.28.0 as a component of old-tls-node 1.0.0",
+          "product_id": "component:9404b57b22a8bf72df5b6d6c93f4defd@product:cb91904541becd528b35755f21604693"
+        },
+        "product_reference": "component:9404b57b22a8bf72df5b6d6c93f4defd",
+        "relates_to_product_reference": "product:cb91904541becd528b35755f21604693"
+      }
+    ]
+  },
+  "vulnerabilities": [
+    {
+      "cve": "CVE-2021-43666",
+      "notes": [
+        {
+          "category": "summary",
+          "text": "CVE-2021-43666 was reported for mbedtls 2.28.0 by grype. Highest severity reported: high."
+        }
+      ],
+      "product_status": {
+        "under_investigation": [
+          "component:9404b57b22a8bf72df5b6d6c93f4defd@product:cb91904541becd528b35755f21604693"
+        ]
+      }
+    },
+    {
+      "cve": "CVE-2021-45451",
+      "notes": [
+        {
+          "category": "summary",
+          "text": "CVE-2021-45451 was reported for mbedtls 2.28.0 by grype. Highest severity reported: high."
+        }
+      ],
+      "product_status": {
+        "under_investigation": [
+          "component:9404b57b22a8bf72df5b6d6c93f4defd@product:cb91904541becd528b35755f21604693"
+        ]
+      }
+    },
+    {
+      "cve": "CVE-2022-35409",
+      "flags": [
+        {
+          "label": "vulnerable_code_not_present",
+          "product_ids": [
+            "component:9404b57b22a8bf72df5b6d6c93f4defd@product:cb91904541becd528b35755f21604693"
+          ]
+        }
+      ],
+      "notes": [
+        {
+          "category": "summary",
+          "text": "CVE-2022-35409 was reported for mbedtls 2.28.0 by grype. Highest severity reported: critical."
+        }
+      ],
+      "product_status": {
+        "known_not_affected": [
+          "component:9404b57b22a8bf72df5b6d6c93f4defd@product:cb91904541becd528b35755f21604693"
+        ]
+      },
+      "threats": [
+        {
+          "category": "impact",
+          "details": "DTLS support (MBEDTLS_SSL_PROTO_DTLS) is not compiled in.",
+          "product_ids": [
+            "component:9404b57b22a8bf72df5b6d6c93f4defd@product:cb91904541becd528b35755f21604693"
+          ]
+        }
+      ]
+    },
+    {
+      "cve": "CVE-2022-46392",
+      "notes": [
+        {
+          "category": "summary",
+          "text": "CVE-2022-46392 was reported for mbedtls 2.28.0 by grype. Highest severity reported: medium."
+        }
+      ],
+      "product_status": {
+        "known_affected": [
+          "component:9404b57b22a8bf72df5b6d6c93f4defd@product:cb91904541becd528b35755f21604693"
+        ]
+      },
+      "remediations": [
+        {
+          "category": "none_available",
+          "details": "Upgrade Mbed TLS to 2.28.2 or later.",
+          "product_ids": [
+            "component:9404b57b22a8bf72df5b6d6c93f4defd@product:cb91904541becd528b35755f21604693"
+          ]
+        }
+      ]
+    },
+    {
+      "cve": "CVE-2022-46393",
+      "flags": [
+        {
+          "label": "vulnerable_code_not_present",
+          "product_ids": [
+            "component:9404b57b22a8bf72df5b6d6c93f4defd@product:cb91904541becd528b35755f21604693"
+          ]
+        }
+      ],
+      "notes": [
+        {
+          "category": "summary",
+          "text": "CVE-2022-46393 was reported for mbedtls 2.28.0 by grype. Highest severity reported: critical."
+        }
+      ],
+      "product_status": {
+        "known_not_affected": [
+          "component:9404b57b22a8bf72df5b6d6c93f4defd@product:cb91904541becd528b35755f21604693"
+        ]
+      },
+      "threats": [
+        {
+          "category": "impact",
+          "details": "DTLS support (MBEDTLS_SSL_PROTO_DTLS) is not compiled in.",
+          "product_ids": [
+            "component:9404b57b22a8bf72df5b6d6c93f4defd@product:cb91904541becd528b35755f21604693"
+          ]
+        }
+      ]
+    },
+    {
+      "cve": "CVE-2023-43615",
+      "notes": [
+        {
+          "category": "summary",
+          "text": "CVE-2023-43615 was reported for mbedtls 2.28.0 by grype. Highest severity reported: high."
+        }
+      ],
+      "product_status": {
+        "under_investigation": [
+          "component:9404b57b22a8bf72df5b6d6c93f4defd@product:cb91904541becd528b35755f21604693"
+        ]
+      }
+    },
+    {
+      "cve": "CVE-2023-52353",
+      "notes": [
+        {
+          "category": "summary",
+          "text": "CVE-2023-52353 was reported for mbedtls 2.28.0 by grype. Highest severity reported: high."
+        }
+      ],
+      "product_status": {
+        "under_investigation": [
+          "component:9404b57b22a8bf72df5b6d6c93f4defd@product:cb91904541becd528b35755f21604693"
+        ]
+      }
+    },
+    {
+      "cve": "CVE-2024-23170",
+      "notes": [
+        {
+          "category": "summary",
+          "text": "CVE-2024-23170 was reported for mbedtls 2.28.0 by grype. Highest severity reported: medium."
+        }
+      ],
+      "product_status": {
+        "under_investigation": [
+          "component:9404b57b22a8bf72df5b6d6c93f4defd@product:cb91904541becd528b35755f21604693"
+        ]
+      }
+    },
+    {
+      "cve": "CVE-2024-23775",
+      "flags": [
+        {
+          "label": "vulnerable_code_not_present",
+          "product_ids": [
+            "component:9404b57b22a8bf72df5b6d6c93f4defd@product:cb91904541becd528b35755f21604693"
+          ]
+        }
+      ],
+      "notes": [
+        {
+          "category": "summary",
+          "text": "CVE-2024-23775 was reported for mbedtls 2.28.0 by grype. Highest severity reported: high."
+        }
+      ],
+      "product_status": {
+        "known_not_affected": [
+          "component:9404b57b22a8bf72df5b6d6c93f4defd@product:cb91904541becd528b35755f21604693"
+        ]
+      },
+      "threats": [
+        {
+          "category": "impact",
+          "details": "Neither X.509 CSR writing nor certificate writing is compiled in.",
+          "product_ids": [
+            "component:9404b57b22a8bf72df5b6d6c93f4defd@product:cb91904541becd528b35755f21604693"
+          ]
+        }
+      ]
+    },
+    {
+      "cve": "CVE-2024-28960",
+      "notes": [
+        {
+          "category": "summary",
+          "text": "CVE-2024-28960 was reported for mbedtls 2.28.0 by grype. Highest severity reported: high."
+        }
+      ],
+      "product_status": {
+        "under_investigation": [
+          "component:9404b57b22a8bf72df5b6d6c93f4defd@product:cb91904541becd528b35755f21604693"
+        ]
+      }
+    },
+    {
+      "cve": "CVE-2025-27809",
+      "notes": [
+        {
+          "category": "summary",
+          "text": "CVE-2025-27809 was reported for mbedtls 2.28.0 by grype. Highest severity reported: medium."
+        }
+      ],
+      "product_status": {
+        "under_investigation": [
+          "component:9404b57b22a8bf72df5b6d6c93f4defd@product:cb91904541becd528b35755f21604693"
+        ]
+      }
+    },
+    {
+      "cve": "CVE-2025-27810",
+      "notes": [
+        {
+          "category": "summary",
+          "text": "CVE-2025-27810 was reported for mbedtls 2.28.0 by grype. Highest severity reported: medium."
+        }
+      ],
+      "product_status": {
+        "under_investigation": [
+          "component:9404b57b22a8bf72df5b6d6c93f4defd@product:cb91904541becd528b35755f21604693"
+        ]
+      }
+    },
+    {
+      "cve": "CVE-2025-47917",
+      "notes": [
+        {
+          "category": "summary",
+          "text": "CVE-2025-47917 was reported for mbedtls 2.28.0 by grype. Highest severity reported: critical."
+        }
+      ],
+      "product_status": {
+        "under_investigation": [
+          "component:9404b57b22a8bf72df5b6d6c93f4defd@product:cb91904541becd528b35755f21604693"
+        ]
+      }
+    },
+    {
+      "cve": "CVE-2025-48965",
+      "notes": [
+        {
+          "category": "summary",
+          "text": "CVE-2025-48965 was reported for mbedtls 2.28.0 by grype. Highest severity reported: high."
+        }
+      ],
+      "product_status": {
+        "under_investigation": [
+          "component:9404b57b22a8bf72df5b6d6c93f4defd@product:cb91904541becd528b35755f21604693"
+        ]
+      }
+    },
+    {
+      "cve": "CVE-2025-52496",
+      "notes": [
+        {
+          "category": "summary",
+          "text": "CVE-2025-52496 was reported for mbedtls 2.28.0 by grype. Highest severity reported: high."
+        }
+      ],
+      "product_status": {
+        "under_investigation": [
+          "component:9404b57b22a8bf72df5b6d6c93f4defd@product:cb91904541becd528b35755f21604693"
+        ]
+      }
+    },
+    {
+      "cve": "CVE-2025-52497",
+      "notes": [
+        {
+          "category": "summary",
+          "text": "CVE-2025-52497 was reported for mbedtls 2.28.0 by grype. Highest severity reported: medium."
+        }
+      ],
+      "product_status": {
+        "under_investigation": [
+          "component:9404b57b22a8bf72df5b6d6c93f4defd@product:cb91904541becd528b35755f21604693"
+        ]
+      }
+    },
+    {
+      "cve": "CVE-2025-54764",
+      "notes": [
+        {
+          "category": "summary",
+          "text": "CVE-2025-54764 was reported for mbedtls 2.28.0 by grype. Highest severity reported: medium."
+        }
+      ],
+      "product_status": {
+        "under_investigation": [
+          "component:9404b57b22a8bf72df5b6d6c93f4defd@product:cb91904541becd528b35755f21604693"
+        ]
+      }
+    },
+    {
+      "cve": "CVE-2025-59438",
+      "notes": [
+        {
+          "category": "summary",
+          "text": "CVE-2025-59438 was reported for mbedtls 2.28.0 by grype. Highest severity reported: medium."
+        }
+      ],
+      "product_status": {
+        "under_investigation": [
+          "component:9404b57b22a8bf72df5b6d6c93f4defd@product:cb91904541becd528b35755f21604693"
+        ]
+      }
+    },
+    {
+      "cve": "CVE-2025-66442",
+      "notes": [
+        {
+          "category": "summary",
+          "text": "CVE-2025-66442 was reported for mbedtls 2.28.0 by grype. Highest severity reported: medium."
+        }
+      ],
+      "product_status": {
+        "under_investigation": [
+          "component:9404b57b22a8bf72df5b6d6c93f4defd@product:cb91904541becd528b35755f21604693"
+        ]
+      }
+    },
+    {
+      "cve": "CVE-2026-25835",
+      "notes": [
+        {
+          "category": "summary",
+          "text": "CVE-2026-25835 was reported for mbedtls 2.28.0 by grype. Highest severity reported: high."
+        }
+      ],
+      "product_status": {
+        "under_investigation": [
+          "component:9404b57b22a8bf72df5b6d6c93f4defd@product:cb91904541becd528b35755f21604693"
+        ]
+      }
+    },
+    {
+      "cve": "CVE-2026-34871",
+      "notes": [
+        {
+          "category": "summary",
+          "text": "CVE-2026-34871 was reported for mbedtls 2.28.0 by grype. Highest severity reported: medium."
+        }
+      ],
+      "product_status": {
+        "under_investigation": [
+          "component:9404b57b22a8bf72df5b6d6c93f4defd@product:cb91904541becd528b35755f21604693"
+        ]
+      }
+    },
+    {
+      "cve": "CVE-2026-34872",
+      "notes": [
+        {
+          "category": "summary",
+          "text": "CVE-2026-34872 was reported for mbedtls 2.28.0 by grype. Highest severity reported: critical."
+        }
+      ],
+      "product_status": {
+        "under_investigation": [
+          "component:9404b57b22a8bf72df5b6d6c93f4defd@product:cb91904541becd528b35755f21604693"
+        ]
+      }
+    },
+    {
+      "cve": "CVE-2026-34877",
+      "notes": [
+        {
+          "category": "summary",
+          "text": "CVE-2026-34877 was reported for mbedtls 2.28.0 by grype. Highest severity reported: critical."
+        }
+      ],
+      "product_status": {
+        "under_investigation": [
+          "component:9404b57b22a8bf72df5b6d6c93f4defd@product:cb91904541becd528b35755f21604693"
+        ]
+      }
+    }
+  ]
+}

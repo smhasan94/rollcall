@@ -144,6 +144,16 @@ pub struct Claim {
     pub status: ClaimStatus,
     /// The justification, as written.
     pub justification: Option<String>,
+    /// The statement's free-text detail, as written. OpenVEX: chosen by status,
+    /// `impact_statement` for `not_affected`, `action_statement` for `affected`, then (for
+    /// any status) `status_notes`. CycloneDX: `analysis.detail`. `rollcall-vex/1`: `detail`.
+    /// Only `rollcall csaf` uses it (as the CSAF impact or action text); a value that is not
+    /// a string is ignored.
+    pub detail: Option<String>,
+    /// CycloneDX `analysis.response` (e.g. `update`, `workaround_available`), sorted and
+    /// deduplicated; empty for the other formats. Only `rollcall csaf` uses it (to choose a
+    /// remediation category); values that are not strings are ignored.
+    pub response: Vec<String>,
     /// For an OpenVEX statement whose products have `subcomponents`: those products (the
     /// claim's targets are the subcomponents). Empty otherwise.
     pub products: Vec<ClaimTarget>,
@@ -232,6 +242,16 @@ fn opt_object<'a>(
         None => Ok(None),
         Some(v) => object(v, &format!("{path}.{key}")).map(Some),
     }
+}
+
+/// A free-text field for [`Claim::detail`]: the first of `keys` that holds a non-empty string.
+/// Lenient on purpose: the detail is informational, so a wrong type is ignored rather than
+/// failing a document `rollcall scan` reads.
+fn detail_text(obj: &Map<String, Value>, keys: &[&str]) -> Option<String> {
+    keys.iter()
+        .filter_map(|k| obj.get(*k).and_then(Value::as_str))
+        .find(|s| !s.trim().is_empty())
+        .map(str::to_owned)
 }
 
 fn strings(
@@ -425,6 +445,13 @@ fn parse_openvex(root: &Map<String, Value>) -> Result<VexDocument, VexDocError> 
             )
         })?;
         let justification = opt_str(statement, "justification", &path)?.map(str::to_owned);
+        let detail = match status {
+            ClaimStatus::NotAffected => {
+                detail_text(statement, &["impact_statement", "status_notes"])
+            }
+            ClaimStatus::Affected => detail_text(statement, &["action_statement", "status_notes"]),
+            _ => detail_text(statement, &["status_notes"]),
+        };
         let mut targets = Vec::new();
         let mut products = Vec::new();
         for (p, product) in opt_array(statement, "products", &path)?.iter().enumerate() {
@@ -462,6 +489,8 @@ fn parse_openvex(root: &Map<String, Value>) -> Result<VexDocument, VexDocError> 
                     targets: vec![target],
                     status,
                     justification: justification.clone(),
+                    detail: detail.clone(),
+                    response: Vec::new(),
                     products: products.clone(),
                 },
             ));
@@ -520,6 +549,21 @@ fn parse_cyclonedx(root: &Map<String, Value>) -> Result<VexDocument, VexDocError
             Some(a) => opt_str(a, "justification", &apath)?.map(str::to_owned),
             None => None,
         };
+        let detail = analysis.and_then(|a| detail_text(a, &["detail"]));
+        // Lenient like the detail: informational, never a reason to reject the document.
+        let response: Vec<String> = analysis
+            .and_then(|a| a.get("response"))
+            .and_then(Value::as_array)
+            .map(|items| {
+                items
+                    .iter()
+                    .filter_map(Value::as_str)
+                    .map(str::to_owned)
+                    .collect::<BTreeSet<String>>()
+                    .into_iter()
+                    .collect()
+            })
+            .unwrap_or_default();
         let mut targets = Vec::new();
         for (a, affects) in opt_array(v, "affects", &path)?.iter().enumerate() {
             let fpath = format!("{path}.affects[{a}]");
@@ -567,6 +611,8 @@ fn parse_cyclonedx(root: &Map<String, Value>) -> Result<VexDocument, VexDocError
             targets,
             status,
             justification,
+            detail,
+            response,
             products: Vec::new(),
         });
     }
@@ -595,6 +641,7 @@ fn parse_rollcall(root: &Map<String, Value>) -> Result<VexDocument, VexDocError>
             )
         })?;
         let justification = opt_str(s, "justification", &path)?.map(str::to_owned);
+        let detail = detail_text(s, &["detail"]);
         let cpath = format!("{path}.component");
         let component =
             opt_object(s, "component", &path)?.ok_or_else(|| shape(&cpath, "an object"))?;
@@ -605,6 +652,8 @@ fn parse_rollcall(root: &Map<String, Value>) -> Result<VexDocument, VexDocError>
             targets: vec![ClaimTarget::BomRef(bom_ref.to_owned())],
             status,
             justification,
+            detail,
+            response: Vec::new(),
             products: Vec::new(),
         });
     }
@@ -833,6 +882,92 @@ mod tests {
                 other => panic!("{doc}: {other:?}"),
             }
         }
+    }
+
+    #[test]
+    fn claim_detail_is_read_from_every_format_and_wrong_types_are_ignored() {
+        let openvex_with = |status: &str, extra: Value| {
+            let mut statement = json!({"vulnerability": "CVE-1", "status": status,
+                "products": [{"@id": "pkg:generic/a@1"}]});
+            for (k, v) in extra.as_object().unwrap() {
+                statement[k] = v.clone();
+            }
+            json!({"@context": "https://openvex.dev/ns/v0.2.0", "statements": [statement]})
+        };
+        let openvex = |extra: Value| openvex_with("not_affected", extra);
+        let detail = |doc: &Value| parse(doc).unwrap().claims[0].detail.clone();
+        assert_eq!(
+            detail(&openvex(
+                json!({"impact_statement": "i", "action_statement": "a"})
+            )),
+            Some("i".to_owned())
+        );
+        // The detail is chosen by status: not_affected never takes the action statement.
+        assert_eq!(
+            detail(&openvex(
+                json!({"action_statement": "a", "status_notes": "n"})
+            )),
+            Some("n".to_owned())
+        );
+        assert_eq!(detail(&openvex(json!({"action_statement": "a"}))), None);
+        assert_eq!(
+            detail(&openvex(
+                json!({"impact_statement": " ", "status_notes": "n"})
+            )),
+            Some("n".to_owned())
+        );
+        assert_eq!(detail(&openvex(json!({"impact_statement": 5}))), None);
+        assert_eq!(detail(&openvex(json!({}))), None);
+        // affected: the action statement, never the impact statement.
+        let both = json!({"impact_statement": "i", "action_statement": "a", "status_notes": "n"});
+        assert_eq!(
+            detail(&openvex_with("affected", both.clone())),
+            Some("a".to_owned())
+        );
+        assert_eq!(
+            detail(&openvex_with("affected", json!({"impact_statement": "i"}))),
+            None
+        );
+        // fixed and under_investigation: only status_notes.
+        for status in ["fixed", "under_investigation"] {
+            assert_eq!(
+                detail(&openvex_with(status, both.clone())),
+                Some("n".to_owned()),
+                "{status}"
+            );
+        }
+        // Only CycloneDX carries a response.
+        assert!(
+            parse(&openvex(json!({}))).unwrap().claims[0]
+                .response
+                .is_empty()
+        );
+
+        let cdx = |analysis: Value| {
+            json!({"bomFormat": "CycloneDX", "vulnerabilities": [
+                {"id": "CVE-1", "analysis": analysis, "affects": [{"ref": "c:1"}]}]})
+        };
+        assert_eq!(
+            detail(&cdx(json!({"state": "not_affected", "detail": "d"}))),
+            Some("d".to_owned())
+        );
+        assert_eq!(
+            detail(&cdx(json!({"state": "not_affected", "detail": ["d"]}))),
+            None
+        );
+        let response = |analysis: Value| parse(&cdx(analysis)).unwrap().claims[0].response.clone();
+        assert_eq!(
+            response(json!({"state": "exploitable",
+                "response": ["workaround_available", "update", 3, "update"]})),
+            ["update", "workaround_available"]
+        );
+        assert!(response(json!({"state": "exploitable", "response": "update"})).is_empty());
+        assert!(response(json!({"state": "exploitable"})).is_empty());
+
+        let rollcall = json!({"schema": "rollcall-vex/1", "statements": [
+            {"vulnerability": "CVE-1", "status": "affected", "detail": "upgrade",
+             "component": {"bom-ref": "c:1"}}]});
+        assert_eq!(detail(&rollcall), Some("upgrade".to_owned()));
     }
 
     #[test]

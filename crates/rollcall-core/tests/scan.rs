@@ -895,3 +895,96 @@ proptest! {
         prop_assert_eq!(normalise(&sbom, &shuffled), expected);
     }
 }
+
+/// SHA-132: the claim detail `rollcall csaf` reads is not part of `rollcall-scan/1`. One VEX
+/// document with two statements that differ only in `impact_statement` gives one `vex[]`
+/// entry, and the JSON is byte-identical to the same document without the field.
+#[test]
+fn statements_differing_only_in_detail_are_one_claim_and_leave_the_json_unchanged() {
+    let statement = |impact: Option<&str>| {
+        let mut s = json!({
+            "vulnerability": {"name": "CVE-2020-36464"},
+            "products": [{"@id": "pkg:cargo/heapless@0.5.0"}],
+            "status": "not_affected",
+            "justification": "vulnerable_code_not_in_execute_path"
+        });
+        if let Some(text) = impact {
+            s["impact_statement"] = json!(text);
+        }
+        s
+    };
+    let doc = |statements: Vec<Value>| {
+        json!({"@context": "https://openvex.dev/ns/v0.2.0", "@id": "urn:uuid:1",
+               "author": "test", "timestamp": GOLDEN_TIMESTAMP, "version": 1,
+               "statements": statements})
+    };
+    let with_details = vex_value(
+        "x.openvex.json",
+        &doc(vec![
+            statement(Some("first reason")),
+            statement(Some("second reason")),
+        ]),
+    );
+    let without = vex_value("x.openvex.json", &doc(vec![statement(None)]));
+    assert_eq!(with_details.1.claims.len(), 2);
+
+    let a = report("old-heapless", &[with_details]);
+    let b = report("old-heapless", &[without]);
+    let finding = a
+        .findings
+        .iter()
+        .find(|f| f.finding.ids().contains("CVE-2020-36464"))
+        .expect("the heapless finding");
+    assert_eq!(finding.vex.len(), 1, "{:?}", finding.vex);
+    assert_eq!(finding.triage, Triage::Suppressed);
+    // The kept claim is the lexicographically greatest detail.
+    assert_eq!(finding.vex[0].detail.as_deref(), Some("second reason"));
+    assert_eq!(a.to_json().unwrap(), b.to_json().unwrap());
+}
+
+/// SHA-132: claims that differ only in their CycloneDX `analysis.response` merge into one
+/// `vex[]` entry carrying the union of the responses (none is lost), and `rollcall-scan/1`
+/// JSON is byte-identical to the same document without any response.
+#[test]
+fn claims_differing_only_in_response_merge_with_the_union_of_responses() {
+    let heapless = bom_ref_of(&sbom_text("old-heapless"), "heapless");
+    let vulnerability = |response: Option<Value>| {
+        let mut v = json!({
+            "id": "CVE-2020-36464",
+            "analysis": {"state": "exploitable", "detail": "same text"},
+            "affects": [{"ref": heapless}]
+        });
+        if let Some(r) = response {
+            v["analysis"]["response"] = r;
+        }
+        v
+    };
+    let doc = |vulnerabilities: Vec<Value>| {
+        json!({"bomFormat": "CycloneDX", "specVersion": "1.6", "version": 1,
+               "vulnerabilities": vulnerabilities})
+    };
+    let with = vex_value(
+        "x.cdx.json",
+        &doc(vec![
+            vulnerability(Some(json!(["will_not_fix"]))),
+            vulnerability(Some(json!(["update", "workaround_available"]))),
+        ]),
+    );
+    let without = vex_value("x.cdx.json", &doc(vec![vulnerability(None)]));
+    assert_eq!(with.1.claims.len(), 2);
+
+    let a = report("old-heapless", &[with]);
+    let b = report("old-heapless", &[without]);
+    let finding = a
+        .findings
+        .iter()
+        .find(|f| f.finding.ids().contains("CVE-2020-36464"))
+        .expect("the heapless finding");
+    assert_eq!(finding.vex.len(), 1, "{:?}", finding.vex);
+    assert_eq!(finding.triage, Triage::Affected);
+    assert_eq!(
+        finding.vex[0].response,
+        ["update", "will_not_fix", "workaround_available"]
+    );
+    assert_eq!(a.to_json().unwrap(), b.to_json().unwrap());
+}

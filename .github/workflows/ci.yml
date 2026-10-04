@@ -60,6 +60,11 @@ jobs:
       # (also run by the step above; named here so a schema failure is visible on its own).
       - name: Report schema
         run: cargo test -p rollcall-core --test report json_validates_against_schema_for_every_fixture --locked
+      # Every fixture with captured findings exported with `rollcall csaf` and checked against
+      # the vendored CSAF 2.0 schema (with the CVSS schemas it references) and rollcall's
+      # CSAF mandatory checks, offline (SHA-132; also run by the step above).
+      - name: CSAF schema
+        run: cargo test -p rollcall-core --test csaf csaf_validates_against_schema_for_every_fixture --locked
       # Offline checks of the identifier-database version-table generator.
       - run: python3 scripts/version-tables.py --self-test
 
@@ -337,6 +342,33 @@ jobs:
             echo "blocked: $url (curl exit 7)"
           done
           offline "$TEST_BIN" --ignored --exact offline_db_path_scan_without_network
+
+  # `rollcall csaf` output for every fixture with captured findings against the official CSAF
+  # validator library (@secvisogram/csaf-validator-lib 2.1.6, pinned with integrity hashes in
+  # scripts/csaf-validator/package-lock.json): the strict CSAF 2.0 schema and every
+  # mandatory test, plus a negative control that must fail (SHA-132). Needs the network for
+  # `npm ci`. Run the same locally with `scripts/csaf-check.sh --install`.
+  csaf:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # Keep in sync with rust-toolchain.toml.
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: "1.91.1"
+      - uses: Swatinem/rust-cache@v2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - run: cargo build -p rollcall-cli --locked
+      - name: CSAF check (official validator)
+        run: scripts/csaf-check.sh --install
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: csaf-check
+          path: .cache/csaf
+          if-no-files-found: warn
 
   # rollcall's VEX output against the reference tooling (SHA-113): vexctl (pinned,
   # SHA-256-verified) loads and validates every OpenVEX statement, the CycloneDX VEX

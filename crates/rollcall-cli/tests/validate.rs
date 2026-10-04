@@ -278,3 +278,47 @@ fn validate_closed_output_pipe_exits_without_panic() {
         assert_eq!(status.code(), Some(code), "{}: {status:?}", path.display());
     }
 }
+
+/// SHA-132: `--schema` detects a CSAF document by content and checks it against the vendored
+/// CSAF 2.0 schema and the CSAF mandatory tests rollcall implements: the committed golden
+/// passes; a broken copy fails both.
+#[test]
+fn validate_schema_detects_csaf_and_reports_violations() {
+    let golden = core_dir().join("golden/csaf/old-mbedtls.csaf.json");
+    let out = validate(&golden);
+    assert_eq!(
+        out.status.code(),
+        Some(0),
+        "{}",
+        String::from_utf8_lossy(&out.stderr)
+    );
+    assert_eq!(
+        String::from_utf8(out.stdout).unwrap(),
+        format!("{}: valid CSAF 2.0\n", golden.display())
+    );
+
+    let dir = tempfile::tempdir().unwrap();
+    let mut doc: serde_json::Value =
+        serde_json::from_slice(&std::fs::read(&golden).unwrap()).unwrap();
+    // A schema violation.
+    doc["document"]["tracking"]["status"] = serde_json::json!("done");
+    let path = write_file(
+        dir.path(),
+        "bad-schema.csaf.json",
+        doc.to_string().as_bytes(),
+    );
+    let out = validate(&path);
+    assert_eq!(out.status.code(), Some(1));
+    let stderr = String::from_utf8(out.stderr).unwrap();
+    assert!(stderr.contains("/document/tracking/status"), "{stderr}");
+
+    // Schema-valid, but a product status names an undefined product (mandatory test 6.1.1).
+    doc["document"]["tracking"]["status"] = serde_json::json!("final");
+    doc["vulnerabilities"][0]["product_status"]["under_investigation"] =
+        serde_json::json!(["no-such-product"]);
+    let path = write_file(dir.path(), "bad-ref.csaf.json", doc.to_string().as_bytes());
+    let out = validate(&path);
+    assert_eq!(out.status.code(), Some(1));
+    let stderr = String::from_utf8(out.stderr).unwrap();
+    assert!(stderr.contains("CSAF 6.1.1"), "{stderr}");
+}

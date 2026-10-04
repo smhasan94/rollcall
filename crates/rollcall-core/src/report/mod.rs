@@ -77,7 +77,7 @@ mod coverage;
 mod findings;
 mod markdown;
 mod model;
-mod scan_input;
+pub(crate) mod scan_input;
 mod score;
 mod summary;
 mod unresolved;

@@ -72,6 +72,12 @@ comment.
 | `vex/conflict.rules.yml` | **Hand-written**: two equally ranked rules that disagree about one CVE. | conflict-warning tests |
 | `vex/bad-status.rules.yml` | **Hand-written** malformed rules file (unknown status on line 7). | `rollcall-cli` `tests/vex.rs` |
 
+The three captured-findings inputs (`old-mbedtls` with `tests/golden/vex/old-mbedtls.openvex.json`,
+`old-heapless`, and `zephyr-old-mbedtls` with `tests/golden/zephyr/old-mbedtls.cdx.json`) are
+also the fixtures of `rollcall csaf` (SHA-132): `tests/csaf.rs` (golden
+`tests/golden/csaf/old-mbedtls.csaf.json`), `rollcall-cli` `tests/csaf.rs` and
+`scripts/csaf-check.sh` (the official CSAF validator, CI job `csaf`).
+
 ## `old-mbedtls-expected-cves.txt` — hand-written expected-CVE list
 
 A **hand-written**, reviewed list (not build output): the CVEs grype must report for mbedtls in

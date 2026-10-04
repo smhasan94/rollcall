@@ -51,6 +51,7 @@ placeholders that reserve the names.
 | `rollcall identifiers` | Inspect and lint the identifier database                              |
 | `rollcall report`   | Produce a readiness report (Markdown or JSON) for an SBOM                |
 | `rollcall diff`     | Compare a build's SBOM and findings with its base branch's (Markdown or JSON) |
+| `rollcall csaf`     | Export scan and VEX results as a CSAF 2.0 VEX document                   |
 
 ## Usage
 
@@ -576,6 +577,44 @@ is deterministic and leaves out the SBOM's serial number, timestamp and the inpu
 two builds' reports diff cleanly. The exit code is 0 whenever a report is written, whatever
 the score.
 
+## CSAF export
+
+`rollcall csaf` writes an SBOM's scan and VEX results as a CSAF 2.0 document with the VEX
+profile (`csaf_vex`), for advisory tooling and CRA vulnerability handling:
+
+```sh
+rollcall csaf product.cdx.json --scan grype.json --scan osv.json --vex product.openvex.json \
+  --publisher "Example Devices Ltd" --publisher-namespace https://devices.example -o product.csaf.json
+```
+
+It takes the inputs `rollcall report` takes and triages the findings exactly as `rollcall
+scan --vex` does, so each product status is the scan's triage: `affected` is
+`known_affected` (with a remediation whose category comes from the claim's CycloneDX
+`analysis.response`, else `none_available`, whose text names any version fixed upstream),
+`not_affected` and `false_positive` are `known_not_affected` (with a flag
+for the justification, or an impact statement), `fixed` is `fixed`, and anything unresolved
+is `under_investigation`. Every status is about a component *as part of the product* (a CSAF
+relationship product, `<component bom-ref>@<product bom-ref>`), not the bare component. The
+product tree holds the product under its vendor, name and version branches, and each
+component a finding names as a product whose id is its `bom-ref`, with the SBOM's purl and
+CPE carried byte for byte. Findings on packages the SBOM does not list, or on components of
+scope `excluded`, are left out with a warning. The publisher defaults to the SBOM product's
+supplier (name, and first URL as the namespace); with neither, the command exits 64.
+`--title`, `--tlp` (none by default), `--timestamp` and `--id` (default: derived from the
+content) are optional, so the output is reproducible. Each document is `tracking.version` 1
+with a single revision: since the default id changes with the findings, pass the same
+`--id` for every update of one advisory (numbered revisions are a follow-up).
+
+A document is written only if it passes the vendored (non-strict) OASIS CSAF 2.0 schema and
+the 12 CSAF mandatory tests rollcall implements (6.1.1, 6.1.2, 6.1.6, 6.1.23, 6.1.33 and the
+VEX-profile tests 6.1.27.4/5/7/8/9/10/11); with no finding about a component of the
+product there is nothing to export, and it exits 1 after printing the warnings that say
+why. `rollcall validate --schema` recognises a CSAF document and checks it the same way. In
+CI, the documents of every fixture with captured findings also pass the official validator
+library: the strict CSAF 2.0 schema and the full §6.1 mandatory suite
+(`scripts/csaf-check.sh --install`). The mapping is documented in the `rollcall_core::csaf`
+module, and the handoff to cra-clock in [`docs/cra-clock.md`](docs/cra-clock.md).
+
 ## GitHub Action
 
 [`action/`](action/README.md) is `rollcall-action`, a composite GitHub Action: it generates
@@ -609,14 +648,14 @@ rollcall diff --sbom sbom.cdx.json --scan scan.json --report report.json \
 | Code | Meaning                                                                  |
 |------|--------------------------------------------------------------------------|
 | 0    | Success (including `--help`, `--version`)                                |
-| 1    | `validate`: the document has schema violations or error-severity profile findings; `vex verify`: the signature does not verify; `identifiers lint`: the database has findings; `scan`: an open finding at or above `--fail-on`; `diff`: a new open finding at or above `--fail-on` |
+| 1    | `validate`: the document has schema violations or error-severity profile findings; `vex verify`: the signature does not verify; `identifiers lint`: the database has findings; `scan`: an open finding at or above `--fail-on`; `diff`: a new open finding at or above `--fail-on`; `csaf`: no finding about a component of the product, so nothing to export (nothing is written; the warnings say what was left out) |
 | 2    | `scan`: an unresolved finding, with `--fail-on-unresolved` |
 | 3    | `scan`: a scanner is missing or failed, or its output cannot be read |
-| 64   | Usage error (bad arguments, `validate` without `--schema` or `--profile` or with an unknown profile name, bad `--timestamp`, `--serial-number` or `--product`, `report` or `diff` without `--format`, `diff --base-scan` or `--base-report` without `--base-sbom`, `merge --blob-manifest` without inputs or `--product`, a `vex --kconfig` that names no image of the product, names one twice, or omits `IMAGE=` for a multi-image product; `vex` flags that do not combine, such as `--embed` without `--format cyclonedx`, `--format cyclonedx` without `--sbom`, or `--sign` without `-o`), or subcommand/format not implemented |
-| 65   | Input is malformed: not JSON, not UTF-8, too deeply nested, or an invalid model; or a Zephyr input (SPDX, `west list`, `.config`, `build_info.yml`) or the identifier database (`--identifier-db`, `--identifiers`, `$ROLLCALL_IDENTIFIERS`, also for `--version`) is malformed or has a `db_version` this rollcall does not accept, or `--zephyr` names a sysbuild top-level directory without `--sysbuild` (or an image directory with it); or a `merge` input is not a readable CycloneDX 1.6 document, the inputs conflict (including different product names or versions without `--product`), or the blob manifest is malformed; or a `vex` input (SBOM, model, `--kconfig`, findings, rules, signing key, signature file) is malformed, with `file:line:column` for rules, or the SBOM cannot take the requested VEX output (no `serialNumber` for `--format cyclonedx`, a `serialNumber` that is not a lowercase `urn:uuid:` or a `version` below 1, a non-empty `vulnerabilities` for `--embed`); or a `validate --profile` file is malformed; or a `report` input (the SBOM, a `--scan` or a `--vex` file) is malformed or not a format it reads; or a `diff` input (an SBOM, a scan or a report) is malformed or has the wrong `schema`; or a `scan` SBOM or `--vex` document is malformed; or `cargo metadata` output (`--cargo-metadata`, or `--cargo` when cargo fails) is malformed, has no root package or names two packages the binary's list cannot tell apart, or the `--elf` has no `.dep-v0` section, a malformed one, or was built from another package |
-| 66   | Input file missing or unreadable (including a directory), including a required Zephyr input, the `--west-list` file or an explicit identifier database (`--identifier-db`, `--identifiers` or `$ROLLCALL_IDENTIFIERS`, also for `--version`), a `merge` input, the blob manifest or a blob it lists, a `vex` input, a `report` input, a `diff` input, a `validate --profile` file, or a `scan` SBOM, `--vex` document or `--db-path` directory, or the `--cargo-metadata` file, the `--elf` file or `--cargo DIR`'s `Cargo.toml` |
+| 64   | Usage error (bad arguments, `validate` without `--schema` or `--profile` or with an unknown profile name, bad `--timestamp`, `--serial-number` or `--product`, `report` or `diff` without `--format`, `diff --base-scan` or `--base-report` without `--base-sbom`, `merge --blob-manifest` without inputs or `--product`, a `vex --kconfig` that names no image of the product, names one twice, or omits `IMAGE=` for a multi-image product; `vex` flags that do not combine, such as `--embed` without `--format cyclonedx`, `--format cyclonedx` without `--sbom`, or `--sign` without `-o`; `csaf` without `--scan`, with a bad `--id` or `--tlp`, or without a publisher: no `--publisher`/`--publisher-namespace` and no SBOM supplier name/URL, or a namespace that is not an absolute URI), or subcommand/format not implemented |
+| 65   | Input is malformed: not JSON, not UTF-8, too deeply nested, or an invalid model; or a Zephyr input (SPDX, `west list`, `.config`, `build_info.yml`) or the identifier database (`--identifier-db`, `--identifiers`, `$ROLLCALL_IDENTIFIERS`, also for `--version`) is malformed or has a `db_version` this rollcall does not accept, or `--zephyr` names a sysbuild top-level directory without `--sysbuild` (or an image directory with it); or a `merge` input is not a readable CycloneDX 1.6 document, the inputs conflict (including different product names or versions without `--product`), or the blob manifest is malformed; or a `vex` input (SBOM, model, `--kconfig`, findings, rules, signing key, signature file) is malformed, with `file:line:column` for rules, or the SBOM cannot take the requested VEX output (no `serialNumber` for `--format cyclonedx`, a `serialNumber` that is not a lowercase `urn:uuid:` or a `version` below 1, a non-empty `vulnerabilities` for `--embed`); or a `validate --profile` file is malformed; or a `report` input (the SBOM, a `--scan` or a `--vex` file) is malformed or not a format it reads; or a `diff` input (an SBOM, a scan or a report) is malformed or has the wrong `schema`; or a `scan` SBOM or `--vex` document is malformed; or a `csaf` input (the SBOM, a `--scan` or a `--vex` file) is malformed or not a format it reads; or `cargo metadata` output (`--cargo-metadata`, or `--cargo` when cargo fails) is malformed, has no root package or names two packages the binary's list cannot tell apart, or the `--elf` has no `.dep-v0` section, a malformed one, or was built from another package |
+| 66   | Input file missing or unreadable (including a directory), including a required Zephyr input, the `--west-list` file or an explicit identifier database (`--identifier-db`, `--identifiers` or `$ROLLCALL_IDENTIFIERS`, also for `--version`), a `merge` input, the blob manifest or a blob it lists, a `vex` input, a `report` input, a `csaf` input, a `diff` input, a `validate --profile` file, or a `scan` SBOM, `--vex` document or `--db-path` directory, or the `--cargo-metadata` file, the `--elf` file or `--cargo DIR`'s `Cargo.toml` |
 | 69   | `vex --sign cosign` / `vex verify --cosign`: cosign is not installed, or keyless signing failed (no OIDC identity); `generate --cargo`: cargo cannot be run (`$CARGO`, else `cargo` on PATH) |
-| 70   | Internal error (`vex`, `validate --json`, `report --format json`, `scan --json`, `diff --format json`: the report cannot be serialised) |
+| 70   | Internal error (`vex`, `validate --json`, `report --format json`, `scan --json`, `diff --format json`: the report cannot be serialised; `csaf`: the document fails the CSAF 2.0 schema or a mandatory check, e.g. an SBOM CPE outside CSAF's pattern, and is not written) |
 | 74   | Output cannot be written (for `scan`, also: its temporary directory cannot be created) |
 
 ## CycloneDX schema
@@ -627,6 +666,11 @@ pinned to CycloneDX/specification tag `1.6.2` (commit
 `e833d732337dd33aceb45ff1991f896796f1e5e7`), and compiled into the binary, so validation
 never uses the network. `SOURCE.md` there records the URLs and SHA-256s. To re-fetch them,
 run `scripts/vendor-cyclonedx-schema.sh`, which refuses any file whose SHA-256 does not match.
+
+The CSAF 2.0 JSON schema (OASIS CSAF v2.0 OS, `csaf_json_schema.json`) and the FIRST CVSS
+v2.0, v3.0 and v3.1 schemas it references are vendored the same way in
+`crates/rollcall-core/schema/csaf/` (URLs and SHA-256s in its `SOURCE.md`), fetched and
+checked by `scripts/vendor-csaf-schema.sh`.
 
 ## Building
 

@@ -8,3 +8,5 @@ python/build/
 /.cache/
 # Build output of the hand-written Cargo fixture sources, if built in place.
 /scripts/fixture-src/*/target/
+# The official CSAF validator's npm dependencies (scripts/csaf-check.sh --install).
+/scripts/csaf-validator/node_modules/
