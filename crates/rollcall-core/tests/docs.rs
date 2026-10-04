@@ -697,3 +697,554 @@ fn cargo_docs_have_inputs_mapping_warnings_and_determinism_sections() {
         assert!(CARGO_DOCS.contains(needle), "cargo/mod.rs lacks {needle:?}");
     }
 }
+
+// SHA-134: the Zephyr gap analysis (docs/zephyr-gaps.md) and its outreach drafts
+// (docs/outreach/). The console examples themselves are run by
+// `scripts/check-doc-examples.sh docs/zephyr-gaps.md` and the http(s) links checked by
+// `scripts/check-doc-links.sh`; these tests check the structure and the in-tree links.
+
+/// The repository root.
+fn repo_root() -> std::path::PathBuf {
+    std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../..")
+}
+
+/// A file of the repository, by its path from the root.
+fn repo_file(rel: &str) -> String {
+    let path = repo_root().join(rel);
+    std::fs::read_to_string(&path).unwrap_or_else(|e| panic!("{}: {e}", path.display()))
+}
+
+const ZEPHYR_GAPS: &str = "docs/zephyr-gaps.md";
+
+/// The outreach drafts, each a row of the outreach log.
+const OUTREACH_DRAFTS: [&str; 3] = [
+    "docs/outreach/zephyr-rfc-120474-comment.md",
+    "docs/outreach/zephyr-working-group-thread.md",
+    "docs/outreach/firmware-sbom-talk.md",
+];
+
+/// The `##` sections of docs/zephyr-gaps.md, in order.
+const ZEPHYR_GAPS_SECTIONS: [&str; 13] = [
+    "## How to reproduce",
+    "## What west spdx produces",
+    "## Gap 1: Identifiers",
+    "## Gap 2: Subsystem split",
+    "## Gap 3: MCUboot and sysbuild",
+    "## Gap 4: Blobs",
+    "## Gap 5: CycloneDX",
+    "## rollcall as the companion",
+    "## Proposals upstream",
+    "## Outreach log",
+    "## Responses",
+    "## References",
+    // Not a section of its own: the end of the list, so the order check covers the last one.
+    "",
+];
+
+/// The sections that make claims about `west spdx` and back them with console examples.
+const ZEPHYR_GAPS_CLAIM_SECTIONS: [&str; 6] = [
+    "## What west spdx produces",
+    "## Gap 1: Identifiers",
+    "## Gap 2: Subsystem split",
+    "## Gap 3: MCUboot and sysbuild",
+    "## Gap 4: Blobs",
+    "## Gap 5: CycloneDX",
+];
+
+/// SHA-134 AC1: the gap analysis has every section of the plan, pinned to the fixtures'
+/// Zephyr and west versions, each section covering its topic.
+#[test]
+fn zephyr_gaps_doc_has_required_sections() {
+    let doc = repo_file(ZEPHYR_GAPS);
+    assert!(doc.starts_with("# Zephyr `west spdx` gap analysis\n"));
+    let headings: Vec<&str> = doc.lines().filter(|l| l.starts_with("## ")).collect();
+    let wanted: Vec<&str> = ZEPHYR_GAPS_SECTIONS
+        .iter()
+        .copied()
+        .filter(|h| !h.is_empty())
+        .collect();
+    assert_eq!(headings, wanted, "the ## sections, in order");
+
+    // Pinned to the versions the fixtures were built with.
+    let manifest: serde_json::Value =
+        serde_json::from_str(&repo_file("fixtures/zephyr/MANIFEST.json")).unwrap();
+    let tag = manifest["zephyr"]["tag"].as_str().unwrap();
+    let commit = manifest["zephyr"]["commit"].as_str().unwrap();
+    let west = manifest["west"]["version"].as_str().unwrap();
+    let intro = doc
+        .lines()
+        .take_while(|l| !l.starts_with("## "))
+        .collect::<Vec<_>>()
+        .join("\n");
+    assert!(intro.contains(&format!("**Zephyr {tag}**")), "pin {tag}");
+    assert!(
+        intro.contains(&format!("`{}`", &commit[..8])),
+        "pin {commit}"
+    );
+    assert!(
+        intro.contains(&format!("**west {west}**")),
+        "pin west {west}"
+    );
+    assert!(
+        intro.contains("On `main`"),
+        "the On `main` notes are explained"
+    );
+
+    let required: [(&str, &[&str]); 12] = [
+        (
+            "## How to reproduce",
+            &[
+                "cargo build -p rollcall-cli",
+                "scripts/check-doc-examples.sh docs/zephyr-gaps.md",
+                "scripts/check-doc-links.sh docs/zephyr-gaps.md",
+                "scripts/regen-fixtures.sh",
+                "hand-written",
+            ],
+        ),
+        (
+            "## What west spdx produces",
+            &[
+                "SPDX-2.3",
+                "zephyr.spdx",
+                "app.spdx",
+                "build.spdx",
+                "modules-deps.spdx",
+                "GENERATED_FROM",
+                "**On `main`:**",
+                "--init",
+                "--spdx-version",
+            ],
+        ),
+        (
+            "## Gap 1: Identifiers",
+            &[
+                "security.external-references",
+                "PackageVersion",
+                "--identifier-db",
+                "pkg:github/Mbed-TLS/mbedtls@v4.1.0",
+                "pkg:generic/",
+                "GitHub Actions",
+                "trustedfirmware",
+                "syft:cpe23",
+                "cpe:2.3:o:zephyrproject:zephyr",
+                "operating-system",
+                "#117299",
+                "#105915",
+                "#53479",
+                "identifiers.md",
+                "known-scanner-behaviour",
+            ],
+        ),
+        (
+            "## Gap 2: Subsystem split",
+            &[
+                "^PackageName: zephyr$",
+                "bluetooth-controller",
+                "bluetooth-host",
+                "tls-sockets",
+                "fixtures/zephyr-smp",
+                "subsystems.md",
+                "subpath",
+            ],
+        ),
+        (
+            "## Gap 3: MCUboot and sysbuild",
+            &[
+                "#105917",
+                "#120474",
+                "build_info.yml",
+                "--sysbuild",
+                "rollcall:image-kind",
+                "bootloader",
+                "application",
+                "bom-ref",
+                "byte-identical",
+                "random UUID",
+            ],
+        ),
+        (
+            "## Gap 4: Blobs",
+            &[
+                "blobs:",
+                "walker.py",
+                "--blob-manifest",
+                "crates/rollcall-core/tests/data/blobs/blobs.yaml",
+                "hand-written test data",
+                "rollcall:opaque",
+                "SHA-256",
+            ],
+        ),
+        (
+            "## Gap 5: CycloneDX",
+            &[
+                "SPDX 2.2 or 2.3",
+                "CycloneDX 1.6",
+                "rollcall validate --schema",
+                "--profile all",
+                "**On `main`:**",
+            ],
+        ),
+        (
+            "## rollcall as the companion",
+            &[
+                "west build",
+                "west spdx",
+                "rollcall generate --zephyr build --sysbuild",
+                "west rollcall -d BUILD_DIR [--sysbuild] [-o FILE]",
+                "**not built yet**",
+            ],
+        ),
+        (
+            "## Proposals upstream",
+            &["1. **", "2. **", "3. **", "4. **", "CPE part `o`"],
+        ),
+        (
+            "## Outreach log",
+            &["| Venue | Draft | Posted | Link | Status |"],
+        ),
+        ("## Responses", &["None yet"]),
+        (
+            "## References",
+            &[
+                "https://github.com/zephyrproject-rtos/zephyr/issues/120474",
+                "https://github.com/zephyrproject-rtos/zephyr/issues/117299",
+                "https://github.com/zephyrproject-rtos/zephyr/issues/105915",
+                "https://github.com/zephyrproject-rtos/zephyr/issues/105917",
+                "https://github.com/zephyrproject-rtos/zephyr/issues/53479",
+                "https://github.com/CycloneDX/specification/issues/1122",
+                "migration-guide-4.5.rst",
+            ],
+        ),
+    ];
+    for (heading, terms) in required {
+        let body = md_section(&doc, heading).join("\n");
+        assert!(!body.trim().is_empty(), "{heading} is empty");
+        for term in terms {
+            assert!(body.contains(term), "{heading} lacks {term:?}");
+        }
+    }
+    // Exactly four proposals.
+    let proposals = md_section(&doc, "## Proposals upstream");
+    let numbered = proposals
+        .iter()
+        .filter(|l| l.len() > 3 && l.as_bytes()[0].is_ascii_digit() && l[1..].starts_with(". **"))
+        .count();
+    assert_eq!(numbered, 4, "four proposals");
+}
+
+/// SHA-134 TP1: every claim section shows commands against the fixtures, in console blocks
+/// that `scripts/check-doc-examples.sh` can run (each block starts with a `$ ` command), and
+/// every gap shows what rollcall does with a `rollcall` command.
+#[test]
+fn zephyr_gaps_every_gap_section_has_a_console_example() {
+    let doc = repo_file(ZEPHYR_GAPS);
+    for heading in ZEPHYR_GAPS_CLAIM_SECTIONS {
+        let body = md_section(&doc, heading);
+        let consoles = fenced(&body, "console");
+        assert!(!consoles.is_empty(), "{heading}: no console example");
+        for block in &consoles {
+            assert!(
+                block.starts_with("$ "),
+                "{heading}: a console block must start with a `$ ` command:\n{block}"
+            );
+        }
+        let commands: Vec<&str> = consoles
+            .iter()
+            .flat_map(|b| b.lines())
+            .filter(|l| l.starts_with("$ "))
+            .collect();
+        assert!(
+            commands.iter().any(|c| c.contains("fixtures/")),
+            "{heading}: no command reads the fixtures"
+        );
+        if heading.starts_with("## Gap ") {
+            assert!(
+                commands.iter().any(|c| c.starts_with("$ rollcall ")),
+                "{heading}: no rollcall command"
+            );
+        }
+        // Console blocks are the only examples that are run, so no shell block may hide a
+        // claim in a gap section.
+        if heading != "## What west spdx produces" {
+            assert!(
+                fenced(&body, "sh").is_empty(),
+                "{heading}: use a console block"
+            );
+        }
+    }
+    // The whole document parses for check-doc-examples: every console block is closed and
+    // starts with a command.
+    let all: Vec<&str> = doc.lines().collect();
+    let total = fenced(&all, "console").len();
+    assert!(total >= 15, "{total} console blocks");
+}
+
+/// GitHub's anchor for a heading's text: lower case, punctuation other than `-` and `_`
+/// dropped, spaces as `-`.
+fn github_slug(text: &str) -> String {
+    text.to_lowercase()
+        .chars()
+        .filter(|c| c.is_alphanumeric() || matches!(c, '-' | '_' | ' '))
+        .map(|c| if c == ' ' { '-' } else { c })
+        .collect()
+}
+
+/// The anchors of the headings of a Markdown document, numbered as GitHub numbers repeats.
+fn heading_anchors(markdown: &str) -> std::collections::BTreeSet<String> {
+    use pulldown_cmark::{Event, Parser, Tag, TagEnd};
+    let mut anchors = std::collections::BTreeSet::new();
+    let mut seen = std::collections::BTreeMap::<String, usize>::new();
+    let mut current: Option<String> = None;
+    for event in Parser::new(markdown) {
+        match event {
+            Event::Start(Tag::Heading { .. }) => current = Some(String::new()),
+            Event::Text(t) | Event::Code(t) => {
+                if let Some(h) = &mut current {
+                    h.push_str(&t);
+                }
+            }
+            Event::End(TagEnd::Heading(_)) => {
+                if let Some(h) = current.take() {
+                    let base = github_slug(h.trim());
+                    let n = seen.entry(base.clone()).or_insert(0);
+                    anchors.insert(if *n == 0 {
+                        base.clone()
+                    } else {
+                        format!("{base}-{n}")
+                    });
+                    *n += 1;
+                }
+            }
+            _ => {}
+        }
+    }
+    anchors
+}
+
+/// The link targets of a Markdown document (inline, reference and autolinks, and images).
+fn link_targets(markdown: &str) -> Vec<String> {
+    use pulldown_cmark::{Event, Parser, Tag};
+    Parser::new(markdown)
+        .filter_map(|event| match event {
+            Event::Start(Tag::Link { dest_url, .. })
+            | Event::Start(Tag::Image { dest_url, .. }) => Some(dest_url.to_string()),
+            _ => None,
+        })
+        .collect()
+}
+
+/// SHA-134 TP2 (in-tree half): every relative link in the gap analysis and the outreach
+/// drafts names a file or directory that exists, and every `#anchor` a heading of its
+/// target. (http(s) links are checked by `scripts/check-doc-links.sh`, which needs the
+/// network.)
+#[test]
+fn zephyr_gaps_doc_links_resolve_in_tree() {
+    let root = repo_root();
+    let mut docs = vec![ZEPHYR_GAPS];
+    docs.extend(OUTREACH_DRAFTS);
+    let mut local = 0;
+    let mut external = 0;
+    for doc in docs {
+        let text = repo_file(doc);
+        let dir = root.join(doc).parent().unwrap().to_path_buf();
+        for target in link_targets(&text) {
+            if target.contains("://") || target.starts_with("mailto:") {
+                assert!(
+                    target.starts_with("https://"),
+                    "{doc}: {target} is not https"
+                );
+                external += 1;
+                continue;
+            }
+            local += 1;
+            let (path, anchor) = match target.split_once('#') {
+                Some((p, a)) => (p, Some(a)),
+                None => (target.as_str(), None),
+            };
+            let file = if path.is_empty() {
+                root.join(doc)
+            } else {
+                dir.join(path)
+            };
+            assert!(file.exists(), "{doc}: {target}: {} missing", file.display());
+            if let Some(anchor) = anchor {
+                let md = std::fs::read_to_string(&file)
+                    .unwrap_or_else(|e| panic!("{doc}: {target}: {e}"));
+                assert!(
+                    heading_anchors(&md).contains(anchor),
+                    "{doc}: {target}: no heading #{anchor} in {}",
+                    file.display()
+                );
+            }
+        }
+    }
+    assert!(local >= 30, "{local} in-tree links");
+    assert!(external >= 20, "{external} external links");
+}
+
+/// The body of `## <name>` in `doc`, up to the next `## ` heading.
+fn h2_body<'a>(doc: &'a str, name: &str) -> Vec<&'a str> {
+    md_section(doc, &format!("## {name}"))
+}
+
+/// SHA-134 AC2 (drafts): the three outreach drafts exist, say where they go and what to do
+/// before posting, link the gap analysis, and carry no tool attribution. The RFC comment is
+/// under 250 words and answers the RFC's sysbuild question.
+#[test]
+fn zephyr_gaps_outreach_drafts_exist_and_link_the_doc() {
+    for draft in OUTREACH_DRAFTS {
+        let text = repo_file(draft);
+        assert!(text.starts_with("# "), "{draft}: no title");
+        assert!(text.contains("**Venue"), "{draft}: no venue");
+        assert!(
+            text.contains("**Before posting:**"),
+            "{draft}: no posting note"
+        );
+        assert!(
+            link_targets(&text)
+                .iter()
+                .any(|t| t.starts_with("../zephyr-gaps.md")),
+            "{draft}: does not link the gap analysis"
+        );
+        for banned in [
+            "Claude",
+            "Anthropic",
+            "AI-generated",
+            "Generated with",
+            "ChatGPT",
+        ] {
+            assert!(!text.contains(banned), "{draft}: contains {banned:?}");
+        }
+    }
+
+    let rfc = repo_file(OUTREACH_DRAFTS[0]);
+    assert!(rfc.contains("https://github.com/zephyrproject-rtos/zephyr/issues/120474"));
+    let comment = h2_body(&rfc, "Comment").join("\n");
+    let words = comment.split_whitespace().count();
+    assert!(
+        (50..250).contains(&words),
+        "the RFC comment has {words} words"
+    );
+    for term in [
+        "sysbuild",
+        "build_info.yml",
+        "#105917",
+        "CycloneDX/specification#1122",
+    ] {
+        assert!(comment.contains(term), "the RFC comment lacks {term:?}");
+    }
+    assert!(
+        comment.contains("](../zephyr-gaps.md"),
+        "the RFC comment links the gap analysis"
+    );
+    // No pitch: the comment answers the RFC's question and does not name the tool.
+    assert!(
+        !comment.to_lowercase().contains("rollcall"),
+        "the RFC comment names rollcall"
+    );
+    assert!(
+        !comment.contains("west rollcall"),
+        "the RFC comment offers west rollcall"
+    );
+
+    let thread = repo_file(OUTREACH_DRAFTS[1]);
+    assert!(!h2_body(&thread, "Title").join("").trim().is_empty());
+    let post = h2_body(&thread, "Post").join("\n");
+    for term in [
+        "**Identifiers.**",
+        "**Subsystems.**",
+        "**Sysbuild.**",
+        "**Blobs.**",
+        "**CycloneDX.**",
+        "`west rollcall`",
+        "Security Working Group",
+    ] {
+        assert!(
+            post.contains(term) || thread.contains(term),
+            "the thread lacks {term:?}"
+        );
+    }
+
+    let talk = repo_file(OUTREACH_DRAFTS[2]);
+    let sections: Vec<&str> = talk.lines().filter(|l| l.starts_with("## ")).collect();
+    for (i, n) in (1..=10).enumerate() {
+        assert!(
+            sections
+                .get(i)
+                .is_some_and(|s| s.starts_with(&format!("## {n}. "))),
+            "talk section {n}: {sections:?}"
+        );
+    }
+    assert_eq!(sections.get(10), Some(&"## purl questions"));
+    let questions = h2_body(&talk, "purl questions");
+    for n in 1..=4 {
+        assert!(
+            questions.iter().any(|l| l.starts_with(&format!("{n}. **"))),
+            "purl question {n}"
+        );
+    }
+    for venue in [
+        "CycloneDX/specification/discussions",
+        "#cyclonedx",
+        "SBOM Everywhere SIG",
+        "purl-spec/discussions",
+    ] {
+        assert!(talk.contains(venue), "the talk lacks venue {venue:?}");
+    }
+}
+
+/// SHA-134 AC2/AC3 bookkeeping: the outreach log has the fixed columns and one row per
+/// draft in docs/outreach/, and a row marked posted has its link.
+#[test]
+fn zephyr_gaps_outreach_log_has_fixed_columns() {
+    let doc = repo_file(ZEPHYR_GAPS);
+    let log = md_section(&doc, "## Outreach log");
+    let table: Vec<&str> = log.iter().copied().filter(|l| l.starts_with('|')).collect();
+    assert_eq!(
+        table.first().copied(),
+        Some("| Venue | Draft | Posted | Link | Status |")
+    );
+    assert!(
+        table.get(1).is_some_and(|l| l.starts_with("|---")),
+        "no delimiter row"
+    );
+    let rows = &table[2..];
+    let mut on_disk: Vec<String> = std::fs::read_dir(repo_root().join("docs/outreach"))
+        .unwrap()
+        .map(|e| e.unwrap().file_name().to_string_lossy().into_owned())
+        .filter(|n| n.ends_with(".md"))
+        .collect();
+    on_disk.sort();
+    let mut listed: Vec<String> = Vec::new();
+    for row in rows {
+        let cells: Vec<&str> = row
+            .trim()
+            .trim_start_matches('|')
+            .trim_end_matches('|')
+            .split('|')
+            .map(str::trim)
+            .collect();
+        assert_eq!(cells.len(), 5, "{row}");
+        let [venue, draft, posted, link, status] = cells[..] else {
+            unreachable!()
+        };
+        assert!(!venue.is_empty() && !status.is_empty(), "{row}");
+        let target = draft
+            .split_once("](outreach/")
+            .and_then(|(_, rest)| rest.strip_suffix(')'))
+            .unwrap_or_else(|| panic!("{row}: draft cell is not a link into outreach/"));
+        listed.push(target.to_string());
+        if !posted.is_empty() {
+            assert!(link.contains("https://"), "{row}: posted without a link");
+        }
+    }
+    listed.sort();
+    assert_eq!(listed, on_disk, "one log row per draft");
+    let expected: Vec<String> = OUTREACH_DRAFTS
+        .iter()
+        .map(|d| d.trim_start_matches("docs/outreach/").to_string())
+        .collect::<std::collections::BTreeSet<_>>()
+        .into_iter()
+        .collect();
+    assert_eq!(listed, expected);
+}

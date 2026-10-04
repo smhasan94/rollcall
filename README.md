@@ -244,6 +244,9 @@ build and `west spdx -d <build>` after it to create `spdx/`.
 Every fact carries evidence naming the file and line it came from. The full mapping is in the
 `rollcall_core::zephyr` module docs.
 
+What `west spdx` leaves out and how rollcall fills it, with every claim reproducible against
+the fixtures: [`docs/zephyr-gaps.md`](docs/zephyr-gaps.md).
+
 ### Cargo ingestion
 
 `--cargo DIR` runs `cargo metadata --format-version 1 --locked [--filter-platform TRIPLE]` in
