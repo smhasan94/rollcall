@@ -31,7 +31,7 @@ use crate::vex::{Finding, FindingsError, Scanner};
 use crate::warning::Warning;
 
 /// Whether `value` is a `rollcall-scan/1` document.
-pub(super) fn is_scan_report(value: &Value) -> bool {
+pub(crate) fn is_scan_report(value: &Value) -> bool {
     value.get("schema").and_then(Value::as_str) == Some(SCAN_SCHEMA)
 }
 
@@ -107,7 +107,7 @@ fn scanner_of(name: &str) -> Option<Scanner> {
 }
 
 /// Reads a `rollcall-scan/1` document's findings (see the [module docs](self)).
-pub(super) fn parse_scan_report(
+pub(crate) fn parse_scan_report(
     value: &Value,
 ) -> Result<(Vec<Finding>, Vec<Warning>), FindingsError> {
     let root = object(value, "$")?;

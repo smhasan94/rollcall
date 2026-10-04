@@ -15,6 +15,7 @@
 //! osv-scanner findings for an SBOM, triages them with VEX documents and decides
 //! `rollcall scan`'s exit code. Both use [`severity`] to normalise scanners' severity words.
 //! [`diff`] compares a pull request's SBOM and findings with its base branch's (`rollcall diff`).
+//! [`csaf`] exports the scan and VEX results as a CSAF 2.0 VEX document (`rollcall csaf`).
 
 #![deny(missing_docs)]
 #![deny(
@@ -35,6 +36,7 @@
 
 pub mod blob;
 pub mod cargo;
+pub mod csaf;
 pub mod cyclonedx;
 pub mod diff;
 pub mod identify;

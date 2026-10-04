@@ -4,7 +4,7 @@ use assert_cmd::Command;
 use predicates::prelude::*;
 
 /// Every subcommand with its one-line `--help` description.
-const SUBCOMMANDS: [(&str, &str); 9] = [
+const SUBCOMMANDS: [(&str, &str); 10] = [
     (
         "generate",
         "Generate a CycloneDX SBOM from firmware build metadata",
@@ -31,6 +31,10 @@ const SUBCOMMANDS: [(&str, &str); 9] = [
     (
         "diff",
         "Compare a build's SBOM and findings with its base branch's (Markdown or JSON)",
+    ),
+    (
+        "csaf",
+        "Export scan and VEX results as a CSAF 2.0 VEX document",
     ),
 ];
 
@@ -64,7 +68,7 @@ fn help_lists_every_subcommand_with_description() {
         );
     }
 
-    // The "Commands:" section lists exactly our eight subcommands plus clap's own `help`.
+    // The "Commands:" section lists exactly our subcommands plus clap's own `help`.
     let listed: Vec<&str> = stdout
         .lines()
         .skip_while(|l| l.trim_end() != "Commands:")

@@ -4,6 +4,7 @@ use std::path::PathBuf;
 use std::str::FromStr;
 
 use clap::{ArgGroup, Args, Parser, Subcommand, ValueEnum};
+use rollcall_core::csaf::TrackingId;
 use rollcall_core::cyclonedx::{SerialNumber, Timestamp};
 use rollcall_core::identify::DbVersion;
 use rollcall_core::merge::ProductSpec;
@@ -30,6 +31,8 @@ pub const EXIT_SCAN_FINDINGS: u8 = 1;
 pub const EXIT_SCAN_UNRESOLVED: u8 = 2;
 /// `scan` only: a scanner is missing or failed, or its output cannot be read.
 pub const EXIT_SCAN_SCANNER: u8 = 3;
+/// `csaf` only: nothing to export (no finding about an SBOM component); nothing is written.
+pub const EXIT_CSAF_EMPTY: u8 = 1;
 
 /// Top-level `rollcall` command line.
 ///
@@ -81,6 +84,8 @@ pub enum Command {
     Report(ReportArgs),
     /// Compare a build's SBOM and findings with its base branch's (Markdown or JSON)
     Diff(DiffArgs),
+    /// Export scan and VEX results as a CSAF 2.0 VEX document
+    Csaf(CsafArgs),
 }
 
 impl Command {
@@ -96,6 +101,7 @@ impl Command {
             Command::Identifiers(_) => "identifiers",
             Command::Report(_) => "report",
             Command::Diff(_) => "diff",
+            Command::Csaf(_) => "csaf",
         }
     }
 }
@@ -510,7 +516,9 @@ pub struct ValidateArgs {
     /// The document to validate
     #[arg(value_name = "FILE")]
     pub file: PathBuf,
-    /// Check the document against the vendored CycloneDX 1.6 JSON schema
+    /// Check the document against the vendored CycloneDX 1.6 JSON schema, or, for a CSAF
+    /// document (detected from the content), the vendored CSAF 2.0 schema and the CSAF
+    /// mandatory tests rollcall implements
     #[arg(long, group = "checks")]
     pub schema: bool,
     /// Check the document against a regulator profile: cisa-2026 (CISA 2026 SBOM minimum
@@ -638,6 +646,106 @@ pub struct DiffArgs {
     #[arg(long, value_enum)]
     pub format: DiffFormat,
     /// Write the diff here instead of to stdout
+    #[arg(short, long, value_name = "FILE")]
+    pub output: Option<PathBuf>,
+}
+
+/// `--publisher-category` values for `rollcall csaf`.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, ValueEnum)]
+pub enum PublisherCategoryArg {
+    /// Coordinator.
+    Coordinator,
+    /// Discoverer.
+    Discoverer,
+    /// Other.
+    Other,
+    /// Translator.
+    Translator,
+    /// User.
+    User,
+    /// Vendor.
+    Vendor,
+}
+
+impl From<PublisherCategoryArg> for rollcall_core::csaf::PublisherCategory {
+    fn from(arg: PublisherCategoryArg) -> Self {
+        match arg {
+            PublisherCategoryArg::Coordinator => Self::Coordinator,
+            PublisherCategoryArg::Discoverer => Self::Discoverer,
+            PublisherCategoryArg::Other => Self::Other,
+            PublisherCategoryArg::Translator => Self::Translator,
+            PublisherCategoryArg::User => Self::User,
+            PublisherCategoryArg::Vendor => Self::Vendor,
+        }
+    }
+}
+
+/// `--tlp` values for `rollcall csaf`.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, ValueEnum)]
+pub enum TlpArg {
+    /// TLP:WHITE.
+    White,
+    /// TLP:GREEN.
+    Green,
+    /// TLP:AMBER.
+    Amber,
+    /// TLP:RED.
+    Red,
+}
+
+impl From<TlpArg> for rollcall_core::csaf::Tlp {
+    fn from(arg: TlpArg) -> Self {
+        match arg {
+            TlpArg::White => Self::White,
+            TlpArg::Green => Self::Green,
+            TlpArg::Amber => Self::Amber,
+            TlpArg::Red => Self::Red,
+        }
+    }
+}
+
+/// Arguments of `rollcall csaf`.
+#[derive(Debug, Args)]
+pub struct CsafArgs {
+    /// The CycloneDX 1.6 SBOM the findings are about (e.g. from `rollcall generate`); its
+    /// hierarchy becomes the CSAF product tree, with each bom-ref as the product id
+    #[arg(value_name = "FILE")]
+    pub file: PathBuf,
+    /// Scanner output for the SBOM: grype `-o json`, osv-scanner `--format json` or
+    /// `rollcall scan --json` (rollcall-scan/1; its VEX triage is not used, pass --vex)
+    /// (detected from the content). Repeatable; at least one
+    #[arg(long, value_name = "FILE", required = true)]
+    pub scan: Vec<PathBuf>,
+    /// VEX statements for the SBOM, as `rollcall scan --vex` reads them (OpenVEX, CycloneDX
+    /// VEX, an SBOM with embedded vulnerabilities, or rollcall-vex/1; detected from the
+    /// content). Repeatable. Without it every finding is under investigation
+    #[arg(long, value_name = "FILE")]
+    pub vex: Vec<PathBuf>,
+    /// Publisher name (document.publisher.name). Defaults to the SBOM product's supplier name
+    #[arg(long, value_name = "NAME")]
+    pub publisher: Option<String>,
+    /// Publisher namespace: a URL under the publisher's control (document.publisher.namespace).
+    /// Defaults to the SBOM product supplier's first url
+    #[arg(long, value_name = "URI")]
+    pub publisher_namespace: Option<String>,
+    /// Publisher category (document.publisher.category)
+    #[arg(long, value_enum, default_value_t = PublisherCategoryArg::Vendor)]
+    pub publisher_category: PublisherCategoryArg,
+    /// Document title. Defaults to "VEX for PRODUCT VERSION", from the SBOM
+    #[arg(long, value_name = "TEXT")]
+    pub title: Option<String>,
+    /// Traffic Light Protocol label (document.distribution.tlp). None by default
+    #[arg(long, value_enum)]
+    pub tlp: Option<TlpArg>,
+    /// Document date (tracking dates), RFC 3339; normalised to UTC. Defaults to the current
+    /// time
+    #[arg(long, value_name = "RFC3339", value_parser = Timestamp::from_str)]
+    pub timestamp: Option<Timestamp>,
+    /// Tracking id (document.tracking.id). Defaults to one derived from the product tree and
+    /// the vulnerabilities
+    #[arg(long, value_name = "ID", value_parser = TrackingId::from_str)]
+    pub id: Option<TrackingId>,
+    /// Write the CSAF document here instead of to stdout
     #[arg(short, long, value_name = "FILE")]
     pub output: Option<PathBuf>,
 }

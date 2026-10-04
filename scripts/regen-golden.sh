@@ -12,9 +12,11 @@
 # from tests/data/findings/ and triaged with the VEX goldens, and the Cargo ingestion goldens
 # under tests/golden/cargo/ rendered from fixtures/cargo-*/ (SHA-127), and the diffs under
 # tests/golden/diff/ (`rollcall diff` of the Zephyr old-mbedTLS golden against the TLS one, with
-# its grype capture; SHA-122), then re-runs the golden tests and the reader round trips against
-# them, and the CLI tests that compare `rollcall generate`, `rollcall merge`, `rollcall vex`,
-# `rollcall validate`, `rollcall report`, `rollcall scan` and `rollcall diff` output with them.
+# its grype capture; SHA-122), and the CSAF document under tests/golden/csaf/ (`rollcall csaf` of
+# the old-mbedTLS model with its captures and the OpenVEX golden; SHA-132), then re-runs the
+# golden tests and the reader round trips against them, and the CLI tests that compare
+# `rollcall generate`, `rollcall merge`, `rollcall vex`, `rollcall validate`, `rollcall report`,
+# `rollcall scan`, `rollcall diff` and `rollcall csaf` output with them.
 #
 # Golden files are only ever produced by this script, never edited by hand. Review the
 # resulting diff like code.
@@ -29,12 +31,12 @@ ROLLCALL_BLESS=1 cargo test -p rollcall-core --test golden --test cyclonedx --te
 # The validation goldens are derived from tests/golden/clean.cdx.json, so they are blessed
 # after it.
 ROLLCALL_BLESS=1 cargo test -p rollcall-core --test validate
-# The report and scan goldens read the VEX goldens (tests/golden/vex/), and the diff goldens
-# the Zephyr ones (tests/golden/zephyr/), so they are blessed after them. The diff bless pass
-# skips the golden inventory, as above.
-ROLLCALL_BLESS=1 cargo test -p rollcall-core --test report --test scan --test diff -- --skip every_committed
-cargo test -p rollcall-core --test golden --test cyclonedx --test zephyr --test cargo --test blob --test reader --test vex --test validate --test report --test scan --test diff
-cargo test -p rollcall-cli --test generate --test generate_zephyr --test generate_cargo --test merge --test vex --test validate_profile --test report --test scan --test diff
+# The report, scan and CSAF goldens read the VEX goldens (tests/golden/vex/), and the diff
+# goldens the Zephyr ones (tests/golden/zephyr/), so they are blessed after them. The diff and
+# CSAF bless passes skip the golden inventory, as above.
+ROLLCALL_BLESS=1 cargo test -p rollcall-core --test report --test scan --test diff --test csaf -- --skip every_committed
+cargo test -p rollcall-core --test golden --test cyclonedx --test zephyr --test cargo --test blob --test reader --test vex --test validate --test report --test scan --test diff --test csaf
+cargo test -p rollcall-cli --test generate --test generate_zephyr --test generate_cargo --test merge --test vex --test validate_profile --test report --test scan --test diff --test csaf --test validate
 
 git status --short -- crates/rollcall-core/tests/golden
 git diff --stat -- crates/rollcall-core/tests/golden
