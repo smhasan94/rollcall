@@ -1,0 +1,151 @@
+# rollcall ESP-IDF table: the esp-idf component's identifiers, the subsystems split out of it
+# (enabling sdkconfig symbols -> archives the link map must show linked), and the directories
+# of Espressif's prebuilt binary libraries (blobs).
+#
+# Hand-maintained (not a build fixture). The schema and rules are documented in the
+# rollcall_core::esp_idf::table module docs and docs/esp-idf.md. Every symbol, archive and
+# directory was checked against ESP-IDF v5.5.1 (the espressif/idf:v5.5.1 Docker image pinned by
+# scripts/regen-fixtures-esp-idf.sh). Upstream versions per ESP-IDF tag come from that tree:
+# components/mbedtls/mbedtls/include/mbedtls/build_info.h (MBEDTLS_VERSION_STRING) and
+# components/lwip/lwip/src/include/lwip/init.h (LWIP_VERSION_STRING, which Espressif's fork
+# reports as 2.2.0d: by lwIP's scheme, in development toward 2.2.0). The purls name the
+# Espressif forks ESP-IDF's .gitmodules points at (espressif/mbedtls, espressif/esp-lwip), in
+# the identifier database's pkg:generic form. CPE
+# vendor:product pairs were confirmed with scripts/nvd-spot-check.sh.
+format: rollcall-esp-idf/1
+idf:
+  tag: v5.5.1
+  purl: 'pkg:generic/esp-idf@{version}?vcs_url=git+https://github.com/espressif/esp-idf'
+  cpe: 'cpe:2.3:a:espressif:esp-idf:{version}:*:*:*:*:*:*:*'
+  supplier: Espressif Systems
+  supplier_url: https://www.espressif.com
+  licence: Apache-2.0
+subsystems:
+  - name: bluedroid
+    description: Bluedroid Bluetooth host (Classic and LE)
+    symbols: [CONFIG_BT_BLUEDROID_ENABLED]
+    archives: [esp-idf/bt/libbt.a]
+    subpath: components/bt/host/bluedroid
+    rationale: >-
+      A Bluetooth host parses untrusted over-the-air data; libbt.a holds the host the
+      sdkconfig selects (Bluedroid or NimBLE, never both).
+
+  - name: esp-tls
+    description: ESP-TLS, ESP-IDF's TLS abstraction over mbedTLS or wolfSSL
+    symbols: [CONFIG_ESP_TLS_USING_MBEDTLS, CONFIG_ESP_TLS_USING_WOLFSSL]
+    archives: [esp-idf/esp-tls/libesp-tls.a]
+    subpath: components/esp-tls
+    rationale: >-
+      Sets up every TLS connection an application makes (certificate verification,
+      ALPN, PSK); it is what makes an image a TLS client or server.
+
+  - name: lwip
+    description: lwIP TCP/IP stack (Espressif's fork)
+    symbols: [CONFIG_LWIP_ENABLE]
+    archives: [esp-idf/lwip/liblwip.a]
+    subpath: components/lwip/lwip
+    licence: BSD-3-Clause
+    cpe: 'cpe:2.3:a:lwip_project:lwip:{version}:*:*:*:*:*:*:*'
+    purl: 'pkg:generic/lwip@{version}?vcs_url=git+https://github.com/espressif/esp-lwip'
+    upstream_versions:
+      v5.5.1: 2.2.0d
+    rationale: >-
+      A separately versioned upstream network stack with its own CVE history, parsing
+      untrusted packets.
+
+  - name: mbedtls
+    description: Mbed TLS (TLS, X.509 and crypto libraries)
+    symbols: [CONFIG_MBEDTLS_TLS_DISABLED, CONFIG_MBEDTLS_TLS_ENABLED]
+    archives:
+      - esp-idf/mbedtls/mbedtls/library/libmbedcrypto.a
+      - esp-idf/mbedtls/mbedtls/library/libmbedtls.a
+      - esp-idf/mbedtls/mbedtls/library/libmbedx509.a
+    # Espressif's port files (components/mbedtls/port), compiled into the same archives:
+    # hardware SHA/AES/bignum drivers and platform glue. Linking only these (as hello_world
+    # does, for the SHA driver) does not link Mbed TLS itself; they stay in esp-idf.
+    glue:
+      - bignum_alt.c
+      - ecc_alt.c
+      - ecdsa_alt.c
+      - esp_aes.c
+      - esp_aes_common.c
+      - esp_aes_crypto_dma_impl.c
+      - esp_aes_dma_core.c
+      - esp_aes_gcm.c
+      - esp_aes_gdma_impl.c
+      - esp_aes_xts.c
+      - esp_bignum.c
+      - esp_crypto_shared_gdma.c
+      - esp_ds_common.c
+      - esp_ecc.c
+      - esp_hardware.c
+      - esp_mbedtls_dynamic_impl.c
+      - esp_md.c
+      - esp_mem.c
+      - esp_platform_time.c
+      - esp_rsa_dec_alt.c
+      - esp_rsa_sign_alt.c
+      - esp_sha.c
+      - esp_sha1.c
+      - esp_sha256.c
+      - esp_sha512.c
+      - esp_sha_crypto_dma_impl.c
+      - esp_sha_gdma_impl.c
+      - esp_ssl_cli.c
+      - esp_ssl_srv.c
+      - esp_ssl_tls.c
+      - esp_timing.c
+      - mbedtls_debug.c
+      - mbedtls_rom_osi.c
+      - mbedtls_rom_osi_bootloader.c
+      - net_sockets.c
+      - sha.c
+    subpath: components/mbedtls/mbedtls
+    licence: Apache-2.0 OR GPL-2.0-or-later
+    cpe: 'cpe:2.3:a:trustedfirmware:mbed_tls:{version}:*:*:*:*:*:*:*'
+    # Deprecated in the dictionary, but NVD still files Mbed TLS CVEs under it (as in the
+    # identifier database).
+    cpe_aliases: ['cpe:2.3:a:arm:mbed_tls:{version}:*:*:*:*:*:*:*']
+    purl: 'pkg:generic/mbedtls@{version}?vcs_url=git+https://github.com/espressif/mbedtls'
+    upstream_versions:
+      v5.5.1: 3.6.4
+    rationale: >-
+      A separately versioned upstream library with a long CVE history; scanners and VEX
+      statements track it under its own CPE.
+
+  - name: nimble
+    description: Apache NimBLE Bluetooth LE host
+    symbols: [CONFIG_BT_NIMBLE_ENABLED]
+    archives: [esp-idf/bt/libbt.a]
+    subpath: components/bt/host/nimble/nimble
+    rationale: >-
+      A Bluetooth host parses untrusted over-the-air data; libbt.a holds the host the
+      sdkconfig selects (Bluedroid or NimBLE, never both).
+
+  - name: wifi
+    description: Wi-Fi driver glue and the WPA supplicant
+    symbols: [CONFIG_ESP_WIFI_ENABLED]
+    archives:
+      - esp-idf/esp_wifi/libesp_wifi.a
+      - esp-idf/wpa_supplicant/libwpa_supplicant.a
+    subpath: components/esp_wifi
+    rationale: >-
+      The open-source half of the Wi-Fi stack: the driver glue and the WPA supplicant (WPA2/
+      WPA3 handshakes on untrusted frames). The closed half is the blobs below.
+
+# Prebuilt Espressif libraries in the ESP-IDF tree. Every archive under one of these
+# directories that the link map shows linked becomes a blob image, hashed when --idf-path is
+# given. The licence is the directory's LICENSE file.
+blobs:
+  - dir: components/bt/controller
+    description: Bluetooth controller libraries
+    licence: Apache-2.0
+  - dir: components/esp_coex/lib
+    description: Wi-Fi/Bluetooth coexistence library
+    licence: Apache-2.0
+  - dir: components/esp_phy/lib
+    description: PHY and RF calibration libraries
+    licence: Apache-2.0
+  - dir: components/esp_wifi/lib
+    description: Wi-Fi MAC, 802.11 and mesh libraries
+    licence: Apache-2.0

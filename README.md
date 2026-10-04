@@ -103,6 +103,10 @@ rollcall generate --cargo . --target thumbv7em-none-eabihf \
 # ...from captured `cargo metadata --format-version 1 --filter-platform <target>` output,
 # also listing the crates the binary does not link, as `scope: excluded`.
 rollcall generate --cargo-metadata cargo-metadata.json --elf app.elf --include-unlinked
+
+# An ESP-IDF project after `idf.py build`: ESP-IDF and its subsystems, managed components, and
+# the linked Espressif blobs, hashed from the ESP-IDF tree (--idf-path, else $IDF_PATH).
+rollcall generate --esp-idf . --idf-path "$IDF_PATH" -o app.cdx.json
 ```
 
 `generate --format spdx` is reserved and not implemented yet. The same model and options
@@ -110,11 +114,12 @@ always produce byte-identical output; changing only `--timestamp` changes only t
 `timestamp` line. How each model field maps to CycloneDX is documented in the
 `rollcall_core::cyclonedx` module docs (`cargo doc -p rollcall-core --open`).
 
-Exactly one of `--model`, `--zephyr`, `--cargo` and `--cargo-metadata` is required;
-`--west-list`, `--include-sdk`, `--sysbuild`, `--product`, `--identifier-db`, `--identify`
-and `-v`/`--verbose` only go with `--zephyr`, and `--workspace` needs `--west-list` and one of
-`--identifier-db` or `--identify`. `--target` only goes with `--cargo`, `--elf` with `--cargo`
-or `--cargo-metadata`, and `--include-unlinked` needs `--elf`.
+Exactly one of `--model`, `--zephyr`, `--cargo`, `--cargo-metadata` and `--esp-idf` is
+required; `--west-list`, `--include-sdk`, `--sysbuild`, `--product`, `--identifier-db` and
+`--identify` only go with `--zephyr`, `-v`/`--verbose` with `--zephyr` or `--esp-idf`, and
+`--workspace` needs `--west-list` and one of `--identifier-db` or `--identify`. `--target`
+only goes with `--cargo`, `--elf` with `--cargo` or `--cargo-metadata`, `--include-unlinked`
+needs `--elf`, and `--build` and `--idf-path` only go with `--esp-idf`.
 
 With `--zephyr`, the `zephyr` component is split into one `library` subcomponent per Zephyr
 subsystem (Bluetooth host, IP stack, USB, logging, …) that the build's `zephyr/.config`
@@ -286,6 +291,31 @@ product and its one `application` image; every crate is a `library` component.
 The full mapping is in the `rollcall_core::cargo` module docs. `fixtures/cargo-*/` hold real
 `cargo auditable` builds, among them keelsign's `examples/nrf52840-hello`
 ([docs/fixtures.md](docs/fixtures.md)).
+
+### ESP-IDF ingestion
+
+`--esp-idf DIR` reads an ESP-IDF project after `idf.py build`: `build/project_description.json`
+and `sdkconfig` (required), `dependencies.lock`, the component manifests
+(`main/idf_component.yml`, `managed_components/*/idf_component.yml`) and the link map
+`build/<project>.map`. `--build DIR` names another build directory; `--idf-path DIR` (else
+`$IDF_PATH`) the ESP-IDF tree the build used.
+
+- ESP-IDF is a `framework` component `esp-idf` with its version, purl
+  `pkg:generic/esp-idf@<version>?vcs_url=git+https://github.com/espressif/esp-idf`, CPE
+  `cpe:2.3:a:espressif:esp-idf:<version>`, supplier Espressif Systems and licence Apache-2.0.
+- Mbed TLS, lwIP, ESP-TLS, Wi-Fi, Bluedroid and NimBLE are split out of it as subcomponents
+  when the `sdkconfig` enables them *and* the link map shows their code linked; Mbed TLS and
+  lwIP carry their own upstream version, purl (`pkg:generic/mbedtls@<version>?vcs_url=…`,
+  naming the Espressif fork) and CPE, and Mbed TLS also `arm:mbed_tls` as an additional CPE.
+- Every `dependencies.lock` component is a `library` component: registry ones
+  `pkg:generic/<namespace>/<name>@<version>?repository_url=https://components.espressif.com`,
+  git ones with a `vcs_url`, ESP-IDF's own local components the `esp-idf` purl with a subpath.
+- Espressif's prebuilt Wi-Fi, PHY, coexistence and Bluetooth controller libraries the map
+  links are opaque blob images, supplier Espressif Systems, with SHA-256 hashes when the
+  ESP-IDF tree is given (a warning otherwise).
+
+The guide, with the subsystem table, purl rules and the fixtures, is
+[docs/esp-idf.md](docs/esp-idf.md).
 
 ### Identifier database
 
@@ -652,8 +682,8 @@ rollcall diff --sbom sbom.cdx.json --scan scan.json --report report.json \
 | 2    | `scan`: an unresolved finding, with `--fail-on-unresolved` |
 | 3    | `scan`: a scanner is missing or failed, or its output cannot be read |
 | 64   | Usage error (bad arguments, `validate` without `--schema` or `--profile` or with an unknown profile name, bad `--timestamp`, `--serial-number` or `--product`, `report` or `diff` without `--format`, `diff --base-scan` or `--base-report` without `--base-sbom`, `merge --blob-manifest` without inputs or `--product`, a `vex --kconfig` that names no image of the product, names one twice, or omits `IMAGE=` for a multi-image product; `vex` flags that do not combine, such as `--embed` without `--format cyclonedx`, `--format cyclonedx` without `--sbom`, or `--sign` without `-o`; `csaf` without `--scan`, with a bad `--id` or `--tlp`, or without a publisher: no `--publisher`/`--publisher-namespace` and no SBOM supplier name/URL, or a namespace that is not an absolute URI), or subcommand/format not implemented |
-| 65   | Input is malformed: not JSON, not UTF-8, too deeply nested, or an invalid model; or a Zephyr input (SPDX, `west list`, `.config`, `build_info.yml`) or the identifier database (`--identifier-db`, `--identifiers`, `$ROLLCALL_IDENTIFIERS`, also for `--version`) is malformed or has a `db_version` this rollcall does not accept, or `--zephyr` names a sysbuild top-level directory without `--sysbuild` (or an image directory with it); or a `merge` input is not a readable CycloneDX 1.6 document, the inputs conflict (including different product names or versions without `--product`), or the blob manifest is malformed; or a `vex` input (SBOM, model, `--kconfig`, findings, rules, signing key, signature file) is malformed, with `file:line:column` for rules, or the SBOM cannot take the requested VEX output (no `serialNumber` for `--format cyclonedx`, a `serialNumber` that is not a lowercase `urn:uuid:` or a `version` below 1, a non-empty `vulnerabilities` for `--embed`); or a `validate --profile` file is malformed; or a `report` input (the SBOM, a `--scan` or a `--vex` file) is malformed or not a format it reads; or a `diff` input (an SBOM, a scan or a report) is malformed or has the wrong `schema`; or a `scan` SBOM or `--vex` document is malformed; or a `csaf` input (the SBOM, a `--scan` or a `--vex` file) is malformed or not a format it reads; or `cargo metadata` output (`--cargo-metadata`, or `--cargo` when cargo fails) is malformed, has no root package or names two packages the binary's list cannot tell apart, or the `--elf` has no `.dep-v0` section, a malformed one, or was built from another package |
-| 66   | Input file missing or unreadable (including a directory), including a required Zephyr input, the `--west-list` file or an explicit identifier database (`--identifier-db`, `--identifiers` or `$ROLLCALL_IDENTIFIERS`, also for `--version`), a `merge` input, the blob manifest or a blob it lists, a `vex` input, a `report` input, a `csaf` input, a `diff` input, a `validate --profile` file, or a `scan` SBOM, `--vex` document or `--db-path` directory, or the `--cargo-metadata` file, the `--elf` file or `--cargo DIR`'s `Cargo.toml` |
+| 65   | Input is malformed: not JSON, not UTF-8, too deeply nested, or an invalid model; or a Zephyr input (SPDX, `west list`, `.config`, `build_info.yml`) or the identifier database (`--identifier-db`, `--identifiers`, `$ROLLCALL_IDENTIFIERS`, also for `--version`) is malformed or has a `db_version` this rollcall does not accept, or `--zephyr` names a sysbuild top-level directory without `--sysbuild` (or an image directory with it); or a `merge` input is not a readable CycloneDX 1.6 document, the inputs conflict (including different product names or versions without `--product`), or the blob manifest is malformed; or a `vex` input (SBOM, model, `--kconfig`, findings, rules, signing key, signature file) is malformed, with `file:line:column` for rules, or the SBOM cannot take the requested VEX output (no `serialNumber` for `--format cyclonedx`, a `serialNumber` that is not a lowercase `urn:uuid:` or a `version` below 1, a non-empty `vulnerabilities` for `--embed`); or a `validate --profile` file is malformed; or a `report` input (the SBOM, a `--scan` or a `--vex` file) is malformed or not a format it reads; or a `diff` input (an SBOM, a scan or a report) is malformed or has the wrong `schema`; or a `scan` SBOM or `--vex` document is malformed; or a `csaf` input (the SBOM, a `--scan` or a `--vex` file) is malformed or not a format it reads; or `cargo metadata` output (`--cargo-metadata`, or `--cargo` when cargo fails) is malformed, has no root package or names two packages the binary's list cannot tell apart, or the `--elf` has no `.dep-v0` section, a malformed one, or was built from another package; or an `--esp-idf` input (`project_description.json`, `sdkconfig`, `dependencies.lock`, an `idf_component.yml`, the link map) is malformed |
+| 66   | Input file missing or unreadable (including a directory), including a required Zephyr input, the `--west-list` file or an explicit identifier database (`--identifier-db`, `--identifiers` or `$ROLLCALL_IDENTIFIERS`, also for `--version`), a `merge` input, the blob manifest or a blob it lists, a `vex` input, a `report` input, a `csaf` input, a `diff` input, a `validate --profile` file, or a `scan` SBOM, `--vex` document or `--db-path` directory, or the `--cargo-metadata` file, the `--elf` file or `--cargo DIR`'s `Cargo.toml`, or `--esp-idf DIR`'s `sdkconfig` or `build/project_description.json` |
 | 69   | `vex --sign cosign` / `vex verify --cosign`: cosign is not installed, or keyless signing failed (no OIDC identity); `generate --cargo`: cargo cannot be run (`$CARGO`, else `cargo` on PATH) |
 | 70   | Internal error (`vex`, `validate --json`, `report --format json`, `scan --json`, `diff --format json`: the report cannot be serialised; `csaf`: the document fails the CSAF 2.0 schema or a mandatory check, e.g. an SBOM CPE outside CSAF's pattern, and is not written) |
 | 74   | Output cannot be written (for `scan`, also: its temporary directory cannot be created) |
@@ -706,6 +736,12 @@ are produced only by `scripts/regen-fixtures.sh`; the committed copy comes from 
 `examples/nrf52840-hello` at a pinned commit, and the hand-written projects in
 `scripts/fixture-src/`. They are produced only by `scripts/regen-fixtures-cargo.sh`
 (`scripts/regen-fixtures.sh --variant cargo-…`).
+
+`fixtures/esp-idf/` holds two real ESP-IDF v5.5.1 builds for esp32 (`hello_world` and the
+Wi-Fi + TLS `https_request` example) made in the `espressif/idf` Docker image pinned by digest:
+the files rollcall reads, the linked blob archives and `MANIFEST.json`. They are produced only
+by `scripts/regen-fixtures-esp-idf.sh` (`scripts/regen-fixtures.sh --variant esp-idf`); see
+[docs/esp-idf.md](docs/esp-idf.md#fixtures).
 
 ## Publishing the placeholders
 

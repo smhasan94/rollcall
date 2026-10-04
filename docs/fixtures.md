@@ -459,3 +459,15 @@ by `ROLLCALL_CARGO_FIXTURES_DIR` (the script runs it on the staged tree before i
 the file set, the manifest's sizes and SHA-256s, the script's pins, no build-machine paths,
 that `firmware.elf`'s `.dep-v0` section reads back to exactly `dep-v0.json`, and that both
 metadata files parse with the package as their root.
+
+## ESP-IDF fixtures
+
+`fixtures/esp-idf/` holds two real ESP-IDF v5.5.1 builds for esp32 (SHA-129):
+`hello-world` (`examples/get-started/hello_world`) and `wifi-tls`
+(`examples/protocols/https_request`), built in the `espressif/idf` Docker image pinned by
+digest. They are produced only by `scripts/regen-fixtures-esp-idf.sh` (which
+`scripts/regen-fixtures.sh --variant esp-idf[-…]` hands over to) and never edited by hand. The
+copy built by the `regen-fixtures` workflow's `regen-esp-idf` job on `ubuntu-24.04` (artifact
+`esp-idf-fixtures`) is canonical. What each tree holds, the pins, how the trees are kept free
+of host paths and how to bump the pin are in [esp-idf.md](esp-idf.md#fixtures);
+`crates/rollcall-core/tests/fixtures_esp_idf.rs` checks the committed tree.

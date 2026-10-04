@@ -1,0 +1,113 @@
+{
+  "schema": "rollcall-model/1",
+  "name": "hello_world",
+  "version": "1",
+  "images": [
+    {
+      "kind": "application",
+      "name": "hello_world",
+      "version": "1",
+      "purl": "pkg:generic/hello_world@1",
+      "evidence": [
+        {
+          "field": "name",
+          "technique": "manifest-analysis",
+          "source": "project-description",
+          "occurrence": {
+            "location": "build/project_description.json"
+          },
+          "value": "hello_world",
+          "confidence": 9000
+        },
+        {
+          "field": "version",
+          "technique": "manifest-analysis",
+          "source": "project-description",
+          "occurrence": {
+            "location": "build/project_description.json"
+          },
+          "value": "1",
+          "confidence": 9000
+        },
+        {
+          "field": "purl",
+          "technique": "manifest-analysis",
+          "source": "project-description",
+          "occurrence": {
+            "location": "build/project_description.json"
+          },
+          "value": "pkg:generic/hello_world@1",
+          "confidence": 9000
+        }
+      ],
+      "components": [
+        {
+          "kind": "framework",
+          "name": "esp-idf",
+          "version": "5.5.1",
+          "supplier": {
+            "name": "Espressif Systems",
+            "urls": [
+              "https://www.espressif.com"
+            ]
+          },
+          "purl": "pkg:generic/esp-idf@5.5.1?vcs_url=git%2Bhttps:%2F%2Fgithub.com%2Fespressif%2Fesp-idf",
+          "cpe": "cpe:2.3:a:espressif:esp-idf:5.5.1:*:*:*:*:*:*:*",
+          "licence": "Apache-2.0",
+          "evidence": [
+            {
+              "field": "name",
+              "technique": "manifest-analysis",
+              "source": "sdkconfig",
+              "occurrence": {
+                "location": "sdkconfig",
+                "line": 256
+              },
+              "value": "target:esp32",
+              "confidence": 6000
+            },
+            {
+              "field": "version",
+              "technique": "manifest-analysis",
+              "source": "idf-version-file",
+              "occurrence": {
+                "location": "esp-idf/components/esp_common/include/esp_idf_version.h"
+              },
+              "value": "5.5.1",
+              "confidence": 9000
+            },
+            {
+              "field": "version",
+              "technique": "manifest-analysis",
+              "source": "project-description",
+              "occurrence": {
+                "location": "build/project_description.json"
+              },
+              "value": "v5.5.1",
+              "confidence": 9000
+            },
+            {
+              "field": "version",
+              "technique": "manifest-analysis",
+              "source": "sdkconfig",
+              "occurrence": {
+                "location": "sdkconfig",
+                "line": 3
+              },
+              "value": "5.5.1",
+              "confidence": 7000
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "image:f4f8ff8a9d6968ac2df28fe1bc80cfcc": [
+      "component:cd7e20e7cd7979bc031ad65866ba6198"
+    ],
+    "product:5d32bde1e0464bf06d5c15377396edd4": [
+      "image:f4f8ff8a9d6968ac2df28fe1bc80cfcc"
+    ]
+  }
+}

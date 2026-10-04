@@ -9,7 +9,9 @@
 //! of `tests/data/` (rendered as `rollcall generate --model` writes them), the blob manifest,
 //! and every real Zephyr build under `fixtures/` ingested as `rollcall generate --zephyr DIR
 //! --sysbuild --west-list DIR/west-list.txt --identify` does (with the embedded seed
-//! identifier database), so unresolved modules reflect real use.
+//! identifier database), so unresolved modules reflect real use, and every real ESP-IDF build
+//! under `fixtures/esp-idf/` ingested as `rollcall generate --esp-idf DIR --idf-path DIR/idf`
+//! does.
 
 mod common;
 
@@ -19,6 +21,7 @@ use std::sync::OnceLock;
 
 use common::{GOLDEN_TIMESTAMP, load_fixture};
 use rollcall_core::cyclonedx::{self, Timestamp, WriteOptions};
+use rollcall_core::esp_idf;
 use rollcall_core::identify::{self, DbSource};
 use rollcall_core::model::{Component, Cpe, Product, Purl};
 use rollcall_core::report::{
@@ -82,6 +85,13 @@ const REAL_BUILDS: [(&str, &str); 6] = [
     ("zephyr-smp-bt", "zephyr-smp/smp-bt"),
 ];
 
+/// A real ESP-IDF build: its golden name, and its project directory under
+/// `fixtures/esp-idf/`.
+const ESP_IDF_BUILDS: [(&str, &str); 2] = [
+    ("esp-idf-hello-world", "hello-world"),
+    ("esp-idf-wifi-tls", "wifi-tls"),
+];
+
 /// Every hand-written model fixture of `tests/data/`, with the scans and VEX documents its
 /// report reads (captured scanner output, the blessed VEX golden).
 const MODEL_FIXTURES: [(&str, &[&str], &[&str]); 5] = [
@@ -138,6 +148,25 @@ fn real_products() -> &'static BTreeMap<&'static str, Product> {
     })
 }
 
+/// The ESP-IDF builds' products, ingested once per test run, as `rollcall generate --esp-idf
+/// DIR --idf-path DIR/idf` does.
+fn esp_idf_products() -> &'static BTreeMap<&'static str, Product> {
+    static PRODUCTS: OnceLock<BTreeMap<&'static str, Product>> = OnceLock::new();
+    PRODUCTS.get_or_init(|| {
+        ESP_IDF_BUILDS
+            .iter()
+            .map(|(name, dir)| {
+                let root = fixtures_root().join("esp-idf").join(dir);
+                let options = esp_idf::EspIdfOptions::new(&root).with_idf_path(root.join("idf"));
+                let product = esp_idf::ingest(&options)
+                    .unwrap_or_else(|e| panic!("{dir}: {e}"))
+                    .product;
+                (*name, product)
+            })
+            .collect()
+    })
+}
+
 /// One report case: the SBOM text, and the scan and VEX files (name, bytes).
 struct Case {
     sbom: String,
@@ -156,6 +185,13 @@ fn case(name: &str) -> Case {
     if let Some(product) = real_products().get(name) {
         return Case {
             sbom: render(product, true),
+            scans: Vec::new(),
+            vex: Vec::new(),
+        };
+    }
+    if let Some(product) = esp_idf_products().get(name) {
+        return Case {
+            sbom: render(product, false),
             scans: Vec::new(),
             vex: Vec::new(),
         };
@@ -213,6 +249,7 @@ fn all_names() -> Vec<&'static str> {
     let mut names: Vec<&str> = MODEL_FIXTURES.iter().map(|(n, _, _)| *n).collect();
     names.push("blobs");
     names.extend(REAL_BUILDS.iter().map(|(n, _)| *n));
+    names.extend(ESP_IDF_BUILDS.iter().map(|(n, _)| *n));
     names.sort();
     names
 }
@@ -256,6 +293,18 @@ fn every_fixture_has_md_and_json_report_goldens() {
     let mut listed: Vec<String> = REAL_BUILDS.iter().map(|(_, d)| d.to_string()).collect();
     listed.sort();
     assert_eq!(listed, on_disk, "REAL_BUILDS must list every real build");
+    let mut esp_on_disk: Vec<String> = std::fs::read_dir(fixtures_root().join("esp-idf"))
+        .unwrap()
+        .map(|e| e.unwrap().path())
+        .filter(|p| p.join("sdkconfig").is_file())
+        .map(|p| p.file_name().unwrap().to_string_lossy().into_owned())
+        .collect();
+    esp_on_disk.sort();
+    let esp_listed: Vec<&str> = ESP_IDF_BUILDS.iter().map(|(_, d)| *d).collect();
+    assert_eq!(
+        esp_listed, esp_on_disk,
+        "ESP_IDF_BUILDS must list every ESP-IDF build"
+    );
     let mut expected: Vec<String> = all_names()
         .iter()
         .flat_map(|n| [format!("{n}.report.json"), format!("{n}.report.md")])
@@ -327,6 +376,16 @@ fn zephyr_smp_serial_report_matches_golden() {
 #[test]
 fn zephyr_smp_bt_report_matches_golden() {
     check_report_goldens("zephyr-smp-bt");
+}
+
+#[test]
+fn esp_idf_hello_world_report_matches_golden() {
+    check_report_goldens("esp-idf-hello-world");
+}
+
+#[test]
+fn esp_idf_wifi_tls_report_matches_golden() {
+    check_report_goldens("esp-idf-wifi-tls");
 }
 
 /// The clean fixture (every node identified, hashed, licensed and passing both profiles)

@@ -1,0 +1,156 @@
+{
+  "build_env": {
+    "IDF_COMPONENT_CHECK_NEW_VERSION": "0"
+  },
+  "ecosystem": "esp-idf",
+  "esp_idf": {
+    "container_idf_path": "/opt/esp/idf",
+    "digest": "sha256:dfa2d076c796769c07c155eba6c672b9f395aec943b2ba3701b73379b5f9e884",
+    "image": "espressif/idf",
+    "image_platform": "linux/arm64",
+    "tag": "v5.5.1",
+    "target": "esp32"
+  },
+  "files": [
+    {
+      "bytes": 1511147,
+      "path": "hello-world/build/hello_world.map",
+      "sha256": "032ed35274fd3daee25a9216d612ad940762ae827da79ab9047e7d9a3a81a431",
+      "transform": "strip-cref"
+    },
+    {
+      "bytes": 90432,
+      "path": "hello-world/build/project_description.json",
+      "sha256": "7fc0e6f03081d213387ba3ecb78bc7ba999369f1ec62b911044cae37ebba0653"
+    },
+    {
+      "bytes": 1520,
+      "path": "hello-world/idf/components/esp_common/include/esp_idf_version.h",
+      "sha256": "501988d965d1d7475443ac98c7c4cdca4a97d56fc9e860774c135b3b67cae9aa"
+    },
+    {
+      "bytes": 38797,
+      "path": "hello-world/sdkconfig",
+      "sha256": "6a8ac247c3074a9fda930a11d163b6caa69059c6a2287e67cabe6bb208ef7f9f"
+    },
+    {
+      "bytes": 5529469,
+      "path": "wifi-tls/build/https_request.map",
+      "sha256": "1dbabbb01571a7c1f0e13335cc2466baf1c91070e86fe30841a340599743eadf",
+      "transform": "strip-cref"
+    },
+    {
+      "bytes": 141786,
+      "path": "wifi-tls/build/project_description.json",
+      "sha256": "9a845052ae65923c45cc730c6781c0877794dd1568307dab649ff852f96426d0"
+    },
+    {
+      "bytes": 398,
+      "path": "wifi-tls/dependencies.lock",
+      "sha256": "966c7ac44430419e192629019678f9bc8a06d045fdeec37875d307a18f8ac8cf"
+    },
+    {
+      "bytes": 1520,
+      "path": "wifi-tls/idf/components/esp_common/include/esp_idf_version.h",
+      "sha256": "501988d965d1d7475443ac98c7c4cdca4a97d56fc9e860774c135b3b67cae9aa"
+    },
+    {
+      "bytes": 862082,
+      "path": "wifi-tls/idf/components/esp_phy/lib/esp32/libphy.a",
+      "sha256": "1178eff52e382fc63749c715ff30709bdace95094a90f175c03f5a9248534cd5"
+    },
+    {
+      "bytes": 297160,
+      "path": "wifi-tls/idf/components/esp_phy/lib/esp32/librtc.a",
+      "sha256": "e3411aeeb48d1da8acd304808290196baa0d6a2397db1a0c7741abee85dade61"
+    },
+    {
+      "bytes": 4876,
+      "path": "wifi-tls/idf/components/esp_wifi/lib/esp32/libcore.a",
+      "sha256": "cbb961fa65b16c0d15ba7c4a2d4a8e68af9b0963b50012d0d762fb5bffbb72ec"
+    },
+    {
+      "bytes": 62402,
+      "path": "wifi-tls/idf/components/esp_wifi/lib/esp32/libespnow.a",
+      "sha256": "ac1bf16d1b38a07caf6e403a413b1c1d8c419963c1593c0acacb61232342c5ba"
+    },
+    {
+      "bytes": 1005348,
+      "path": "wifi-tls/idf/components/esp_wifi/lib/esp32/libmesh.a",
+      "sha256": "900414c370738f068da867f4b40f47aae8bebe9edb7307da82259c600f2f7ecb"
+    },
+    {
+      "bytes": 1534918,
+      "path": "wifi-tls/idf/components/esp_wifi/lib/esp32/libnet80211.a",
+      "sha256": "50f0b680b945513cdb2458d38db1913fe9c015eefbc414627914ac80d12b5dbb"
+    },
+    {
+      "bytes": 625036,
+      "path": "wifi-tls/idf/components/esp_wifi/lib/esp32/libpp.a",
+      "sha256": "f789190f2d25972c97b2a64bddec6c44e1da34cc96c8a5d0c043037a64ccaef7"
+    },
+    {
+      "bytes": 116,
+      "path": "wifi-tls/main/idf_component.yml",
+      "sha256": "1af28eb470547c5466f138bef190f2f217679a499540d1483867af73e6c399ee"
+    },
+    {
+      "bytes": 59791,
+      "path": "wifi-tls/sdkconfig",
+      "sha256": "a611a09ae18efe01232bdd1c26edf29b50ab12651d5662e47eb892a55f37f2da"
+    }
+  ],
+  "format": "rollcall-fixtures/1",
+  "generator": "scripts/regen-fixtures-esp-idf.sh",
+  "host": {
+    "arch": "arm64",
+    "os": "darwin"
+  },
+  "total_bytes": 11766798,
+  "variants": {
+    "hello-world": {
+      "blobs": [],
+      "build_command": [
+        [
+          "idf.py",
+          "set-target",
+          "esp32"
+        ],
+        [
+          "idf.py",
+          "build"
+        ]
+      ],
+      "container_project_dir": "/project/hello-world",
+      "lock": null,
+      "project": "hello_world",
+      "sample": "examples/get-started/hello_world"
+    },
+    "wifi-tls": {
+      "blobs": [
+        "components/esp_phy/lib/esp32/libphy.a",
+        "components/esp_phy/lib/esp32/librtc.a",
+        "components/esp_wifi/lib/esp32/libcore.a",
+        "components/esp_wifi/lib/esp32/libespnow.a",
+        "components/esp_wifi/lib/esp32/libmesh.a",
+        "components/esp_wifi/lib/esp32/libnet80211.a",
+        "components/esp_wifi/lib/esp32/libpp.a"
+      ],
+      "build_command": [
+        [
+          "idf.py",
+          "set-target",
+          "esp32"
+        ],
+        [
+          "idf.py",
+          "build"
+        ]
+      ],
+      "container_project_dir": "/project/wifi-tls",
+      "lock": "dependencies.lock",
+      "project": "https_request",
+      "sample": "examples/protocols/https_request"
+    }
+  }
+}

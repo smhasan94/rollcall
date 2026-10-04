@@ -19,3 +19,9 @@ fixtures/cargo-*/cargo-metadata*.json -diff
 # Hand-written blob test data: tests pin the SHA-256 of these files, so checkout must never
 # convert line endings.
 crates/rollcall-core/tests/data/blobs/** -text
+
+# ESP-IDF build fixtures (scripts/regen-fixtures-esp-idf.sh, SHA-129): byte-exact like the
+# others (MANIFEST.json pins every SHA-256). The maps are large and generated, so not diffed.
+fixtures/esp-idf/** -text linguist-generated=true
+fixtures/esp-idf/**/*.map -diff
+fixtures/esp-idf/**/*.a binary

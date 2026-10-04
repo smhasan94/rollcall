@@ -120,6 +120,7 @@ pub enum Format {
 #[command(group = ArgGroup::new("input").required(true).multiple(false))]
 #[command(group = ArgGroup::new("db").multiple(false))]
 #[command(group = ArgGroup::new("cargo_input").args(["cargo", "cargo_metadata"]).multiple(false))]
+#[command(group = ArgGroup::new("notes_input").args(["zephyr", "esp_idf"]).multiple(false))]
 pub struct GenerateArgs {
     /// The rollcall model (`rollcall-model/1` JSON) to render
     #[arg(long, value_name = "FILE", group = "input")]
@@ -127,6 +128,28 @@ pub struct GenerateArgs {
     /// Zephyr image build directory (the one holding build_info.yml and spdx/)
     #[arg(long, value_name = "DIR", group = "input")]
     pub zephyr: Option<PathBuf>,
+    /// ESP-IDF project directory (holding sdkconfig), built with `idf.py build`: the project,
+    /// ESP-IDF and its subsystems, managed components and linked Espressif blobs
+    #[arg(long, value_name = "DIR", group = "input")]
+    pub esp_idf: Option<PathBuf>,
+    /// The ESP-IDF build directory (with --esp-idf), relative to the working directory (not to
+    /// the --esp-idf directory). Default: the build directory inside the --esp-idf directory
+    #[arg(
+        long,
+        value_name = "DIR",
+        requires = "esp_idf",
+        conflicts_with_all = ["model", "zephyr", "cargo", "cargo_metadata"]
+    )]
+    pub build: Option<PathBuf>,
+    /// The ESP-IDF tree the build used (with --esp-idf), to hash the linked blobs and read the
+    /// version file. Default: $IDF_PATH, if set
+    #[arg(
+        long,
+        value_name = "DIR",
+        requires = "esp_idf",
+        conflicts_with_all = ["model", "zephyr", "cargo", "cargo_metadata"]
+    )]
+    pub idf_path: Option<PathBuf>,
     /// Rust package directory (holding Cargo.toml): run `cargo metadata` there ($CARGO, else
     /// cargo on PATH) and list its crates. Needs a Cargo.lock (cargo runs with --locked)
     #[arg(long, value_name = "DIR", group = "input")]
@@ -206,10 +229,11 @@ pub struct GenerateArgs {
     /// their `west list` path. Requires --identifier-db or --identify, and --west-list
     #[arg(long, value_name = "DIR", requires_all = ["db", "west_list"])]
     pub workspace: Option<PathBuf>,
-    /// Also print notes (with --zephyr): why a subsystem the .config enables was not split
-    /// out of the zephyr component (none of its code was linked), and linked code left in it
+    /// Also print notes (with --zephyr or --esp-idf): why a subsystem the .config or sdkconfig
+    /// enables was not split out of the zephyr or esp-idf component (none of its code was
+    /// linked), and linked code left in it
     // `conflicts_with` is not redundant: `requires` alone lets `--model … --verbose` through.
-    #[arg(short, long, requires = "zephyr", conflicts_with = "model")]
+    #[arg(short, long, requires = "notes_input", conflicts_with = "model")]
     pub verbose: bool,
     /// Output format
     #[arg(long, value_enum, default_value_t = Format::Cyclonedx)]

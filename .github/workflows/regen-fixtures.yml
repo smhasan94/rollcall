@@ -4,7 +4,9 @@ name: Regenerate Zephyr fixtures
 # docs/fixtures.md), one job per pin set: fixtures/zephyr (artifact `zephyr-fixtures`),
 # fixtures/zephyr-old-mbedtls (artifact `zephyr-old-mbedtls-fixtures`) and fixtures/zephyr-smp
 # (artifact `zephyr-smp-fixtures`), and the Cargo fixtures fixtures/cargo-* (job regen-cargo,
-# artifact `cargo-fixtures`, scripts/regen-fixtures-cargo.sh). The uploaded artifacts
+# artifact `cargo-fixtures`, scripts/regen-fixtures-cargo.sh), and the ESP-IDF fixtures
+# fixtures/esp-idf (job regen-esp-idf, artifact `esp-idf-fixtures`,
+# scripts/regen-fixtures-esp-idf.sh). The uploaded artifacts
 # are the canonical fixture sets: they are downloaded and committed by hand, never pushed by
 # this workflow.
 
@@ -19,6 +21,7 @@ on:
     paths:
       - scripts/regen-fixtures.sh
       - scripts/regen-fixtures-cargo.sh
+      - scripts/regen-fixtures-esp-idf.sh
       - scripts/fixture-src/**
       - .github/workflows/regen-fixtures.yml
 
@@ -211,5 +214,72 @@ jobs:
         if: always()
         with:
           name: cargo-fixtures-reports
+          path: regen-reports
+          if-no-files-found: warn
+
+  # The ESP-IDF fixtures (SHA-129): hello_world and https_request built for esp32 in the
+  # espressif/idf image the script pins by digest (about 12 GB unpacked, so its own job; the
+  # runner's preinstalled toolchains are removed first to make room). The builds need no
+  # network beyond the image pull. This runner's artifact is canonical.
+  regen-esp-idf:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Free disk space for the ESP-IDF image
+        run: |
+          df -h
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
+          docker system prune -af
+          df -h
+      # Keep in sync with rust-toolchain.toml; the script ends with `cargo test`.
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: "1.91.1"
+      - uses: Swatinem/rust-cache@v2
+      - name: Regenerate ESP-IDF fixtures
+        env:
+          CHECK_STABLE: ${{ github.event_name != 'workflow_dispatch' || inputs.check_stable }}
+        run: |
+          args=(--remove-image)
+          if [[ "$CHECK_STABLE" == true ]]; then
+            args+=(--check-stable)
+          fi
+          scripts/regen-fixtures-esp-idf.sh "${args[@]}"
+      - name: Compare with the committed fixtures
+        continue-on-error: true
+        run: |
+          {
+            echo "### Regenerated fixtures/esp-idf vs committed"
+            echo
+            if git diff --quiet --exit-code -- fixtures/esp-idf && \
+               [[ -z "$(git status --porcelain -- fixtures/esp-idf)" ]]; then
+              echo "**PASS**: byte-identical to the committed fixtures."
+            else
+              echo "**DIFFERENT** (informational):"
+              echo
+              echo '```'
+              git status --short -- fixtures/esp-idf | head -50
+              echo '```'
+            fi
+          } >>"$GITHUB_STEP_SUMMARY"
+      - name: Collect reports and logs
+        if: always()
+        run: |
+          mkdir -p regen-reports
+          cp .cache/esp-idf-fixtures-staging/compare-stable.txt regen-reports/ 2>/dev/null || true
+          cp -R .cache/esp-idf-fixtures-logs regen-reports/logs 2>/dev/null || true
+          df -h
+      - uses: actions/upload-artifact@v4
+        with:
+          name: esp-idf-fixtures
+          path: fixtures/esp-idf
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: esp-idf-fixtures-reports
           path: regen-reports
           if-no-files-found: warn
