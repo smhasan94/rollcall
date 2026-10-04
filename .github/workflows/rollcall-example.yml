@@ -5,9 +5,13 @@
 # - zephyr: the Zephyr v4.4.2 sysbuild TLS build (fixtures/zephyr/tls), failing on new
 #   findings at or above high;
 # - cargo:  the keelsign Rust firmware (fixtures/cargo-keelsign, captured cargo metadata),
-#   failing only on new critical findings.
+#   failing only on new critical findings;
+# - platformio: the Arduino-ESP32 MQTT sketch (fixtures/platformio/arduino-mqtt, three
+#   lib_deps) with `ecosystem: auto` (SHA-131): a check step then asserts the action detected
+#   PlatformIO and that the SBOM names the framework and the three libraries.
 #
-# On a push to main each job uploads its artifact (rollcall-zephyr, rollcall-cargo); on a pull
+# On a push to main each job uploads its artifact (rollcall-zephyr, rollcall-cargo,
+# rollcall-platformio); on a pull
 # request each job diffs against main's latest artifact of the same name, posts or updates
 # one comment, and fails on new findings at or above its fail-on. Before this workflow has run
 # on main there is no base artifact, and every open finding counts as new.
@@ -51,3 +55,35 @@ jobs:
           build-dir: fixtures/cargo-keelsign
           fail-on: critical
           artifact-name: rollcall-cargo
+
+  platformio:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      - uses: ./action
+        id: rollcall
+        with:
+          build-dir: fixtures/platformio/arduino-mqtt
+          ecosystem: auto
+          fail-on: high
+          artifact-name: rollcall-platformio
+      - name: Check the PlatformIO SBOM
+        env:
+          ECOSYSTEM: ${{ steps.rollcall.outputs.ecosystem }}
+          SBOM: ${{ steps.rollcall.outputs.sbom }}
+        run: |
+          set -euo pipefail
+          echo "ecosystem: $ECOSYSTEM"
+          [[ "$ECOSYSTEM" == platformio ]] || { echo "::error::detected $ECOSYSTEM, not platformio"; exit 1; }
+          purls="$(jq -r '.. | objects | select(has("purl")) | .purl' "$SBOM" | sort)"
+          echo "$purls"
+          for purl in \
+            'pkg:generic/bblanchon/ArduinoJson@7.2.1?repository_url=https:%2F%2Fregistry.platformio.org' \
+            'pkg:generic/knolleary/PubSubClient@2.8?repository_url=https:%2F%2Fregistry.platformio.org' \
+            'pkg:generic/mathertel/OneButton@2.6.1?repository_url=https:%2F%2Fregistry.platformio.org' \
+            'pkg:generic/arduino-esp32@2.0.17?vcs_url=git%2Bhttps:%2F%2Fgithub.com%2Fespressif%2Farduino-esp32'; do
+            grep -qxF "$purl" <<<"$purls" || { echo "::error::$purl is not in the SBOM"; exit 1; }
+          done
+          jq -e '[.components[0].components[] | select(.type == "framework" and .name == "arduino-esp32" and .version == "2.0.17")] | length == 1' "$SBOM"

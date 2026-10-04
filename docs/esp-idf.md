@@ -208,6 +208,23 @@ a blob of the image. In the `wifi-tls` fixture this is `libmesh.a`.
 
 Pass the tree the build actually used. A different ESP-IDF checkout gives other hashes.
 
+## Auto-detect
+
+`rollcall generate DIR` treats DIR as an ESP-IDF project when it holds `sdkconfig` and
+`build/project_description.json` (with `--build OUT`, `OUT/project_description.json`), as
+`--esp-idf DIR`. An `sdkconfig` without a build is no match, and the error says to run
+`idf.py build`. `--idf-path` is not inferred; pass it with DIR, else `$IDF_PATH` is read as
+for `--esp-idf`. A PlatformIO project built with `framework = espidf` is PlatformIO, not
+ESP-IDF: its configuration is `sdkconfig.<env>` and its build is under `.pio/build/<env>/`
+(see [platformio.md](platformio.md#auto-detect)).
+
+```console
+$ rollcall detect fixtures/esp-idf/wifi-tls
+esp-idf
+```
+
+Every ecosystem's signal is in the [docs index](README.md#ecosystems).
+
 ## Warnings
 
 Non-fatal problems are printed as `rollcall generate: warning: <file>: <message>`, sorted:

@@ -5,6 +5,8 @@
 //! schema validation. [`zephyr`] ingests a Zephyr image (or sysbuild) build directory into
 //! the model, [`cargo`] ingests a Rust binary from `cargo metadata` and the `.dep-v0`
 //! section `cargo auditable` embeds, [`esp_idf`] ingests an ESP-IDF project and its build,
+//! [`platformio`] ingests a PlatformIO project, [`detect`] tells which of those a directory
+//! is,
 //! [`blob`] turns a blob manifest into opaque blob images, and [`merge`] combines separately
 //! generated products into one. [`subsystems`] is the
 //! table of Zephyr subsystems (enabling Kconfig symbols and source paths) used to split the
@@ -39,12 +41,14 @@ pub mod blob;
 pub mod cargo;
 pub mod csaf;
 pub mod cyclonedx;
+pub mod detect;
 pub mod diff;
 pub mod esp_idf;
 pub mod identify;
 pub mod linker_map;
 pub mod merge;
 pub mod model;
+pub mod platformio;
 pub mod report;
 pub mod scan;
 pub mod severity;
@@ -60,9 +64,11 @@ pub use cyclonedx::{
     ReadError, SchemaViolation, SerialNumber, Timestamp, WriteError, WriteOptions,
     validate_cyclonedx_1_6,
 };
+pub use detect::{DetectError, Detection, Ecosystem};
 pub use esp_idf::{EspIdfError, EspIdfIngest, EspIdfOptions};
 pub use identify::{IdentifierDb, Level, Resolver};
 pub use merge::{ProductSpec, ProductSpecError};
+pub use platformio::{PlatformIoError, PlatformIoIngest, PlatformIoOptions};
 pub use subsystems::{Subsystem, SubsystemTable, SubsystemsError};
 pub use warning::Warning;
 

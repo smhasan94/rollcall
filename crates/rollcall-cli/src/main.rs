@@ -47,6 +47,7 @@ fn main() -> ExitCode {
         Command::Scan(args) => commands::scan::run(args),
         Command::Diff(args) => commands::diff::run(args),
         Command::Csaf(args) => commands::csaf::run(args),
+        Command::Detect(args) => commands::detect::run(args),
         other @ Command::Assay => {
             eprintln!("rollcall {}: not implemented", other.name());
             EXIT_USAGE

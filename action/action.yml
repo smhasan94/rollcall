@@ -12,10 +12,10 @@ branding:
 
 inputs:
   build-dir:
-    description: The build to describe. Zephyr - the build directory (holding build_info.yml; a sysbuild top-level directory when it has domains.yaml). Cargo - the package directory (Cargo.toml) or a directory holding captured cargo-metadata.json
+    description: The build to describe. Zephyr - the build directory (holding build_info.yml; a sysbuild top-level directory when it has domains.yaml). Cargo - the package directory (Cargo.toml) or a directory holding captured cargo-metadata.json. ESP-IDF - the project directory (sdkconfig, built in build/). PlatformIO - the project directory (platformio.ini), after pio run
     required: true
   ecosystem:
-    description: auto, zephyr or cargo. auto - build_info.yml means Zephyr, else Cargo.toml or cargo-metadata.json means Cargo
+    description: auto, zephyr, cargo, esp-idf or platformio. auto - `rollcall detect`, the same detection as `rollcall generate DIR` - build_info.yml means Zephyr, Cargo.toml or cargo-metadata.json Cargo, sdkconfig with build/project_description.json ESP-IDF, platformio.ini PlatformIO; a directory several match fails, listing them
     required: false
     default: auto
   identifiers-version:
@@ -47,7 +47,7 @@ inputs:
     required: false
     default: auto
   product:
-    description: Zephyr - put the product under this NAME[@VERSION]
+    description: Put the product under this NAME[@VERSION] (any ecosystem)
     required: false
     default: ''
   elf:
@@ -56,6 +56,14 @@ inputs:
     default: ''
   target:
     description: Cargo (a package directory) - the target triple to resolve the crates for
+    required: false
+    default: ''
+  env:
+    description: PlatformIO - the environment to describe (default - the one default_envs names, else the project's only one)
+    required: false
+    default: ''
+  pio-core:
+    description: PlatformIO - the core directory the build used, for the installed platform and framework versions (after `pio run` on the runner, ~/.platformio; a leading ~/ is the runner's home). Default - none, so the versions come from exact pins in platformio.ini
     required: false
     default: ''
   scanner:
@@ -88,6 +96,9 @@ inputs:
     default: .rollcall-action
 
 outputs:
+  ecosystem:
+    description: The ecosystem described - zephyr, cargo, esp-idf or platformio
+    value: ${{ steps.pipeline.outputs.ecosystem }}
   sbom:
     description: Path of the CycloneDX 1.6 SBOM
     value: ${{ steps.pipeline.outputs.sbom }}
@@ -156,6 +167,8 @@ runs:
         RC_PRODUCT: ${{ inputs.product }}
         RC_ELF: ${{ inputs.elf }}
         RC_TARGET: ${{ inputs.target }}
+        RC_ENV: ${{ inputs.env }}
+        RC_PIO_CORE: ${{ inputs.pio-core }}
         RC_SCANNER: ${{ inputs.scanner }}
         RC_TIMESTAMP: ${{ inputs.timestamp }}
         RC_OUT_DIR: ${{ inputs.out-dir }}

@@ -4,7 +4,7 @@ use assert_cmd::Command;
 use predicates::prelude::*;
 
 /// Every subcommand with its one-line `--help` description.
-const SUBCOMMANDS: [(&str, &str); 10] = [
+const SUBCOMMANDS: [(&str, &str); 11] = [
     (
         "generate",
         "Generate a CycloneDX SBOM from firmware build metadata",
@@ -35,6 +35,10 @@ const SUBCOMMANDS: [(&str, &str); 10] = [
     (
         "csaf",
         "Export scan and VEX results as a CSAF 2.0 VEX document",
+    ),
+    (
+        "detect",
+        "Print which ecosystem a build or project directory is (as `generate DIR` tells it)",
     ),
 ];
 

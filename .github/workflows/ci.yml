@@ -98,7 +98,7 @@ jobs:
   # The worked examples of docs/vex-rules.md (SHA-115) and the gap analysis in
   # docs/zephyr-gaps.md (SHA-134): every `$ ` command in a ```console block runs and must
   # print exactly the output shown under it. Offline. Run the same locally with
-  # `scripts/check-doc-examples.sh docs/vex-rules.md docs/zephyr-gaps.md docs/esp-idf.md`.
+  # `scripts/check-doc-examples.sh docs/vex-rules.md docs/zephyr-gaps.md docs/esp-idf.md docs/platformio.md docs/README.md docs/zephyr.md docs/cargo.md`.
   docs-examples:
     runs-on: ubuntu-latest
     steps:
@@ -109,7 +109,7 @@ jobs:
           toolchain: "1.91.1"
       - uses: Swatinem/rust-cache@v2
       - run: cargo build -p rollcall-cli --locked
-      - run: ROLLCALL_BIN=target/debug/rollcall scripts/check-doc-examples.sh docs/vex-rules.md docs/zephyr-gaps.md docs/esp-idf.md
+      - run: ROLLCALL_BIN=target/debug/rollcall scripts/check-doc-examples.sh docs/vex-rules.md docs/zephyr-gaps.md docs/esp-idf.md docs/platformio.md docs/README.md docs/zephyr.md docs/cargo.md
       # The starter VEX rule pack's Kconfig symbols all exist in the real builds' .config files.
       - name: Lint the starter VEX rule pack
         run: |

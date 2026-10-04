@@ -6,7 +6,9 @@ name: Regenerate Zephyr fixtures
 # (artifact `zephyr-smp-fixtures`), and the Cargo fixtures fixtures/cargo-* (job regen-cargo,
 # artifact `cargo-fixtures`, scripts/regen-fixtures-cargo.sh), and the ESP-IDF fixtures
 # fixtures/esp-idf (job regen-esp-idf, artifact `esp-idf-fixtures`,
-# scripts/regen-fixtures-esp-idf.sh). The uploaded artifacts
+# scripts/regen-fixtures-esp-idf.sh), and the PlatformIO fixture fixtures/platformio (job
+# regen-platformio, artifact `platformio-fixtures`, scripts/regen-fixtures-platformio.sh).
+# The uploaded artifacts
 # are the canonical fixture sets: they are downloaded and committed by hand, never pushed by
 # this workflow.
 
@@ -22,6 +24,7 @@ on:
       - scripts/regen-fixtures.sh
       - scripts/regen-fixtures-cargo.sh
       - scripts/regen-fixtures-esp-idf.sh
+      - scripts/regen-fixtures-platformio.sh
       - scripts/fixture-src/**
       - .github/workflows/regen-fixtures.yml
 
@@ -281,5 +284,68 @@ jobs:
         if: always()
         with:
           name: esp-idf-fixtures-reports
+          path: regen-reports
+          if-no-files-found: warn
+
+  # The PlatformIO fixture (SHA-131): `pio run -e esp32dev` of the hand-written Arduino-ESP32
+  # project in scripts/fixture-src/platformio/, in the python image the script pins by digest
+  # (linux/amd64), with PlatformIO Core installed from hash-pinned wheels. The build downloads
+  # the platform, toolchain, framework and libraries from the PlatformIO registry. The fixture
+  # holds hidden files (.pio/, .piopm), so the upload includes them. This runner's artifact is
+  # canonical.
+  regen-platformio:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      # Keep in sync with rust-toolchain.toml; the script ends with `cargo test`.
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: "1.91.1"
+      - uses: Swatinem/rust-cache@v2
+      - name: Regenerate the PlatformIO fixture
+        env:
+          CHECK_STABLE: ${{ github.event_name != 'workflow_dispatch' || inputs.check_stable }}
+        run: |
+          args=(--remove-image)
+          if [[ "$CHECK_STABLE" == true ]]; then
+            args+=(--check-stable)
+          fi
+          scripts/regen-fixtures-platformio.sh "${args[@]}"
+      - name: Compare with the committed fixtures
+        continue-on-error: true
+        run: |
+          {
+            echo "### Regenerated fixtures/platformio vs committed"
+            echo
+            if git diff --quiet --exit-code -- fixtures/platformio && \
+               [[ -z "$(git status --porcelain -- fixtures/platformio)" ]]; then
+              echo "**PASS**: byte-identical to the committed fixtures."
+            else
+              echo "**DIFFERENT** (informational):"
+              echo
+              echo '```'
+              git status --short -- fixtures/platformio | head -50
+              echo '```'
+            fi
+          } >>"$GITHUB_STEP_SUMMARY"
+      - name: Collect reports and logs
+        if: always()
+        run: |
+          mkdir -p regen-reports
+          cp .cache/platformio-fixtures-staging/compare-stable.txt regen-reports/ 2>/dev/null || true
+          cp -R .cache/platformio-fixtures-logs regen-reports/logs 2>/dev/null || true
+      - uses: actions/upload-artifact@v4
+        with:
+          name: platformio-fixtures
+          path: fixtures/platformio
+          if-no-files-found: error
+          include-hidden-files: true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: platformio-fixtures-reports
           path: regen-reports
           if-no-files-found: warn

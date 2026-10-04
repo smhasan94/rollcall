@@ -477,7 +477,7 @@ fn fail_on_critical_pipeline_passes_with_high_listed() {
     grype = serde_json::from_str(&text_value).unwrap();
     r.grype(Some(grype));
     let outputs = r.pipeline("fixtures/cargo-old-heapless", "push", "critical");
-    assert_eq!(r.outputs("pipeline.sh")["ecosystem"], "cargo-metadata");
+    assert_eq!(r.outputs("pipeline.sh")["ecosystem"], "cargo");
     assert_eq!(outputs["gate"], "clean");
     assert_eq!(outputs["new-findings"], "1");
     let diff: Value =
@@ -810,11 +810,13 @@ fn base_script_absent_run_reports_no_base_without_failing() {
     );
 }
 
-/// `ecosystem: auto` tells a Zephyr build (build_info.yml) from captured cargo metadata and
-/// a Cargo package (Cargo.toml); a directory that is neither, or a wrong explicit ecosystem,
-/// exits 64 with an error annotation.
+/// `ecosystem: auto` runs `rollcall detect` (the detection `rollcall generate DIR` uses) and
+/// tells all four ecosystems apart: a Zephyr build, captured cargo metadata and a Cargo
+/// package, an ESP-IDF project and a PlatformIO project. A directory several ecosystems match
+/// exits 64 and one none matches 66, each with an error annotation; an unknown ecosystem is
+/// 64; an explicit ecosystem the directory is not fails naming what is missing.
 #[test]
-fn ecosystem_auto_detects_zephyr_and_cargo_metadata() {
+fn ecosystem_auto_uses_rollcall_detect_for_all_four_ecosystems() {
     let r = Runner::new();
     let detect = |dir: &Path, ecosystem: &str| {
         let out = r.run(
@@ -827,38 +829,216 @@ fn ecosystem_auto_detects_zephyr_and_cargo_metadata() {
         );
         (out, r.outputs("pipeline.sh").get("ecosystem").cloned())
     };
-    let (out, eco) = detect(&workspace().join("fixtures/zephyr/tls"), "auto");
-    assert_eq!(out.status.code(), Some(0), "{}", text(&out));
-    assert_eq!(eco.as_deref(), Some("zephyr"));
-    let (out, eco) = detect(&workspace().join("fixtures/cargo-keelsign"), "auto");
-    assert_eq!(out.status.code(), Some(0), "{}", text(&out));
-    assert_eq!(eco.as_deref(), Some("cargo-metadata"));
-    let (out, eco) = detect(&workspace().join("fixtures/cargo-keelsign"), "cargo");
-    assert_eq!(out.status.code(), Some(0), "{}", text(&out));
-    assert_eq!(eco.as_deref(), Some("cargo-metadata"));
-    // A package directory (Cargo.toml) is a Cargo build, run with --cargo; this one has no
-    // Cargo.lock, so `rollcall generate --cargo` itself fails after detection.
+    for (dir, expected) in [
+        ("fixtures/zephyr/tls", "zephyr"),
+        ("fixtures/cargo-keelsign", "cargo"),
+        ("fixtures/esp-idf/hello-world", "esp-idf"),
+        ("fixtures/platformio/arduino-mqtt", "platformio"),
+    ] {
+        let (out, eco) = detect(&workspace().join(dir), "auto");
+        assert_eq!(out.status.code(), Some(0), "{dir}: {}", text(&out));
+        assert_eq!(eco.as_deref(), Some(expected), "{dir}");
+        assert!(
+            String::from_utf8_lossy(&out.stderr).contains(&format!("ecosystem: {expected}")),
+            "{dir}"
+        );
+        // The same choice made explicitly gives the same SBOM.
+        let auto = std::fs::read(r.out().join("sbom.cdx.json")).unwrap();
+        let (out, eco) = detect(&workspace().join(dir), expected);
+        assert_eq!(out.status.code(), Some(0), "{dir}: {}", text(&out));
+        assert_eq!(eco.as_deref(), Some(expected));
+        let explicit = std::fs::read(r.out().join("sbom.cdx.json")).unwrap();
+        // Timestamps differ (none is pinned here); compare without them.
+        let strip = |b: &[u8]| {
+            let mut v: Value = serde_json::from_slice(b).unwrap();
+            v["metadata"]["timestamp"] = Value::Null;
+            v
+        };
+        assert_eq!(strip(&auto), strip(&explicit), "{dir}");
+    }
+    // A package directory (Cargo.toml) is a Cargo build, run with cargo metadata; here a fake
+    // cargo fails (as for a package without Cargo.lock), so `rollcall generate` fails after
+    // detection with exit 65, and the step exits with that code.
+    write_exe(
+        &r.path("bin/cargo"),
+        "#!/bin/sh\necho 'error: the lock file needs to be updated' >&2\nexit 101\n",
+    );
     let package = r.path("pkg");
     std::fs::create_dir_all(&package).unwrap();
     std::fs::write(package.join("Cargo.toml"), "[package]\nname = \"x\"\n").unwrap();
     let (out, eco) = detect(&package, "auto");
     assert_eq!(eco.as_deref(), Some("cargo"));
-    assert_ne!(out.status.code(), Some(0));
-    assert!(String::from_utf8_lossy(&out.stderr).contains("--cargo"));
-    // Neither.
+    assert_eq!(out.status.code(), Some(65), "{}", text(&out));
+    assert!(
+        String::from_utf8_lossy(&out.stderr).contains("--ecosystem cargo"),
+        "{}",
+        text(&out)
+    );
+    // Several ecosystems: 64, listing them.
+    std::fs::write(package.join("platformio.ini"), "[env:a]\n").unwrap();
+    let (out, eco) = detect(&package, "auto");
+    assert_eq!(out.status.code(), Some(64), "{}", text(&out));
+    assert_eq!(eco, None);
+    let stderr = String::from_utf8_lossy(&out.stderr).into_owned();
+    assert!(stderr.contains("::error::"), "{stderr}");
+    assert!(
+        stderr.contains("cargo (Cargo.toml), platformio (platformio.ini)"),
+        "{stderr}"
+    );
+    // None: 66.
     let empty = r.path("empty");
     std::fs::create_dir_all(&empty).unwrap();
     let (out, eco) = detect(&empty, "auto");
-    assert_eq!(out.status.code(), Some(64), "{}", text(&out));
+    assert_eq!(out.status.code(), Some(66), "{}", text(&out));
     assert_eq!(eco, None);
     assert!(String::from_utf8_lossy(&out.stderr).contains("::error::"));
+    assert!(String::from_utf8_lossy(&out.stderr).contains("no ecosystem recognised"));
     // Wrong explicit ecosystem, unknown ecosystem, missing directory.
     let (out, _) = detect(&workspace().join("fixtures/cargo-keelsign"), "zephyr");
-    assert_eq!(out.status.code(), Some(64), "{}", text(&out));
+    assert_eq!(out.status.code(), Some(66), "{}", text(&out));
+    assert!(
+        String::from_utf8_lossy(&out.stderr).contains("not a zephyr directory: no build_info.yml"),
+        "{}",
+        text(&out)
+    );
     let (out, _) = detect(&workspace().join("fixtures/zephyr/tls"), "espidf");
     assert_eq!(out.status.code(), Some(64), "{}", text(&out));
     let (out, _) = detect(&r.path("nowhere"), "auto");
     assert_eq!(out.status.code(), Some(66), "{}", text(&out));
+}
+
+/// TP3, local proxy for the example workflow's `platformio` job: on the PlatformIO fixture
+/// with `ecosystem: auto`, the pipeline is green, detects PlatformIO, writes every file the
+/// upload step lists, and the SBOM names the framework and the three libraries.
+#[test]
+fn pipeline_on_platformio_fixture_with_ecosystem_auto_is_clean() {
+    let r = Runner::new();
+    let outputs = r.pipeline_with(
+        "fixtures/platformio/arduino-mqtt",
+        "push",
+        "high",
+        &[("RC_ECOSYSTEM", "auto")],
+    );
+    assert_eq!(outputs["gate"], "clean");
+    assert_eq!(r.outputs("pipeline.sh")["ecosystem"], "platformio");
+    for file in artifact_files() {
+        assert!(r.out().join(&file).is_file(), "{file} was not written");
+    }
+    let sbom: Value =
+        serde_json::from_slice(&std::fs::read(r.out().join("sbom.cdx.json")).unwrap()).unwrap();
+    let components = sbom["components"][0]["components"].as_array().unwrap();
+    let purls: Vec<&str> = components
+        .iter()
+        .filter_map(|c| c["purl"].as_str())
+        .collect();
+    for purl in [
+        "pkg:generic/bblanchon/ArduinoJson@7.2.1?repository_url=https:%2F%2Fregistry.platformio.org",
+        "pkg:generic/knolleary/PubSubClient@2.8?repository_url=https:%2F%2Fregistry.platformio.org",
+        "pkg:generic/mathertel/OneButton@2.6.1?repository_url=https:%2F%2Fregistry.platformio.org",
+        "pkg:generic/arduino-esp32@2.0.17?vcs_url=git%2Bhttps:%2F%2Fgithub.com%2Fespressif%2Farduino-esp32",
+    ] {
+        assert!(purls.contains(&purl), "{purl} not in {purls:?}");
+    }
+    // The example workflow's job runs the same: ecosystem auto on this fixture, then checks.
+    let example: Value = yaml_serde::from_str(
+        &std::fs::read_to_string(workspace().join(".github/workflows/rollcall-example.yml"))
+            .unwrap(),
+    )
+    .unwrap();
+    let job = &example["jobs"]["platformio"];
+    let steps = job["steps"].as_array().unwrap();
+    let action = steps.iter().find(|s| s["uses"] == "./action").unwrap();
+    assert_eq!(
+        action["with"]["build-dir"],
+        "fixtures/platformio/arduino-mqtt"
+    );
+    assert_eq!(action["with"]["ecosystem"], "auto");
+    let check = steps
+        .iter()
+        .find_map(|s| s["run"].as_str())
+        .expect("a check step");
+    for needle in [
+        "platformio",
+        "ArduinoJson@7.2.1",
+        "PubSubClient@2.8",
+        "OneButton@2.6.1",
+        "arduino-esp32",
+    ] {
+        assert!(check.contains(needle), "the check step lacks {needle}");
+    }
+}
+
+/// The `pio-core` input passes the core directory to `rollcall generate --pio-core` (a leading
+/// `~/` is the runner's home): the SBOM then carries the installed packages' facts (the
+/// platform's licence, `pio-core/` evidence), which the exact pins alone do not give. A
+/// build-dir starting with `-` is refused (it would be read as a flag).
+#[test]
+fn pio_core_input_reaches_generate_and_dash_build_dir_is_refused() {
+    let r = Runner::new();
+    let platform_licence = |r: &Runner| {
+        let sbom: Value =
+            serde_json::from_slice(&std::fs::read(r.out().join("sbom.cdx.json")).unwrap()).unwrap();
+        sbom["components"][0]["components"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|c| c["name"] == "espressif32")
+            .unwrap()["licenses"]
+            .clone()
+    };
+    let fixture = "fixtures/platformio/arduino-mqtt";
+    r.pipeline_with(fixture, "push", "high", &[]);
+    assert_eq!(platform_licence(&r), Value::Null);
+    // The core directory copied under the runner's home, named as ~/core.
+    let home_core = r.path("core");
+    let src = workspace().join(fixture).join("pio-core");
+    for rel in [
+        "platforms/espressif32/platform.json",
+        "platforms/espressif32/.piopm",
+        "packages/framework-arduinoespressif32/package.json",
+        "packages/framework-arduinoespressif32/.piopm",
+    ] {
+        let to = home_core.join(rel);
+        std::fs::create_dir_all(to.parent().unwrap()).unwrap();
+        std::fs::copy(src.join(rel), &to).unwrap();
+    }
+    let out = r.run(
+        "pipeline.sh",
+        "push",
+        &[
+            ("RC_BUILD_DIR", workspace().join(fixture).to_str().unwrap()),
+            ("RC_PIO_CORE", "~/core"),
+            ("RC_TIMESTAMP", GOLDEN_TIMESTAMP),
+        ],
+    );
+    assert_eq!(out.status.code(), Some(0), "{}", text(&out));
+    let stderr = String::from_utf8_lossy(&out.stderr).into_owned();
+    assert!(
+        stderr.contains(&format!("--pio-core {}", home_core.display())),
+        "{stderr}"
+    );
+    assert_eq!(platform_licence(&r), json!([{"expression": "Apache-2.0"}]));
+    // Another ecosystem: ignored with a warning.
+    let out = r.run(
+        "pipeline.sh",
+        "push",
+        &[
+            (
+                "RC_BUILD_DIR",
+                workspace()
+                    .join("fixtures/cargo-keelsign")
+                    .to_str()
+                    .unwrap(),
+            ),
+            ("RC_PIO_CORE", "~/core"),
+        ],
+    );
+    assert_eq!(out.status.code(), Some(0), "{}", text(&out));
+    assert!(String::from_utf8_lossy(&out.stderr).contains("pio-core is ignored for a cargo build"));
+    // A build-dir that looks like a flag.
+    let out = r.run("pipeline.sh", "push", &[("RC_BUILD_DIR", "--help")]);
+    assert_eq!(out.status.code(), Some(64), "{}", text(&out));
+    assert!(String::from_utf8_lossy(&out.stderr).contains("must not start with '-'"));
 }
 
 /// The ```yaml blocks of a Markdown file.
@@ -928,6 +1108,7 @@ fn action_yml_declares_scope_inputs_and_readme_workflow_uses_only_declared_input
     assert_eq!(inputs["rollcall-version"]["default"], "source");
     let outputs = action["outputs"].as_object().unwrap();
     for name in [
+        "ecosystem",
         "sbom",
         "vex",
         "scan",
@@ -1026,7 +1207,7 @@ fn action_yml_declares_scope_inputs_and_readme_workflow_uses_only_declared_input
             .unwrap(),
     )
     .unwrap();
-    let steps = check_workflow("rollcall-example.yml", &example, 2);
+    let steps = check_workflow("rollcall-example.yml", &example, 3);
     let mut names = Vec::new();
     for step in &steps {
         let dir = step["with"]["build-dir"].as_str().unwrap();
@@ -1035,7 +1216,7 @@ fn action_yml_declares_scope_inputs_and_readme_workflow_uses_only_declared_input
     }
     names.sort();
     names.dedup();
-    assert_eq!(names.len(), 2, "each job needs its own artifact name");
+    assert_eq!(names.len(), 3, "each job needs its own artifact name");
 }
 
 /// The old-mbedTLS build's diff (no base) with these extra pipeline inputs.

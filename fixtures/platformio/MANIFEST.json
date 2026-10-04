@@ -1,0 +1,117 @@
+{
+  "ecosystem": "platformio",
+  "files": [
+    {
+      "bytes": 162,
+      "path": "arduino-mqtt/.pio/libdeps/esp32dev/ArduinoJson/.piopm",
+      "sha256": "bae93b2f7cb4772feca5114260d8b55ec7f363b5fe3db6dd2055c87e33bca5ae"
+    },
+    {
+      "bytes": 748,
+      "path": "arduino-mqtt/.pio/libdeps/esp32dev/ArduinoJson/library.json",
+      "sha256": "544fe231e8f6127af01c17e41e7e8855925ef3650ab4f47d7881aa49a08fac53"
+    },
+    {
+      "bytes": 160,
+      "path": "arduino-mqtt/.pio/libdeps/esp32dev/OneButton/.piopm",
+      "sha256": "e3c33d2661cd44bf87de99ed606ebfeb971d34e3c85b3fa623ce0e687d4a634c"
+    },
+    {
+      "bytes": 854,
+      "path": "arduino-mqtt/.pio/libdeps/esp32dev/OneButton/library.json",
+      "sha256": "d4eac4b400b6a86326f0073e218b474ec1c070eed811ec337fed943e52479901"
+    },
+    {
+      "bytes": 164,
+      "path": "arduino-mqtt/.pio/libdeps/esp32dev/PubSubClient/.piopm",
+      "sha256": "4ce65d27a40356b5a7bd1caf1fcc5fe1ff15f56de29d8eec8c2efce7b05b0ad6"
+    },
+    {
+      "bytes": 798,
+      "path": "arduino-mqtt/.pio/libdeps/esp32dev/PubSubClient/library.json",
+      "sha256": "1ef98a1ba548fc800a166c1d4ec1e6a54824066dd7f7e7652508e94135a415cb"
+    },
+    {
+      "bytes": 218,
+      "path": "arduino-mqtt/pio-core/packages/framework-arduinoespressif32/.piopm",
+      "sha256": "e413903767348a4c955aaeebaa04a40076f5bd6045dd8f083d42c113a9cb9bbd"
+    },
+    {
+      "bytes": 414,
+      "path": "arduino-mqtt/pio-core/packages/framework-arduinoespressif32/package.json",
+      "sha256": "f35415c75f6f43755df92bbbf7ef10c9e65c2edb2569d512636a0477be64d5bf"
+    },
+    {
+      "bytes": 167,
+      "path": "arduino-mqtt/pio-core/platforms/espressif32/.piopm",
+      "sha256": "059cda0454e0460f3376870150b6ac4eab102391c03256b175d3e62f5b79dbb9"
+    },
+    {
+      "bytes": 3907,
+      "path": "arduino-mqtt/pio-core/platforms/espressif32/platform.json",
+      "sha256": "e3af009560c744de005ac98465affb2969ac6decaf873bdf2054960298151ffd"
+    },
+    {
+      "bytes": 803,
+      "path": "arduino-mqtt/platformio.ini",
+      "sha256": "589646074e43b40869f24e0d25ad102bfbf727e161177ccce5cfe1307a57c087"
+    }
+  ],
+  "format": "rollcall-fixtures/1",
+  "generator": "scripts/regen-fixtures-platformio.sh",
+  "host": {
+    "arch": "arm64",
+    "os": "darwin"
+  },
+  "platformio": {
+    "container_core_dir": "/pio-core",
+    "core_version": "6.1.18",
+    "digest": "sha256:9901e0a8d75037d8242ed43155cbcb2d1f61be1356383d8054afb59fd50e39c4",
+    "image": "python",
+    "image_platform": "linux/amd64",
+    "requirements": "scripts/fixture-src/platformio/requirements.txt",
+    "tag": "3.12-slim-bookworm"
+  },
+  "total_bytes": 8395,
+  "variants": {
+    "arduino-mqtt": {
+      "build_command": [
+        [
+          "pio",
+          "run",
+          "-e",
+          "esp32dev"
+        ]
+      ],
+      "container_project_dir": "/project/arduino-mqtt",
+      "env": "esp32dev",
+      "framework": {
+        "package": "framework-arduinoespressif32",
+        "upstream": "2.0.17",
+        "version": "3.20017.241212"
+      },
+      "libraries": [
+        {
+          "name": "ArduinoJson",
+          "owner": "bblanchon",
+          "version": "7.2.1"
+        },
+        {
+          "name": "PubSubClient",
+          "owner": "knolleary",
+          "version": "2.8"
+        },
+        {
+          "name": "OneButton",
+          "owner": "mathertel",
+          "version": "2.6.1"
+        }
+      ],
+      "platform": {
+        "name": "espressif32",
+        "version": "6.10.0"
+      },
+      "source": "scripts/fixture-src/platformio/arduino-mqtt"
+    }
+  }
+}
