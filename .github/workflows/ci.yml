@@ -147,6 +147,10 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: scripts/check-report-markdown.sh
+      - name: Render the pull-request comment goldens with GitHub's renderer
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: scripts/check-report-markdown.sh --comment
 
   # grype and osv-scanner (pinned, SHA-256-verified) must load the generated CycloneDX
   # documents without warnings, and find nothing in the minimal fixture. Needs the network.

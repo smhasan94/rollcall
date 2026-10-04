@@ -1,0 +1,433 @@
+{
+  "schema": "rollcall-diff/1",
+  "product": {
+    "name": "mbedtls",
+    "version": null
+  },
+  "base": {
+    "present": true,
+    "product": {
+      "name": "http_server",
+      "version": null
+    },
+    "reason": null
+  },
+  "summary": "This report checks how ready the software bill of materials (SBOM) of mbedtls is to hand to a customer or regulator. Its readiness score is 32 out of 100. The SBOM lists 10 items in total: the product, 1 firmware image and 8 software components. 8 of them carry an identifier (a PURL or CPE) that vulnerability databases can match, 0 a file hash that proves exactly which file was shipped, and 4 a licence. 2 modules are not in rollcall's identifier database, so their identity may be incomplete (see Unresolved modules). The SBOM is valid CycloneDX 1.6; the CISA 2026 and EU Cyber Resilience Act checks found 21 problems to fix and 0 recommendations. A vulnerability scan was supplied: 13 known vulnerabilities affect this product's components; 13 are still open (4 critical, 4 high) and 0 closed by VEX statements (not affected or fixed).",
+  "score": {
+    "head": 32,
+    "base": 36
+  },
+  "components": {
+    "added": [
+      {
+        "path": "mbedtls",
+        "level": "image",
+        "name": "mbedtls",
+        "version": null,
+        "purl": false,
+        "cpe": false
+      },
+      {
+        "path": "mbedtls",
+        "level": "product",
+        "name": "mbedtls",
+        "version": null,
+        "purl": false,
+        "cpe": false
+      },
+      {
+        "path": "mbedtls / cmsis",
+        "level": "component",
+        "name": "cmsis",
+        "version": "512cc7e895e8491696b61f7ba8066b4a182569b8",
+        "purl": true,
+        "cpe": false
+      },
+      {
+        "path": "mbedtls / cmsis-6",
+        "level": "component",
+        "name": "cmsis-6",
+        "version": "06d952b6713a2ca41c9224a62075e4059402a151",
+        "purl": true,
+        "cpe": false
+      },
+      {
+        "path": "mbedtls / hal-nordic",
+        "level": "component",
+        "name": "hal-nordic",
+        "version": "9587b1dcb83d24ab74e89837843a5f7d573f7059",
+        "purl": true,
+        "cpe": false
+      },
+      {
+        "path": "mbedtls / mbedtls",
+        "level": "component",
+        "name": "mbedtls",
+        "version": "85440ef5fffa95d0e9971e9163719189cf34d979",
+        "purl": true,
+        "cpe": true
+      },
+      {
+        "path": "mbedtls / mcuboot",
+        "level": "component",
+        "name": "mcuboot",
+        "version": "4eba8087fa606db801455f14d185255bc8c49467",
+        "purl": true,
+        "cpe": false
+      },
+      {
+        "path": "mbedtls / zephyr",
+        "level": "component",
+        "name": "zephyr",
+        "version": "4.2.0",
+        "purl": true,
+        "cpe": true
+      },
+      {
+        "path": "mbedtls / zephyr / logging",
+        "level": "component",
+        "name": "logging",
+        "version": "4.2.0",
+        "purl": true,
+        "cpe": false
+      },
+      {
+        "path": "mbedtls / zephyr / mbedtls-integration",
+        "level": "component",
+        "name": "mbedtls-integration",
+        "version": "4.2.0",
+        "purl": true,
+        "cpe": false
+      }
+    ],
+    "removed": [
+      {
+        "path": "http_server",
+        "level": "image",
+        "name": "http_server",
+        "version": null,
+        "purl": false,
+        "cpe": false
+      },
+      {
+        "path": "http_server",
+        "level": "product",
+        "name": "http_server",
+        "version": null,
+        "purl": false,
+        "cpe": false
+      },
+      {
+        "path": "http_server / cmsis",
+        "level": "component",
+        "name": "cmsis",
+        "version": "512cc7e895e8491696b61f7ba8066b4a182569b8",
+        "purl": true,
+        "cpe": false
+      },
+      {
+        "path": "http_server / cmsis_6",
+        "level": "component",
+        "name": "cmsis_6",
+        "version": "30a859f44ef8ab4dc8f84b03ed586fd16ccf9d74",
+        "purl": true,
+        "cpe": false
+      },
+      {
+        "path": "http_server / hal_nordic",
+        "level": "component",
+        "name": "hal_nordic",
+        "version": "44fd3d44b15cb75f80a25b4679f91d2787e28664",
+        "purl": true,
+        "cpe": false
+      },
+      {
+        "path": "http_server / mbedtls",
+        "level": "component",
+        "name": "mbedtls",
+        "version": "a3e190fe44c78d1ba67f55979e1257328cc7d0d8",
+        "purl": true,
+        "cpe": true
+      },
+      {
+        "path": "http_server / mcuboot",
+        "level": "component",
+        "name": "mcuboot",
+        "version": "6d3b3d2c38ab20c242e5b9abb04d050086383eb2",
+        "purl": true,
+        "cpe": false
+      },
+      {
+        "path": "http_server / tf-psa-crypto",
+        "level": "component",
+        "name": "tf-psa-crypto",
+        "version": "dc575a2ddcc8cb16275d24c42a52eaf79ebe2231",
+        "purl": true,
+        "cpe": true
+      },
+      {
+        "path": "http_server / zephyr",
+        "level": "component",
+        "name": "zephyr",
+        "version": "4.4.2",
+        "purl": true,
+        "cpe": true
+      },
+      {
+        "path": "http_server / zephyr / filesystem",
+        "level": "component",
+        "name": "filesystem",
+        "version": "4.4.2",
+        "purl": true,
+        "cpe": false
+      },
+      {
+        "path": "http_server / zephyr / ip-stack",
+        "level": "component",
+        "name": "ip-stack",
+        "version": "4.4.2",
+        "purl": true,
+        "cpe": false
+      },
+      {
+        "path": "http_server / zephyr / json",
+        "level": "component",
+        "name": "json",
+        "version": "4.4.2",
+        "purl": true,
+        "cpe": false
+      },
+      {
+        "path": "http_server / zephyr / logging",
+        "level": "component",
+        "name": "logging",
+        "version": "4.4.2",
+        "purl": true,
+        "cpe": false
+      },
+      {
+        "path": "http_server / zephyr / mbedtls-integration",
+        "level": "component",
+        "name": "mbedtls-integration",
+        "version": "4.4.2",
+        "purl": true,
+        "cpe": false
+      },
+      {
+        "path": "http_server / zephyr / networking-core",
+        "level": "component",
+        "name": "networking-core",
+        "version": "4.4.2",
+        "purl": true,
+        "cpe": false
+      },
+      {
+        "path": "http_server / zephyr / shell",
+        "level": "component",
+        "name": "shell",
+        "version": "4.4.2",
+        "purl": true,
+        "cpe": false
+      },
+      {
+        "path": "http_server / zephyr / tls-sockets",
+        "level": "component",
+        "name": "tls-sockets",
+        "version": "4.4.2",
+        "purl": true,
+        "cpe": false
+      },
+      {
+        "path": "http_server / zephyr / usb-device",
+        "level": "component",
+        "name": "usb-device",
+        "version": "4.4.2",
+        "purl": true,
+        "cpe": false
+      }
+    ],
+    "changed": []
+  },
+  "findings": {
+    "scanned": true,
+    "head_total": 13,
+    "head_open": 13,
+    "new": [
+      {
+        "id": "CVE-2026-34872",
+        "aliases": [],
+        "severity": "critical",
+        "component": "mbedtls / mbedtls",
+        "name": "mbedtls",
+        "in_sbom": true,
+        "version": "85440ef5fffa95d0e9971e9163719189cf34d979",
+        "fixed_versions": [
+          "3.6.6"
+        ],
+        "triage": "unresolved"
+      },
+      {
+        "id": "CVE-2026-34873",
+        "aliases": [],
+        "severity": "critical",
+        "component": "mbedtls / mbedtls",
+        "name": "mbedtls",
+        "in_sbom": true,
+        "version": "85440ef5fffa95d0e9971e9163719189cf34d979",
+        "fixed_versions": [
+          "3.6.6",
+          "4.1.0"
+        ],
+        "triage": "unresolved"
+      },
+      {
+        "id": "CVE-2026-34875",
+        "aliases": [],
+        "severity": "critical",
+        "component": "mbedtls / mbedtls",
+        "name": "mbedtls",
+        "in_sbom": true,
+        "version": "85440ef5fffa95d0e9971e9163719189cf34d979",
+        "fixed_versions": [
+          "3.6.6"
+        ],
+        "triage": "unresolved"
+      },
+      {
+        "id": "CVE-2026-34877",
+        "aliases": [],
+        "severity": "critical",
+        "component": "mbedtls / mbedtls",
+        "name": "mbedtls",
+        "in_sbom": true,
+        "version": "85440ef5fffa95d0e9971e9163719189cf34d979",
+        "fixed_versions": [
+          "3.6.6"
+        ],
+        "triage": "unresolved"
+      },
+      {
+        "id": "CVE-2026-25833",
+        "aliases": [],
+        "severity": "high",
+        "component": "mbedtls / mbedtls",
+        "name": "mbedtls",
+        "in_sbom": true,
+        "version": "85440ef5fffa95d0e9971e9163719189cf34d979",
+        "fixed_versions": [
+          "3.6.6"
+        ],
+        "triage": "unresolved"
+      },
+      {
+        "id": "CVE-2026-25835",
+        "aliases": [],
+        "severity": "high",
+        "component": "mbedtls / mbedtls",
+        "name": "mbedtls",
+        "in_sbom": true,
+        "version": "85440ef5fffa95d0e9971e9163719189cf34d979",
+        "fixed_versions": [
+          "3.6.6"
+        ],
+        "triage": "unresolved"
+      },
+      {
+        "id": "CVE-2026-34874",
+        "aliases": [],
+        "severity": "high",
+        "component": "mbedtls / mbedtls",
+        "name": "mbedtls",
+        "in_sbom": true,
+        "version": "85440ef5fffa95d0e9971e9163719189cf34d979",
+        "fixed_versions": [
+          "3.6.6"
+        ],
+        "triage": "unresolved"
+      },
+      {
+        "id": "CVE-2026-34876",
+        "aliases": [],
+        "severity": "high",
+        "component": "mbedtls / mbedtls",
+        "name": "mbedtls",
+        "in_sbom": true,
+        "version": "85440ef5fffa95d0e9971e9163719189cf34d979",
+        "fixed_versions": [
+          "3.6.6"
+        ],
+        "triage": "unresolved"
+      },
+      {
+        "id": "CVE-2025-54764",
+        "aliases": [],
+        "severity": "medium",
+        "component": "mbedtls / mbedtls",
+        "name": "mbedtls",
+        "in_sbom": true,
+        "version": "85440ef5fffa95d0e9971e9163719189cf34d979",
+        "fixed_versions": [
+          "3.6.5"
+        ],
+        "triage": "unresolved"
+      },
+      {
+        "id": "CVE-2025-59438",
+        "aliases": [],
+        "severity": "medium",
+        "component": "mbedtls / mbedtls",
+        "name": "mbedtls",
+        "in_sbom": true,
+        "version": "85440ef5fffa95d0e9971e9163719189cf34d979",
+        "fixed_versions": [
+          "3.6.5"
+        ],
+        "triage": "unresolved"
+      },
+      {
+        "id": "CVE-2025-66442",
+        "aliases": [],
+        "severity": "medium",
+        "component": "mbedtls / mbedtls",
+        "name": "mbedtls",
+        "in_sbom": true,
+        "version": "85440ef5fffa95d0e9971e9163719189cf34d979",
+        "fixed_versions": [],
+        "triage": "unresolved"
+      },
+      {
+        "id": "CVE-2026-25834",
+        "aliases": [],
+        "severity": "medium",
+        "component": "mbedtls / mbedtls",
+        "name": "mbedtls",
+        "in_sbom": true,
+        "version": "85440ef5fffa95d0e9971e9163719189cf34d979",
+        "fixed_versions": [
+          "3.6.6"
+        ],
+        "triage": "unresolved"
+      },
+      {
+        "id": "CVE-2026-34871",
+        "aliases": [],
+        "severity": "medium",
+        "component": "mbedtls / mbedtls",
+        "name": "mbedtls",
+        "in_sbom": true,
+        "version": "85440ef5fffa95d0e9971e9163719189cf34d979",
+        "fixed_versions": [
+          "3.6.6"
+        ],
+        "triage": "unresolved"
+      }
+    ],
+    "fixed": [],
+    "changed": []
+  },
+  "gate": {
+    "fail_on": "high",
+    "new_open_at_or_above": 8,
+    "outcome": "findings"
+  }
+}

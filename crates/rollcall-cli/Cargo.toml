@@ -27,6 +27,7 @@ tempfile.workspace = true
 assert_cmd.workspace = true
 predicates.workspace = true
 toml.workspace = true
+yaml_serde.workspace = true
 
 [lints]
 workspace = true

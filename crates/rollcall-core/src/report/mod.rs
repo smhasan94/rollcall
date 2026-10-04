@@ -350,6 +350,28 @@ pub fn build(
     Ok(report)
 }
 
+/// The report's component rows for `sbom` alone: one [`ComponentRow`] per node, the product
+/// first, in the report's walk order (see the [module docs](self)). `rollcall diff` compares
+/// two builds with them. Never panics; a malformed SBOM is a [`ReportError`].
+pub fn component_rows(sbom: Input<'_>) -> Result<Vec<ComponentRow>, ReportError> {
+    let document: Value =
+        serde_json::from_slice(sbom.bytes).map_err(|e| ReportError::SbomJson {
+            name: sbom.name.to_owned(),
+            message: e.to_string(),
+        })?;
+    let read = cyclonedx::read(&document).map_err(|source| ReportError::Sbom {
+        name: sbom.name.to_owned(),
+        source: Box::new(source),
+    })?;
+    let product_type = document
+        .get("metadata")
+        .and_then(|m| m.get("component"))
+        .and_then(|c| c.get("type"))
+        .and_then(Value::as_str)
+        .unwrap_or("firmware");
+    Ok(coverage::rows(&coverage::nodes(&read, product_type)))
+}
+
 /// The report as canonical `rollcall-report/1` JSON: two-space-indented, keys in a fixed
 /// order, ending in a newline.
 pub fn to_json(report: &ReadinessReport) -> Result<String, ModelError> {

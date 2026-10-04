@@ -1,0 +1,38 @@
+{
+  "schema": "rollcall-diff/1",
+  "product": {
+    "name": "mbedtls",
+    "version": null
+  },
+  "base": {
+    "present": true,
+    "product": {
+      "name": "mbedtls",
+      "version": null
+    },
+    "reason": null
+  },
+  "summary": "This report checks how ready the software bill of materials (SBOM) of mbedtls is to hand to a customer or regulator. Its readiness score is 32 out of 100. The SBOM lists 10 items in total: the product, 1 firmware image and 8 software components. 8 of them carry an identifier (a PURL or CPE) that vulnerability databases can match, 0 a file hash that proves exactly which file was shipped, and 4 a licence. 2 modules are not in rollcall's identifier database, so their identity may be incomplete (see Unresolved modules). The SBOM is valid CycloneDX 1.6; the CISA 2026 and EU Cyber Resilience Act checks found 21 problems to fix and 0 recommendations. A vulnerability scan was supplied: 13 known vulnerabilities affect this product's components; 13 are still open (4 critical, 4 high) and 0 closed by VEX statements (not affected or fixed).",
+  "score": {
+    "head": 32,
+    "base": 32
+  },
+  "components": {
+    "added": [],
+    "removed": [],
+    "changed": []
+  },
+  "findings": {
+    "scanned": true,
+    "head_total": 13,
+    "head_open": 13,
+    "new": [],
+    "fixed": [],
+    "changed": []
+  },
+  "gate": {
+    "fail_on": "high",
+    "new_open_at_or_above": 0,
+    "outcome": "clean"
+  }
+}

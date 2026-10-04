@@ -1,0 +1,219 @@
+# rollcall-action: SBOM, VEX, scan and readiness report for a firmware build, with a
+# pull-request comment diffing it against the base branch and a gate on new findings.
+# See action/README.md. Every step runs a script under action/scripts/ with the inputs passed
+# as environment variables (never interpolated into shell source). Third-party actions are
+# pinned to full commit SHAs.
+name: rollcall
+description: CycloneDX SBOM, VEX, vulnerability scan and readiness report for a firmware build, with a PR comment and a gate on new findings
+author: Sharukh Hasan
+branding:
+  icon: shield
+  color: blue
+
+inputs:
+  build-dir:
+    description: The build to describe. Zephyr - the build directory (holding build_info.yml; a sysbuild top-level directory when it has domains.yaml). Cargo - the package directory (Cargo.toml) or a directory holding captured cargo-metadata.json
+    required: true
+  ecosystem:
+    description: auto, zephyr or cargo. auto - build_info.yml means Zephyr, else Cargo.toml or cargo-metadata.json means Cargo
+    required: false
+    default: auto
+  identifiers-version:
+    description: Identifier database for Zephyr module resolution - embedded (the one built into rollcall), or a db_version (e.g. 1.1.0) downloaded from the release identifiers-v<db_version> and verified against its SHA256SUMS
+    required: false
+    default: embedded
+  fail-on:
+    description: Fail the check when the pull request adds an open (not VEX-suppressed) finding at or above this severity - critical, high, medium, low, unknown or none. Findings below it are still listed
+    required: false
+    default: high
+  gate-on-push:
+    description: Also enforce the gate outside pull requests (e.g. on a push to main, where there is no base and every open finding counts as new). Default false - the outcome is only noted
+    required: false
+    default: 'false'
+  vex-rules:
+    description: Your VEX rules files (YAML), one path per line, applied after the starter pack
+    required: false
+    default: ''
+  starter-rules:
+    description: Apply rollcall's starter VEX rule pack (true or false)
+    required: false
+    default: 'true'
+  west-list:
+    description: Zephyr - output of `west list -f "{name} {path} {revision} {url}"` (default - BUILD-DIR/west-list.txt when present)
+    required: false
+    default: ''
+  sysbuild:
+    description: Zephyr - auto, true or false. auto - a sysbuild when BUILD-DIR holds domains.yaml
+    required: false
+    default: auto
+  product:
+    description: Zephyr - put the product under this NAME[@VERSION]
+    required: false
+    default: ''
+  elf:
+    description: Cargo - the binary built with `cargo auditable`, to list only the crates it links
+    required: false
+    default: ''
+  target:
+    description: Cargo (a package directory) - the target triple to resolve the crates for
+    required: false
+    default: ''
+  scanner:
+    description: grype (default), or auto - grype and, installed too, osv-scanner
+    required: false
+    default: grype
+  rollcall-version:
+    description: source - build rollcall from the action's own checkout (cached); or a rollcall release tag (e.g. v0.1.0) - download its binary and verify it against the release's SHA256SUMS
+    required: false
+    default: source
+  artifact-name:
+    description: Name of the workflow artifact (SBOM, VEX, scan, report, diff); the base branch's artifact of the same name is the diff's base, and it keys the comment, so give each job its own
+    required: false
+    default: rollcall
+  comment:
+    description: Post (or update) the pull-request comment (true or false)
+    required: false
+    default: 'true'
+  github-token:
+    description: Token for the comment and the base artifact (needs pull-requests write and actions read)
+    required: false
+    default: ${{ github.token }}
+  timestamp:
+    description: Fixed RFC 3339 timestamp for the SBOM, VEX and report (reproducible output); default - now
+    required: false
+    default: ''
+  out-dir:
+    description: Directory for every output file
+    required: false
+    default: .rollcall-action
+
+outputs:
+  sbom:
+    description: Path of the CycloneDX 1.6 SBOM
+    value: ${{ steps.pipeline.outputs.sbom }}
+  vex:
+    description: Path of the OpenVEX document
+    value: ${{ steps.pipeline.outputs.vex }}
+  scan:
+    description: Path of the rollcall-scan/1 report (triaged with the VEX)
+    value: ${{ steps.pipeline.outputs.scan }}
+  report:
+    description: Path of the readiness report (Markdown; report.json beside it)
+    value: ${{ steps.pipeline.outputs.report }}
+  comment:
+    description: Path of the pull-request comment (Markdown)
+    value: ${{ steps.diff.outputs.comment }}
+  score:
+    description: The readiness score out of 100
+    value: ${{ steps.pipeline.outputs.score }}
+  new-findings:
+    description: How many findings are new against the base (every finding without a base)
+    value: ${{ steps.diff.outputs.new-findings }}
+  gate:
+    description: clean, or findings when a new open finding is at or above fail-on (the job then fails)
+    value: ${{ steps.diff.outputs.gate }}
+
+runs:
+  using: composite
+  steps:
+    - name: Cache the rollcall build
+      if: inputs.rollcall-version == 'source'
+      uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+      with:
+        path: |
+          ~/.cargo/registry/index
+          ~/.cargo/registry/cache
+          ~/.cargo/git/db
+          ${{ github.action_path }}/../target
+        # Keyed on the action's own repository and ref (a local `./action` has neither, so the
+        # commit), never on the calling repository's files; older builds seed a new key.
+        key: rollcall-action-${{ runner.os }}-${{ github.action_repository }}-${{ github.action_ref || github.sha }}
+        restore-keys: |
+          rollcall-action-${{ runner.os }}-${{ github.action_repository }}-
+          rollcall-action-${{ runner.os }}-
+
+    - name: Install rollcall and grype
+      id: install
+      shell: bash
+      env:
+        RC_ROLLCALL_VERSION: ${{ inputs.rollcall-version }}
+        RC_IDENTIFIERS_VERSION: ${{ inputs.identifiers-version }}
+        RC_SCANNER: ${{ inputs.scanner }}
+      run: '"$GITHUB_ACTION_PATH/scripts/install.sh"'
+
+    - name: Generate, validate, scan, VEX and report
+      id: pipeline
+      shell: bash
+      env:
+        ROLLCALL_BIN: ${{ steps.install.outputs.rollcall-bin }}
+        RC_IDENTIFIERS: ${{ steps.install.outputs.identifiers }}
+        RC_BUILD_DIR: ${{ inputs.build-dir }}
+        RC_ECOSYSTEM: ${{ inputs.ecosystem }}
+        RC_VEX_RULES: ${{ inputs.vex-rules }}
+        RC_STARTER_RULES: ${{ inputs.starter-rules }}
+        RC_WEST_LIST: ${{ inputs.west-list }}
+        RC_SYSBUILD: ${{ inputs.sysbuild }}
+        RC_PRODUCT: ${{ inputs.product }}
+        RC_ELF: ${{ inputs.elf }}
+        RC_TARGET: ${{ inputs.target }}
+        RC_SCANNER: ${{ inputs.scanner }}
+        RC_TIMESTAMP: ${{ inputs.timestamp }}
+        RC_OUT_DIR: ${{ inputs.out-dir }}
+      run: '"$GITHUB_ACTION_PATH/scripts/pipeline.sh"'
+
+    - name: Fetch the base branch's artifact
+      id: base
+      if: github.event_name == 'pull_request'
+      shell: bash
+      env:
+        RC_ARTIFACT_NAME: ${{ inputs.artifact-name }}
+        RC_GITHUB_TOKEN: ${{ inputs.github-token }}
+        RC_OUT_DIR: ${{ inputs.out-dir }}
+      run: '"$GITHUB_ACTION_PATH/scripts/base.sh"'
+
+    - name: Diff against the base
+      id: diff
+      shell: bash
+      env:
+        ROLLCALL_BIN: ${{ steps.install.outputs.rollcall-bin }}
+        RC_BASE: ${{ steps.base.outputs.base }}
+        RC_FAIL_ON: ${{ inputs.fail-on }}
+        RC_OUT_DIR: ${{ inputs.out-dir }}
+      run: '"$GITHUB_ACTION_PATH/scripts/diff.sh"'
+
+    - name: Post or update the pull-request comment
+      id: comment
+      if: github.event_name == 'pull_request' && inputs.comment == 'true'
+      shell: bash
+      env:
+        RC_ARTIFACT_NAME: ${{ inputs.artifact-name }}
+        RC_GITHUB_TOKEN: ${{ inputs.github-token }}
+        RC_OUT_DIR: ${{ inputs.out-dir }}
+      run: '"$GITHUB_ACTION_PATH/scripts/comment.sh"'
+
+    - name: Upload the SBOM, VEX, scan, report and diff
+      if: always()
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      with:
+        name: ${{ inputs.artifact-name }}
+        path: |
+          ${{ inputs.out-dir }}/sbom.cdx.json
+          ${{ inputs.out-dir }}/vex.openvex.json
+          ${{ inputs.out-dir }}/scan.json
+          ${{ inputs.out-dir }}/report.md
+          ${{ inputs.out-dir }}/report.json
+          ${{ inputs.out-dir }}/validate.json
+          ${{ inputs.out-dir }}/diff.json
+          ${{ inputs.out-dir }}/comment.md
+        if-no-files-found: warn
+        overwrite: true
+
+    - name: Gate on new findings
+      if: always() && steps.diff.outcome == 'success'
+      shell: bash
+      env:
+        RC_GATE: ${{ steps.diff.outputs.gate }}
+        RC_FAIL_ON: ${{ inputs.fail-on }}
+        RC_GATE_ON_PUSH: ${{ inputs.gate-on-push }}
+        RC_OUT_DIR: ${{ inputs.out-dir }}
+      run: '"$GITHUB_ACTION_PATH/scripts/gate.sh"'

@@ -14,6 +14,7 @@
 //! the readiness report (Markdown and JSON) for an SBOM. [`scan`] normalises grype and
 //! osv-scanner findings for an SBOM, triages them with VEX documents and decides
 //! `rollcall scan`'s exit code. Both use [`severity`] to normalise scanners' severity words.
+//! [`diff`] compares a pull request's SBOM and findings with its base branch's (`rollcall diff`).
 
 #![deny(missing_docs)]
 #![deny(
@@ -35,6 +36,7 @@
 pub mod blob;
 pub mod cargo;
 pub mod cyclonedx;
+pub mod diff;
 pub mod identify;
 pub mod linker_map;
 pub mod merge;
