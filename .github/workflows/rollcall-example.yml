@@ -36,7 +36,7 @@ jobs:
           persist-credentials: false
       - uses: ./action
         with:
-          build-dir: fixtures/zephyr/tls
+          build-dir: fixtures/zephyr-old-mbedtls/old-mbedtls
           fail-on: high
           artifact-name: rollcall-zephyr
 
@@ -48,6 +48,6 @@ jobs:
           persist-credentials: false
       - uses: ./action
         with:
-          build-dir: fixtures/cargo-keelsign
+          build-dir: fixtures/cargo-old-heapless
           fail-on: critical
           artifact-name: rollcall-cargo
