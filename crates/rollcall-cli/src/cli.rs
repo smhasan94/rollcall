@@ -23,6 +23,12 @@ pub const EXIT_SOFTWARE: u8 = 70;
 pub const EXIT_UNAVAILABLE: u8 = 69;
 /// Exit code when output cannot be written (`EX_IOERR`).
 pub const EXIT_IOERR: u8 = 74;
+/// `scan` only: an open finding at or above `--fail-on`.
+pub const EXIT_SCAN_FINDINGS: u8 = 1;
+/// `scan` only: an unresolved finding, with `--fail-on-unresolved`.
+pub const EXIT_SCAN_UNRESOLVED: u8 = 2;
+/// `scan` only: a scanner is missing or failed, or its output cannot be read.
+pub const EXIT_SCAN_SCANNER: u8 = 3;
 
 /// Top-level `rollcall` command line.
 ///
@@ -65,7 +71,7 @@ pub enum Command {
     /// Emit VEX statements for an SBOM
     Vex(VexArgs),
     /// Scan an SBOM for known vulnerabilities
-    Scan,
+    Scan(ScanArgs),
     /// Produce a CycloneDX CBOM (cryptographic inventory) for a build
     Assay,
     /// Inspect and lint the identifier database
@@ -82,7 +88,7 @@ impl Command {
             Command::Validate(_) => "validate",
             Command::Merge(_) => "merge",
             Command::Vex(_) => "vex",
-            Command::Scan => "scan",
+            Command::Scan(_) => "scan",
             Command::Assay => "assay",
             Command::Identifiers(_) => "identifiers",
             Command::Report(_) => "report",
@@ -388,6 +394,77 @@ pub struct VexArgs {
     pub output: Option<PathBuf>,
 }
 
+/// Which scanners `rollcall scan` runs.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, ValueEnum)]
+pub enum ScannerChoice {
+    /// Anchore grype only.
+    Grype,
+    /// Google osv-scanner only.
+    Osv,
+    /// Every scanner found on PATH (grype, osv-scanner); a missing one is skipped.
+    Auto,
+}
+
+/// A `--fail-on` threshold.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, ValueEnum)]
+pub enum SeverityArg {
+    /// Critical findings.
+    Critical,
+    /// High or critical.
+    High,
+    /// Medium or higher.
+    Medium,
+    /// Low or higher.
+    Low,
+    /// Every open finding, including those of unknown severity.
+    Unknown,
+}
+
+impl From<SeverityArg> for rollcall_core::severity::Severity {
+    fn from(arg: SeverityArg) -> Self {
+        match arg {
+            SeverityArg::Critical => Self::Critical,
+            SeverityArg::High => Self::High,
+            SeverityArg::Medium => Self::Medium,
+            SeverityArg::Low => Self::Low,
+            SeverityArg::Unknown => Self::Unknown,
+        }
+    }
+}
+
+/// Arguments of `rollcall scan`.
+#[derive(Debug, Args)]
+pub struct ScanArgs {
+    /// The CycloneDX 1.6 SBOM to scan (e.g. from `rollcall generate`)
+    #[arg(value_name = "SBOM")]
+    pub sbom: PathBuf,
+    /// A VEX document to triage the findings with: OpenVEX, CycloneDX VEX (standalone, or an
+    /// SBOM with embedded vulnerabilities) or rollcall-vex/1 (detected from the content).
+    /// Suppressed findings are still listed. Repeatable
+    #[arg(long, value_name = "FILE")]
+    pub vex: Vec<PathBuf>,
+    /// Which scanners to run. auto runs every one found on PATH and skips a missing one
+    #[arg(long, value_enum, default_value_t = ScannerChoice::Auto)]
+    pub scanner: ScannerChoice,
+    /// Scan offline with pre-downloaded databases: grype's in DIR/grype (its
+    /// GRYPE_DB_CACHE_DIR, auto-update off) and osv-scanner's in DIR/osv-scanner (its
+    /// OSV_SCANNER_LOCAL_DB_CACHE_DIRECTORY, --offline). A grype database older than grype's
+    /// age limit fails the scan (exit 3); see docs/scan.md
+    #[arg(long, value_name = "DIR")]
+    pub db_path: Option<PathBuf>,
+    /// Exit 1 if an open (not VEX-suppressed) finding is at or above this severity.
+    /// unknown is the lowest level
+    #[arg(long, value_enum, value_name = "SEVERITY")]
+    pub fail_on: Option<SeverityArg>,
+    /// Exit 2 if a finding is unresolved: no VEX claim, under_investigation, or conflicting
+    /// claims (exit 1 takes precedence)
+    #[arg(long)]
+    pub fail_on_unresolved: bool,
+    /// Print the rollcall-scan/1 JSON report on stdout instead of the table
+    #[arg(long)]
+    pub json: bool,
+}
+
 /// Arguments of `rollcall validate`.
 #[derive(Debug, Args)]
 #[command(group = ArgGroup::new("checks").required(true).multiple(true))]
@@ -461,8 +538,9 @@ pub struct ReportArgs {
     /// The CycloneDX 1.6 SBOM to report on (e.g. from `rollcall generate`)
     #[arg(value_name = "FILE")]
     pub file: PathBuf,
-    /// Scanner output for the SBOM: grype `-o json` or osv-scanner `--format json` (detected
-    /// from the content). Repeatable. Without it, vulnerabilities are not assessed
+    /// Scanner output for the SBOM: grype `-o json`, osv-scanner `--format json` or
+    /// `rollcall scan --json` (rollcall-scan/1; its VEX triage is not used, pass --vex)
+    /// (detected from the content). Repeatable. Without it, vulnerabilities are not assessed
     #[arg(long, value_name = "FILE")]
     pub scan: Vec<PathBuf>,
     /// VEX statements for the SBOM: `rollcall vex` output in any format (rollcall-vex/1,

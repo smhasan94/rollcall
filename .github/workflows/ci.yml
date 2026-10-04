@@ -205,6 +205,89 @@ jobs:
             .cache/grype-cves-attempt-2
           if-no-files-found: warn
 
+  # `rollcall scan` against the pinned grype 0.119.0 and osv-scanner 2.6.0 (SHA-256-verified,
+  # installed by scripts/smoke-scan.sh --install): the grype/osv-scanner overlap on every
+  # fixture SBOM, the known CVE set of the old-mbedTLS Zephyr build, then an offline scan with
+  # --db-path while the network is blocked. Needs the network up to the block.
+  scan:
+    runs-on: ubuntu-latest
+    env:
+      ROLLCALL_TOOLS_DIR: ${{ github.workspace }}/.cache/tools
+      GRYPE_DB_CACHE_DIR: ${{ github.workspace }}/.cache/grype-db
+      ROLLCALL_SCAN_DB_DIR: ${{ github.workspace }}/.cache/scan-db
+    steps:
+      - uses: actions/checkout@v4
+      # Keep in sync with rust-toolchain.toml.
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: "1.91.1"
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo build -p rollcall-cli --locked
+      - name: Install the pinned scanners
+        run: |
+          ROLLCALL_SMOKE_OUT=.cache/scan-install scripts/smoke-scan.sh --install --only minimal || {
+            echo "install failed; retrying once"
+            ROLLCALL_SMOKE_OUT=.cache/scan-install scripts/smoke-scan.sh --install --only minimal
+          }
+      - name: Scanner integration tests (online)
+        run: cargo test -p rollcall-cli --locked --test scan_scanners -- --ignored --skip offline
+      # Everything the offline test needs is fetched or built while the network is up: both
+      # databases (osv-scanner's for the ecosystems of the SBOM it will scan) and the test
+      # binary.
+      - name: Prime the offline databases and build the offline test
+        id: prime
+        run: |
+          set -euo pipefail
+          export PATH="$ROLLCALL_TOOLS_DIR:$PATH"
+          v=fixtures/zephyr-old-mbedtls/old-mbedtls
+          target/debug/rollcall generate --zephyr "$v/mbedtls" --west-list "$v/west-list.txt" \
+            --identifier-db crates/rollcall-identifiers/db/identifiers.yaml \
+            --timestamp 2026-01-02T03:04:05Z -o .cache/scan-old-mbedtls.cdx.json
+          GRYPE_DB_CACHE_DIR="$ROLLCALL_SCAN_DB_DIR/grype" grype db update
+          rc=0
+          OSV_SCANNER_LOCAL_DB_CACHE_DIRECTORY="$ROLLCALL_SCAN_DB_DIR/osv-scanner" \
+            osv-scanner scan source -L .cache/scan-old-mbedtls.cdx.json --format json \
+            --offline-vulnerabilities --download-offline-databases >/dev/null || rc=$?
+          test "$rc" -le 1
+          bin="$(cargo test -p rollcall-cli --locked --test scan_scanners --no-run --message-format=json |
+            jq -r 'select(.profile.test == true and .target.name == "scan_scanners") | .executable')"
+          test -x "$bin"
+          echo "bin=$bin" >> "$GITHUB_OUTPUT"
+      # The block is scoped to processes whose group is `nonet`, so the runner itself keeps
+      # its connection to GitHub: iptables/ip6tables reject all their output except
+      # loopback (TCP with a reset, so a connection fails at once rather than timing out),
+      # and curl run the same way proves it before the test runs. curl must fail with exit 7
+      # (could not connect) and nothing else: any other failure (setpriv, the group, DNS)
+      # proves nothing about the block. A reset is never a timeout, so 28 is not accepted.
+      - name: Offline scan with --db-path and the network blocked
+        env:
+          TEST_BIN: ${{ steps.prime.outputs.bin }}
+        run: |
+          set -euo pipefail
+          sudo groupadd --force nonet
+          for ipt in iptables ip6tables; do
+            sudo "$ipt" -I OUTPUT 1 -m owner --gid-owner nonet ! -o lo -j REJECT
+            sudo "$ipt" -I OUTPUT 1 -m owner --gid-owner nonet ! -o lo -p tcp \
+              -j REJECT --reject-with tcp-reset
+          done
+          offline() {
+            sudo env PATH="$PATH" HOME="$HOME" ROLLCALL_TOOLS_DIR="$ROLLCALL_TOOLS_DIR" \
+              ROLLCALL_SCAN_DB_DIR="$ROLLCALL_SCAN_DB_DIR" \
+              setpriv --reuid="$(id -u)" --regid=nonet --clear-groups -- "$@"
+          }
+          # The same setpriv context can run a command at all.
+          offline true
+          for url in https://api.osv.dev https://grype.anchore.io https://github.com; do
+            rc=0
+            offline curl -sS --max-time 20 -o /dev/null "$url" || rc=$?
+            if [ "$rc" -ne 7 ]; then
+              echo "network block not proven for $url: curl exit $rc (want 7, could not connect)"
+              exit 1
+            fi
+            echo "blocked: $url (curl exit 7)"
+          done
+          offline "$TEST_BIN" --ignored --exact offline_db_path_scan_without_network
+
   # rollcall's VEX output against the reference tooling (SHA-113): vexctl (pinned,
   # SHA-256-verified) loads and validates every OpenVEX statement, the CycloneDX VEX
   # document validates against the CycloneDX 1.6 schema, and grype --vex suppresses the
