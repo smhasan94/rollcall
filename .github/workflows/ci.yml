@@ -90,9 +90,10 @@ jobs:
       - run: scripts/lint-identifiers.sh
       - run: scripts/check-identifiers-package.sh
 
-  # The worked examples of docs/vex-rules.md (SHA-115): every `$ ` command in a ```console
-  # block runs and must print exactly the output shown under it. Offline. Run the same
-  # locally with `scripts/check-doc-examples.sh`.
+  # The worked examples of docs/vex-rules.md (SHA-115) and the gap analysis in
+  # docs/zephyr-gaps.md (SHA-134): every `$ ` command in a ```console block runs and must
+  # print exactly the output shown under it. Offline. Run the same locally with
+  # `scripts/check-doc-examples.sh docs/vex-rules.md docs/zephyr-gaps.md`.
   docs-examples:
     runs-on: ubuntu-latest
     steps:
@@ -103,7 +104,7 @@ jobs:
           toolchain: "1.91.1"
       - uses: Swatinem/rust-cache@v2
       - run: cargo build -p rollcall-cli --locked
-      - run: ROLLCALL_BIN=target/debug/rollcall scripts/check-doc-examples.sh docs/vex-rules.md
+      - run: ROLLCALL_BIN=target/debug/rollcall scripts/check-doc-examples.sh docs/vex-rules.md docs/zephyr-gaps.md
       # The starter VEX rule pack's Kconfig symbols all exist in the real builds' .config files.
       - name: Lint the starter VEX rule pack
         run: |
@@ -113,6 +114,19 @@ jobs:
             args+=(--kconfig "$config")
           done < <(find fixtures -path '*/zephyr/.config' | sort)
           target/debug/rollcall vex lint --starter-rules --lint-starter-symbols "${args[@]}"
+
+  # Every link in docs/zephyr-gaps.md and the outreach drafts in docs/outreach/ (SHA-134):
+  # links inside the repository must exist (with their #anchors), and http(s) links must
+  # answer 2xx or 3xx. Needs the network. Run the same locally with
+  # `scripts/check-doc-links.sh docs/zephyr-gaps.md docs/outreach/*.md` (`--offline` checks
+  # only the links inside the repository). Network-dependent: an external site that is down
+  # fails this job, and re-running it is the remedy.
+  docs-links:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check the gap analysis and outreach links
+        run: scripts/check-doc-links.sh docs/zephyr-gaps.md docs/outreach/*.md
 
   # crates/rollcall-core/db/subsystems.yaml against the pinned Zephyr tree (every source path
   # and Kconfig symbol real, `size` claims backed). Needs the network on a cache miss.
