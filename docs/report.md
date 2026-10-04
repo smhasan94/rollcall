@@ -22,6 +22,18 @@ rollcall report product.cdx.json --format md \
   SBOM does not list is counted as `not-in-sbom`. Severities are normalised
   case-insensitively: `low` and `negligible` are low, `medium` and `moderate` medium, `high`
   high, `critical` critical, anything else (including a CVSS number) unknown.
+
+  `--scan` also reads `rollcall scan --json` output (`rollcall-scan/1`, detected by its
+  `"schema"`). Each of its findings is read as one scanner finding on the SBOM component
+  `rollcall scan` joined it to (its name, version and purl; a finding with no component
+  keeps the reported package and stays `not-in-sbom`), with its id, aliases and fixed
+  versions. Its severity is the scanner's own word for the scan's (highest) severity, so a
+  report from `rollcall scan --json` output is identical to one from the same grype and
+  osv-scanner output given raw. The scan's VEX triage (`triage`, `vex`) is **not** used:
+  only the report's own `--vex` documents close findings, so the VEX coverage counts
+  statements the report can see. When the scan suppressed findings, a warning says how
+  many and asks for the same documents with `--vex`; a scanner the scan records as
+  `failed` or `skipped` is warned about too, since its findings are missing.
 - **`--vex FILE`** (repeatable): `rollcall vex` output in any format: `rollcall-vex/1`,
   OpenVEX, a CycloneDX VEX BOM, or an SBOM with embedded `vulnerabilities` (`--embed`),
   detected from the content. A statement matches a finding when one of its ids is the

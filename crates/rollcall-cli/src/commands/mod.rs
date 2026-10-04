@@ -5,6 +5,7 @@ pub mod identifiers;
 pub mod merge;
 pub mod output;
 pub mod report;
+pub mod scan;
 pub mod validate;
 pub mod version;
 pub mod vex;

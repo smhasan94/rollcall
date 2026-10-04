@@ -1,7 +1,10 @@
 # Written by scripts/capture-findings.sh; do not edit.
-captured: 2026-10-01
 grype: 0.119.0
 osv-scanner: 2.6.0 (queries osv.dev at capture time)
+old-heapless.grype.json: captured 2026-10-03
+old-heapless.osv.json: captured 2026-10-01
+old-mbedtls.grype.json: captured 2026-10-01
+old-mbedtls.osv.json: captured 2026-10-01
 grype db status:
   Path:      .cache/grype-db/6/vulnerability.db
   Schema:    v6.1.9
