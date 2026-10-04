@@ -1106,6 +1106,15 @@ fn zephyr_gaps_outreach_drafts_exist_and_link_the_doc() {
                 .any(|t| t.starts_with("../zephyr-gaps.md")),
             "{draft}: does not link the gap analysis"
         );
+        // What gets posted (everything from the first `## `) links by GitHub URL, since a
+        // relative link means nothing outside the repo.
+        let body = text.split_once("\n## ").map_or("", |(_, b)| b);
+        for target in link_targets(body) {
+            assert!(
+                !target.starts_with("../") && !target.starts_with("./"),
+                "{draft}: relative link {target} in the postable text"
+            );
+        }
         for banned in [
             "Claude",
             "Anthropic",
@@ -1134,12 +1143,16 @@ fn zephyr_gaps_outreach_drafts_exist_and_link_the_doc() {
         assert!(comment.contains(term), "the RFC comment lacks {term:?}");
     }
     assert!(
-        comment.contains("](../zephyr-gaps.md"),
+        comment.contains("](https://github.com/smhasan94/rollcall/blob/main/docs/zephyr-gaps.md"),
         "the RFC comment links the gap analysis"
     );
-    // No pitch: the comment answers the RFC's question and does not name the tool.
+    // No pitch: the comment answers the RFC's question and does not name the tool. Link
+    // targets are left out: the gap analysis URL names the repository, the prose must not.
+    let prose = link_targets(&comment)
+        .iter()
+        .fold(comment.clone(), |text, target| text.replace(target, ""));
     assert!(
-        !comment.to_lowercase().contains("rollcall"),
+        !prose.to_lowercase().contains("rollcall"),
         "the RFC comment names rollcall"
     );
     assert!(

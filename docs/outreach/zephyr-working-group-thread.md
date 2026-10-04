@@ -6,9 +6,8 @@
   `#security` channel (<https://chat.zephyrproject.org>), and offered as an agenda item for
   the [Security Working Group](https://github.com/zephyrproject-rtos/zephyr/wiki/Security-Working-Group)
   meeting.
-- **Before posting:** replace the relative links to the gap analysis with their URLs on
-  GitHub (`https://github.com/smhasan94/rollcall/blob/main/docs/zephyr-gaps.md`) once it is
-  merged, then record the thread's URL in the [outreach log](../zephyr-gaps.md#outreach-log).
+- **Before posting:** the post's links to the gap analysis are already URLs on GitHub;
+  record the thread's URL in the [outreach log](../zephyr-gaps.md#outreach-log).
 
 ## Title
 
@@ -20,7 +19,7 @@ I build SBOMs for Zephyr products and have been comparing what `west spdx` gives
 vulnerability management and the EU Cyber Resilience Act need. `west spdx` is a solid base:
 file-level hashes and licences, straight from the build system. I wrote up where it stops,
 with every claim reproducible from real v4.4.2 build output:
-[gap analysis](../zephyr-gaps.md).
+[gap analysis](https://github.com/smhasan94/rollcall/blob/main/docs/zephyr-gaps.md).
 
 The short version:
 

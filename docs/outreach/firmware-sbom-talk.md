@@ -12,8 +12,7 @@ identifier conventions rollcall uses, with a request for feedback on purl type c
   - Package URL: a thread in
     [purl-spec Discussions](https://github.com/package-url/purl-spec/discussions) with the
     questions in [purl questions](#purl-questions).
-- **Before posting:** replace the relative links with their URLs on GitHub
-  (`https://github.com/smhasan94/rollcall/blob/main/docs/...`) once they are merged, then
+- **Before posting:** the links in the talk and posts are already URLs on GitHub;
   record each post's URL in the [outreach log](../zephyr-gaps.md#outreach-log).
 
 ## 1. Who I am and why firmware
@@ -33,26 +32,26 @@ the SBOM should say it.
 Zephyr and many vendor SDKs build libraries from their own forks, pinned by commit. The
 SBOM's version is then a commit hash, and scanners cannot look it up. rollcall keeps the
 commit as the version and records the upstream release it carries in the purl, with the
-fork's purl kept as evidence ([Gap 1](../zephyr-gaps.md#gap-1-identifiers)).
+fork's purl kept as evidence ([Gap 1](https://github.com/smhasan94/rollcall/blob/main/docs/zephyr-gaps.md#gap-1-identifiers)).
 
 ## 4. Problem: one kernel, many subsystems
 
 The RTOS is one repository and one CPE, but many of its CVEs are in a subsystem (Bluetooth,
 networking, USB) that a given build may not include. rollcall emits each built-in subsystem
 as a subcomponent with a purl subpath, which makes evidence-backed "code not present" VEX
-statements possible ([Gap 2](../zephyr-gaps.md#gap-2-subsystem-split)).
+statements possible ([Gap 2](https://github.com/smhasan94/rollcall/blob/main/docs/zephyr-gaps.md#gap-2-subsystem-split)).
 
 ## 5. Problem: blobs
 
 Vendor binaries are shipped but never compiled, so source-based SBOM tools miss them.
 rollcall adds them from a manifest as opaque components with a SHA-256
-([Gap 4](../zephyr-gaps.md#gap-4-blobs)).
+([Gap 4](https://github.com/smhasan94/rollcall/blob/main/docs/zephyr-gaps.md#gap-4-blobs)).
 
 ## 6. Problem: one product, several images
 
 Bootloader and application are built together but described separately. rollcall merges
 them into one product with content-derived `bom-ref`s, so the same build gives a
-byte-identical SBOM ([Gap 3](../zephyr-gaps.md#gap-3-mcuboot-and-sysbuild)).
+byte-identical SBOM ([Gap 3](https://github.com/smhasan94/rollcall/blob/main/docs/zephyr-gaps.md#gap-3-mcuboot-and-sysbuild)).
 
 ## 7. The identifier database conventions
 
@@ -60,14 +59,14 @@ byte-identical SBOM ([Gap 3](../zephyr-gaps.md#gap-3-mcuboot-and-sysbuild)).
   libraries that are in no package registry.
 - CPE: only when the vendor:product is in the NVD CPE dictionary, never made up, with
   aliases when NVD files one project under two vendors (Mbed TLS).
-- Details: [docs/identifiers.md](../identifiers.md).
+- Details: [docs/identifiers.md](https://github.com/smhasan94/rollcall/blob/main/docs/identifiers.md).
 
 ## 8. What scanners do with these
 
 grype matches these C libraries on their CPE, and it skips CycloneDX `operating-system`
 components, so an RTOS typed as an operating system is not scanned. osv-scanner matches on
 the purl ecosystem, and neither `pkg:generic` nor `pkg:github` maps to C library advisories
-([Scanner behaviour](../identifiers.md#scanner-behaviour)).
+([Scanner behaviour](https://github.com/smhasan94/rollcall/blob/main/docs/identifiers.md#scanner-behaviour)).
 
 ## 9. Questions for the community
 
@@ -76,7 +75,7 @@ under a `firmware` product the right CycloneDX shape for a multi-image product?
 
 ## 10. Where to find it
 
-The gap analysis with reproducible commands ([docs/zephyr-gaps.md](../zephyr-gaps.md)),
+The gap analysis with reproducible commands ([docs/zephyr-gaps.md](https://github.com/smhasan94/rollcall/blob/main/docs/zephyr-gaps.md)),
 and rollcall itself (Apache-2.0).
 
 ## purl questions
