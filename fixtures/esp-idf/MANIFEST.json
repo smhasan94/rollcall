@@ -7,7 +7,7 @@
     "container_idf_path": "/opt/esp/idf",
     "digest": "sha256:dfa2d076c796769c07c155eba6c672b9f395aec943b2ba3701b73379b5f9e884",
     "image": "espressif/idf",
-    "image_platform": "linux/arm64",
+    "image_platform": "linux/amd64",
     "tag": "v5.5.1",
     "target": "esp32"
   },
@@ -36,7 +36,7 @@
     {
       "bytes": 5529469,
       "path": "wifi-tls/build/https_request.map",
-      "sha256": "1dbabbb01571a7c1f0e13335cc2466baf1c91070e86fe30841a340599743eadf",
+      "sha256": "102ca7b0961f6e0efc0cd05ebd8c38facd18aca7c75fc8cb2921a2aa395975f8",
       "transform": "strip-cref"
     },
     {
@@ -103,8 +103,8 @@
   "format": "rollcall-fixtures/1",
   "generator": "scripts/regen-fixtures-esp-idf.sh",
   "host": {
-    "arch": "arm64",
-    "os": "darwin"
+    "arch": "x86_64",
+    "os": "linux"
   },
   "total_bytes": 11766798,
   "variants": {

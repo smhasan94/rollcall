@@ -27640,7 +27640,7 @@ Discarded input sections
  .debug_line    0x00000000       0x7c /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/lib/esp32/no-rtti/libstdc++.a(eh_unex_handler.o)
  .debug_str     0x00000000      0x674 /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/lib/esp32/no-rtti/libstdc++.a(eh_unex_handler.o)
  .debug_line_str
-                0x00000000      0x41f /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/lib/esp32/no-rtti/libstdc++.a(eh_unex_handler.o)
+                0x00000000      0x413 /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/lib/esp32/no-rtti/libstdc++.a(eh_unex_handler.o)
  .comment       0x00000000       0x30 /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/lib/esp32/no-rtti/libstdc++.a(eh_unex_handler.o)
  .xt.prop       0x00000000        0xc /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/lib/esp32/no-rtti/libstdc++.a(eh_unex_handler.o)
  .text          0x00000000        0x0 /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/lib/esp32/no-rtti/libstdc++.a(new_opv.o)
@@ -77340,117 +77340,117 @@ LOAD /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib
  *(.debug_addr)
 
 .debug_line_str
-                0x00000000     0x1d92
+                0x00000000     0x1de6
  *(.debug_line_str)
  .debug_line_str
-                0x00000000     0x1d92 /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/lib/esp32/no-rtti/libstdc++.a(del_opv.o)
+                0x00000000     0x1de6 /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/lib/esp32/no-rtti/libstdc++.a(del_opv.o)
                                 0x253 (size before relaxing)
  .debug_line_str
-                0x00001d92      0x25f /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/lib/esp32/no-rtti/libstdc++.a(new_handler.o)
+                0x00001de6      0x25f /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/lib/esp32/no-rtti/libstdc++.a(new_handler.o)
  .debug_line_str
-                0x00001d92      0x259 /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/lib/esp32/no-rtti/libstdc++.a(new_opvnt.o)
+                0x00001de6      0x259 /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/lib/esp32/no-rtti/libstdc++.a(new_opvnt.o)
  .debug_line_str
-                0x00001d92      0x386 /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/lib/esp32/no-rtti/libstdc++.a(del_op.o)
+                0x00001de6      0x37a /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/lib/esp32/no-rtti/libstdc++.a(del_op.o)
  .debug_line_str
-                0x00001d92      0x461 /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/lib/esp32/no-rtti/libstdc++.a(eh_catch.o)
+                0x00001de6      0x455 /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/lib/esp32/no-rtti/libstdc++.a(eh_catch.o)
  .debug_line_str
-                0x00001d92      0x548 /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/lib/esp32/no-rtti/libstdc++.a(eh_globals.o)
+                0x00001de6      0x53c /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/lib/esp32/no-rtti/libstdc++.a(eh_globals.o)
  .debug_line_str
-                0x00001d92      0x46d /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/lib/esp32/no-rtti/libstdc++.a(eh_terminate.o)
+                0x00001de6      0x461 /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/lib/esp32/no-rtti/libstdc++.a(eh_terminate.o)
  .debug_line_str
-                0x00001d92      0x253 /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/lib/esp32/no-rtti/libstdc++.a(new_opv.o)
+                0x00001de6      0x253 /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/lib/esp32/no-rtti/libstdc++.a(new_opv.o)
  .debug_line_str
-                0x00001d92      0x476 /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/lib/esp32/no-rtti/libstdc++.a(eh_term_handler.o)
+                0x00001de6      0x46a /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/lib/esp32/no-rtti/libstdc++.a(eh_term_handler.o)
  .debug_line_str
-                0x00001d92      0x415 /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/lib/esp32/no-rtti/libstdc++.a(new_op.o)
+                0x00001de6      0x409 /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/lib/esp32/no-rtti/libstdc++.a(new_op.o)
  .debug_line_str
-                0x00001d92      0x375 /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/lib/esp32/no-rtti/libstdc++.a(si_class_type_info.o)
+                0x00001de6      0x369 /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/lib/esp32/no-rtti/libstdc++.a(si_class_type_info.o)
  .debug_line_str
-                0x00001d92      0x34e /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/lib/esp32/no-rtti/libstdc++.a(tinfo.o)
+                0x00001de6      0x342 /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/lib/esp32/no-rtti/libstdc++.a(tinfo.o)
  .debug_line_str
-                0x00001d92      0x2e4 /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/lib/esp32/no-rtti/libstdc++.a(bad_alloc.o)
+                0x00001de6      0x2e4 /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/lib/esp32/no-rtti/libstdc++.a(bad_alloc.o)
  .debug_line_str
-                0x00001d92      0x36c /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/lib/esp32/no-rtti/libstdc++.a(class_type_info.o)
+                0x00001de6      0x360 /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/lib/esp32/no-rtti/libstdc++.a(class_type_info.o)
  .debug_line_str
-                0x00001d92      0x253 /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/lib/esp32/no-rtti/libstdc++.a(del_ops.o)
+                0x00001de6      0x253 /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/lib/esp32/no-rtti/libstdc++.a(del_ops.o)
  .debug_line_str
-                0x00001d92      0x3af /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/lib/esp32/no-rtti/libstdc++.a(eh_exception.o)
+                0x00001de6      0x3af /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/lib/esp32/no-rtti/libstdc++.a(eh_exception.o)
  .debug_line_str
-                0x00001d92       0xc5 /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib/gcc/xtensa-esp-elf/14.2.0/esp32/no-rtti/libgcc.a(_divsf3.o)
+                0x00001de6       0xc5 /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib/gcc/xtensa-esp-elf/14.2.0/esp32/no-rtti/libgcc.a(_divsf3.o)
  .debug_line_str
-                0x00001d92      0x2ba /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/lib/esp32/no-rtti/libc.a(libc_a-findfp.o)
+                0x00001de6      0x2ba /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/lib/esp32/no-rtti/libc.a(libc_a-findfp.o)
  .debug_line_str
-                0x00001d92      0x2ad /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/lib/esp32/no-rtti/libc.a(libc_a-fopen.o)
+                0x00001de6      0x2ad /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/lib/esp32/no-rtti/libc.a(libc_a-fopen.o)
  .debug_line_str
-                0x00001d92      0x29d /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/lib/esp32/no-rtti/libc.a(libc_a-fseek.o)
+                0x00001de6      0x29d /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/lib/esp32/no-rtti/libc.a(libc_a-fseek.o)
  .debug_line_str
-                0x00001d92      0x2bf /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/lib/esp32/no-rtti/libc.a(libc_a-fvwrite.o)
+                0x00001de6      0x2bf /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/lib/esp32/no-rtti/libc.a(libc_a-fvwrite.o)
  .debug_line_str
-                0x00001d92      0x29d /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/lib/esp32/no-rtti/libc.a(libc_a-fwalk.o)
+                0x00001de6      0x29d /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/lib/esp32/no-rtti/libc.a(libc_a-fwalk.o)
  .debug_line_str
-                0x00001d92      0x2b4 /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/lib/esp32/no-rtti/libc.a(libc_a-printf.o)
+                0x00001de6      0x2b4 /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/lib/esp32/no-rtti/libc.a(libc_a-printf.o)
  .debug_line_str
-                0x00001d92      0x2a2 /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/lib/esp32/no-rtti/libc.a(libc_a-putc.o)
+                0x00001de6      0x2a2 /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/lib/esp32/no-rtti/libc.a(libc_a-putc.o)
  .debug_line_str
-                0x00001d92      0x2a3 /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/lib/esp32/no-rtti/libc.a(libc_a-putchar.o)
+                0x00001de6      0x2a3 /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/lib/esp32/no-rtti/libc.a(libc_a-putchar.o)
  .debug_line_str
-                0x00001d92      0x2b5 /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/lib/esp32/no-rtti/libc.a(libc_a-puts.o)
+                0x00001de6      0x2b5 /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/lib/esp32/no-rtti/libc.a(libc_a-puts.o)
  .debug_line_str
-                0x00001d92      0x2b1 /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/lib/esp32/no-rtti/libc.a(libc_a-refill.o)
+                0x00001de6      0x2b1 /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/lib/esp32/no-rtti/libc.a(libc_a-refill.o)
  .debug_line_str
-                0x00001d92      0x2bf /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/lib/esp32/no-rtti/libc.a(libc_a-sprintf.o)
+                0x00001de6      0x2bf /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/lib/esp32/no-rtti/libc.a(libc_a-sprintf.o)
  .debug_line_str
-                0x00001d92      0x2b7 /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/lib/esp32/no-rtti/libc.a(libc_a-vprintf.o)
+                0x00001de6      0x2b7 /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/lib/esp32/no-rtti/libc.a(libc_a-vprintf.o)
  .debug_line_str
-                0x00001d92      0x2c5 /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/lib/esp32/no-rtti/libc.a(libc_a-vsnprintf.o)
+                0x00001de6      0x2c5 /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/lib/esp32/no-rtti/libc.a(libc_a-vsnprintf.o)
  .debug_line_str
-                0x00001d92      0x2b1 /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/lib/esp32/no-rtti/libc.a(libc_a-wsetup.o)
+                0x00001de6      0x2b1 /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/lib/esp32/no-rtti/libc.a(libc_a-wsetup.o)
  .debug_line_str
-                0x00001d92      0x34d /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/lib/esp32/no-rtti/libc.a(libc_a-fseeko.o)
+                0x00001de6      0x34d /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/lib/esp32/no-rtti/libc.a(libc_a-fseeko.o)
  .debug_line_str
-                0x00001d92      0x2b3 /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/lib/esp32/no-rtti/libc.a(libc_a-strerror.o)
+                0x00001de6      0x2b3 /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/lib/esp32/no-rtti/libc.a(libc_a-strerror.o)
  .debug_line_str
-                0x00001d92      0x183 /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/lib/esp32/no-rtti/libc.a(libc_a-u_strerr.o)
+                0x00001de6      0x183 /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/lib/esp32/no-rtti/libc.a(libc_a-u_strerr.o)
  .debug_line_str
-                0x00001d92      0x31f /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/lib/esp32/no-rtti/libc.a(libc_a-gmtime.o)
+                0x00001de6      0x31f /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/lib/esp32/no-rtti/libc.a(libc_a-gmtime.o)
  .debug_line_str
-                0x00001d92      0x292 /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/lib/esp32/no-rtti/libc.a(libc_a-gmtime_r.o)
+                0x00001de6      0x292 /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/lib/esp32/no-rtti/libc.a(libc_a-gmtime_r.o)
  .debug_line_str
-                0x00001d92      0x30f /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/lib/esp32/no-rtti/libc.a(libc_a-time.o)
+                0x00001de6      0x30f /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/lib/esp32/no-rtti/libc.a(libc_a-time.o)
  .debug_line_str
-                0x00001d92      0x29e /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/lib/esp32/no-rtti/libc.a(libc_a-reent.o)
+                0x00001de6      0x29e /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/lib/esp32/no-rtti/libc.a(libc_a-reent.o)
  .debug_line_str
-                0x00001d92      0x243 /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/lib/esp32/no-rtti/libc.a(libc_a-impure.o)
+                0x00001de6      0x243 /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/lib/esp32/no-rtti/libc.a(libc_a-impure.o)
  .debug_line_str
-                0x00001d92      0x251 /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/lib/esp32/no-rtti/libc.a(libc_a-errno.o)
+                0x00001de6      0x251 /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/lib/esp32/no-rtti/libc.a(libc_a-errno.o)
  .debug_line_str
-                0x00001d92      0x2ac /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/lib/esp32/no-rtti/libc.a(libc_a-sysfcntl.o)
+                0x00001de6      0x2ac /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/lib/esp32/no-rtti/libc.a(libc_a-sysfcntl.o)
  .debug_line_str
-                0x00001d92      0x326 /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/lib/esp32/no-rtti/libc.a(libc_a-sysgettod.o)
+                0x00001de6      0x326 /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/lib/esp32/no-rtti/libc.a(libc_a-sysgettod.o)
  .debug_line_str
-                0x00001d92      0x3e6 /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/lib/esp32/no-rtti/libc.a(libc_a-svfprintf.o)
+                0x00001de6      0x3e6 /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/lib/esp32/no-rtti/libc.a(libc_a-svfprintf.o)
  .debug_line_str
-                0x00001d92      0x3e4 /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/lib/esp32/no-rtti/libc.a(libc_a-vfprintf.o)
+                0x00001de6      0x3e4 /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/lib/esp32/no-rtti/libc.a(libc_a-vfprintf.o)
  .debug_line_str
-                0x00001d92      0x3d4 /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/lib/esp32/no-rtti/libc.a(libc_a-vfiprintf.o)
+                0x00001de6      0x3d4 /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/lib/esp32/no-rtti/libc.a(libc_a-vfiprintf.o)
  .debug_line_str
-                0x00001d92      0x249 /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/lib/esp32/no-rtti/libc.a(libc_a-flags.o)
+                0x00001de6      0x249 /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/lib/esp32/no-rtti/libc.a(libc_a-flags.o)
  .debug_line_str
-                0x00001d92      0x33f /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/lib/esp32/no-rtti/libc.a(libc_a-makebuf.o)
+                0x00001de6      0x33f /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/lib/esp32/no-rtti/libc.a(libc_a-makebuf.o)
  .debug_line_str
-                0x00001d92      0x330 /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/lib/esp32/no-rtti/libc.a(libc_a-locale.o)
+                0x00001de6      0x330 /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/lib/esp32/no-rtti/libc.a(libc_a-locale.o)
  .debug_line_str
-                0x00001d92      0x2c3 /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/lib/esp32/no-rtti/libc.a(libc_a-localeconv.o)
+                0x00001de6      0x2c3 /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/lib/esp32/no-rtti/libc.a(libc_a-localeconv.o)
  .debug_line_str
-                0x00001d92      0x28a /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/lib/esp32/no-rtti/libc.a(libm_a-s_frexp.o)
+                0x00001de6      0x28a /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/lib/esp32/no-rtti/libc.a(libm_a-s_frexp.o)
  .debug_line_str
-                0x00001d92      0x390 /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/lib/esp32/no-rtti/libc.a(libc_a-dtoa.o)
+                0x00001de6      0x390 /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/lib/esp32/no-rtti/libc.a(libc_a-dtoa.o)
  .debug_line_str
-                0x00001d92      0x31d /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/lib/esp32/no-rtti/libc.a(libc_a-mbtowc_r.o)
+                0x00001de6      0x31d /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/lib/esp32/no-rtti/libc.a(libc_a-mbtowc_r.o)
  .debug_line_str
-                0x00001d92      0x393 /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/lib/esp32/no-rtti/libc.a(libc_a-mprec.o)
+                0x00001de6      0x393 /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/lib/esp32/no-rtti/libc.a(libc_a-mprec.o)
  .debug_line_str
-                0x00001d92      0x3d6 /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/lib/esp32/no-rtti/libc.a(libc_a-svfiprintf.o)
+                0x00001de6      0x3d6 /opt/esp/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/../lib/gcc/xtensa-esp-elf/14.2.0/../../../../xtensa-esp-elf/lib/esp32/no-rtti/libc.a(libc_a-svfiprintf.o)
 
 .debug_loclists
                 0x00000000     0xd6d9
