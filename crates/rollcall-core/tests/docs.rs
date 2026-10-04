@@ -1261,3 +1261,90 @@ fn zephyr_gaps_outreach_log_has_fixed_columns() {
         .collect();
     assert_eq!(listed, expected);
 }
+
+// SHA-129: the ESP-IDF guide (docs/esp-idf.md) and the ingester's module docs. The guide's
+// console examples are run by `scripts/check-doc-examples.sh docs/esp-idf.md` (CI job
+// docs-examples).
+
+const ESP_IDF_DOCS: &str = include_str!("../src/esp_idf/mod.rs");
+
+/// The `##` sections of docs/esp-idf.md, in order.
+const ESP_IDF_GUIDE_SECTIONS: [&str; 10] = [
+    "## Usage",
+    "## Inputs",
+    "## Mapping",
+    "## Subsystems",
+    "## Package URLs",
+    "## Blobs",
+    "## Warnings",
+    "## Determinism",
+    "## Limitations",
+    "## Fixtures",
+];
+
+#[test]
+fn esp_idf_guide_covers_inputs_mapping_split_blobs_and_fixtures() {
+    let doc = repo_file("docs/esp-idf.md");
+    assert!(doc.starts_with("# ESP-IDF\n"));
+    let headings: Vec<&str> = doc.lines().filter(|l| l.starts_with("## ")).collect();
+    assert_eq!(headings, ESP_IDF_GUIDE_SECTIONS);
+    for sub in ["### Regenerating", "### Bumping the pin"] {
+        assert!(doc.lines().any(|l| l == sub), "missing {sub}");
+    }
+    for needle in [
+        "--esp-idf",
+        "--build",
+        "--idf-path",
+        "$IDF_PATH",
+        "--verbose",
+        "dependencies.lock",
+        "sdkconfig",
+        "idf_component.yml",
+        "project_description.json",
+        "esp_idf_version.h",
+        "pkg:generic/<namespace>/<name>@<version>?repository_url=https://components.espressif.com",
+        "pkg:generic/esp-idf@<version>?vcs_url=git+https://github.com/espressif/esp-idf",
+        "rollcall:opaque",
+        "Espressif Systems",
+        "SHA-256",
+        "scripts/regen-fixtures-esp-idf.sh",
+        "--check-stable",
+        "sha256:dfa2d076c796769c07c155eba6c672b9f395aec943b2ba3701b73379b5f9e884",
+        "examples/protocols/https_request",
+        "examples/get-started/hello_world",
+        "CI is canonical",
+        "```console",
+    ] {
+        assert!(doc.contains(needle), "docs/esp-idf.md lacks {needle:?}");
+    }
+    // Every subsystem of the table is in the guide's subsystem table.
+    for subsystem in rollcall_core::esp_idf::table::builtin().unwrap().subsystems {
+        assert!(
+            doc.contains(&format!("| `{}` |", subsystem.name)),
+            "docs/esp-idf.md does not list subsystem {}",
+            subsystem.name
+        );
+    }
+    // The module docs have the sections every ingester documents.
+    for heading in [
+        "//! # Inputs",
+        "//! # Mapping",
+        "//! # Warnings",
+        "//! # Determinism",
+    ] {
+        assert!(
+            ESP_IDF_DOCS.contains(heading),
+            "missing section {heading:?} in esp_idf/mod.rs"
+        );
+    }
+    // The guide is linked from the README and the fixtures doc.
+    for (file, link) in [
+        ("README.md", "docs/esp-idf.md"),
+        ("docs/fixtures.md", "esp-idf.md"),
+    ] {
+        assert!(
+            repo_file(file).contains(link),
+            "{file} does not link {link}"
+        );
+    }
+}

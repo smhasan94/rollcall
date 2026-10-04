@@ -1,0 +1,481 @@
+{
+  "schema": "rollcall-report/1",
+  "generated": "2026-01-02T03:04:05Z",
+  "tool": {
+    "name": "rollcall",
+    "version": "0.0.1"
+  },
+  "product": {
+    "name": "https_request",
+    "version": "1"
+  },
+  "summary": "This report checks how ready the software bill of materials (SBOM) of https_request 1 is to hand to a customer or regulator. Its readiness score is 57 out of 100. The SBOM lists 14 items in total: the product, 7 firmware images and 6 software components. 13 of them carry an identifier (a PURL or CPE) that vulnerability databases can match, 6 a file hash that proves exactly which file was shipped, and 11 a licence. No unresolved modules. The SBOM is valid CycloneDX 1.6; the CISA 2026 and EU Cyber Resilience Act checks found 17 problems to fix and 0 recommendations. No vulnerability scan was supplied, so known vulnerabilities were not checked and are not part of the score.",
+  "score": {
+    "value": 57,
+    "basis_points": 5714,
+    "weight_assessed": 90,
+    "scan_supplied": false,
+    "categories": [
+      {
+        "id": "identified",
+        "weight": 25,
+        "assessed": true,
+        "numerator": 13,
+        "denominator": 14,
+        "earned": 232142
+      },
+      {
+        "id": "hashed",
+        "weight": 15,
+        "assessed": true,
+        "numerator": 6,
+        "denominator": 14,
+        "earned": 64285
+      },
+      {
+        "id": "licensed",
+        "weight": 15,
+        "assessed": true,
+        "numerator": 11,
+        "denominator": 14,
+        "earned": 117857
+      },
+      {
+        "id": "validation",
+        "weight": 25,
+        "assessed": true,
+        "numerator": 0,
+        "denominator": 14,
+        "earned": 0
+      },
+      {
+        "id": "modules",
+        "weight": 10,
+        "assessed": true,
+        "numerator": 0,
+        "denominator": 0,
+        "earned": 100000
+      },
+      {
+        "id": "vulnerabilities",
+        "weight": 10,
+        "assessed": false,
+        "numerator": 0,
+        "denominator": 0,
+        "earned": 0
+      }
+    ]
+  },
+  "coverage": {
+    "nodes": 14,
+    "purl": {
+      "count": 13,
+      "basis_points": 9285
+    },
+    "cpe": {
+      "count": 3,
+      "basis_points": 2142
+    },
+    "identified": {
+      "count": 13,
+      "basis_points": 9285
+    },
+    "hash": {
+      "count": 6,
+      "basis_points": 4285
+    },
+    "licence": {
+      "count": 11,
+      "basis_points": 7857
+    }
+  },
+  "components": [
+    {
+      "level": "product",
+      "path": "https_request",
+      "type": "firmware",
+      "name": "https_request",
+      "version": "1",
+      "bom_ref": "product:9cfb8ade18db261bd612a9ca7131be4c",
+      "purl": false,
+      "cpe": false,
+      "hash": false,
+      "licence": false
+    },
+    {
+      "level": "image",
+      "path": "https_request",
+      "type": "firmware",
+      "name": "https_request",
+      "version": "1",
+      "bom_ref": "image:fc6940a8a47bc78598c8dc3720cc7b42",
+      "purl": true,
+      "cpe": false,
+      "hash": false,
+      "licence": false
+    },
+    {
+      "level": "component",
+      "path": "https_request / esp-idf",
+      "type": "framework",
+      "name": "esp-idf",
+      "version": "5.5.1",
+      "bom_ref": "component:96f203c8c2a25288368c76469dca27d0",
+      "purl": true,
+      "cpe": true,
+      "hash": false,
+      "licence": true
+    },
+    {
+      "level": "component",
+      "path": "https_request / esp-idf / esp-tls",
+      "type": "library",
+      "name": "esp-tls",
+      "version": "5.5.1",
+      "bom_ref": "component:ddcf891056f3f63aead5bff0b52135a3",
+      "purl": true,
+      "cpe": false,
+      "hash": false,
+      "licence": true
+    },
+    {
+      "level": "component",
+      "path": "https_request / esp-idf / lwip",
+      "type": "library",
+      "name": "lwip",
+      "version": "2.2.0d",
+      "bom_ref": "component:9a892d6b34eceb2372e54c4c1a3e8c62",
+      "purl": true,
+      "cpe": true,
+      "hash": false,
+      "licence": true
+    },
+    {
+      "level": "component",
+      "path": "https_request / esp-idf / mbedtls",
+      "type": "library",
+      "name": "mbedtls",
+      "version": "3.6.4",
+      "bom_ref": "component:7cce2c038f0e73896fd6e65489228221",
+      "purl": true,
+      "cpe": true,
+      "hash": false,
+      "licence": true
+    },
+    {
+      "level": "component",
+      "path": "https_request / esp-idf / wifi",
+      "type": "library",
+      "name": "wifi",
+      "version": "5.5.1",
+      "bom_ref": "component:1beabfd7442f117cce08bbb92647299d",
+      "purl": true,
+      "cpe": false,
+      "hash": false,
+      "licence": true
+    },
+    {
+      "level": "component",
+      "path": "https_request / protocol_examples_common",
+      "type": "library",
+      "name": "protocol_examples_common",
+      "version": "5.5.1",
+      "bom_ref": "component:45a31e3fe7ad8df0f5662bef86dd99ff",
+      "purl": true,
+      "cpe": false,
+      "hash": false,
+      "licence": false
+    },
+    {
+      "level": "image",
+      "path": "libcore",
+      "type": "library",
+      "name": "libcore",
+      "version": "5.5.1",
+      "bom_ref": "image:3e4f9f8dd4d61fcf5fc42d82a2c248a3",
+      "purl": true,
+      "cpe": false,
+      "hash": true,
+      "licence": true
+    },
+    {
+      "level": "image",
+      "path": "libespnow",
+      "type": "library",
+      "name": "libespnow",
+      "version": "5.5.1",
+      "bom_ref": "image:323d5c68404c74db1522242a91f2f52b",
+      "purl": true,
+      "cpe": false,
+      "hash": true,
+      "licence": true
+    },
+    {
+      "level": "image",
+      "path": "libnet80211",
+      "type": "library",
+      "name": "libnet80211",
+      "version": "5.5.1",
+      "bom_ref": "image:f39f3ea2e631a7b31e91934fc9ac90d3",
+      "purl": true,
+      "cpe": false,
+      "hash": true,
+      "licence": true
+    },
+    {
+      "level": "image",
+      "path": "libphy",
+      "type": "library",
+      "name": "libphy",
+      "version": "5.5.1",
+      "bom_ref": "image:b8fa9a7e1c2d87a829475b18530e4b4b",
+      "purl": true,
+      "cpe": false,
+      "hash": true,
+      "licence": true
+    },
+    {
+      "level": "image",
+      "path": "libpp",
+      "type": "library",
+      "name": "libpp",
+      "version": "5.5.1",
+      "bom_ref": "image:ed5e9da828c3bcdabb916ab4f915ff37",
+      "purl": true,
+      "cpe": false,
+      "hash": true,
+      "licence": true
+    },
+    {
+      "level": "image",
+      "path": "librtc",
+      "type": "library",
+      "name": "librtc",
+      "version": "5.5.1",
+      "bom_ref": "image:f61668959d589e700c3bc48a297365f0",
+      "purl": true,
+      "cpe": false,
+      "hash": true,
+      "licence": true
+    }
+  ],
+  "unresolved": [],
+  "findings": null,
+  "vex": null,
+  "validation": {
+    "schema": {
+      "valid": true,
+      "violations": []
+    },
+    "profiles": {
+      "profiles": [
+        "cisa-2026",
+        "cra"
+      ],
+      "passed": false,
+      "errors": 17,
+      "warnings": 0,
+      "findings": [
+        {
+          "check": "component.hash",
+          "severity": "error",
+          "profiles": [
+            "cisa-2026",
+            "cra"
+          ],
+          "component": "https_request",
+          "level": "product",
+          "pointer": null,
+          "message": "no hash"
+        },
+        {
+          "check": "component.identifier",
+          "severity": "error",
+          "profiles": [
+            "cisa-2026",
+            "cra"
+          ],
+          "component": "https_request",
+          "level": "product",
+          "pointer": null,
+          "message": "no unique identifier (cpe, purl missing)"
+        },
+        {
+          "check": "component.supplier",
+          "severity": "error",
+          "profiles": [
+            "cisa-2026",
+            "cra"
+          ],
+          "component": "https_request",
+          "level": "product",
+          "pointer": null,
+          "message": "no supplier (manufacturer.name and supplier.name missing)"
+        },
+        {
+          "check": "component.hash",
+          "severity": "error",
+          "profiles": [
+            "cisa-2026",
+            "cra"
+          ],
+          "component": "https_request",
+          "level": "image",
+          "pointer": null,
+          "message": "no hash"
+        },
+        {
+          "check": "component.supplier",
+          "severity": "error",
+          "profiles": [
+            "cisa-2026",
+            "cra"
+          ],
+          "component": "https_request",
+          "level": "image",
+          "pointer": null,
+          "message": "no supplier (manufacturer.name and supplier.name missing)"
+        },
+        {
+          "check": "component.hash",
+          "severity": "error",
+          "profiles": [
+            "cisa-2026",
+            "cra"
+          ],
+          "component": "https_request / esp-idf",
+          "level": "component",
+          "pointer": null,
+          "message": "no hash"
+        },
+        {
+          "check": "component.hash",
+          "severity": "error",
+          "profiles": [
+            "cisa-2026",
+            "cra"
+          ],
+          "component": "https_request / esp-idf / esp-tls",
+          "level": "component",
+          "pointer": null,
+          "message": "no hash"
+        },
+        {
+          "check": "component.hash",
+          "severity": "error",
+          "profiles": [
+            "cisa-2026",
+            "cra"
+          ],
+          "component": "https_request / esp-idf / lwip",
+          "level": "component",
+          "pointer": null,
+          "message": "no hash"
+        },
+        {
+          "check": "component.hash",
+          "severity": "error",
+          "profiles": [
+            "cisa-2026",
+            "cra"
+          ],
+          "component": "https_request / esp-idf / mbedtls",
+          "level": "component",
+          "pointer": null,
+          "message": "no hash"
+        },
+        {
+          "check": "component.hash",
+          "severity": "error",
+          "profiles": [
+            "cisa-2026",
+            "cra"
+          ],
+          "component": "https_request / esp-idf / wifi",
+          "level": "component",
+          "pointer": null,
+          "message": "no hash"
+        },
+        {
+          "check": "component.hash",
+          "severity": "error",
+          "profiles": [
+            "cisa-2026",
+            "cra"
+          ],
+          "component": "https_request / protocol_examples_common",
+          "level": "component",
+          "pointer": null,
+          "message": "no hash"
+        },
+        {
+          "check": "graph.top-level-complete",
+          "severity": "error",
+          "profiles": [
+            "cra"
+          ],
+          "component": "libcore",
+          "level": "image",
+          "pointer": null,
+          "message": "top-level component is not listed in the root's dependsOn"
+        },
+        {
+          "check": "graph.top-level-complete",
+          "severity": "error",
+          "profiles": [
+            "cra"
+          ],
+          "component": "libespnow",
+          "level": "image",
+          "pointer": null,
+          "message": "top-level component is not listed in the root's dependsOn"
+        },
+        {
+          "check": "graph.top-level-complete",
+          "severity": "error",
+          "profiles": [
+            "cra"
+          ],
+          "component": "libnet80211",
+          "level": "image",
+          "pointer": null,
+          "message": "top-level component is not listed in the root's dependsOn"
+        },
+        {
+          "check": "graph.top-level-complete",
+          "severity": "error",
+          "profiles": [
+            "cra"
+          ],
+          "component": "libphy",
+          "level": "image",
+          "pointer": null,
+          "message": "top-level component is not listed in the root's dependsOn"
+        },
+        {
+          "check": "graph.top-level-complete",
+          "severity": "error",
+          "profiles": [
+            "cra"
+          ],
+          "component": "libpp",
+          "level": "image",
+          "pointer": null,
+          "message": "top-level component is not listed in the root's dependsOn"
+        },
+        {
+          "check": "graph.top-level-complete",
+          "severity": "error",
+          "profiles": [
+            "cra"
+          ],
+          "component": "librtc",
+          "level": "image",
+          "pointer": null,
+          "message": "top-level component is not listed in the root's dependsOn"
+        }
+      ]
+    }
+  },
+  "warnings": []
+}

@@ -1,10 +1,12 @@
-//! `rollcall generate`: render a model, a Zephyr image or sysbuild build directory, or a Rust
-//! package (`cargo metadata` and a `cargo auditable` ELF), as CycloneDX 1.6 JSON.
+//! `rollcall generate`: render a model, a Zephyr image or sysbuild build directory, a Rust
+//! package (`cargo metadata` and a `cargo auditable` ELF), or an ESP-IDF project and its
+//! build, as CycloneDX 1.6 JSON.
 
 use std::io::Write;
 use std::path::Path;
 
 use rollcall_core::cargo::{self, CargoOptions};
+use rollcall_core::esp_idf::{self, EspIdfOptions};
 use rollcall_core::identify::{self, DbSource, LoadedDbs};
 use rollcall_core::merge::{self, ProductSpec};
 use rollcall_core::model::Product;
@@ -84,7 +86,7 @@ fn apply_product(product: Product, spec: Option<&ProductSpec>) -> Result<Product
         .map_err(|e| (EXIT_DATAERR, format!("cannot apply --product {spec}: {e}")))
 }
 
-/// What `--model` or `--zephyr` gave.
+/// What `--model`, `--zephyr`, `--cargo`/`--cargo-metadata` or `--esp-idf` gave.
 struct Loaded {
     product: Product,
     warnings: Vec<Warning>,
@@ -139,6 +141,9 @@ fn load_product(args: &GenerateArgs, dbs: Option<&LoadedDbs>) -> Result<Loaded, 
     if args.cargo.is_some() || args.cargo_metadata.is_some() {
         return load_cargo(args);
     }
+    if let Some(dir) = &args.esp_idf {
+        return load_esp_idf(args, dir);
+    }
     if let Some(dir) = &args.zephyr {
         let mut options = IngestOptions::new(dir)
             .with_include_sdk(args.include_sdk)
@@ -167,11 +172,13 @@ fn load_product(args: &GenerateArgs, dbs: Option<&LoadedDbs>) -> Result<Loaded, 
             Err(e) => Err((EXIT_DATAERR, e.to_string())),
         };
     }
-    // clap guarantees exactly one of --model / --zephyr / --cargo / --cargo-metadata.
+    // clap guarantees exactly one of --model / --zephyr / --cargo / --cargo-metadata /
+    // --esp-idf.
     let Some(model) = &args.model else {
         return Err((
             EXIT_USAGE,
-            "one of --model, --zephyr, --cargo or --cargo-metadata is required".to_owned(),
+            "one of --model, --zephyr, --cargo, --cargo-metadata or --esp-idf is required"
+                .to_owned(),
         ));
     };
     let bytes =
@@ -228,6 +235,47 @@ fn load_cargo(args: &GenerateArgs) -> Result<Loaded, (u8, String)> {
         warnings,
         unknown_modules: Vec::new(),
         notes: Vec::new(),
+    })
+}
+
+/// Reads an ESP-IDF project (`--esp-idf DIR`), built in `--build` (default `DIR/build`), with
+/// blobs hashed from `--idf-path`, else `$IDF_PATH` when set.
+fn load_esp_idf(args: &GenerateArgs, dir: &Path) -> Result<Loaded, (u8, String)> {
+    let mut options = EspIdfOptions::new(dir);
+    if let Some(build) = &args.build {
+        options = options.with_build_dir(build);
+    }
+    let idf_path = args.idf_path.clone().or_else(|| {
+        let from_env: Option<std::path::PathBuf> = std::env::var_os("IDF_PATH")
+            .filter(|p| !p.is_empty())
+            .map(Into::into);
+        // Named on stderr, as a database picked up from the cache is: the tree changes the
+        // blob hashes, so the user must see which one was read.
+        if let Some(path) = &from_env {
+            let _ = writeln!(
+                std::io::stderr().lock(),
+                "rollcall generate: note: no --idf-path; reading blobs and the version file from $IDF_PATH ({})",
+                path.display()
+            );
+        }
+        from_env
+    });
+    if let Some(idf_path) = idf_path {
+        options = options.with_idf_path(idf_path);
+    }
+    let ingest = esp_idf::ingest(&options).map_err(|e| {
+        let code = if e.is_read_error() {
+            EXIT_NOINPUT
+        } else {
+            EXIT_DATAERR
+        };
+        (code, e.to_string())
+    })?;
+    Ok(Loaded {
+        product: ingest.product,
+        warnings: ingest.warnings,
+        unknown_modules: Vec::new(),
+        notes: ingest.notes,
     })
 }
 

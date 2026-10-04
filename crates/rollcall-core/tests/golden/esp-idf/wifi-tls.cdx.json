@@ -1,0 +1,1236 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.6",
+  "serialNumber": "urn:uuid:c852d442-5116-8907-8038-9af26d4b5c9f",
+  "version": 1,
+  "metadata": {
+    "timestamp": "2026-01-02T03:04:05Z",
+    "tools": {
+      "components": [
+        {
+          "type": "application",
+          "name": "rollcall",
+          "version": "0.0.1"
+        }
+      ]
+    },
+    "component": {
+      "type": "firmware",
+      "bom-ref": "product:9cfb8ade18db261bd612a9ca7131be4c",
+      "name": "https_request",
+      "version": "1"
+    }
+  },
+  "components": [
+    {
+      "type": "firmware",
+      "bom-ref": "image:fc6940a8a47bc78598c8dc3720cc7b42",
+      "name": "https_request",
+      "version": "1",
+      "purl": "pkg:generic/https_request@1",
+      "evidence": {
+        "identity": [
+          {
+            "field": "name",
+            "confidence": 0.9,
+            "concludedValue": "https_request",
+            "methods": [
+              {
+                "technique": "manifest-analysis",
+                "confidence": 0.9,
+                "value": "https_request"
+              }
+            ]
+          },
+          {
+            "field": "version",
+            "confidence": 0.9,
+            "concludedValue": "1",
+            "methods": [
+              {
+                "technique": "manifest-analysis",
+                "confidence": 0.9,
+                "value": "1"
+              }
+            ]
+          },
+          {
+            "field": "purl",
+            "confidence": 0.9,
+            "concludedValue": "pkg:generic/https_request@1",
+            "methods": [
+              {
+                "technique": "manifest-analysis",
+                "confidence": 0.9,
+                "value": "pkg:generic/https_request@1"
+              }
+            ]
+          }
+        ],
+        "occurrences": [
+          {
+            "location": "build/project_description.json"
+          }
+        ]
+      },
+      "properties": [
+        {
+          "name": "rollcall:evidence",
+          "value": "{\"field\":\"name\",\"technique\":\"manifest-analysis\",\"source\":\"project-description\",\"occurrence\":{\"location\":\"build/project_description.json\"},\"value\":\"https_request\",\"confidence\":9000}"
+        },
+        {
+          "name": "rollcall:evidence",
+          "value": "{\"field\":\"purl\",\"technique\":\"manifest-analysis\",\"source\":\"project-description\",\"occurrence\":{\"location\":\"build/project_description.json\"},\"value\":\"pkg:generic/https_request@1\",\"confidence\":9000}"
+        },
+        {
+          "name": "rollcall:evidence",
+          "value": "{\"field\":\"version\",\"technique\":\"manifest-analysis\",\"source\":\"project-description\",\"occurrence\":{\"location\":\"build/project_description.json\"},\"value\":\"1\",\"confidence\":9000}"
+        },
+        {
+          "name": "rollcall:evidence-source",
+          "value": "project-description"
+        },
+        {
+          "name": "rollcall:image-kind",
+          "value": "application"
+        }
+      ],
+      "components": [
+        {
+          "type": "framework",
+          "bom-ref": "component:96f203c8c2a25288368c76469dca27d0",
+          "name": "esp-idf",
+          "version": "5.5.1",
+          "supplier": {
+            "name": "Espressif Systems",
+            "url": [
+              "https://www.espressif.com"
+            ]
+          },
+          "purl": "pkg:generic/esp-idf@5.5.1?vcs_url=git%2Bhttps:%2F%2Fgithub.com%2Fespressif%2Fesp-idf",
+          "cpe": "cpe:2.3:a:espressif:esp-idf:5.5.1:*:*:*:*:*:*:*",
+          "licenses": [
+            {
+              "expression": "Apache-2.0"
+            }
+          ],
+          "evidence": {
+            "identity": [
+              {
+                "field": "name",
+                "confidence": 0.6,
+                "concludedValue": "esp-idf",
+                "methods": [
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.6,
+                    "value": "target:esp32"
+                  }
+                ]
+              },
+              {
+                "field": "version",
+                "confidence": 0.9,
+                "concludedValue": "5.5.1",
+                "methods": [
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.9,
+                    "value": "5.5.1"
+                  },
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.9,
+                    "value": "5.5.1"
+                  },
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.9,
+                    "value": "v5.5.1"
+                  },
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.7,
+                    "value": "5.5.1"
+                  }
+                ]
+              }
+            ],
+            "occurrences": [
+              {
+                "location": "build/project_description.json"
+              },
+              {
+                "location": "dependencies.lock"
+              },
+              {
+                "location": "esp-idf/components/esp_common/include/esp_idf_version.h"
+              },
+              {
+                "location": "sdkconfig",
+                "line": 3
+              },
+              {
+                "location": "sdkconfig",
+                "line": 256
+              }
+            ]
+          },
+          "properties": [
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"name\",\"technique\":\"manifest-analysis\",\"source\":\"sdkconfig\",\"occurrence\":{\"location\":\"sdkconfig\",\"line\":256},\"value\":\"target:esp32\",\"confidence\":6000}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"version\",\"technique\":\"manifest-analysis\",\"source\":\"dependencies-lock\",\"occurrence\":{\"location\":\"dependencies.lock\"},\"value\":\"5.5.1\",\"confidence\":9000}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"version\",\"technique\":\"manifest-analysis\",\"source\":\"idf-version-file\",\"occurrence\":{\"location\":\"esp-idf/components/esp_common/include/esp_idf_version.h\"},\"value\":\"5.5.1\",\"confidence\":9000}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"version\",\"technique\":\"manifest-analysis\",\"source\":\"project-description\",\"occurrence\":{\"location\":\"build/project_description.json\"},\"value\":\"v5.5.1\",\"confidence\":9000}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"version\",\"technique\":\"manifest-analysis\",\"source\":\"sdkconfig\",\"occurrence\":{\"location\":\"sdkconfig\",\"line\":3},\"value\":\"5.5.1\",\"confidence\":7000}"
+            },
+            {
+              "name": "rollcall:evidence-source",
+              "value": "dependencies-lock"
+            },
+            {
+              "name": "rollcall:evidence-source",
+              "value": "idf-version-file"
+            },
+            {
+              "name": "rollcall:evidence-source",
+              "value": "project-description"
+            },
+            {
+              "name": "rollcall:evidence-source",
+              "value": "sdkconfig"
+            }
+          ],
+          "components": [
+            {
+              "type": "library",
+              "bom-ref": "component:ddcf891056f3f63aead5bff0b52135a3",
+              "name": "esp-tls",
+              "version": "5.5.1",
+              "supplier": {
+                "name": "Espressif Systems",
+                "url": [
+                  "https://www.espressif.com"
+                ]
+              },
+              "purl": "pkg:generic/esp-idf@5.5.1?vcs_url=git%2Bhttps:%2F%2Fgithub.com%2Fespressif%2Fesp-idf#components/esp-tls",
+              "licenses": [
+                {
+                  "expression": "Apache-2.0"
+                }
+              ],
+              "evidence": {
+                "identity": [
+                  {
+                    "field": "name",
+                    "confidence": 0.8,
+                    "concludedValue": "esp-tls",
+                    "methods": [
+                      {
+                        "technique": "binary-analysis",
+                        "confidence": 0.8,
+                        "value": "esp-idf/esp-tls/libesp-tls.a(esp_tls.c.obj)"
+                      },
+                      {
+                        "technique": "manifest-analysis",
+                        "confidence": 0.6,
+                        "value": "CONFIG_ESP_TLS_USING_MBEDTLS"
+                      }
+                    ]
+                  }
+                ],
+                "occurrences": [
+                  {
+                    "location": "build/https_request.map",
+                    "line": 40721
+                  },
+                  {
+                    "location": "sdkconfig",
+                    "line": 652
+                  }
+                ]
+              },
+              "properties": [
+                {
+                  "name": "rollcall:evidence",
+                  "value": "{\"field\":\"name\",\"technique\":\"binary-analysis\",\"source\":\"linker-map\",\"occurrence\":{\"location\":\"build/https_request.map\",\"line\":40721},\"value\":\"esp-idf/esp-tls/libesp-tls.a(esp_tls.c.obj)\",\"confidence\":8000}"
+                },
+                {
+                  "name": "rollcall:evidence",
+                  "value": "{\"field\":\"name\",\"technique\":\"manifest-analysis\",\"source\":\"sdkconfig\",\"occurrence\":{\"location\":\"sdkconfig\",\"line\":652},\"value\":\"CONFIG_ESP_TLS_USING_MBEDTLS\",\"confidence\":6000}"
+                },
+                {
+                  "name": "rollcall:evidence-source",
+                  "value": "linker-map"
+                },
+                {
+                  "name": "rollcall:evidence-source",
+                  "value": "sdkconfig"
+                }
+              ]
+            },
+            {
+              "type": "library",
+              "bom-ref": "component:9a892d6b34eceb2372e54c4c1a3e8c62",
+              "name": "lwip",
+              "version": "2.2.0d",
+              "supplier": {
+                "name": "Espressif Systems",
+                "url": [
+                  "https://www.espressif.com"
+                ]
+              },
+              "purl": "pkg:generic/lwip@2.2.0d?vcs_url=git%2Bhttps:%2F%2Fgithub.com%2Fespressif%2Fesp-lwip",
+              "cpe": "cpe:2.3:a:lwip_project:lwip:2.2.0d:*:*:*:*:*:*:*",
+              "licenses": [
+                {
+                  "expression": "BSD-3-Clause"
+                }
+              ],
+              "evidence": {
+                "identity": [
+                  {
+                    "field": "name",
+                    "confidence": 0.8,
+                    "concludedValue": "lwip",
+                    "methods": [
+                      {
+                        "technique": "binary-analysis",
+                        "confidence": 0.8,
+                        "value": "esp-idf/lwip/liblwip.a(acd_dhcp_check.c.obj)"
+                      },
+                      {
+                        "technique": "manifest-analysis",
+                        "confidence": 0.6,
+                        "value": "CONFIG_LWIP_ENABLE"
+                      }
+                    ]
+                  },
+                  {
+                    "field": "purl",
+                    "confidence": 0.9,
+                    "concludedValue": "pkg:generic/lwip@2.2.0d?vcs_url=git%2Bhttps:%2F%2Fgithub.com%2Fespressif%2Fesp-lwip",
+                    "methods": [
+                      {
+                        "technique": "manifest-analysis",
+                        "confidence": 0.9,
+                        "value": "pkg:generic/lwip@2.2.0d?vcs_url=git%2Bhttps:%2F%2Fgithub.com%2Fespressif%2Fesp-lwip"
+                      }
+                    ]
+                  },
+                  {
+                    "field": "cpe",
+                    "confidence": 0.9,
+                    "concludedValue": "cpe:2.3:a:lwip_project:lwip:2.2.0d:*:*:*:*:*:*:*",
+                    "methods": [
+                      {
+                        "technique": "manifest-analysis",
+                        "confidence": 0.9,
+                        "value": "cpe:2.3:a:lwip_project:lwip:2.2.0d:*:*:*:*:*:*:*"
+                      }
+                    ]
+                  }
+                ],
+                "occurrences": [
+                  {
+                    "location": "build/https_request.map",
+                    "line": 61180
+                  },
+                  {
+                    "location": "esp-idf.yaml"
+                  },
+                  {
+                    "location": "sdkconfig",
+                    "line": 1320
+                  }
+                ]
+              },
+              "properties": [
+                {
+                  "name": "rollcall:evidence",
+                  "value": "{\"field\":\"cpe\",\"technique\":\"manifest-analysis\",\"source\":\"esp-idf-table\",\"occurrence\":{\"location\":\"esp-idf.yaml\"},\"value\":\"cpe:2.3:a:lwip_project:lwip:2.2.0d:*:*:*:*:*:*:*\",\"confidence\":9000}"
+                },
+                {
+                  "name": "rollcall:evidence",
+                  "value": "{\"field\":\"name\",\"technique\":\"binary-analysis\",\"source\":\"linker-map\",\"occurrence\":{\"location\":\"build/https_request.map\",\"line\":61180},\"value\":\"esp-idf/lwip/liblwip.a(acd_dhcp_check.c.obj)\",\"confidence\":8000}"
+                },
+                {
+                  "name": "rollcall:evidence",
+                  "value": "{\"field\":\"name\",\"technique\":\"manifest-analysis\",\"source\":\"sdkconfig\",\"occurrence\":{\"location\":\"sdkconfig\",\"line\":1320},\"value\":\"CONFIG_LWIP_ENABLE\",\"confidence\":6000}"
+                },
+                {
+                  "name": "rollcall:evidence",
+                  "value": "{\"field\":\"purl\",\"technique\":\"manifest-analysis\",\"source\":\"esp-idf-table\",\"occurrence\":{\"location\":\"esp-idf.yaml\"},\"value\":\"pkg:generic/lwip@2.2.0d?vcs_url=git%2Bhttps:%2F%2Fgithub.com%2Fespressif%2Fesp-lwip\",\"confidence\":9000}"
+                },
+                {
+                  "name": "rollcall:evidence-source",
+                  "value": "esp-idf-table"
+                },
+                {
+                  "name": "rollcall:evidence-source",
+                  "value": "linker-map"
+                },
+                {
+                  "name": "rollcall:evidence-source",
+                  "value": "sdkconfig"
+                }
+              ]
+            },
+            {
+              "type": "library",
+              "bom-ref": "component:7cce2c038f0e73896fd6e65489228221",
+              "name": "mbedtls",
+              "version": "3.6.4",
+              "supplier": {
+                "name": "Espressif Systems",
+                "url": [
+                  "https://www.espressif.com"
+                ]
+              },
+              "purl": "pkg:generic/mbedtls@3.6.4?vcs_url=git%2Bhttps:%2F%2Fgithub.com%2Fespressif%2Fmbedtls",
+              "cpe": "cpe:2.3:a:trustedfirmware:mbed_tls:3.6.4:*:*:*:*:*:*:*",
+              "licenses": [
+                {
+                  "expression": "Apache-2.0 OR GPL-2.0-or-later"
+                }
+              ],
+              "evidence": {
+                "identity": [
+                  {
+                    "field": "name",
+                    "confidence": 0.8,
+                    "concludedValue": "mbedtls",
+                    "methods": [
+                      {
+                        "technique": "binary-analysis",
+                        "confidence": 0.8,
+                        "value": "esp-idf/mbedtls/mbedtls/library/libmbedcrypto.a(aria.c.obj)"
+                      },
+                      {
+                        "technique": "manifest-analysis",
+                        "confidence": 0.6,
+                        "value": "CONFIG_MBEDTLS_TLS_ENABLED"
+                      }
+                    ]
+                  },
+                  {
+                    "field": "purl",
+                    "confidence": 0.9,
+                    "concludedValue": "pkg:generic/mbedtls@3.6.4?vcs_url=git%2Bhttps:%2F%2Fgithub.com%2Fespressif%2Fmbedtls",
+                    "methods": [
+                      {
+                        "technique": "manifest-analysis",
+                        "confidence": 0.9,
+                        "value": "pkg:generic/mbedtls@3.6.4?vcs_url=git%2Bhttps:%2F%2Fgithub.com%2Fespressif%2Fmbedtls"
+                      }
+                    ]
+                  },
+                  {
+                    "field": "cpe",
+                    "confidence": 0.9,
+                    "concludedValue": "cpe:2.3:a:trustedfirmware:mbed_tls:3.6.4:*:*:*:*:*:*:*",
+                    "methods": [
+                      {
+                        "technique": "manifest-analysis",
+                        "confidence": 0.9,
+                        "value": "cpe:2.3:a:trustedfirmware:mbed_tls:3.6.4:*:*:*:*:*:*:*"
+                      }
+                    ]
+                  },
+                  {
+                    "field": "cpe",
+                    "confidence": 0.9,
+                    "concludedValue": "cpe:2.3:a:arm:mbed_tls:3.6.4:*:*:*:*:*:*:*",
+                    "methods": [
+                      {
+                        "technique": "manifest-analysis",
+                        "confidence": 0.9,
+                        "value": "cpe:2.3:a:arm:mbed_tls:3.6.4:*:*:*:*:*:*:*"
+                      }
+                    ]
+                  }
+                ],
+                "occurrences": [
+                  {
+                    "location": "build/https_request.map",
+                    "line": 41279
+                  },
+                  {
+                    "location": "esp-idf.yaml"
+                  },
+                  {
+                    "location": "sdkconfig",
+                    "line": 1563
+                  }
+                ]
+              },
+              "properties": [
+                {
+                  "name": "rollcall:evidence",
+                  "value": "{\"field\":\"cpe\",\"technique\":\"manifest-analysis\",\"source\":\"esp-idf-table\",\"occurrence\":{\"location\":\"esp-idf.yaml\"},\"value\":\"cpe:2.3:a:arm:mbed_tls:3.6.4:*:*:*:*:*:*:*\",\"confidence\":9000}"
+                },
+                {
+                  "name": "rollcall:evidence",
+                  "value": "{\"field\":\"cpe\",\"technique\":\"manifest-analysis\",\"source\":\"esp-idf-table\",\"occurrence\":{\"location\":\"esp-idf.yaml\"},\"value\":\"cpe:2.3:a:trustedfirmware:mbed_tls:3.6.4:*:*:*:*:*:*:*\",\"confidence\":9000}"
+                },
+                {
+                  "name": "rollcall:evidence",
+                  "value": "{\"field\":\"name\",\"technique\":\"binary-analysis\",\"source\":\"linker-map\",\"occurrence\":{\"location\":\"build/https_request.map\",\"line\":41279},\"value\":\"esp-idf/mbedtls/mbedtls/library/libmbedcrypto.a(aria.c.obj)\",\"confidence\":8000}"
+                },
+                {
+                  "name": "rollcall:evidence",
+                  "value": "{\"field\":\"name\",\"technique\":\"manifest-analysis\",\"source\":\"sdkconfig\",\"occurrence\":{\"location\":\"sdkconfig\",\"line\":1563},\"value\":\"CONFIG_MBEDTLS_TLS_ENABLED\",\"confidence\":6000}"
+                },
+                {
+                  "name": "rollcall:evidence",
+                  "value": "{\"field\":\"purl\",\"technique\":\"manifest-analysis\",\"source\":\"esp-idf-table\",\"occurrence\":{\"location\":\"esp-idf.yaml\"},\"value\":\"pkg:generic/mbedtls@3.6.4?vcs_url=git%2Bhttps:%2F%2Fgithub.com%2Fespressif%2Fmbedtls\",\"confidence\":9000}"
+                },
+                {
+                  "name": "rollcall:evidence-source",
+                  "value": "esp-idf-table"
+                },
+                {
+                  "name": "rollcall:evidence-source",
+                  "value": "linker-map"
+                },
+                {
+                  "name": "rollcall:evidence-source",
+                  "value": "sdkconfig"
+                },
+                {
+                  "name": "syft:cpe23",
+                  "value": "cpe:2.3:a:arm:mbed_tls:3.6.4:*:*:*:*:*:*:*"
+                }
+              ]
+            },
+            {
+              "type": "library",
+              "bom-ref": "component:1beabfd7442f117cce08bbb92647299d",
+              "name": "wifi",
+              "version": "5.5.1",
+              "supplier": {
+                "name": "Espressif Systems",
+                "url": [
+                  "https://www.espressif.com"
+                ]
+              },
+              "purl": "pkg:generic/esp-idf@5.5.1?vcs_url=git%2Bhttps:%2F%2Fgithub.com%2Fespressif%2Fesp-idf#components/esp_wifi",
+              "licenses": [
+                {
+                  "expression": "Apache-2.0"
+                }
+              ],
+              "evidence": {
+                "identity": [
+                  {
+                    "field": "name",
+                    "confidence": 0.8,
+                    "concludedValue": "wifi",
+                    "methods": [
+                      {
+                        "technique": "binary-analysis",
+                        "confidence": 0.8,
+                        "value": "esp-idf/esp_wifi/libesp_wifi.a(esp_adapter.c.obj)"
+                      },
+                      {
+                        "technique": "manifest-analysis",
+                        "confidence": 0.6,
+                        "value": "CONFIG_ESP_WIFI_ENABLED"
+                      }
+                    ]
+                  }
+                ],
+                "occurrences": [
+                  {
+                    "location": "build/https_request.map",
+                    "line": 33432
+                  },
+                  {
+                    "location": "sdkconfig",
+                    "line": 1105
+                  }
+                ]
+              },
+              "properties": [
+                {
+                  "name": "rollcall:evidence",
+                  "value": "{\"field\":\"name\",\"technique\":\"binary-analysis\",\"source\":\"linker-map\",\"occurrence\":{\"location\":\"build/https_request.map\",\"line\":33432},\"value\":\"esp-idf/esp_wifi/libesp_wifi.a(esp_adapter.c.obj)\",\"confidence\":8000}"
+                },
+                {
+                  "name": "rollcall:evidence",
+                  "value": "{\"field\":\"name\",\"technique\":\"manifest-analysis\",\"source\":\"sdkconfig\",\"occurrence\":{\"location\":\"sdkconfig\",\"line\":1105},\"value\":\"CONFIG_ESP_WIFI_ENABLED\",\"confidence\":6000}"
+                },
+                {
+                  "name": "rollcall:evidence-source",
+                  "value": "linker-map"
+                },
+                {
+                  "name": "rollcall:evidence-source",
+                  "value": "sdkconfig"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "library",
+          "bom-ref": "component:45a31e3fe7ad8df0f5662bef86dd99ff",
+          "name": "protocol_examples_common",
+          "version": "5.5.1",
+          "supplier": {
+            "name": "Espressif Systems",
+            "url": [
+              "https://www.espressif.com"
+            ]
+          },
+          "purl": "pkg:generic/esp-idf@5.5.1?vcs_url=git%2Bhttps:%2F%2Fgithub.com%2Fespressif%2Fesp-idf#examples/common_components/protocol_examples_common",
+          "evidence": {
+            "identity": [
+              {
+                "field": "name",
+                "confidence": 0.9,
+                "concludedValue": "protocol_examples_common",
+                "methods": [
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.9,
+                    "value": "protocol_examples_common"
+                  }
+                ]
+              },
+              {
+                "field": "version",
+                "confidence": 0.9,
+                "concludedValue": "5.5.1",
+                "methods": [
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.9,
+                    "value": "*"
+                  }
+                ]
+              }
+            ],
+            "occurrences": [
+              {
+                "location": "dependencies.lock"
+              }
+            ]
+          },
+          "properties": [
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"name\",\"technique\":\"manifest-analysis\",\"source\":\"dependencies-lock\",\"occurrence\":{\"location\":\"dependencies.lock\"},\"value\":\"protocol_examples_common\",\"confidence\":9000}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"version\",\"technique\":\"manifest-analysis\",\"source\":\"dependencies-lock\",\"occurrence\":{\"location\":\"dependencies.lock\"},\"value\":\"*\",\"confidence\":9000}"
+            },
+            {
+              "name": "rollcall:evidence-source",
+              "value": "dependencies-lock"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "image:3e4f9f8dd4d61fcf5fc42d82a2c248a3",
+      "name": "libcore",
+      "version": "5.5.1",
+      "supplier": {
+        "name": "Espressif Systems",
+        "url": [
+          "https://www.espressif.com"
+        ]
+      },
+      "purl": "pkg:generic/esp-idf@5.5.1?vcs_url=git%2Bhttps:%2F%2Fgithub.com%2Fespressif%2Fesp-idf#components/esp_wifi/lib/esp32/libcore.a",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "cbb961fa65b16c0d15ba7c4a2d4a8e68af9b0963b50012d0d762fb5bffbb72ec"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "Apache-2.0"
+        }
+      ],
+      "evidence": {
+        "identity": [
+          {
+            "field": "name",
+            "confidence": 0.8,
+            "concludedValue": "libcore",
+            "methods": [
+              {
+                "technique": "binary-analysis",
+                "confidence": 0.8,
+                "value": "esp-idf/components/esp_wifi/lib/esp32/libcore.a(misc_nvs.o)"
+              }
+            ]
+          },
+          {
+            "field": "hash",
+            "confidence": 1.0,
+            "methods": [
+              {
+                "technique": "binary-analysis",
+                "confidence": 1.0,
+                "value": "cbb961fa65b16c0d15ba7c4a2d4a8e68af9b0963b50012d0d762fb5bffbb72ec"
+              }
+            ]
+          }
+        ],
+        "occurrences": [
+          {
+            "location": "build/https_request.map",
+            "line": 39443
+          },
+          {
+            "location": "esp-idf/components/esp_wifi/lib/esp32/libcore.a"
+          }
+        ]
+      },
+      "properties": [
+        {
+          "name": "rollcall:evidence",
+          "value": "{\"field\":\"hash\",\"technique\":\"binary-analysis\",\"source\":\"idf-blob\",\"occurrence\":{\"location\":\"esp-idf/components/esp_wifi/lib/esp32/libcore.a\"},\"value\":\"cbb961fa65b16c0d15ba7c4a2d4a8e68af9b0963b50012d0d762fb5bffbb72ec\",\"confidence\":10000}"
+        },
+        {
+          "name": "rollcall:evidence",
+          "value": "{\"field\":\"name\",\"technique\":\"binary-analysis\",\"source\":\"linker-map\",\"occurrence\":{\"location\":\"build/https_request.map\",\"line\":39443},\"value\":\"esp-idf/components/esp_wifi/lib/esp32/libcore.a(misc_nvs.o)\",\"confidence\":8000}"
+        },
+        {
+          "name": "rollcall:evidence-source",
+          "value": "idf-blob"
+        },
+        {
+          "name": "rollcall:evidence-source",
+          "value": "linker-map"
+        },
+        {
+          "name": "rollcall:image-kind",
+          "value": "blob"
+        },
+        {
+          "name": "rollcall:opaque",
+          "value": "contents not analysed; hashes computed from the file"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "image:323d5c68404c74db1522242a91f2f52b",
+      "name": "libespnow",
+      "version": "5.5.1",
+      "supplier": {
+        "name": "Espressif Systems",
+        "url": [
+          "https://www.espressif.com"
+        ]
+      },
+      "purl": "pkg:generic/esp-idf@5.5.1?vcs_url=git%2Bhttps:%2F%2Fgithub.com%2Fespressif%2Fesp-idf#components/esp_wifi/lib/esp32/libespnow.a",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "ac1bf16d1b38a07caf6e403a413b1c1d8c419963c1593c0acacb61232342c5ba"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "Apache-2.0"
+        }
+      ],
+      "evidence": {
+        "identity": [
+          {
+            "field": "name",
+            "confidence": 0.8,
+            "concludedValue": "libespnow",
+            "methods": [
+              {
+                "technique": "binary-analysis",
+                "confidence": 0.8,
+                "value": "esp-idf/components/esp_wifi/lib/esp32/libespnow.a(manatick.o)"
+              }
+            ]
+          },
+          {
+            "field": "hash",
+            "confidence": 1.0,
+            "methods": [
+              {
+                "technique": "binary-analysis",
+                "confidence": 1.0,
+                "value": "ac1bf16d1b38a07caf6e403a413b1c1d8c419963c1593c0acacb61232342c5ba"
+              }
+            ]
+          }
+        ],
+        "occurrences": [
+          {
+            "location": "build/https_request.map",
+            "line": 38140
+          },
+          {
+            "location": "esp-idf/components/esp_wifi/lib/esp32/libespnow.a"
+          }
+        ]
+      },
+      "properties": [
+        {
+          "name": "rollcall:evidence",
+          "value": "{\"field\":\"hash\",\"technique\":\"binary-analysis\",\"source\":\"idf-blob\",\"occurrence\":{\"location\":\"esp-idf/components/esp_wifi/lib/esp32/libespnow.a\"},\"value\":\"ac1bf16d1b38a07caf6e403a413b1c1d8c419963c1593c0acacb61232342c5ba\",\"confidence\":10000}"
+        },
+        {
+          "name": "rollcall:evidence",
+          "value": "{\"field\":\"name\",\"technique\":\"binary-analysis\",\"source\":\"linker-map\",\"occurrence\":{\"location\":\"build/https_request.map\",\"line\":38140},\"value\":\"esp-idf/components/esp_wifi/lib/esp32/libespnow.a(manatick.o)\",\"confidence\":8000}"
+        },
+        {
+          "name": "rollcall:evidence-source",
+          "value": "idf-blob"
+        },
+        {
+          "name": "rollcall:evidence-source",
+          "value": "linker-map"
+        },
+        {
+          "name": "rollcall:image-kind",
+          "value": "blob"
+        },
+        {
+          "name": "rollcall:opaque",
+          "value": "contents not analysed; hashes computed from the file"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "image:f39f3ea2e631a7b31e91934fc9ac90d3",
+      "name": "libnet80211",
+      "version": "5.5.1",
+      "supplier": {
+        "name": "Espressif Systems",
+        "url": [
+          "https://www.espressif.com"
+        ]
+      },
+      "purl": "pkg:generic/esp-idf@5.5.1?vcs_url=git%2Bhttps:%2F%2Fgithub.com%2Fespressif%2Fesp-idf#components/esp_wifi/lib/esp32/libnet80211.a",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "50f0b680b945513cdb2458d38db1913fe9c015eefbc414627914ac80d12b5dbb"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "Apache-2.0"
+        }
+      ],
+      "evidence": {
+        "identity": [
+          {
+            "field": "name",
+            "confidence": 0.8,
+            "concludedValue": "libnet80211",
+            "methods": [
+              {
+                "technique": "binary-analysis",
+                "confidence": 0.8,
+                "value": "esp-idf/components/esp_wifi/lib/esp32/libnet80211.a(ieee80211.o)"
+              }
+            ]
+          },
+          {
+            "field": "hash",
+            "confidence": 1.0,
+            "methods": [
+              {
+                "technique": "binary-analysis",
+                "confidence": 1.0,
+                "value": "50f0b680b945513cdb2458d38db1913fe9c015eefbc414627914ac80d12b5dbb"
+              }
+            ]
+          }
+        ],
+        "occurrences": [
+          {
+            "location": "build/https_request.map",
+            "line": 39078
+          },
+          {
+            "location": "esp-idf/components/esp_wifi/lib/esp32/libnet80211.a"
+          }
+        ]
+      },
+      "properties": [
+        {
+          "name": "rollcall:evidence",
+          "value": "{\"field\":\"hash\",\"technique\":\"binary-analysis\",\"source\":\"idf-blob\",\"occurrence\":{\"location\":\"esp-idf/components/esp_wifi/lib/esp32/libnet80211.a\"},\"value\":\"50f0b680b945513cdb2458d38db1913fe9c015eefbc414627914ac80d12b5dbb\",\"confidence\":10000}"
+        },
+        {
+          "name": "rollcall:evidence",
+          "value": "{\"field\":\"name\",\"technique\":\"binary-analysis\",\"source\":\"linker-map\",\"occurrence\":{\"location\":\"build/https_request.map\",\"line\":39078},\"value\":\"esp-idf/components/esp_wifi/lib/esp32/libnet80211.a(ieee80211.o)\",\"confidence\":8000}"
+        },
+        {
+          "name": "rollcall:evidence-source",
+          "value": "idf-blob"
+        },
+        {
+          "name": "rollcall:evidence-source",
+          "value": "linker-map"
+        },
+        {
+          "name": "rollcall:image-kind",
+          "value": "blob"
+        },
+        {
+          "name": "rollcall:opaque",
+          "value": "contents not analysed; hashes computed from the file"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "image:b8fa9a7e1c2d87a829475b18530e4b4b",
+      "name": "libphy",
+      "version": "5.5.1",
+      "supplier": {
+        "name": "Espressif Systems",
+        "url": [
+          "https://www.espressif.com"
+        ]
+      },
+      "purl": "pkg:generic/esp-idf@5.5.1?vcs_url=git%2Bhttps:%2F%2Fgithub.com%2Fespressif%2Fesp-idf#components/esp_phy/lib/esp32/libphy.a",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "1178eff52e382fc63749c715ff30709bdace95094a90f175c03f5a9248534cd5"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "Apache-2.0"
+        }
+      ],
+      "evidence": {
+        "identity": [
+          {
+            "field": "name",
+            "confidence": 0.8,
+            "concludedValue": "libphy",
+            "methods": [
+              {
+                "technique": "binary-analysis",
+                "confidence": 0.8,
+                "value": "esp-idf/components/esp_phy/lib/esp32/libphy.a(phy.o)"
+              }
+            ]
+          },
+          {
+            "field": "hash",
+            "confidence": 1.0,
+            "methods": [
+              {
+                "technique": "binary-analysis",
+                "confidence": 1.0,
+                "value": "1178eff52e382fc63749c715ff30709bdace95094a90f175c03f5a9248534cd5"
+              }
+            ]
+          }
+        ],
+        "occurrences": [
+          {
+            "location": "build/https_request.map",
+            "line": 67559
+          },
+          {
+            "location": "esp-idf/components/esp_phy/lib/esp32/libphy.a"
+          }
+        ]
+      },
+      "properties": [
+        {
+          "name": "rollcall:evidence",
+          "value": "{\"field\":\"hash\",\"technique\":\"binary-analysis\",\"source\":\"idf-blob\",\"occurrence\":{\"location\":\"esp-idf/components/esp_phy/lib/esp32/libphy.a\"},\"value\":\"1178eff52e382fc63749c715ff30709bdace95094a90f175c03f5a9248534cd5\",\"confidence\":10000}"
+        },
+        {
+          "name": "rollcall:evidence",
+          "value": "{\"field\":\"name\",\"technique\":\"binary-analysis\",\"source\":\"linker-map\",\"occurrence\":{\"location\":\"build/https_request.map\",\"line\":67559},\"value\":\"esp-idf/components/esp_phy/lib/esp32/libphy.a(phy.o)\",\"confidence\":8000}"
+        },
+        {
+          "name": "rollcall:evidence-source",
+          "value": "idf-blob"
+        },
+        {
+          "name": "rollcall:evidence-source",
+          "value": "linker-map"
+        },
+        {
+          "name": "rollcall:image-kind",
+          "value": "blob"
+        },
+        {
+          "name": "rollcall:opaque",
+          "value": "contents not analysed; hashes computed from the file"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "image:ed5e9da828c3bcdabb916ab4f915ff37",
+      "name": "libpp",
+      "version": "5.5.1",
+      "supplier": {
+        "name": "Espressif Systems",
+        "url": [
+          "https://www.espressif.com"
+        ]
+      },
+      "purl": "pkg:generic/esp-idf@5.5.1?vcs_url=git%2Bhttps:%2F%2Fgithub.com%2Fespressif%2Fesp-idf#components/esp_wifi/lib/esp32/libpp.a",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "f789190f2d25972c97b2a64bddec6c44e1da34cc96c8a5d0c043037a64ccaef7"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "Apache-2.0"
+        }
+      ],
+      "evidence": {
+        "identity": [
+          {
+            "field": "name",
+            "confidence": 0.8,
+            "concludedValue": "libpp",
+            "methods": [
+              {
+                "technique": "binary-analysis",
+                "confidence": 0.8,
+                "value": "esp-idf/components/esp_wifi/lib/esp32/libpp.a(esf_buf.o)"
+              }
+            ]
+          },
+          {
+            "field": "hash",
+            "confidence": 1.0,
+            "methods": [
+              {
+                "technique": "binary-analysis",
+                "confidence": 1.0,
+                "value": "f789190f2d25972c97b2a64bddec6c44e1da34cc96c8a5d0c043037a64ccaef7"
+              }
+            ]
+          }
+        ],
+        "occurrences": [
+          {
+            "location": "build/https_request.map",
+            "line": 37117
+          },
+          {
+            "location": "esp-idf/components/esp_wifi/lib/esp32/libpp.a"
+          }
+        ]
+      },
+      "properties": [
+        {
+          "name": "rollcall:evidence",
+          "value": "{\"field\":\"hash\",\"technique\":\"binary-analysis\",\"source\":\"idf-blob\",\"occurrence\":{\"location\":\"esp-idf/components/esp_wifi/lib/esp32/libpp.a\"},\"value\":\"f789190f2d25972c97b2a64bddec6c44e1da34cc96c8a5d0c043037a64ccaef7\",\"confidence\":10000}"
+        },
+        {
+          "name": "rollcall:evidence",
+          "value": "{\"field\":\"name\",\"technique\":\"binary-analysis\",\"source\":\"linker-map\",\"occurrence\":{\"location\":\"build/https_request.map\",\"line\":37117},\"value\":\"esp-idf/components/esp_wifi/lib/esp32/libpp.a(esf_buf.o)\",\"confidence\":8000}"
+        },
+        {
+          "name": "rollcall:evidence-source",
+          "value": "idf-blob"
+        },
+        {
+          "name": "rollcall:evidence-source",
+          "value": "linker-map"
+        },
+        {
+          "name": "rollcall:image-kind",
+          "value": "blob"
+        },
+        {
+          "name": "rollcall:opaque",
+          "value": "contents not analysed; hashes computed from the file"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "image:f61668959d589e700c3bc48a297365f0",
+      "name": "librtc",
+      "version": "5.5.1",
+      "supplier": {
+        "name": "Espressif Systems",
+        "url": [
+          "https://www.espressif.com"
+        ]
+      },
+      "purl": "pkg:generic/esp-idf@5.5.1?vcs_url=git%2Bhttps:%2F%2Fgithub.com%2Fespressif%2Fesp-idf#components/esp_phy/lib/esp32/librtc.a",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "e3411aeeb48d1da8acd304808290196baa0d6a2397db1a0c7741abee85dade61"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "Apache-2.0"
+        }
+      ],
+      "evidence": {
+        "identity": [
+          {
+            "field": "name",
+            "confidence": 0.8,
+            "concludedValue": "librtc",
+            "methods": [
+              {
+                "technique": "binary-analysis",
+                "confidence": 0.8,
+                "value": "esp-idf/components/esp_phy/lib/esp32/librtc.a(bt_bb.o)"
+              }
+            ]
+          },
+          {
+            "field": "hash",
+            "confidence": 1.0,
+            "methods": [
+              {
+                "technique": "binary-analysis",
+                "confidence": 1.0,
+                "value": "e3411aeeb48d1da8acd304808290196baa0d6a2397db1a0c7741abee85dade61"
+              }
+            ]
+          }
+        ],
+        "occurrences": [
+          {
+            "location": "build/https_request.map",
+            "line": 37394
+          },
+          {
+            "location": "esp-idf/components/esp_phy/lib/esp32/librtc.a"
+          }
+        ]
+      },
+      "properties": [
+        {
+          "name": "rollcall:evidence",
+          "value": "{\"field\":\"hash\",\"technique\":\"binary-analysis\",\"source\":\"idf-blob\",\"occurrence\":{\"location\":\"esp-idf/components/esp_phy/lib/esp32/librtc.a\"},\"value\":\"e3411aeeb48d1da8acd304808290196baa0d6a2397db1a0c7741abee85dade61\",\"confidence\":10000}"
+        },
+        {
+          "name": "rollcall:evidence",
+          "value": "{\"field\":\"name\",\"technique\":\"binary-analysis\",\"source\":\"linker-map\",\"occurrence\":{\"location\":\"build/https_request.map\",\"line\":37394},\"value\":\"esp-idf/components/esp_phy/lib/esp32/librtc.a(bt_bb.o)\",\"confidence\":8000}"
+        },
+        {
+          "name": "rollcall:evidence-source",
+          "value": "idf-blob"
+        },
+        {
+          "name": "rollcall:evidence-source",
+          "value": "linker-map"
+        },
+        {
+          "name": "rollcall:image-kind",
+          "value": "blob"
+        },
+        {
+          "name": "rollcall:opaque",
+          "value": "contents not analysed; hashes computed from the file"
+        }
+      ]
+    }
+  ],
+  "dependencies": [
+    {
+      "ref": "product:9cfb8ade18db261bd612a9ca7131be4c",
+      "dependsOn": [
+        "image:fc6940a8a47bc78598c8dc3720cc7b42"
+      ]
+    },
+    {
+      "ref": "image:fc6940a8a47bc78598c8dc3720cc7b42",
+      "dependsOn": [
+        "component:45a31e3fe7ad8df0f5662bef86dd99ff",
+        "component:96f203c8c2a25288368c76469dca27d0",
+        "image:323d5c68404c74db1522242a91f2f52b",
+        "image:3e4f9f8dd4d61fcf5fc42d82a2c248a3",
+        "image:b8fa9a7e1c2d87a829475b18530e4b4b",
+        "image:ed5e9da828c3bcdabb916ab4f915ff37",
+        "image:f39f3ea2e631a7b31e91934fc9ac90d3",
+        "image:f61668959d589e700c3bc48a297365f0"
+      ]
+    },
+    {
+      "ref": "component:96f203c8c2a25288368c76469dca27d0",
+      "dependsOn": []
+    },
+    {
+      "ref": "component:ddcf891056f3f63aead5bff0b52135a3",
+      "dependsOn": []
+    },
+    {
+      "ref": "component:9a892d6b34eceb2372e54c4c1a3e8c62",
+      "dependsOn": []
+    },
+    {
+      "ref": "component:7cce2c038f0e73896fd6e65489228221",
+      "dependsOn": []
+    },
+    {
+      "ref": "component:1beabfd7442f117cce08bbb92647299d",
+      "dependsOn": []
+    },
+    {
+      "ref": "component:45a31e3fe7ad8df0f5662bef86dd99ff",
+      "dependsOn": []
+    },
+    {
+      "ref": "image:3e4f9f8dd4d61fcf5fc42d82a2c248a3",
+      "dependsOn": []
+    },
+    {
+      "ref": "image:323d5c68404c74db1522242a91f2f52b",
+      "dependsOn": []
+    },
+    {
+      "ref": "image:f39f3ea2e631a7b31e91934fc9ac90d3",
+      "dependsOn": []
+    },
+    {
+      "ref": "image:b8fa9a7e1c2d87a829475b18530e4b4b",
+      "dependsOn": []
+    },
+    {
+      "ref": "image:ed5e9da828c3bcdabb916ab4f915ff37",
+      "dependsOn": []
+    },
+    {
+      "ref": "image:f61668959d589e700c3bc48a297365f0",
+      "dependsOn": []
+    }
+  ]
+}

@@ -9,10 +9,14 @@
 #   scripts/regen-fixtures.sh [--variant V]... [--check-stable] [--skip-setup] [--keep-build]
 #   scripts/regen-fixtures.sh compare DIR_A DIR_B
 #   scripts/regen-fixtures.sh --variant cargo-… [--check-stable] [--skip-setup]
+#   scripts/regen-fixtures.sh --variant esp-idf[-…] [--check-stable]
 #
 #   A `cargo-*` variant (cargo-keelsign, cargo-deps, cargo-old-heapless) hands the whole
 #   command line to scripts/regen-fixtures-cargo.sh, which builds the Cargo fixtures
 #   (fixtures/cargo-*/); see that script.
+#   An `esp-idf` or `esp-idf-*` variant (esp-idf, esp-idf-hello-world, esp-idf-wifi-tls) hands
+#   it to scripts/regen-fixtures-esp-idf.sh, which builds the ESP-IDF fixtures
+#   (fixtures/esp-idf/) in the pinned espressif/idf Docker image; see that script.
 #
 #   --variant V      build only variant V (baseline, bt or tls); repeatable. Default: all.
 #                    Unselected variants already in the output are carried over unchanged,
@@ -986,10 +990,12 @@ if [[ "${1:-}" == compare ]]; then
     exit $?
 fi
 
-# The Cargo fixtures have their own script and pins (SHA-127).
+# The Cargo fixtures (SHA-127) and the ESP-IDF fixtures (SHA-129) have their own scripts and
+# pins.
 for arg in "$@"; do
     case "$arg" in
         cargo-*) exec "$REPO_ROOT/scripts/regen-fixtures-cargo.sh" "$@" ;;
+        esp-idf | esp-idf-*) exec "$REPO_ROOT/scripts/regen-fixtures-esp-idf.sh" "$@" ;;
     esac
 done
 

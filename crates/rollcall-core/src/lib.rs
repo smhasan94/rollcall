@@ -4,8 +4,9 @@
 //! deterministic `bom-ref` derivation, and [`cyclonedx`] for CycloneDX 1.6 output, input and
 //! schema validation. [`zephyr`] ingests a Zephyr image (or sysbuild) build directory into
 //! the model, [`cargo`] ingests a Rust binary from `cargo metadata` and the `.dep-v0`
-//! section `cargo auditable` embeds, [`blob`] turns a blob manifest into opaque blob images,
-//! and [`merge`] combines separately generated products into one. [`subsystems`] is the
+//! section `cargo auditable` embeds, [`esp_idf`] ingests an ESP-IDF project and its build,
+//! [`blob`] turns a blob manifest into opaque blob images, and [`merge`] combines separately
+//! generated products into one. [`subsystems`] is the
 //! table of Zephyr subsystems (enabling Kconfig symbols and source paths) used to split the
 //! kernel package, and
 //! [`linker_map`] parses the GNU ld map that split is cross-checked against. [`vex`]
@@ -39,6 +40,7 @@ pub mod cargo;
 pub mod csaf;
 pub mod cyclonedx;
 pub mod diff;
+pub mod esp_idf;
 pub mod identify;
 pub mod linker_map;
 pub mod merge;
@@ -58,6 +60,7 @@ pub use cyclonedx::{
     ReadError, SchemaViolation, SerialNumber, Timestamp, WriteError, WriteOptions,
     validate_cyclonedx_1_6,
 };
+pub use esp_idf::{EspIdfError, EspIdfIngest, EspIdfOptions};
 pub use identify::{IdentifierDb, Level, Resolver};
 pub use merge::{ProductSpec, ProductSpecError};
 pub use subsystems::{Subsystem, SubsystemTable, SubsystemsError};
