@@ -4,7 +4,7 @@ use assert_cmd::Command;
 use predicates::prelude::*;
 
 /// Every subcommand with its one-line `--help` description.
-const SUBCOMMANDS: [(&str, &str); 8] = [
+const SUBCOMMANDS: [(&str, &str); 9] = [
     (
         "generate",
         "Generate a CycloneDX SBOM from firmware build metadata",
@@ -27,6 +27,10 @@ const SUBCOMMANDS: [(&str, &str); 8] = [
     (
         "report",
         "Produce a readiness report (Markdown or JSON) for an SBOM",
+    ),
+    (
+        "diff",
+        "Compare a build's SBOM and findings with its base branch's (Markdown or JSON)",
     ),
 ];
 

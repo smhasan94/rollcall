@@ -1,0 +1,53 @@
+# rollcall-action on this repository's own build fixtures: the in-repo stand-in for an
+# example firmware repository (SHA-122). Each job runs the action from this checkout
+# (`uses: ./action`, rollcall built from source):
+#
+# - zephyr: the Zephyr v4.4.2 sysbuild TLS build (fixtures/zephyr/tls), failing on new
+#   findings at or above high;
+# - cargo:  the keelsign Rust firmware (fixtures/cargo-keelsign, captured cargo metadata),
+#   failing only on new critical findings.
+#
+# On a push to main each job uploads its artifact (rollcall-zephyr, rollcall-cargo); on a pull
+# request each job diffs against main's latest artifact of the same name, posts or updates
+# one comment, and fails on new findings at or above its fail-on. Before this workflow has run
+# on main there is no base artifact, and every open finding counts as new.
+#
+# To see the gate trip, point a branch's build-dir at fixtures/zephyr-old-mbedtls/old-mbedtls
+# (Mbed TLS 3.6.4) and fixtures/cargo-old-heapless (heapless 0.5.6): the zephyr job goes red
+# naming the new CVEs; the cargo job stays green but lists heapless's high advisory.
+name: rollcall example
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+  pull-requests: write
+  actions: read
+
+jobs:
+  zephyr:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      - uses: ./action
+        with:
+          build-dir: fixtures/zephyr/tls
+          fail-on: high
+          artifact-name: rollcall-zephyr
+
+  cargo:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      - uses: ./action
+        with:
+          build-dir: fixtures/cargo-keelsign
+          fail-on: critical
+          artifact-name: rollcall-cargo

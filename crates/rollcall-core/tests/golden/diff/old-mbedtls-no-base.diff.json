@@ -1,0 +1,204 @@
+{
+  "schema": "rollcall-diff/1",
+  "product": {
+    "name": "mbedtls",
+    "version": null
+  },
+  "base": {
+    "present": false,
+    "product": null,
+    "reason": "No base artifact was found for this pull request's base branch"
+  },
+  "summary": "This report checks how ready the software bill of materials (SBOM) of mbedtls is to hand to a customer or regulator. Its readiness score is 32 out of 100. The SBOM lists 10 items in total: the product, 1 firmware image and 8 software components. 8 of them carry an identifier (a PURL or CPE) that vulnerability databases can match, 0 a file hash that proves exactly which file was shipped, and 4 a licence. 2 modules are not in rollcall's identifier database, so their identity may be incomplete (see Unresolved modules). The SBOM is valid CycloneDX 1.6; the CISA 2026 and EU Cyber Resilience Act checks found 21 problems to fix and 0 recommendations. A vulnerability scan was supplied: 13 known vulnerabilities affect this product's components; 13 are still open (4 critical, 4 high) and 0 closed by VEX statements (not affected or fixed).",
+  "score": {
+    "head": 32,
+    "base": null
+  },
+  "components": {
+    "added": [],
+    "removed": [],
+    "changed": []
+  },
+  "findings": {
+    "scanned": true,
+    "head_total": 13,
+    "head_open": 13,
+    "new": [
+      {
+        "id": "CVE-2026-34872",
+        "aliases": [],
+        "severity": "critical",
+        "component": "mbedtls / mbedtls",
+        "name": "mbedtls",
+        "in_sbom": true,
+        "version": "85440ef5fffa95d0e9971e9163719189cf34d979",
+        "fixed_versions": [
+          "3.6.6"
+        ],
+        "triage": "unresolved"
+      },
+      {
+        "id": "CVE-2026-34873",
+        "aliases": [],
+        "severity": "critical",
+        "component": "mbedtls / mbedtls",
+        "name": "mbedtls",
+        "in_sbom": true,
+        "version": "85440ef5fffa95d0e9971e9163719189cf34d979",
+        "fixed_versions": [
+          "3.6.6",
+          "4.1.0"
+        ],
+        "triage": "unresolved"
+      },
+      {
+        "id": "CVE-2026-34875",
+        "aliases": [],
+        "severity": "critical",
+        "component": "mbedtls / mbedtls",
+        "name": "mbedtls",
+        "in_sbom": true,
+        "version": "85440ef5fffa95d0e9971e9163719189cf34d979",
+        "fixed_versions": [
+          "3.6.6"
+        ],
+        "triage": "unresolved"
+      },
+      {
+        "id": "CVE-2026-34877",
+        "aliases": [],
+        "severity": "critical",
+        "component": "mbedtls / mbedtls",
+        "name": "mbedtls",
+        "in_sbom": true,
+        "version": "85440ef5fffa95d0e9971e9163719189cf34d979",
+        "fixed_versions": [
+          "3.6.6"
+        ],
+        "triage": "unresolved"
+      },
+      {
+        "id": "CVE-2026-25833",
+        "aliases": [],
+        "severity": "high",
+        "component": "mbedtls / mbedtls",
+        "name": "mbedtls",
+        "in_sbom": true,
+        "version": "85440ef5fffa95d0e9971e9163719189cf34d979",
+        "fixed_versions": [
+          "3.6.6"
+        ],
+        "triage": "unresolved"
+      },
+      {
+        "id": "CVE-2026-25835",
+        "aliases": [],
+        "severity": "high",
+        "component": "mbedtls / mbedtls",
+        "name": "mbedtls",
+        "in_sbom": true,
+        "version": "85440ef5fffa95d0e9971e9163719189cf34d979",
+        "fixed_versions": [
+          "3.6.6"
+        ],
+        "triage": "unresolved"
+      },
+      {
+        "id": "CVE-2026-34874",
+        "aliases": [],
+        "severity": "high",
+        "component": "mbedtls / mbedtls",
+        "name": "mbedtls",
+        "in_sbom": true,
+        "version": "85440ef5fffa95d0e9971e9163719189cf34d979",
+        "fixed_versions": [
+          "3.6.6"
+        ],
+        "triage": "unresolved"
+      },
+      {
+        "id": "CVE-2026-34876",
+        "aliases": [],
+        "severity": "high",
+        "component": "mbedtls / mbedtls",
+        "name": "mbedtls",
+        "in_sbom": true,
+        "version": "85440ef5fffa95d0e9971e9163719189cf34d979",
+        "fixed_versions": [
+          "3.6.6"
+        ],
+        "triage": "unresolved"
+      },
+      {
+        "id": "CVE-2025-54764",
+        "aliases": [],
+        "severity": "medium",
+        "component": "mbedtls / mbedtls",
+        "name": "mbedtls",
+        "in_sbom": true,
+        "version": "85440ef5fffa95d0e9971e9163719189cf34d979",
+        "fixed_versions": [
+          "3.6.5"
+        ],
+        "triage": "unresolved"
+      },
+      {
+        "id": "CVE-2025-59438",
+        "aliases": [],
+        "severity": "medium",
+        "component": "mbedtls / mbedtls",
+        "name": "mbedtls",
+        "in_sbom": true,
+        "version": "85440ef5fffa95d0e9971e9163719189cf34d979",
+        "fixed_versions": [
+          "3.6.5"
+        ],
+        "triage": "unresolved"
+      },
+      {
+        "id": "CVE-2025-66442",
+        "aliases": [],
+        "severity": "medium",
+        "component": "mbedtls / mbedtls",
+        "name": "mbedtls",
+        "in_sbom": true,
+        "version": "85440ef5fffa95d0e9971e9163719189cf34d979",
+        "fixed_versions": [],
+        "triage": "unresolved"
+      },
+      {
+        "id": "CVE-2026-25834",
+        "aliases": [],
+        "severity": "medium",
+        "component": "mbedtls / mbedtls",
+        "name": "mbedtls",
+        "in_sbom": true,
+        "version": "85440ef5fffa95d0e9971e9163719189cf34d979",
+        "fixed_versions": [
+          "3.6.6"
+        ],
+        "triage": "unresolved"
+      },
+      {
+        "id": "CVE-2026-34871",
+        "aliases": [],
+        "severity": "medium",
+        "component": "mbedtls / mbedtls",
+        "name": "mbedtls",
+        "in_sbom": true,
+        "version": "85440ef5fffa95d0e9971e9163719189cf34d979",
+        "fixed_versions": [
+          "3.6.6"
+        ],
+        "triage": "unresolved"
+      }
+    ],
+    "fixed": [],
+    "changed": []
+  },
+  "gate": {
+    "fail_on": "high",
+    "new_open_at_or_above": 8,
+    "outcome": "findings"
+  }
+}

@@ -1,5 +1,6 @@
 //! Implementations of the subcommands. Each `run` returns the process exit code.
 
+pub mod diff;
 pub mod generate;
 pub mod identifiers;
 pub mod merge;

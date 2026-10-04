@@ -1,0 +1,518 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/smhasan94/rollcall/blob/main/docs/diff-schema.json",
+  "title": "rollcall-diff/1",
+  "description": "A rollcall diff (`rollcall diff --format json`): a build's SBOM and findings compared with its base branch's. Version 1: every field is always present (absent values are null) and no other field is allowed; a change to that is a new schema version. Components are keyed by path and level (a version bump is one changed row); findings are matched by component name and any shared id or alias. Without a base, or a base scan, every head finding is new (base.reason says why). gate.new_open_at_or_above counts new findings not suppressed by VEX at or above gate.fail_on; outcome is findings when it is above 0 (exit 1), else clean. See docs/diff.md.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "product",
+    "base",
+    "summary",
+    "score",
+    "components",
+    "findings",
+    "gate"
+  ],
+  "properties": {
+    "schema": {
+      "const": "rollcall-diff/1"
+    },
+    "product": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "version"
+      ],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "version": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "base": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "present",
+        "product",
+        "reason"
+      ],
+      "properties": {
+        "present": {
+          "type": "boolean"
+        },
+        "product": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "name",
+                "version"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "version": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        "reason": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "summary": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "score": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "head",
+        "base"
+      ],
+      "properties": {
+        "head": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 100
+        },
+        "base": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 100
+        }
+      }
+    },
+    "components": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "added",
+        "removed",
+        "changed"
+      ],
+      "properties": {
+        "added": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "path",
+              "level",
+              "name",
+              "version",
+              "purl",
+              "cpe"
+            ],
+            "properties": {
+              "path": {
+                "type": "string"
+              },
+              "level": {
+                "enum": [
+                  "product",
+                  "image",
+                  "component"
+                ]
+              },
+              "name": {
+                "type": "string"
+              },
+              "version": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "purl": {
+                "type": "boolean"
+              },
+              "cpe": {
+                "type": "boolean"
+              }
+            }
+          }
+        },
+        "removed": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "path",
+              "level",
+              "name",
+              "version",
+              "purl",
+              "cpe"
+            ],
+            "properties": {
+              "path": {
+                "type": "string"
+              },
+              "level": {
+                "enum": [
+                  "product",
+                  "image",
+                  "component"
+                ]
+              },
+              "name": {
+                "type": "string"
+              },
+              "version": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "purl": {
+                "type": "boolean"
+              },
+              "cpe": {
+                "type": "boolean"
+              }
+            }
+          }
+        },
+        "changed": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "path",
+              "level",
+              "name",
+              "base_version",
+              "head_version",
+              "base_purl",
+              "head_purl",
+              "base_cpe",
+              "head_cpe"
+            ],
+            "properties": {
+              "path": {
+                "type": "string"
+              },
+              "level": {
+                "enum": [
+                  "product",
+                  "image",
+                  "component"
+                ]
+              },
+              "name": {
+                "type": "string"
+              },
+              "base_version": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "head_version": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "base_purl": {
+                "type": "boolean"
+              },
+              "head_purl": {
+                "type": "boolean"
+              },
+              "base_cpe": {
+                "type": "boolean"
+              },
+              "head_cpe": {
+                "type": "boolean"
+              }
+            }
+          }
+        }
+      }
+    },
+    "findings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "scanned",
+        "head_total",
+        "head_open",
+        "new",
+        "fixed",
+        "changed"
+      ],
+      "properties": {
+        "scanned": {
+          "type": "boolean"
+        },
+        "head_total": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "head_open": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "new": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "aliases",
+              "severity",
+              "component",
+              "name",
+              "in_sbom",
+              "version",
+              "fixed_versions",
+              "triage"
+            ],
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "aliases": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "severity": {
+                "enum": [
+                  "critical",
+                  "high",
+                  "medium",
+                  "low",
+                  "unknown"
+                ]
+              },
+              "component": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "in_sbom": {
+                "type": "boolean"
+              },
+              "version": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "fixed_versions": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "triage": {
+                "enum": [
+                  "suppressed",
+                  "affected",
+                  "unresolved"
+                ]
+              }
+            }
+          }
+        },
+        "fixed": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "aliases",
+              "severity",
+              "component",
+              "name",
+              "in_sbom",
+              "version",
+              "fixed_versions",
+              "triage"
+            ],
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "aliases": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "severity": {
+                "enum": [
+                  "critical",
+                  "high",
+                  "medium",
+                  "low",
+                  "unknown"
+                ]
+              },
+              "component": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "in_sbom": {
+                "type": "boolean"
+              },
+              "version": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "fixed_versions": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "triage": {
+                "enum": [
+                  "suppressed",
+                  "affected",
+                  "unresolved"
+                ]
+              }
+            }
+          }
+        },
+        "changed": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "severity",
+              "component",
+              "version",
+              "base_triage",
+              "head_triage"
+            ],
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "severity": {
+                "enum": [
+                  "critical",
+                  "high",
+                  "medium",
+                  "low",
+                  "unknown"
+                ]
+              },
+              "component": {
+                "type": "string"
+              },
+              "version": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "base_triage": {
+                "enum": [
+                  "suppressed",
+                  "affected",
+                  "unresolved"
+                ]
+              },
+              "head_triage": {
+                "enum": [
+                  "suppressed",
+                  "affected",
+                  "unresolved"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "gate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "fail_on",
+        "new_open_at_or_above",
+        "outcome"
+      ],
+      "properties": {
+        "fail_on": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "enum": [
+                "critical",
+                "high",
+                "medium",
+                "low",
+                "unknown"
+              ]
+            }
+          ]
+        },
+        "new_open_at_or_above": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "outcome": {
+          "enum": [
+            "clean",
+            "findings"
+          ]
+        }
+      }
+    }
+  }
+}

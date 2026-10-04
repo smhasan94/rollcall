@@ -23,7 +23,8 @@ pub const EXIT_SOFTWARE: u8 = 70;
 pub const EXIT_UNAVAILABLE: u8 = 69;
 /// Exit code when output cannot be written (`EX_IOERR`).
 pub const EXIT_IOERR: u8 = 74;
-/// `scan` only: an open finding at or above `--fail-on`.
+/// `scan`: an open finding at or above `--fail-on`; `diff`: a new open finding at or above
+/// `--fail-on`.
 pub const EXIT_SCAN_FINDINGS: u8 = 1;
 /// `scan` only: an unresolved finding, with `--fail-on-unresolved`.
 pub const EXIT_SCAN_UNRESOLVED: u8 = 2;
@@ -78,6 +79,8 @@ pub enum Command {
     Identifiers(IdentifiersArgs),
     /// Produce a readiness report (Markdown or JSON) for an SBOM
     Report(ReportArgs),
+    /// Compare a build's SBOM and findings with its base branch's (Markdown or JSON)
+    Diff(DiffArgs),
 }
 
 impl Command {
@@ -92,6 +95,7 @@ impl Command {
             Command::Assay => "assay",
             Command::Identifiers(_) => "identifiers",
             Command::Report(_) => "report",
+            Command::Diff(_) => "diff",
         }
     }
 }
@@ -590,6 +594,50 @@ pub struct ReportArgs {
     #[arg(long, value_name = "RFC3339", value_parser = Timestamp::from_str)]
     pub timestamp: Option<Timestamp>,
     /// Write the report here instead of to stdout
+    #[arg(short, long, value_name = "FILE")]
+    pub output: Option<PathBuf>,
+}
+
+/// Output formats for `rollcall diff`.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, ValueEnum)]
+pub enum DiffFormat {
+    /// GitHub-flavoured Markdown: the pull-request comment.
+    Md,
+    /// `rollcall-diff/1` JSON (docs/diff-schema.json), for machines.
+    Json,
+}
+
+/// Arguments of `rollcall diff`.
+#[derive(Debug, Args)]
+pub struct DiffArgs {
+    /// The head build's CycloneDX 1.6 SBOM (e.g. from `rollcall generate`)
+    #[arg(long, value_name = "FILE")]
+    pub sbom: PathBuf,
+    /// The head build's `rollcall scan --json` report (rollcall-scan/1). Without it, findings
+    /// are not compared
+    #[arg(long, value_name = "FILE")]
+    pub scan: Option<PathBuf>,
+    /// The head build's `rollcall report --format json` report (rollcall-report/1), for its
+    /// summary and score
+    #[arg(long, value_name = "FILE")]
+    pub report: Option<PathBuf>,
+    /// The base branch's SBOM. Without it every head finding is new
+    #[arg(long, value_name = "FILE")]
+    pub base_sbom: Option<PathBuf>,
+    /// The base branch's `rollcall scan --json` report. Without it every head finding is new
+    #[arg(long, value_name = "FILE", requires = "base_sbom")]
+    pub base_scan: Option<PathBuf>,
+    /// The base branch's `rollcall report --format json` report
+    #[arg(long, value_name = "FILE", requires = "base_sbom")]
+    pub base_report: Option<PathBuf>,
+    /// Exit 1 if a new open (not VEX-suppressed) finding is at or above this severity.
+    /// unknown is the lowest level. Without it nothing is gated
+    #[arg(long, value_enum, value_name = "SEVERITY")]
+    pub fail_on: Option<SeverityArg>,
+    /// Output format
+    #[arg(long, value_enum)]
+    pub format: DiffFormat,
+    /// Write the diff here instead of to stdout
     #[arg(short, long, value_name = "FILE")]
     pub output: Option<PathBuf>,
 }
