@@ -96,3 +96,4 @@ The diff depends only on the inputs' contents: findings are sorted most severe f
 id, component and version; components by path, level and version. It carries no timestamp and
 no file path, so the same inputs give byte-identical output. The goldens under
 `crates/rollcall-core/tests/golden/diff/` are written only by `scripts/regen-golden.sh`.
+
