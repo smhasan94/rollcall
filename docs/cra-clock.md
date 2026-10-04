@@ -5,10 +5,11 @@ profile (`csaf_vex`), written by `rollcall csaf`. This page is the handoff contr
 rollcall writes, what a consumer can rely on, and how to check that an import shows the same
 findings and statuses.
 
-> **Status.** The import into cra-clock has **not been run yet**: where cra-clock lives and
-> how it imports a document are still open. The rollcall side (the export, the official
-> validator in CI, and the reference rows below) is in place and tested. Until the import is
-> run, the second acceptance criterion and test-plan item of SHA-132 stay open.
+> **Status.** cra-clock is not built yet, so no document has been imported into it. Until it
+> is, secvisogram's validator (`@secvisogram/csaf-validator-lib`, pinned in
+> `scripts/csaf-validator/`) stands in as the consumer: the old-mbedTLS document loads in it,
+> and its findings and statuses match `rollcall scan` row for row (see
+> [Import test](#import-test-old-mbedtls)). Run the cra-clock steps there once cra-clock exists.
 
 ## The pipeline
 
@@ -140,9 +141,6 @@ To show "the same findings and statuses", an importer must:
 
 ## Import test (old-mbedTLS)
 
-To be run once cra-clock's location and import path are known. Record the evidence on
-SHA-132.
-
 1. Produce the document: `scripts/csaf-check.sh --install` (writes
    `.cache/csaf/old-mbedtls.csaf.json`, byte-identical to the golden), or step 4 above.
 2. Print the reference rows: `scripts/csaf-summary.sh .cache/csaf/old-mbedtls.csaf.json`.
@@ -150,12 +148,18 @@ SHA-132.
    relationship product; the purl and CPE are its component's); the old-mbedTLS document has
    23 rows (1 `known_affected`, 3 `known_not_affected`, 19 `under_investigation`), all on
    `pkg:github/mbed-tls/mbedtls@v2.28.0`.
-3. Import `.cache/csaf/old-mbedtls.csaf.json` into a local cra-clock instance:
-   `<cra-clock import command or UI action — to be filled in>`.
-4. Compare cra-clock's findings with the rows of step 2: the same vulnerabilities, each with
-   the same status on the same product (purl and CPE).
-5. Attach to SHA-132: the import log, a screenshot of cra-clock's findings view, and the
-   output of step 2.
+3. Load the document in the consumer:
+   - **Stand-in (run, SHA-132):** `node scripts/csaf-validator/validate.mjs
+     .cache/csaf/old-mbedtls.csaf.json` passes (the strict schema and every mandatory test).
+     The validator checks the document but shows no findings, so the comparison in step 4
+     uses the rows of step 2.
+   - **cra-clock (once it exists):** import the same file into a local instance.
+4. Compare the consumer's findings with `rollcall scan` on the same SBOM, captures and VEX:
+   the same vulnerabilities, each with the same status on the same product (purl and CPE),
+   with scan triage mapped as in [Mapping](#mapping). For the stand-in, all 23 rows match.
+   The full commands and log are on SHA-132.
+5. For cra-clock, attach to its ticket: the import log, a screenshot of cra-clock's findings
+   view, and the output of step 2.
 
 For the real Zephyr build, do the same with `.cache/csaf/zephyr-old-mbedtls.csaf.json` (13
 rows: the Mbed TLS 3.6.4 CVEs, all `under_investigation`, on the build's Mbed TLS component).
