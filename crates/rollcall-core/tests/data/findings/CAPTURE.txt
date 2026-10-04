@@ -5,6 +5,7 @@ old-heapless.grype.json: captured 2026-10-03
 old-heapless.osv.json: captured 2026-10-01
 old-mbedtls.grype.json: captured 2026-10-01
 old-mbedtls.osv.json: captured 2026-10-01
+zephyr-old-mbedtls.grype.json: captured 2026-10-03
 grype db status:
   Path:      .cache/grype-db/6/vulnerability.db
   Schema:    v6.1.9

@@ -1,0 +1,16 @@
+# Hand-written test data (SHA-115), not a security assessment: the starter pack's Bluetooth
+# rule for CVE-2026-11368 with its Kconfig symbol misspelt (CONFIG_BTT for CONFIG_BT). No
+# .config contains CONFIG_BTT, so the condition is never true and the rule never applies;
+# `rollcall vex lint` warns about the unknown symbol. Used by tests/vex_starter.rs,
+# rollcall-cli tests/vex_lint.rs and docs/vex-rules.md (example 4).
+version: 1
+rules:
+  - id: zephyr-bluetooth-off-typo
+    match:
+      name: zephyr
+      cves: [CVE-2026-11368]
+    when:
+      - kconfig_off: CONFIG_BTT
+    status: not_affected
+    justification: code_not_present
+    detail: Bluetooth is compiled out (CONFIG_BTT is not set).

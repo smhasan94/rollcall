@@ -3,7 +3,9 @@
 # `identifiers-lint` runs it. Offline.
 #
 #   1. Packages twice; the two SHA-256s must agree (same toolchain and zlib build).
-#   2. Unpacks it into a temporary cache directory, as a user installs a release:
+#   2. Unpacks it into a temporary cache directory, as a user installs a release; it holds
+#      identifiers.yaml and the starter VEX rule pack vex-rules.yaml, byte-identical to the
+#      tree's;
 #      - as is, the entry is accepted with no warning (it is the embedded version, so the
 #        embedded database stays active);
 #      - `rollcall --identifiers <unpacked entry> --version` reports its db_version;
@@ -32,6 +34,8 @@ root=$tmp/rollcall/identifiers
 mkdir -p "$root"
 tar -xzf "$tarball" -C "$root"
 test -f "$root/$version/identifiers.yaml"
+cmp "$root/$version/identifiers.yaml" crates/rollcall-identifiers/db/identifiers.yaml
+cmp "$root/$version/vex-rules.yaml" crates/rollcall-identifiers/db/vex-rules.yaml
 
 cargo build -q -p rollcall-cli --locked
 rollcall() {

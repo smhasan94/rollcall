@@ -10,17 +10,19 @@ use crate::zephyr::kconfig::{Kconfig, KconfigValue};
 /// What is known about the build, beyond the SBOM. Every part is optional: a condition that
 /// needs a missing part evaluates to [`Verdict::Unknown`], never to true.
 ///
-/// Kconfig is per image: a product's images (e.g. MCUboot and the application in a sysbuild
-/// build) are configured separately, so a `kconfig_off` condition for a component is judged
-/// only by the `.config` of the image that component is in.
+/// Kconfig and linked symbols are per image: a product's images (e.g. MCUboot and the
+/// application in a sysbuild build) are configured and linked separately, so a `kconfig_off`
+/// or `symbol_not_linked` condition for a component is judged only by the evidence of the
+/// image that component is in.
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct BuildEvidence {
     /// Each image's Kconfig `.config`, by image name.
     pub kconfig: BTreeMap<String, Kconfig>,
     /// The enabled Cargo features.
     pub cargo_features: Option<BTreeSet<String>>,
-    /// The symbols in the linked image.
-    pub linked_symbols: Option<BTreeSet<String>>,
+    /// Each image's linked symbols (e.g. from
+    /// [`linked_functions`](crate::linker_map::linked_functions)), by image name.
+    pub linked_symbols: BTreeMap<String, BTreeSet<String>>,
 }
 
 /// How a `.config` is cited in evidence text: `<image>/zephyr/.config`, a stable label
@@ -50,12 +52,16 @@ impl BuildEvidence {
         self
     }
 
-    /// With the set of linked symbols.
+    /// With the symbols linked into the image named `image` (replacing any given before).
     pub fn with_linked_symbols<I: IntoIterator<Item = S>, S: Into<String>>(
         mut self,
+        image: &str,
         symbols: I,
     ) -> Self {
-        self.linked_symbols = Some(symbols.into_iter().map(Into::into).collect());
+        self.linked_symbols.insert(
+            image.to_owned(),
+            symbols.into_iter().map(Into::into).collect(),
+        );
         self
     }
 }
@@ -77,8 +83,12 @@ impl Condition {
     /// - `kconfig_off`: judged by that image's `.config` only: true when the symbol is `n` or
     ///   not set; false for `y`, `m` or any value; unknown when the image has no `.config` or
     ///   the symbol is not in it (a misspelt symbol must not yield `not_affected`).
-    /// - `cargo_feature_off`, `symbol_not_linked`: true when the name is not in the set, false
-    ///   when it is, unknown without the set.
+    /// - `kconfig_equals`: judged like `kconfig_off`; true when the symbol's value, as written
+    ///   (`y`, `n` for `is not set`, `m`, a number, or a string's contents), is the one given.
+    /// - `cargo_feature_off`: true when the name is not in the set, false when it is, unknown
+    ///   without the set.
+    /// - `symbol_not_linked`: judged by that image's linked-symbol set only: true when the
+    ///   name is not in it, false when it is, unknown when the image has none.
     /// - `version_in`: compares the component's effective version (see
     ///   [`effective_version`](super::effective_version)); unknown when there is none.
     pub fn evaluate(
@@ -98,14 +108,16 @@ impl Condition {
                 }
                 Some(_) => Verdict::True(format!("Cargo feature `{feature}` is not enabled")),
             },
-            Self::SymbolNotLinked(symbol) => match &evidence.linked_symbols {
+            Self::KconfigEquals(symbol, value) => kconfig_equals(symbol, value, image, evidence),
+            Self::SymbolNotLinked(symbol) => match evidence.linked_symbols.get(image) {
                 None => Verdict::Unknown(format!(
-                    "no linked-symbol list given, so cannot tell whether `{symbol}` is linked"
+                    "no linked-symbol list given for image {image}, so cannot tell whether \
+                     `{symbol}` is linked"
                 )),
                 Some(set) if set.contains(symbol) => {
-                    Verdict::False(format!("symbol `{symbol}` is linked"))
+                    Verdict::False(format!("{image}: symbol `{symbol}` is linked"))
                 }
-                Some(_) => Verdict::True(format!("symbol `{symbol}` is not linked")),
+                Some(_) => Verdict::True(format!("{image}: symbol `{symbol}` is not linked")),
             },
             Self::VersionIn(range) => {
                 let shown = component.version.as_deref().unwrap_or("(none)");
@@ -122,6 +134,36 @@ impl Condition {
                 }
             }
         }
+    }
+}
+
+/// The value of a `.config` entry as written: `y`, `n`, `m`, the number, or the string's
+/// contents.
+fn written_value(value: &KconfigValue) -> &str {
+    match value {
+        KconfigValue::Bool(true) => "y",
+        KconfigValue::Bool(false) => "n",
+        KconfigValue::Module => "m",
+        KconfigValue::Int(v) | KconfigValue::Hex(v) | KconfigValue::Str(v) => v,
+    }
+}
+
+fn kconfig_equals(symbol: &str, want: &str, image: &str, evidence: &BuildEvidence) -> Verdict {
+    let location = kconfig_label(image);
+    let Some(kconfig) = evidence.kconfig.get(image) else {
+        return Verdict::Unknown(format!(
+            "no .config given for image {image}, so cannot tell whether {symbol} is {want:?}"
+        ));
+    };
+    let Some(entry) = kconfig.get(symbol) else {
+        return Verdict::Unknown(format!("{symbol} is not in {location}"));
+    };
+    let at = format!("{location}:{}", entry.line);
+    let got = written_value(&entry.value);
+    if got == want {
+        Verdict::True(format!("{at}: {symbol} is {want:?}"))
+    } else {
+        Verdict::False(format!("{at}: {symbol} is {got:?}, not {want:?}"))
     }
 }
 
@@ -264,7 +306,7 @@ mod tests {
 
     #[test]
     fn symbol_not_linked_true() {
-        let e = BuildEvidence::new().with_linked_symbols(["main"]);
+        let e = BuildEvidence::new().with_linked_symbols("app", ["main"]);
         assert!(matches!(
             linked("parse_hello").evaluate("app", &lib("1.0.0"), &e),
             Verdict::True(_)
@@ -273,7 +315,7 @@ mod tests {
 
     #[test]
     fn symbol_not_linked_false() {
-        let e = BuildEvidence::new().with_linked_symbols(["main", "parse_hello"]);
+        let e = BuildEvidence::new().with_linked_symbols("app", ["main", "parse_hello"]);
         assert!(matches!(
             linked("parse_hello").evaluate("app", &lib("1.0.0"), &e),
             Verdict::False(_)
@@ -284,6 +326,66 @@ mod tests {
     fn symbol_not_linked_unknown() {
         assert!(matches!(
             linked("parse_hello").evaluate("app", &lib("1.0.0"), &BuildEvidence::new()),
+            Verdict::Unknown(_)
+        ));
+    }
+
+    #[test]
+    fn symbol_not_linked_is_per_image() {
+        // Only the application's map was given: MCUboot's component stays unknown.
+        let e = BuildEvidence::new().with_linked_symbols("app", ["main"]);
+        assert_eq!(
+            linked("parse_hello").evaluate("mcuboot", &lib("1.0.0"), &e),
+            Verdict::Unknown(
+                "no linked-symbol list given for image mcuboot, so cannot tell whether \
+                 `parse_hello` is linked"
+                    .to_owned()
+            )
+        );
+        let e = e.with_linked_symbols("mcuboot", ["parse_hello"]);
+        assert!(matches!(
+            linked("parse_hello").evaluate("mcuboot", &lib("1.0.0"), &e),
+            Verdict::False(_)
+        ));
+        assert!(matches!(
+            linked("parse_hello").evaluate("app", &lib("1.0.0"), &e),
+            Verdict::True(_)
+        ));
+    }
+
+    fn equals(symbol: &str, value: &str) -> Condition {
+        Condition::KconfigEquals(symbol.to_owned(), value.to_owned())
+    }
+
+    #[test]
+    fn kconfig_equals_compares_the_written_value() {
+        let config =
+            "CONFIG_FILE=\"config-mbedtls.h\"\nCONFIG_A=y\n# CONFIG_B is not set\nCONFIG_E=4\n";
+        let e = BuildEvidence::new().with_kconfig("app", kconfig::parse(config).unwrap());
+        let c = lib("1.0.0");
+        assert_eq!(
+            equals("CONFIG_FILE", "config-mbedtls.h").evaluate("app", &c, &e),
+            Verdict::True("app/zephyr/.config:1: CONFIG_FILE is \"config-mbedtls.h\"".to_owned())
+        );
+        assert_eq!(
+            equals("CONFIG_FILE", "mcuboot-mbedtls-cfg.h").evaluate("app", &c, &e),
+            Verdict::False(
+                "app/zephyr/.config:1: CONFIG_FILE is \"config-mbedtls.h\", not \"mcuboot-mbedtls-cfg.h\""
+                    .to_owned()
+            )
+        );
+        for (symbol, value) in [("CONFIG_A", "y"), ("CONFIG_B", "n"), ("CONFIG_E", "4")] {
+            assert!(matches!(
+                equals(symbol, value).evaluate("app", &c, &e),
+                Verdict::True(_)
+            ));
+        }
+        assert!(matches!(
+            equals("CONFIG_TYPO", "y").evaluate("app", &c, &e),
+            Verdict::Unknown(_)
+        ));
+        assert!(matches!(
+            equals("CONFIG_A", "y").evaluate("mcuboot", &c, &e),
             Verdict::Unknown(_)
         ));
     }

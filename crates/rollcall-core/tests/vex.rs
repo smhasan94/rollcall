@@ -180,8 +180,10 @@ fn symbol_not_linked_in_memory() {
     let product = load_fixture("old-mbedtls");
     let mbedtls = component(&product, "mbedtls");
     let symbol = Condition::SymbolNotLinked("mbedtls_ssl_parse_client_hello".to_owned());
-    let linked = BuildEvidence::new().with_linked_symbols(["mbedtls_ssl_parse_client_hello"]);
-    let not_linked = BuildEvidence::new().with_linked_symbols(["mbedtls_ssl_handshake"]);
+    let linked =
+        BuildEvidence::new().with_linked_symbols(OLD_TLS_APP, ["mbedtls_ssl_parse_client_hello"]);
+    let not_linked =
+        BuildEvidence::new().with_linked_symbols(OLD_TLS_APP, ["mbedtls_ssl_handshake"]);
     assert!(matches!(
         symbol.evaluate(OLD_TLS_APP, mbedtls, &linked),
         Verdict::False(_)
