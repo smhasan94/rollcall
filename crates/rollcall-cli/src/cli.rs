@@ -86,6 +86,8 @@ pub enum Command {
     Diff(DiffArgs),
     /// Export scan and VEX results as a CSAF 2.0 VEX document
     Csaf(CsafArgs),
+    /// Print which ecosystem a build or project directory is (as `generate DIR` tells it)
+    Detect(DetectArgs),
 }
 
 impl Command {
@@ -102,6 +104,7 @@ impl Command {
             Command::Report(_) => "report",
             Command::Diff(_) => "diff",
             Command::Csaf(_) => "csaf",
+            Command::Detect(_) => "detect",
         }
     }
 }
@@ -115,13 +118,49 @@ pub enum Format {
     Spdx,
 }
 
+/// `--ecosystem`: which ingester a positional DIR is for.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, ValueEnum)]
+pub enum EcosystemArg {
+    /// Tell from the files at the top of DIR (the default).
+    Auto,
+    /// A Zephyr build directory, as --zephyr (a sysbuild when it holds domains.yaml).
+    Zephyr,
+    /// A Rust package (Cargo.toml, as --cargo) or captured metadata (cargo-metadata.json, as
+    /// --cargo-metadata).
+    Cargo,
+    /// An ESP-IDF project, as --esp-idf.
+    EspIdf,
+    /// A PlatformIO project, as --platformio.
+    Platformio,
+}
+
 /// Arguments of `rollcall generate`.
 #[derive(Debug, Args)]
 #[command(group = ArgGroup::new("input").required(true).multiple(false))]
 #[command(group = ArgGroup::new("db").multiple(false))]
-#[command(group = ArgGroup::new("cargo_input").args(["cargo", "cargo_metadata"]).multiple(false))]
-#[command(group = ArgGroup::new("notes_input").args(["zephyr", "esp_idf"]).multiple(false))]
+#[command(group = ArgGroup::new("cargo_input").args(["cargo", "cargo_metadata", "dir"]).multiple(false))]
+#[command(group = ArgGroup::new("cargo_dir_input").args(["cargo", "dir"]).multiple(false))]
+#[command(group = ArgGroup::new("zephyr_input").args(["zephyr", "dir"]).multiple(false))]
+#[command(group = ArgGroup::new("esp_idf_input").args(["esp_idf", "dir"]).multiple(false))]
+#[command(group = ArgGroup::new("platformio_input").args(["platformio", "dir"]).multiple(false))]
+#[command(group = ArgGroup::new("notes_input").args(["zephyr", "esp_idf", "dir"]).multiple(false))]
 pub struct GenerateArgs {
+    /// A build or project directory of any ecosystem: Zephyr, Cargo, ESP-IDF or PlatformIO,
+    /// told from its files (see --ecosystem). The other flags apply as for that ecosystem's
+    /// own input flag
+    #[arg(value_name = "DIR", group = "input")]
+    pub dir: Option<PathBuf>,
+    /// Which ecosystem DIR is: auto tells it from the files at its top (build_info.yml,
+    /// Cargo.toml or cargo-metadata.json, sdkconfig and build/project_description.json,
+    /// platformio.ini) and fails, listing them, when several match. Default: auto
+    #[arg(
+        long,
+        value_enum,
+        value_name = "ECOSYSTEM",
+        requires = "dir",
+        conflicts_with_all = ["model", "zephyr", "esp_idf", "platformio", "cargo", "cargo_metadata"]
+    )]
+    pub ecosystem: Option<EcosystemArg>,
     /// The rollcall model (`rollcall-model/1` JSON) to render
     #[arg(long, value_name = "FILE", group = "input")]
     pub model: Option<PathBuf>,
@@ -137,8 +176,8 @@ pub struct GenerateArgs {
     #[arg(
         long,
         value_name = "DIR",
-        requires = "esp_idf",
-        conflicts_with_all = ["model", "zephyr", "cargo", "cargo_metadata"]
+        requires = "esp_idf_input",
+        conflicts_with_all = ["model", "zephyr", "cargo", "cargo_metadata", "platformio"]
     )]
     pub build: Option<PathBuf>,
     /// The ESP-IDF tree the build used (with --esp-idf), to hash the linked blobs and read the
@@ -146,10 +185,33 @@ pub struct GenerateArgs {
     #[arg(
         long,
         value_name = "DIR",
-        requires = "esp_idf",
-        conflicts_with_all = ["model", "zephyr", "cargo", "cargo_metadata"]
+        requires = "esp_idf_input",
+        conflicts_with_all = ["model", "zephyr", "cargo", "cargo_metadata", "platformio"]
     )]
     pub idf_path: Option<PathBuf>,
+    /// PlatformIO project directory (holding platformio.ini), after `pio run` or `pio pkg
+    /// install`: the framework, the platform and every library installed for the environment
+    #[arg(long, value_name = "DIR", group = "input")]
+    pub platformio: Option<PathBuf>,
+    /// The PlatformIO environment (with --platformio). Default: the one default_envs names,
+    /// else the project's only environment
+    #[arg(
+        long,
+        value_name = "NAME",
+        requires = "platformio_input",
+        conflicts_with_all = ["model", "zephyr", "esp_idf", "cargo", "cargo_metadata"]
+    )]
+    pub env: Option<String>,
+    /// The PlatformIO core directory the build used (with --platformio), for the installed
+    /// platform and framework versions. Default: $PLATFORMIO_CORE_DIR, if set; without one,
+    /// the exact pins in platformio.ini
+    #[arg(
+        long,
+        value_name = "DIR",
+        requires = "platformio_input",
+        conflicts_with_all = ["model", "zephyr", "esp_idf", "cargo", "cargo_metadata"]
+    )]
+    pub pio_core: Option<PathBuf>,
     /// Rust package directory (holding Cargo.toml): run `cargo metadata` there ($CARGO, else
     /// cargo on PATH) and list its crates. Needs a Cargo.lock (cargo runs with --locked)
     #[arg(long, value_name = "DIR", group = "input")]
@@ -165,8 +227,8 @@ pub struct GenerateArgs {
     #[arg(
         long,
         value_name = "TRIPLE",
-        requires = "cargo",
-        conflicts_with_all = ["model", "zephyr", "cargo_metadata"]
+        requires = "cargo_dir_input",
+        conflicts_with_all = ["model", "zephyr", "cargo_metadata", "esp_idf", "platformio"]
     )]
     pub target: Option<String>,
     /// ELF built with `cargo auditable`: the crates its .dep-v0 section lists are the
@@ -176,36 +238,48 @@ pub struct GenerateArgs {
         long,
         value_name = "FILE",
         requires = "cargo_input",
-        conflicts_with_all = ["model", "zephyr"]
+        conflicts_with_all = ["model", "zephyr", "esp_idf", "platformio"]
     )]
     pub elf: Option<PathBuf>,
     /// Also list the crates in the metadata that the ELF does not link, with CycloneDX
     /// `scope: excluded` (with --elf)
-    #[arg(long, requires = "elf", conflicts_with_all = ["model", "zephyr"])]
+    #[arg(
+        long,
+        requires = "elf",
+        conflicts_with_all = ["model", "zephyr", "esp_idf", "platformio"]
+    )]
     pub include_unlinked: bool,
     /// Output of `west list -f "{name} {path} {revision} {url}"`, for module revisions and
-    /// URLs (with --zephyr)
+    /// URLs (with --zephyr; with a Zephyr DIR, default DIR/west-list.txt when present)
     #[arg(
         long,
         value_name = "FILE",
-        requires = "zephyr",
-        conflicts_with = "model"
+        requires = "zephyr_input",
+        conflicts_with_all = ["model", "esp_idf", "cargo", "cargo_metadata", "platformio"]
     )]
     pub west_list: Option<PathBuf>,
     /// Add the SDK/toolchain as a component (with --zephyr)
-    #[arg(long, requires = "zephyr", conflicts_with = "model")]
+    #[arg(
+        long,
+        requires = "zephyr_input",
+        conflicts_with_all = ["model", "esp_idf", "cargo", "cargo_metadata", "platformio"]
+    )]
     pub include_sdk: bool,
     /// --zephyr names a sysbuild top-level build directory: ingest every image it lists
-    /// (e.g. MCUboot and the application) and merge them into one product
-    #[arg(long, requires = "zephyr", conflicts_with = "model")]
+    /// (e.g. MCUboot and the application) and merge them into one product (with a Zephyr DIR,
+    /// implied when it holds domains.yaml)
+    #[arg(
+        long,
+        requires = "zephyr_input",
+        conflicts_with_all = ["model", "esp_idf", "cargo", "cargo_metadata", "platformio"]
+    )]
     pub sysbuild: bool,
     /// Put the product under this name and optional version (split at the last @, so
-    /// `@scope/widget@1.0.0`), exactly as `merge --product` would. With or without --sysbuild
+    /// `@scope/widget@1.0.0`), exactly as `merge --product` would. With any input but --model
     #[arg(
         long,
         value_name = "NAME[@VERSION]",
         value_parser = ProductSpec::from_str,
-        requires = "zephyr",
         conflicts_with = "model"
     )]
     pub product: Option<ProductSpec>,
@@ -215,15 +289,20 @@ pub struct GenerateArgs {
     #[arg(
         long,
         value_name = "FILE",
-        requires = "zephyr",
-        conflicts_with = "model",
+        requires = "zephyr_input",
+        conflicts_with_all = ["model", "esp_idf", "cargo", "cargo_metadata", "platformio"],
         group = "db"
     )]
     pub identifier_db: Option<PathBuf>,
     /// Resolve modules with the active identifier database (with --zephyr): --identifiers,
     /// else $ROLLCALL_IDENTIFIERS, else the newest compatible database in the cache directory
     /// that is newer than the embedded one, else the embedded one (see `rollcall --version`)
-    #[arg(long, requires = "zephyr", conflicts_with = "model", group = "db")]
+    #[arg(
+        long,
+        requires = "zephyr_input",
+        conflicts_with_all = ["model", "esp_idf", "cargo", "cargo_metadata", "platformio"],
+        group = "db"
+    )]
     pub identify: bool,
     /// The west workspace (topdir), so identifier database rules can read module sources at
     /// their `west list` path. Requires --identifier-db or --identify, and --west-list
@@ -233,7 +312,12 @@ pub struct GenerateArgs {
     /// enables was not split out of the zephyr or esp-idf component (none of its code was
     /// linked), and linked code left in it
     // `conflicts_with` is not redundant: `requires` alone lets `--model … --verbose` through.
-    #[arg(short, long, requires = "notes_input", conflicts_with = "model")]
+    #[arg(
+        short,
+        long,
+        requires = "notes_input",
+        conflicts_with_all = ["model", "cargo", "cargo_metadata", "platformio"]
+    )]
     pub verbose: bool,
     /// Output format
     #[arg(long, value_enum, default_value_t = Format::Cyclonedx)]
@@ -249,6 +333,18 @@ pub struct GenerateArgs {
     /// Write the document here instead of to stdout
     #[arg(short, long, value_name = "FILE")]
     pub output: Option<PathBuf>,
+}
+
+/// Arguments of `rollcall detect`.
+#[derive(Debug, Args)]
+pub struct DetectArgs {
+    /// The directory: printed as zephyr, cargo, esp-idf or platformio (exit 0); exit 64 when
+    /// several ecosystems match (listing them), 66 when none does or DIR is not a directory
+    #[arg(value_name = "DIR")]
+    pub dir: PathBuf,
+    /// The ESP-IDF build directory, as for `generate --build`. Default: DIR/build
+    #[arg(long, value_name = "DIR")]
+    pub build: Option<PathBuf>,
 }
 
 /// Arguments of `rollcall merge`.

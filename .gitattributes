@@ -25,3 +25,7 @@ crates/rollcall-core/tests/data/blobs/** -text
 fixtures/esp-idf/** -text linguist-generated=true
 fixtures/esp-idf/**/*.map -diff
 fixtures/esp-idf/**/*.a binary
+
+# PlatformIO build fixture (scripts/regen-fixtures-platformio.sh, SHA-131): byte-exact like the
+# others (MANIFEST.json pins every SHA-256). It holds hidden files (.pio/, .piopm) on purpose.
+fixtures/platformio/** -text linguist-generated=true

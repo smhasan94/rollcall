@@ -471,3 +471,26 @@ copy built by the `regen-fixtures` workflow's `regen-esp-idf` job on `ubuntu-24.
 `esp-idf-fixtures`) is canonical. What each tree holds, the pins, how the trees are kept free
 of host paths and how to bump the pin are in [esp-idf.md](esp-idf.md#fixtures);
 `crates/rollcall-core/tests/fixtures_esp_idf.rs` checks the committed tree.
+
+## PlatformIO fixtures
+
+`fixtures/platformio/arduino-mqtt/` is a real `pio run -e esp32dev` (SHA-131) of the
+hand-written Arduino-ESP32 project in `scripts/fixture-src/platformio/arduino-mqtt/`. It uses
+three `lib_deps`: ArduinoJson 7.2.1, PubSubClient 2.8 and OneButton 2.6.1. It was built with
+PlatformIO Core 6.1.18 and espressif32 6.10.0 (Arduino-ESP32 2.0.17), in the python image
+pinned by digest.
+
+It holds only metadata, much of it in hidden files (`.pio/`, `.piopm`), so the artifact
+upload uses `include-hidden-files: true`:
+
+- `platformio.ini`;
+- each installed library's `library.json` and `.piopm`;
+- `pio-core/`, the platform's and framework package's manifests from the build's core
+  directory.
+
+It is produced only by `scripts/regen-fixtures-platformio.sh` (which
+`scripts/regen-fixtures.sh --variant platformio` hands over to) and never edited by hand. The
+copy built by the `regen-fixtures` workflow's `regen-platformio` job on `ubuntu-24.04`
+(artifact `platformio-fixtures`) is canonical. The pins, the checks and how to bump them are in
+[platformio.md](platformio.md#fixtures). `crates/rollcall-core/tests/fixtures_platformio.rs`
+checks the committed tree.

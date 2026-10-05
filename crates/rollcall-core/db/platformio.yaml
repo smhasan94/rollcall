@@ -1,0 +1,48 @@
+# rollcall PlatformIO table: the framework packages PlatformIO installs, mapped to the upstream
+# projects they package, with those projects' identifiers.
+#
+# Hand-maintained (not a build fixture). The schema and rules are documented in the
+# rollcall_core::platformio::table module docs and docs/platformio.md. A PlatformIO framework
+# package's version encodes the upstream release in its middle number (3.20017.241212 is
+# Arduino-ESP32 2.0.17: 2, 00, 17); `versions` lists the releases checked by hand, against the
+# package installed by scripts/regen-fixtures-platformio.sh, and any other version is decoded
+# by that rule (with a warning). The purls follow the identifier database's pkg:generic form
+# naming the upstream repository (Zephyr's is the one west spdx writes). CPE vendor:product
+# pairs were confirmed with scripts/nvd-spot-check.sh: espressif:arduino-esp32 (17 entries),
+# espressif:esp-idf, zephyrproject:zephyr.
+format: rollcall-platformio/1
+registry: https://registry.platformio.org
+frameworks:
+  - package: framework-arduinoespressif32
+    framework: arduino
+    platforms: [espressif32]
+    name: arduino-esp32
+    description: Arduino core for the ESP32 family (Espressif's arduino-esp32)
+    purl: 'pkg:generic/arduino-esp32@{version}?vcs_url=git+https://github.com/espressif/arduino-esp32'
+    cpe: 'cpe:2.3:a:espressif:arduino-esp32:{version}:*:*:*:*:*:*:*'
+    supplier: Espressif Systems
+    supplier_url: https://www.espressif.com
+    licence: LGPL-2.1-or-later
+    versions:
+      3.20017.241212: 2.0.17
+
+  - package: framework-espidf
+    framework: espidf
+    platforms: [espressif32]
+    name: esp-idf
+    description: Espressif IoT Development Framework, as rollcall's ESP-IDF ingester names it
+    purl: 'pkg:generic/esp-idf@{version}?vcs_url=git+https://github.com/espressif/esp-idf'
+    cpe: 'cpe:2.3:a:espressif:esp-idf:{version}:*:*:*:*:*:*:*'
+    supplier: Espressif Systems
+    supplier_url: https://www.espressif.com
+    licence: Apache-2.0
+
+  - package: framework-zephyr
+    framework: zephyr
+    name: zephyr
+    description: The Zephyr RTOS, as west spdx and rollcall's Zephyr ingester name it
+    purl: 'pkg:github/zephyrproject-rtos/zephyr@v{version}'
+    cpe: 'cpe:2.3:o:zephyrproject:zephyr:{version}:-:*:*:*:*:*:*'
+    supplier: Zephyr Project
+    supplier_url: https://www.zephyrproject.org
+    licence: Apache-2.0

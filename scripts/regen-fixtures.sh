@@ -10,6 +10,7 @@
 #   scripts/regen-fixtures.sh compare DIR_A DIR_B
 #   scripts/regen-fixtures.sh --variant cargo-… [--check-stable] [--skip-setup]
 #   scripts/regen-fixtures.sh --variant esp-idf[-…] [--check-stable]
+#   scripts/regen-fixtures.sh --variant platformio[-…] [--check-stable]
 #
 #   A `cargo-*` variant (cargo-keelsign, cargo-deps, cargo-old-heapless) hands the whole
 #   command line to scripts/regen-fixtures-cargo.sh, which builds the Cargo fixtures
@@ -17,6 +18,9 @@
 #   An `esp-idf` or `esp-idf-*` variant (esp-idf, esp-idf-hello-world, esp-idf-wifi-tls) hands
 #   it to scripts/regen-fixtures-esp-idf.sh, which builds the ESP-IDF fixtures
 #   (fixtures/esp-idf/) in the pinned espressif/idf Docker image; see that script.
+#   A `platformio` or `platformio-*` variant (platformio, platformio-arduino-mqtt) hands it to
+#   scripts/regen-fixtures-platformio.sh, which builds the PlatformIO fixture
+#   (fixtures/platformio/) with `pio run` in the pinned python image; see that script.
 #
 #   --variant V      build only variant V (baseline, bt or tls); repeatable. Default: all.
 #                    Unselected variants already in the output are carried over unchanged,
@@ -990,12 +994,13 @@ if [[ "${1:-}" == compare ]]; then
     exit $?
 fi
 
-# The Cargo fixtures (SHA-127) and the ESP-IDF fixtures (SHA-129) have their own scripts and
-# pins.
+# The Cargo fixtures (SHA-127), the ESP-IDF fixtures (SHA-129) and the PlatformIO fixture
+# (SHA-131) have their own scripts and pins.
 for arg in "$@"; do
     case "$arg" in
         cargo-*) exec "$REPO_ROOT/scripts/regen-fixtures-cargo.sh" "$@" ;;
         esp-idf | esp-idf-*) exec "$REPO_ROOT/scripts/regen-fixtures-esp-idf.sh" "$@" ;;
+        platformio | platformio-*) exec "$REPO_ROOT/scripts/regen-fixtures-platformio.sh" "$@" ;;
     esac
 done
 

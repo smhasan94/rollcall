@@ -7,7 +7,8 @@ above a severity you choose.
 
 For each build it runs:
 
-1. `rollcall generate` (Zephyr or Cargo, detected from the build directory);
+1. `rollcall generate` (Zephyr, Cargo, ESP-IDF or PlatformIO, detected from the build
+   directory by `rollcall detect`);
 2. `rollcall validate --schema` (an invalid SBOM fails the job) and
    `rollcall validate --profile all` (CISA 2026 and CRA findings, recorded only);
 3. grype (pinned, SHA-256-verified) on the SBOM, then `rollcall vex` with the starter rule pack
@@ -56,8 +57,8 @@ upload the artifact that pull requests are compared with.
 
 | Input | Default | Meaning |
 |-------|---------|---------|
-| `build-dir` | (required) | The build. Zephyr: the build directory holding `build_info.yml` (a sysbuild top-level directory when it holds `domains.yaml`). Cargo: the package directory (`Cargo.toml`, needs `Cargo.lock`), or a directory holding captured `cargo-metadata.json` |
-| `ecosystem` | `auto` | `auto`, `zephyr` or `cargo`. `auto`: `build_info.yml` means Zephyr; else `Cargo.toml` (run `cargo metadata`) or `cargo-metadata.json` (read it) means Cargo; else the job fails |
+| `build-dir` | (required) | The build (must not start with `-`; write `./-dir`). Zephyr: the build directory holding `build_info.yml` (a sysbuild top-level directory when it holds `domains.yaml`). Cargo: the package directory (`Cargo.toml`, needs `Cargo.lock`), or a directory holding captured `cargo-metadata.json`. ESP-IDF: the project directory (`sdkconfig`, built in `build/`). PlatformIO: the project directory (`platformio.ini`), after `pio run` |
+| `ecosystem` | `auto` | `auto`, `zephyr`, `cargo`, `esp-idf` or `platformio`. `auto` runs `rollcall detect`, the detection `rollcall generate DIR` uses: `build_info.yml` means Zephyr; `Cargo.toml` (run `cargo metadata`) or `cargo-metadata.json` (read it) Cargo; `sdkconfig` with `build/project_description.json` ESP-IDF; `platformio.ini` PlatformIO. A directory that several match fails (exit 64) listing them, and one that none matches fails (exit 66); set `ecosystem` to choose |
 | `identifiers-version` | `embedded` | The identifier database for Zephyr modules: `embedded` (built into rollcall), or a `db_version` such as `1.1.0`, downloaded from the release `identifiers-v<db_version>` and verified against its `SHA256SUMS` |
 | `fail-on` | `high` | Fail the check when the pull request adds an open finding (not suppressed by VEX) at or above `critical`, `high`, `medium`, `low` or `unknown`; `none` never fails. Findings below the threshold are still listed in the comment |
 | `gate-on-push` | `false` | Also enforce the gate outside pull requests (e.g. a push to the base branch, where there is no base and every open finding counts as new). By default the outcome is only noted there |
@@ -65,9 +66,11 @@ upload the artifact that pull requests are compared with.
 | `starter-rules` | `true` | Apply rollcall's starter VEX rule pack first |
 | `west-list` | `BUILD-DIR/west-list.txt` if present | Zephyr: `west list -f "{name} {path} {revision} {url}"` output |
 | `sysbuild` | `auto` | Zephyr: `auto` (a sysbuild when `domains.yaml` is present), `true` or `false` |
-| `product` | | Zephyr: name the product `NAME[@VERSION]` |
+| `product` | | Name the product `NAME[@VERSION]` (any ecosystem) |
 | `elf` | | Cargo: the binary built with `cargo auditable`, so only the crates it links are listed |
 | `target` | | Cargo package directory: the target triple to resolve crates for |
+| `env` | | PlatformIO: the environment to describe (default: the one `default_envs` names, else the project's only one) |
+| `pio-core` | | PlatformIO: the core directory the build used, read for the installed platform and framework versions (`rollcall generate --pio-core`). After `pio run` on the runner that is `~/.platformio` (a leading `~/` is the runner's home). Without it, the versions come from exact pins in `platformio.ini`, and are unknown (a warning) for a range |
 | `scanner` | `grype` | `grype`, or `auto`: grype and osv-scanner (both pinned) |
 | `rollcall-version` | `source` | `source`: build rollcall from the action's own checkout (cached per action repository and ref); or a release tag such as `v0.1.0`: download `rollcall-<tag>-<os>-<arch>.tar.gz` and verify it against the release's `SHA256SUMS` |
 | `artifact-name` | `rollcall` | The workflow artifact's name. The base is the base branch's artifact of the same name, and the comment is keyed on it, so give each job its own |
@@ -80,6 +83,7 @@ upload the artifact that pull requests are compared with.
 
 | Output | Meaning |
 |--------|---------|
+| `ecosystem` | The ecosystem described: `zephyr`, `cargo`, `esp-idf` or `platformio` |
 | `sbom` | Path of the CycloneDX 1.6 SBOM (`sbom.cdx.json`) |
 | `vex` | Path of the OpenVEX document (`vex.openvex.json`) |
 | `scan` | Path of the `rollcall-scan/1` report, triaged with that VEX (`scan.json`) |
@@ -88,6 +92,14 @@ upload the artifact that pull requests are compared with.
 | `score` | The readiness score out of 100 |
 | `new-findings` | How many findings are new against the base |
 | `gate` | `clean`, or `findings` when a new open finding is at or above `fail-on` |
+
+## Exit codes
+
+The generate step exits with `rollcall`'s own exit code when `rollcall detect` or
+`rollcall generate` fails, so a failed job says why: 64 for a usage error (a directory several
+ecosystems match, a flag of another ecosystem, an unknown `env`), 65 for a malformed input, 66
+for a missing one (a directory no ecosystem matches, or not the one `ecosystem` names). Other
+failures of the step exit 1, with an error annotation naming the command.
 
 ## The comment and the gate
 

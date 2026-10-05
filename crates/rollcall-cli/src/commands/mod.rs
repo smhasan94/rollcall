@@ -1,6 +1,7 @@
 //! Implementations of the subcommands. Each `run` returns the process exit code.
 
 pub mod csaf;
+pub mod detect;
 pub mod diff;
 pub mod generate;
 pub mod identifiers;

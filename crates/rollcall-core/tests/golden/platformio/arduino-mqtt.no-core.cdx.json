@@ -1,0 +1,616 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.6",
+  "serialNumber": "urn:uuid:d08c87cb-7f16-8753-b251-4ea0507faa63",
+  "version": 1,
+  "metadata": {
+    "timestamp": "2026-01-02T03:04:05Z",
+    "tools": {
+      "components": [
+        {
+          "type": "application",
+          "name": "rollcall",
+          "version": "0.0.1"
+        }
+      ]
+    },
+    "component": {
+      "type": "firmware",
+      "bom-ref": "product:b7bf9757f2e4ce1598482ac5b4d7eaa2",
+      "name": "arduino-mqtt"
+    }
+  },
+  "components": [
+    {
+      "type": "firmware",
+      "bom-ref": "image:a569c89091cfbe061545cd1384a6d783",
+      "name": "arduino-mqtt",
+      "purl": "pkg:generic/arduino-mqtt",
+      "evidence": {
+        "identity": [
+          {
+            "field": "name",
+            "confidence": 0.8,
+            "concludedValue": "arduino-mqtt",
+            "methods": [
+              {
+                "technique": "manifest-analysis",
+                "confidence": 0.8,
+                "value": "arduino-mqtt"
+              },
+              {
+                "technique": "manifest-analysis",
+                "confidence": 0.8,
+                "value": "env:esp32dev"
+              }
+            ]
+          }
+        ],
+        "occurrences": [
+          {
+            "location": "platformio.ini"
+          },
+          {
+            "location": "platformio.ini",
+            "line": 23
+          }
+        ]
+      },
+      "properties": [
+        {
+          "name": "rollcall:evidence",
+          "value": "{\"field\":\"name\",\"technique\":\"manifest-analysis\",\"source\":\"platformio-ini\",\"occurrence\":{\"location\":\"platformio.ini\",\"line\":23},\"value\":\"env:esp32dev\",\"confidence\":8000}"
+        },
+        {
+          "name": "rollcall:evidence",
+          "value": "{\"field\":\"name\",\"technique\":\"manifest-analysis\",\"source\":\"platformio-ini\",\"occurrence\":{\"location\":\"platformio.ini\"},\"value\":\"arduino-mqtt\",\"confidence\":8000}"
+        },
+        {
+          "name": "rollcall:evidence-source",
+          "value": "platformio-ini"
+        },
+        {
+          "name": "rollcall:image-kind",
+          "value": "application"
+        }
+      ],
+      "components": [
+        {
+          "type": "framework",
+          "bom-ref": "component:40f80ec86ed7e9549fb48086c876a392",
+          "name": "arduino-esp32",
+          "version": "2.0.17",
+          "supplier": {
+            "name": "Espressif Systems",
+            "url": [
+              "https://www.espressif.com"
+            ]
+          },
+          "purl": "pkg:generic/arduino-esp32@2.0.17?vcs_url=git%2Bhttps:%2F%2Fgithub.com%2Fespressif%2Farduino-esp32",
+          "cpe": "cpe:2.3:a:espressif:arduino-esp32:2.0.17:*:*:*:*:*:*:*",
+          "licenses": [
+            {
+              "expression": "LGPL-2.1-or-later"
+            }
+          ],
+          "evidence": {
+            "identity": [
+              {
+                "field": "name",
+                "confidence": 0.8,
+                "concludedValue": "arduino-esp32",
+                "methods": [
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.8,
+                    "value": "framework:arduino"
+                  }
+                ]
+              },
+              {
+                "field": "version",
+                "confidence": 0.9,
+                "concludedValue": "2.0.17",
+                "methods": [
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.8,
+                    "value": "3.20017.241212"
+                  },
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.9,
+                    "value": "2.0.17"
+                  }
+                ]
+              },
+              {
+                "field": "purl",
+                "confidence": 0.9,
+                "concludedValue": "pkg:generic/arduino-esp32@2.0.17?vcs_url=git%2Bhttps:%2F%2Fgithub.com%2Fespressif%2Farduino-esp32",
+                "methods": [
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.9,
+                    "value": "pkg:generic/arduino-esp32@2.0.17?vcs_url=git%2Bhttps:%2F%2Fgithub.com%2Fespressif%2Farduino-esp32"
+                  }
+                ]
+              },
+              {
+                "field": "cpe",
+                "confidence": 0.9,
+                "concludedValue": "cpe:2.3:a:espressif:arduino-esp32:2.0.17:*:*:*:*:*:*:*",
+                "methods": [
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.9,
+                    "value": "cpe:2.3:a:espressif:arduino-esp32:2.0.17:*:*:*:*:*:*:*"
+                  }
+                ]
+              }
+            ],
+            "occurrences": [
+              {
+                "location": "platformio.ini",
+                "line": 13
+              },
+              {
+                "location": "platformio.ini",
+                "line": 14
+              },
+              {
+                "location": "platformio.yaml"
+              }
+            ]
+          },
+          "properties": [
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"cpe\",\"technique\":\"manifest-analysis\",\"source\":\"platformio-table\",\"occurrence\":{\"location\":\"platformio.yaml\"},\"value\":\"cpe:2.3:a:espressif:arduino-esp32:2.0.17:*:*:*:*:*:*:*\",\"confidence\":9000}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"name\",\"technique\":\"manifest-analysis\",\"source\":\"platformio-ini\",\"occurrence\":{\"location\":\"platformio.ini\",\"line\":14},\"value\":\"framework:arduino\",\"confidence\":8000}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"purl\",\"technique\":\"manifest-analysis\",\"source\":\"platformio-table\",\"occurrence\":{\"location\":\"platformio.yaml\"},\"value\":\"pkg:generic/arduino-esp32@2.0.17?vcs_url=git%2Bhttps:%2F%2Fgithub.com%2Fespressif%2Farduino-esp32\",\"confidence\":9000}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"version\",\"technique\":\"manifest-analysis\",\"source\":\"platformio-ini\",\"occurrence\":{\"location\":\"platformio.ini\",\"line\":13},\"value\":\"3.20017.241212\",\"confidence\":8000}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"version\",\"technique\":\"manifest-analysis\",\"source\":\"platformio-table\",\"occurrence\":{\"location\":\"platformio.yaml\"},\"value\":\"2.0.17\",\"confidence\":9000}"
+            },
+            {
+              "name": "rollcall:evidence-source",
+              "value": "platformio-ini"
+            },
+            {
+              "name": "rollcall:evidence-source",
+              "value": "platformio-table"
+            }
+          ]
+        },
+        {
+          "type": "library",
+          "bom-ref": "component:8c88e5435494f8212ed29e2e928d77a8",
+          "name": "bblanchon/ArduinoJson",
+          "version": "7.2.1",
+          "purl": "pkg:generic/bblanchon/ArduinoJson@7.2.1?repository_url=https:%2F%2Fregistry.platformio.org",
+          "evidence": {
+            "identity": [
+              {
+                "field": "name",
+                "confidence": 0.95,
+                "concludedValue": "bblanchon/ArduinoJson",
+                "methods": [
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.95,
+                    "value": "bblanchon/ArduinoJson"
+                  },
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.8,
+                    "value": "bblanchon/ArduinoJson @ 7.2.1"
+                  }
+                ]
+              },
+              {
+                "field": "version",
+                "confidence": 0.95,
+                "concludedValue": "7.2.1",
+                "methods": [
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.9,
+                    "value": "7.2.1"
+                  },
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.95,
+                    "value": "7.2.1"
+                  }
+                ]
+              },
+              {
+                "field": "purl",
+                "confidence": 0.7,
+                "concludedValue": "pkg:generic/bblanchon/ArduinoJson@7.2.1?repository_url=https:%2F%2Fregistry.platformio.org",
+                "methods": [
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.7,
+                    "value": "pkg:generic/ArduinoJson@7.2.1?vcs_url=git%2Bhttps:%2F%2Fgithub.com%2Fbblanchon%2FArduinoJson.git"
+                  }
+                ]
+              }
+            ],
+            "occurrences": [
+              {
+                "location": ".pio/libdeps/esp32dev/ArduinoJson/.piopm"
+              },
+              {
+                "location": ".pio/libdeps/esp32dev/ArduinoJson/library.json"
+              },
+              {
+                "location": "platformio.ini",
+                "line": 19
+              }
+            ]
+          },
+          "properties": [
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"name\",\"technique\":\"manifest-analysis\",\"source\":\"piopm\",\"occurrence\":{\"location\":\".pio/libdeps/esp32dev/ArduinoJson/.piopm\"},\"value\":\"bblanchon/ArduinoJson\",\"confidence\":9500}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"name\",\"technique\":\"manifest-analysis\",\"source\":\"platformio-ini\",\"occurrence\":{\"location\":\"platformio.ini\",\"line\":19},\"value\":\"bblanchon/ArduinoJson @ 7.2.1\",\"confidence\":8000}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"purl\",\"technique\":\"manifest-analysis\",\"source\":\"library-json\",\"occurrence\":{\"location\":\".pio/libdeps/esp32dev/ArduinoJson/library.json\"},\"value\":\"pkg:generic/ArduinoJson@7.2.1?vcs_url=git%2Bhttps:%2F%2Fgithub.com%2Fbblanchon%2FArduinoJson.git\",\"confidence\":7000}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"version\",\"technique\":\"manifest-analysis\",\"source\":\"library-json\",\"occurrence\":{\"location\":\".pio/libdeps/esp32dev/ArduinoJson/library.json\"},\"value\":\"7.2.1\",\"confidence\":9000}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"version\",\"technique\":\"manifest-analysis\",\"source\":\"piopm\",\"occurrence\":{\"location\":\".pio/libdeps/esp32dev/ArduinoJson/.piopm\"},\"value\":\"7.2.1\",\"confidence\":9500}"
+            },
+            {
+              "name": "rollcall:evidence-source",
+              "value": "library-json"
+            },
+            {
+              "name": "rollcall:evidence-source",
+              "value": "piopm"
+            },
+            {
+              "name": "rollcall:evidence-source",
+              "value": "platformio-ini"
+            }
+          ]
+        },
+        {
+          "type": "library",
+          "bom-ref": "component:68e065f0ef229a1d159427b369e8c198",
+          "name": "knolleary/PubSubClient",
+          "version": "2.8",
+          "purl": "pkg:generic/knolleary/PubSubClient@2.8?repository_url=https:%2F%2Fregistry.platformio.org",
+          "evidence": {
+            "identity": [
+              {
+                "field": "name",
+                "confidence": 0.95,
+                "concludedValue": "knolleary/PubSubClient",
+                "methods": [
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.95,
+                    "value": "knolleary/PubSubClient"
+                  },
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.8,
+                    "value": "knolleary/PubSubClient @ 2.8"
+                  }
+                ]
+              },
+              {
+                "field": "version",
+                "confidence": 0.95,
+                "concludedValue": "2.8",
+                "methods": [
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.9,
+                    "value": "2.8"
+                  },
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.95,
+                    "value": "2.8.0"
+                  }
+                ]
+              },
+              {
+                "field": "purl",
+                "confidence": 0.7,
+                "concludedValue": "pkg:generic/knolleary/PubSubClient@2.8?repository_url=https:%2F%2Fregistry.platformio.org",
+                "methods": [
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.7,
+                    "value": "pkg:generic/PubSubClient@2.8?vcs_url=git%2Bhttps:%2F%2Fgithub.com%2Fknolleary%2Fpubsubclient.git"
+                  }
+                ]
+              }
+            ],
+            "occurrences": [
+              {
+                "location": ".pio/libdeps/esp32dev/PubSubClient/.piopm"
+              },
+              {
+                "location": ".pio/libdeps/esp32dev/PubSubClient/library.json"
+              },
+              {
+                "location": "platformio.ini",
+                "line": 20
+              }
+            ]
+          },
+          "properties": [
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"name\",\"technique\":\"manifest-analysis\",\"source\":\"piopm\",\"occurrence\":{\"location\":\".pio/libdeps/esp32dev/PubSubClient/.piopm\"},\"value\":\"knolleary/PubSubClient\",\"confidence\":9500}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"name\",\"technique\":\"manifest-analysis\",\"source\":\"platformio-ini\",\"occurrence\":{\"location\":\"platformio.ini\",\"line\":20},\"value\":\"knolleary/PubSubClient @ 2.8\",\"confidence\":8000}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"purl\",\"technique\":\"manifest-analysis\",\"source\":\"library-json\",\"occurrence\":{\"location\":\".pio/libdeps/esp32dev/PubSubClient/library.json\"},\"value\":\"pkg:generic/PubSubClient@2.8?vcs_url=git%2Bhttps:%2F%2Fgithub.com%2Fknolleary%2Fpubsubclient.git\",\"confidence\":7000}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"version\",\"technique\":\"manifest-analysis\",\"source\":\"library-json\",\"occurrence\":{\"location\":\".pio/libdeps/esp32dev/PubSubClient/library.json\"},\"value\":\"2.8\",\"confidence\":9000}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"version\",\"technique\":\"manifest-analysis\",\"source\":\"piopm\",\"occurrence\":{\"location\":\".pio/libdeps/esp32dev/PubSubClient/.piopm\"},\"value\":\"2.8.0\",\"confidence\":9500}"
+            },
+            {
+              "name": "rollcall:evidence-source",
+              "value": "library-json"
+            },
+            {
+              "name": "rollcall:evidence-source",
+              "value": "piopm"
+            },
+            {
+              "name": "rollcall:evidence-source",
+              "value": "platformio-ini"
+            }
+          ]
+        },
+        {
+          "type": "library",
+          "bom-ref": "component:97d09529f181fe024d5c66dc461d1a7a",
+          "name": "mathertel/OneButton",
+          "version": "2.6.1",
+          "purl": "pkg:generic/mathertel/OneButton@2.6.1?repository_url=https:%2F%2Fregistry.platformio.org",
+          "licenses": [
+            {
+              "expression": "BSD-3-Clause"
+            }
+          ],
+          "evidence": {
+            "identity": [
+              {
+                "field": "name",
+                "confidence": 0.95,
+                "concludedValue": "mathertel/OneButton",
+                "methods": [
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.95,
+                    "value": "mathertel/OneButton"
+                  },
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.8,
+                    "value": "mathertel/OneButton @ 2.6.1"
+                  }
+                ]
+              },
+              {
+                "field": "version",
+                "confidence": 0.95,
+                "concludedValue": "2.6.1",
+                "methods": [
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.9,
+                    "value": "2.6.1"
+                  },
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.95,
+                    "value": "2.6.1"
+                  }
+                ]
+              },
+              {
+                "field": "purl",
+                "confidence": 0.7,
+                "concludedValue": "pkg:generic/mathertel/OneButton@2.6.1?repository_url=https:%2F%2Fregistry.platformio.org",
+                "methods": [
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.7,
+                    "value": "pkg:generic/OneButton@2.6.1?vcs_url=git%2Bhttps:%2F%2Fgithub.com%2Fmathertel%2FOneButton"
+                  }
+                ]
+              }
+            ],
+            "occurrences": [
+              {
+                "location": ".pio/libdeps/esp32dev/OneButton/.piopm"
+              },
+              {
+                "location": ".pio/libdeps/esp32dev/OneButton/library.json"
+              },
+              {
+                "location": "platformio.ini",
+                "line": 21
+              }
+            ],
+            "licenses": [
+              {
+                "expression": "BSD-3-Clause"
+              }
+            ]
+          },
+          "properties": [
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"licence\",\"technique\":\"manifest-analysis\",\"source\":\"library-json\",\"occurrence\":{\"location\":\".pio/libdeps/esp32dev/OneButton/library.json\"},\"value\":\"BSD-3-Clause\",\"confidence\":9000}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"name\",\"technique\":\"manifest-analysis\",\"source\":\"piopm\",\"occurrence\":{\"location\":\".pio/libdeps/esp32dev/OneButton/.piopm\"},\"value\":\"mathertel/OneButton\",\"confidence\":9500}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"name\",\"technique\":\"manifest-analysis\",\"source\":\"platformio-ini\",\"occurrence\":{\"location\":\"platformio.ini\",\"line\":21},\"value\":\"mathertel/OneButton @ 2.6.1\",\"confidence\":8000}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"purl\",\"technique\":\"manifest-analysis\",\"source\":\"library-json\",\"occurrence\":{\"location\":\".pio/libdeps/esp32dev/OneButton/library.json\"},\"value\":\"pkg:generic/OneButton@2.6.1?vcs_url=git%2Bhttps:%2F%2Fgithub.com%2Fmathertel%2FOneButton\",\"confidence\":7000}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"version\",\"technique\":\"manifest-analysis\",\"source\":\"library-json\",\"occurrence\":{\"location\":\".pio/libdeps/esp32dev/OneButton/library.json\"},\"value\":\"2.6.1\",\"confidence\":9000}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"version\",\"technique\":\"manifest-analysis\",\"source\":\"piopm\",\"occurrence\":{\"location\":\".pio/libdeps/esp32dev/OneButton/.piopm\"},\"value\":\"2.6.1\",\"confidence\":9500}"
+            },
+            {
+              "name": "rollcall:evidence-source",
+              "value": "library-json"
+            },
+            {
+              "name": "rollcall:evidence-source",
+              "value": "piopm"
+            },
+            {
+              "name": "rollcall:evidence-source",
+              "value": "platformio-ini"
+            }
+          ]
+        },
+        {
+          "type": "platform",
+          "bom-ref": "component:d7a2f718078d37281479f387773d1c14",
+          "name": "espressif32",
+          "version": "6.10.0",
+          "scope": "excluded",
+          "purl": "pkg:generic/platformio/espressif32@6.10.0?repository_url=https:%2F%2Fregistry.platformio.org",
+          "evidence": {
+            "identity": [
+              {
+                "field": "name",
+                "confidence": 0.8,
+                "concludedValue": "espressif32",
+                "methods": [
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.8,
+                    "value": "espressif32 @ 6.10.0"
+                  }
+                ]
+              },
+              {
+                "field": "version",
+                "confidence": 0.8,
+                "concludedValue": "6.10.0",
+                "methods": [
+                  {
+                    "technique": "manifest-analysis",
+                    "confidence": 0.8,
+                    "value": "6.10.0"
+                  }
+                ]
+              }
+            ],
+            "occurrences": [
+              {
+                "location": "platformio.ini",
+                "line": 11
+              }
+            ]
+          },
+          "properties": [
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"name\",\"technique\":\"manifest-analysis\",\"source\":\"platformio-ini\",\"occurrence\":{\"location\":\"platformio.ini\",\"line\":11},\"value\":\"espressif32 @ 6.10.0\",\"confidence\":8000}"
+            },
+            {
+              "name": "rollcall:evidence",
+              "value": "{\"field\":\"version\",\"technique\":\"manifest-analysis\",\"source\":\"platformio-ini\",\"occurrence\":{\"location\":\"platformio.ini\",\"line\":11},\"value\":\"6.10.0\",\"confidence\":8000}"
+            },
+            {
+              "name": "rollcall:evidence-source",
+              "value": "platformio-ini"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "dependencies": [
+    {
+      "ref": "product:b7bf9757f2e4ce1598482ac5b4d7eaa2",
+      "dependsOn": [
+        "image:a569c89091cfbe061545cd1384a6d783"
+      ]
+    },
+    {
+      "ref": "image:a569c89091cfbe061545cd1384a6d783",
+      "dependsOn": [
+        "component:40f80ec86ed7e9549fb48086c876a392",
+        "component:68e065f0ef229a1d159427b369e8c198",
+        "component:8c88e5435494f8212ed29e2e928d77a8",
+        "component:97d09529f181fe024d5c66dc461d1a7a"
+      ]
+    },
+    {
+      "ref": "component:40f80ec86ed7e9549fb48086c876a392",
+      "dependsOn": []
+    },
+    {
+      "ref": "component:8c88e5435494f8212ed29e2e928d77a8",
+      "dependsOn": []
+    },
+    {
+      "ref": "component:68e065f0ef229a1d159427b369e8c198",
+      "dependsOn": []
+    },
+    {
+      "ref": "component:97d09529f181fe024d5c66dc461d1a7a",
+      "dependsOn": []
+    },
+    {
+      "ref": "component:d7a2f718078d37281479f387773d1c14",
+      "dependsOn": []
+    }
+  ]
+}

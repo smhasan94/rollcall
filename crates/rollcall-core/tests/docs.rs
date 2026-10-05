@@ -1269,13 +1269,14 @@ fn zephyr_gaps_outreach_log_has_fixed_columns() {
 const ESP_IDF_DOCS: &str = include_str!("../src/esp_idf/mod.rs");
 
 /// The `##` sections of docs/esp-idf.md, in order.
-const ESP_IDF_GUIDE_SECTIONS: [&str; 10] = [
+const ESP_IDF_GUIDE_SECTIONS: [&str; 11] = [
     "## Usage",
     "## Inputs",
     "## Mapping",
     "## Subsystems",
     "## Package URLs",
     "## Blobs",
+    "## Auto-detect",
     "## Warnings",
     "## Determinism",
     "## Limitations",
@@ -1345,6 +1346,192 @@ fn esp_idf_guide_covers_inputs_mapping_split_blobs_and_fixtures() {
         assert!(
             repo_file(file).contains(link),
             "{file} does not link {link}"
+        );
+    }
+}
+
+// SHA-131: the PlatformIO guide (docs/platformio.md), the docs index's ecosystem comparison
+// table (docs/README.md), and an Auto-detect section in every ecosystem's guide. The console
+// examples are run by `scripts/check-doc-examples.sh docs/platformio.md docs/README.md
+// docs/zephyr.md docs/cargo.md` (CI job docs-examples).
+
+const PLATFORMIO_DOCS: &str = include_str!("../src/platformio/mod.rs");
+
+/// The `##` sections of docs/platformio.md, in order.
+const PLATFORMIO_GUIDE_SECTIONS: [&str; 9] = [
+    "## Usage",
+    "## Inputs",
+    "## Mapping",
+    "## Package URLs",
+    "## Auto-detect",
+    "## Warnings",
+    "## Determinism",
+    "## Limitations",
+    "## Fixtures",
+];
+
+/// The four ecosystems: (name, guide, input flag, detection signal).
+const ECOSYSTEMS: [(&str, &str, &str, &str); 4] = [
+    ("zephyr", "docs/zephyr.md", "--zephyr DIR", "build_info.yml"),
+    ("cargo", "docs/cargo.md", "--cargo DIR", "Cargo.toml"),
+    ("esp-idf", "docs/esp-idf.md", "--esp-idf DIR", "sdkconfig"),
+    (
+        "platformio",
+        "docs/platformio.md",
+        "--platformio DIR",
+        "platformio.ini",
+    ),
+];
+
+#[test]
+fn platformio_guide_covers_inputs_mapping_purls_detection_and_fixtures() {
+    let doc = repo_file("docs/platformio.md");
+    assert!(doc.starts_with("# PlatformIO\n"));
+    let headings: Vec<&str> = doc.lines().filter(|l| l.starts_with("## ")).collect();
+    assert_eq!(headings, PLATFORMIO_GUIDE_SECTIONS);
+    for sub in ["### Regenerating", "### Bumping the pins"] {
+        assert!(doc.lines().any(|l| l == sub), "missing {sub}");
+    }
+    for needle in [
+        "--platformio",
+        "--env",
+        "--pio-core",
+        "$PLATFORMIO_CORE_DIR",
+        "--ecosystem",
+        "rollcall detect",
+        "platformio.ini",
+        "library.json",
+        ".piopm",
+        "platform.json",
+        "package.json",
+        "extends",
+        "${sysenv.NAME}",
+        "lib_deps",
+        "platform_packages",
+        "pkg:generic/<owner>/<name>@<version>?repository_url=https://registry.platformio.org",
+        "pkg:generic/arduino-esp32@<version>?vcs_url=git+https://github.com/espressif/arduino-esp32",
+        "scope: excluded",
+        "framework = espidf",
+        "scripts/regen-fixtures-platformio.sh",
+        "--check-stable",
+        "sha256:9901e0a8d75037d8242ed43155cbcb2d1f61be1356383d8054afb59fd50e39c4",
+        "--require-hashes",
+        "6.1.18",
+        "6.10.0",
+        "3.20017.241212",
+        "2.0.17",
+        "CI is canonical",
+        "```console",
+    ] {
+        assert!(doc.contains(needle), "docs/platformio.md lacks {needle:?}");
+    }
+    // Every framework package of the table is in the guide's table.
+    for f in rollcall_core::platformio::table::builtin()
+        .unwrap()
+        .frameworks
+    {
+        assert!(
+            doc.contains(&format!("| `{}` |", f.package)),
+            "docs/platformio.md does not list {}",
+            f.package
+        );
+    }
+    for heading in [
+        "//! # Inputs",
+        "//! # Mapping",
+        "//! # Package URLs",
+        "//! # Warnings",
+        "//! # Determinism",
+    ] {
+        assert!(
+            PLATFORMIO_DOCS.contains(heading),
+            "missing section {heading:?} in platformio/mod.rs"
+        );
+    }
+    for (file, link) in [
+        ("README.md", "docs/platformio.md"),
+        ("docs/fixtures.md", "platformio.md"),
+        ("docs/README.md", "platformio.md"),
+    ] {
+        assert!(
+            repo_file(file).contains(link),
+            "{file} does not link {link}"
+        );
+    }
+}
+
+#[test]
+fn docs_index_has_ecosystem_comparison_table_for_all_four() {
+    let doc = repo_file("docs/README.md");
+    let table = md_section(&doc, "## Ecosystems");
+    let rows: Vec<&str> = table
+        .iter()
+        .copied()
+        .filter(|l| l.starts_with("| `"))
+        .collect();
+    assert_eq!(rows.len(), 4, "{rows:#?}");
+    let header = table
+        .iter()
+        .find(|l| l.starts_with("| Ecosystem"))
+        .expect("a table header");
+    for column in ["Input flag", "Auto-detect signal", "Inputs read", "Guide"] {
+        assert!(header.contains(column), "no {column} column: {header}");
+    }
+    for ((name, guide, flag, signal), row) in ECOSYSTEMS.iter().zip(&rows) {
+        assert!(row.starts_with(&format!("| `{name}` |")), "{row}");
+        assert!(row.contains(flag), "{name}: {row} lacks {flag}");
+        assert!(row.contains(signal), "{name}: {row} lacks {signal}");
+        let file = guide.trim_start_matches("docs/");
+        assert!(
+            row.contains(&format!("]({file})")),
+            "{name}: {row} does not link {file}"
+        );
+        assert!(repo_root().join(guide).is_file(), "{guide} does not exist");
+    }
+    // Every guide the index links exists.
+    for target in link_targets(&doc) {
+        if target.starts_with("http") {
+            continue;
+        }
+        let path = target.split('#').next().unwrap();
+        assert!(
+            repo_root().join("docs").join(path).exists(),
+            "docs/README.md links {target}, which does not exist"
+        );
+    }
+}
+
+#[test]
+fn every_ecosystem_guide_documents_auto_detect() {
+    for (name, guide, flag, signal) in ECOSYSTEMS {
+        let doc = repo_file(guide);
+        let section = md_section(&doc, "## Auto-detect").join("\n");
+        assert!(
+            !section.trim().is_empty(),
+            "{guide} has no ## Auto-detect section"
+        );
+        for needle in ["rollcall generate DIR", signal] {
+            assert!(
+                section.contains(needle),
+                "{guide}: Auto-detect lacks {needle:?}"
+            );
+        }
+        assert!(
+            section.contains("$ rollcall detect") && section.contains(&format!("\n{name}\n")),
+            "{guide}: Auto-detect has no `rollcall detect` example printing {name}"
+        );
+        assert!(
+            doc.contains(flag.split(' ').next().unwrap()),
+            "{guide} lacks {flag}"
+        );
+    }
+    // The README's Auto-detect section names every signal.
+    let readme = repo_file("README.md");
+    let section = md_section(&readme, "### Auto-detect").join("\n");
+    for (name, _, _, signal) in ECOSYSTEMS {
+        assert!(
+            section.contains(&format!("`{name}`")) && section.contains(signal),
+            "README Auto-detect lacks {name}"
         );
     }
 }

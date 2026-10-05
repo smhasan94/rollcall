@@ -10,13 +10,18 @@
 #   report.md / .json   rollcall report --scan scan.json --vex vex.openvex.json
 #
 # `rollcall validate --schema` failing (the SBOM breaks CycloneDX 1.6) fails the step, as does
-# any other command failing; `rollcall scan` exiting 3 (a scanner failed) is fatal too.
+# any other command failing; `rollcall scan` exiting 3 (a scanner failed) is fatal too. When
+# `rollcall detect` or `rollcall generate` fails, the step exits with rollcall's own exit code
+# (64 usage, 65 malformed input, 66 missing input; see the README's exit codes).
 #
-# Inputs (environment): RC_BUILD_DIR (required), RC_ECOSYSTEM (auto|zephyr|cargo),
-# RC_IDENTIFIERS (`embedded` or a directory, from install.sh), RC_VEX_RULES (newline-separated
-# paths), RC_STARTER_RULES (true|false), RC_WEST_LIST, RC_SYSBUILD (auto|true|false),
-# RC_PRODUCT, RC_ELF, RC_TARGET, RC_SCANNER (grype|auto), RC_TIMESTAMP, RC_OUT_DIR,
-# ROLLCALL_BIN (default rollcall on PATH). grype (and osv-scanner) must be on PATH.
+# Inputs (environment): RC_BUILD_DIR (required), RC_ECOSYSTEM
+# (auto|zephyr|cargo|esp-idf|platformio; auto runs `rollcall detect`, the same detection as
+# `rollcall generate DIR`), RC_IDENTIFIERS (`embedded` or a directory, from install.sh),
+# RC_VEX_RULES (newline-separated paths), RC_STARTER_RULES (true|false), RC_WEST_LIST,
+# RC_SYSBUILD (auto|true|false), RC_PRODUCT, RC_ELF, RC_TARGET, RC_ENV, RC_PIO_CORE (a leading
+# `~/` is the runner's home), RC_SCANNER
+# (grype|auto), RC_TIMESTAMP, RC_OUT_DIR, ROLLCALL_BIN (default rollcall on PATH). grype (and
+# osv-scanner) must be on PATH.
 #
 # Outputs: ecosystem, sbom, vex, scan, report, report-json, score.
 set -euo pipefail
@@ -25,32 +30,20 @@ set -euo pipefail
 
 ROLLCALL="${ROLLCALL_BIN:-rollcall}"
 
-# detect_ecosystem DIR CHOICE: zephyr, cargo (a package directory) or cargo-metadata (captured
-# `cargo metadata` output); exits 64 when DIR is neither.
+# detect_ecosystem DIR CHOICE: zephyr, cargo, esp-idf or platformio. auto asks `rollcall
+# detect` (exit 64 when several ecosystems match, 66 when none does, with its message); an
+# explicit choice is checked by `rollcall generate DIR --ecosystem CHOICE`.
 detect_ecosystem() {
-    local dir="$1" choice="$2"
+    local dir="$1" choice="$2" found status=0
     case "$choice" in
         auto)
-            if [[ -f "$dir/build_info.yml" ]]; then
-                echo zephyr
-                return
-            fi
+            found="$("$ROLLCALL" detect "$dir")" || status=$?
+            [[ "$status" -eq 0 ]] || die "$status" "cannot tell the ecosystem of $dir (rollcall detect exit $status; pass ecosystem: to choose)"
+            echo "$found"
             ;;
-        zephyr)
-            [[ -f "$dir/build_info.yml" ]] || die 64 "ecosystem zephyr: $dir has no build_info.yml"
-            echo zephyr
-            return
-            ;;
-        cargo) ;;
-        *) die 64 "ecosystem must be auto, zephyr or cargo, not '$choice'" ;;
+        zephyr | cargo | esp-idf | platformio) echo "$choice" ;;
+        *) die 64 "ecosystem must be auto, zephyr, cargo, esp-idf or platformio, not '$choice'" ;;
     esac
-    if [[ -f "$dir/Cargo.toml" ]]; then
-        echo cargo
-    elif [[ -f "$dir/cargo-metadata.json" ]]; then
-        echo cargo-metadata
-    else
-        die 64 "cannot tell the ecosystem of $dir: no build_info.yml (Zephyr), Cargo.toml or cargo-metadata.json (Cargo)"
-    fi
 }
 
 # is_sysbuild DIR: whether the Zephyr build is a sysbuild (RC_SYSBUILD, auto: domains.yaml).
@@ -71,14 +64,20 @@ RULES=()
 STAMP=()
 IDENTIFIERS=()
 
-# generate_args ECOSYSTEM DIR: appends the `rollcall generate` arguments to GEN.
+# generate_args ECOSYSTEM DIR: appends the `rollcall generate` arguments to GEN: DIR with
+# --ecosystem (rollcall infers a Zephyr sysbuild from domains.yaml, a Cargo directory's
+# cargo-metadata.json), and that ecosystem's flags from the inputs.
 generate_args() {
     local eco="$1" dir="$2"
     case "$eco" in
         zephyr)
-            GEN+=(--zephyr "$dir")
+            # sysbuild: false ingests DIR as one image even if it holds domains.yaml.
             if is_sysbuild "$dir"; then
-                GEN+=(--sysbuild)
+                GEN+=("$dir" --ecosystem zephyr --sysbuild)
+            elif [[ -f "$dir/domains.yaml" ]]; then
+                GEN+=(--zephyr "$dir")
+            else
+                GEN+=("$dir" --ecosystem zephyr)
             fi
             local west="${RC_WEST_LIST:-}"
             if [[ -z "$west" && -f "$dir/west-list.txt" ]]; then
@@ -88,30 +87,45 @@ generate_args() {
                 GEN+=(--west-list "$west")
             fi
             GEN+=(--identify)
-            if [[ -n "${RC_PRODUCT:-}" ]]; then
-                GEN+=(--product "$RC_PRODUCT")
-            fi
             IDENTIFIERS=(--identifiers "${RC_IDENTIFIERS:-embedded}")
             ;;
         cargo)
-            GEN+=(--cargo "$dir")
+            GEN+=("$dir" --ecosystem cargo)
             if [[ -n "${RC_TARGET:-}" ]]; then
-                GEN+=(--target "$RC_TARGET")
+                if [[ -f "$dir/Cargo.toml" ]]; then
+                    GEN+=(--target "$RC_TARGET")
+                else
+                    echo "::warning::rollcall-action: target is ignored with a captured cargo-metadata.json (it was resolved when captured)" >&2
+                fi
             fi
             if [[ -n "${RC_ELF:-}" ]]; then
                 GEN+=(--elf "$RC_ELF")
             fi
             ;;
-        cargo-metadata)
-            GEN+=(--cargo-metadata "$dir/cargo-metadata.json")
-            if [[ -n "${RC_ELF:-}" ]]; then
-                GEN+=(--elf "$RC_ELF")
+        esp-idf)
+            GEN+=("$dir" --ecosystem esp-idf)
+            ;;
+        platformio)
+            GEN+=("$dir" --ecosystem platformio)
+            if [[ -n "${RC_ENV:-}" ]]; then
+                GEN+=(--env "$RC_ENV")
             fi
-            if [[ -n "${RC_TARGET:-}" ]]; then
-                echo "::warning::rollcall-action: target is ignored with a captured cargo-metadata.json (it was resolved when captured)" >&2
+            if [[ -n "${RC_PIO_CORE:-}" ]]; then
+                # A leading ~/ is the runner's home (the input is not expanded by a shell).
+                local core="${RC_PIO_CORE}"
+                if [[ "$core" == "~" || "$core" == "~/"* ]]; then
+                    core="${HOME}${core:1}"
+                fi
+                GEN+=(--pio-core "$core")
             fi
             ;;
     esac
+    if [[ "$eco" != platformio && -n "${RC_PIO_CORE:-}" ]]; then
+        echo "::warning::rollcall-action: pio-core is ignored for a $eco build" >&2
+    fi
+    if [[ -n "${RC_PRODUCT:-}" ]]; then
+        GEN+=(--product "$RC_PRODUCT")
+    fi
     GEN+=(${STAMP[@]+"${STAMP[@]}"})
 }
 
@@ -156,6 +170,9 @@ vex_rule_args() {
 main() {
     local dir="${RC_BUILD_DIR:-}"
     [[ -n "$dir" ]] || die 64 "build-dir is required"
+    # It is passed to rollcall as a positional argument: one starting with `-` would be read
+    # as a flag.
+    [[ "$dir" != -* ]] || die 64 "build-dir must not start with '-' (write ./$dir)"
     [[ -d "$dir" ]] || die 66 "build-dir $dir is not a directory"
     case "${RC_SCANNER:-grype}" in
         grype | auto) ;;
@@ -177,7 +194,7 @@ main() {
     local sbom="$OUT/sbom.cdx.json" status=0
     log "rollcall ${IDENTIFIERS[*]+${IDENTIFIERS[*]}} generate ${GEN[*]}"
     "$ROLLCALL" ${IDENTIFIERS[@]+"${IDENTIFIERS[@]}"} generate "${GEN[@]}" -o "$sbom" || status=$?
-    [[ "$status" -eq 0 ]] || die "rollcall generate failed (exit $status)"
+    [[ "$status" -eq 0 ]] || die "$status" "rollcall generate failed (exit $status)"
     write_output sbom "$sbom"
 
     "$ROLLCALL" validate --schema "$sbom" >&2 || status=$?

@@ -1,0 +1,373 @@
+{
+  "schema": "rollcall-model/1",
+  "name": "arduino-mqtt",
+  "images": [
+    {
+      "kind": "application",
+      "name": "arduino-mqtt",
+      "purl": "pkg:generic/arduino-mqtt",
+      "evidence": [
+        {
+          "field": "name",
+          "technique": "manifest-analysis",
+          "source": "platformio-ini",
+          "occurrence": {
+            "location": "platformio.ini"
+          },
+          "value": "arduino-mqtt",
+          "confidence": 8000
+        },
+        {
+          "field": "name",
+          "technique": "manifest-analysis",
+          "source": "platformio-ini",
+          "occurrence": {
+            "location": "platformio.ini",
+            "line": 23
+          },
+          "value": "env:esp32dev",
+          "confidence": 8000
+        }
+      ],
+      "components": [
+        {
+          "kind": "framework",
+          "name": "arduino-esp32",
+          "version": "2.0.17",
+          "supplier": {
+            "name": "Espressif Systems",
+            "urls": [
+              "https://www.espressif.com"
+            ]
+          },
+          "purl": "pkg:generic/arduino-esp32@2.0.17?vcs_url=git%2Bhttps:%2F%2Fgithub.com%2Fespressif%2Farduino-esp32",
+          "cpe": "cpe:2.3:a:espressif:arduino-esp32:2.0.17:*:*:*:*:*:*:*",
+          "licence": "LGPL-2.1-or-later",
+          "evidence": [
+            {
+              "field": "name",
+              "technique": "manifest-analysis",
+              "source": "platformio-ini",
+              "occurrence": {
+                "location": "platformio.ini",
+                "line": 14
+              },
+              "value": "framework:arduino",
+              "confidence": 8000
+            },
+            {
+              "field": "version",
+              "technique": "manifest-analysis",
+              "source": "package-json",
+              "occurrence": {
+                "location": "pio-core/packages/framework-arduinoespressif32/package.json"
+              },
+              "value": "3.20017.241212+sha.dcc1105b",
+              "confidence": 9000
+            },
+            {
+              "field": "version",
+              "technique": "manifest-analysis",
+              "source": "piopm",
+              "occurrence": {
+                "location": "pio-core/packages/framework-arduinoespressif32/.piopm"
+              },
+              "value": "3.20017.241212+sha.dcc1105b",
+              "confidence": 9500
+            },
+            {
+              "field": "version",
+              "technique": "manifest-analysis",
+              "source": "platformio-table",
+              "occurrence": {
+                "location": "platformio.yaml"
+              },
+              "value": "2.0.17",
+              "confidence": 9000
+            },
+            {
+              "field": "purl",
+              "technique": "manifest-analysis",
+              "source": "platformio-table",
+              "occurrence": {
+                "location": "platformio.yaml"
+              },
+              "value": "pkg:generic/arduino-esp32@2.0.17?vcs_url=git%2Bhttps:%2F%2Fgithub.com%2Fespressif%2Farduino-esp32",
+              "confidence": 9000
+            },
+            {
+              "field": "cpe",
+              "technique": "manifest-analysis",
+              "source": "platformio-table",
+              "occurrence": {
+                "location": "platformio.yaml"
+              },
+              "value": "cpe:2.3:a:espressif:arduino-esp32:2.0.17:*:*:*:*:*:*:*",
+              "confidence": 9000
+            },
+            {
+              "field": "licence",
+              "technique": "manifest-analysis",
+              "source": "package-json",
+              "occurrence": {
+                "location": "pio-core/packages/framework-arduinoespressif32/package.json"
+              },
+              "value": "LGPL-2.1-or-later",
+              "confidence": 9000
+            }
+          ]
+        },
+        {
+          "kind": "library",
+          "name": "bblanchon/ArduinoJson",
+          "version": "7.2.1",
+          "purl": "pkg:generic/bblanchon/ArduinoJson@7.2.1?repository_url=https:%2F%2Fregistry.platformio.org",
+          "evidence": [
+            {
+              "field": "name",
+              "technique": "manifest-analysis",
+              "source": "piopm",
+              "occurrence": {
+                "location": ".pio/libdeps/esp32dev/ArduinoJson/.piopm"
+              },
+              "value": "bblanchon/ArduinoJson",
+              "confidence": 9500
+            },
+            {
+              "field": "name",
+              "technique": "manifest-analysis",
+              "source": "platformio-ini",
+              "occurrence": {
+                "location": "platformio.ini",
+                "line": 19
+              },
+              "value": "bblanchon/ArduinoJson @ 7.2.1",
+              "confidence": 8000
+            },
+            {
+              "field": "version",
+              "technique": "manifest-analysis",
+              "source": "library-json",
+              "occurrence": {
+                "location": ".pio/libdeps/esp32dev/ArduinoJson/library.json"
+              },
+              "value": "7.2.1",
+              "confidence": 9000
+            },
+            {
+              "field": "version",
+              "technique": "manifest-analysis",
+              "source": "piopm",
+              "occurrence": {
+                "location": ".pio/libdeps/esp32dev/ArduinoJson/.piopm"
+              },
+              "value": "7.2.1",
+              "confidence": 9500
+            },
+            {
+              "field": "purl",
+              "technique": "manifest-analysis",
+              "source": "library-json",
+              "occurrence": {
+                "location": ".pio/libdeps/esp32dev/ArduinoJson/library.json"
+              },
+              "value": "pkg:generic/ArduinoJson@7.2.1?vcs_url=git%2Bhttps:%2F%2Fgithub.com%2Fbblanchon%2FArduinoJson.git",
+              "confidence": 7000
+            }
+          ]
+        },
+        {
+          "kind": "library",
+          "name": "knolleary/PubSubClient",
+          "version": "2.8",
+          "purl": "pkg:generic/knolleary/PubSubClient@2.8?repository_url=https:%2F%2Fregistry.platformio.org",
+          "evidence": [
+            {
+              "field": "name",
+              "technique": "manifest-analysis",
+              "source": "piopm",
+              "occurrence": {
+                "location": ".pio/libdeps/esp32dev/PubSubClient/.piopm"
+              },
+              "value": "knolleary/PubSubClient",
+              "confidence": 9500
+            },
+            {
+              "field": "name",
+              "technique": "manifest-analysis",
+              "source": "platformio-ini",
+              "occurrence": {
+                "location": "platformio.ini",
+                "line": 20
+              },
+              "value": "knolleary/PubSubClient @ 2.8",
+              "confidence": 8000
+            },
+            {
+              "field": "version",
+              "technique": "manifest-analysis",
+              "source": "library-json",
+              "occurrence": {
+                "location": ".pio/libdeps/esp32dev/PubSubClient/library.json"
+              },
+              "value": "2.8",
+              "confidence": 9000
+            },
+            {
+              "field": "version",
+              "technique": "manifest-analysis",
+              "source": "piopm",
+              "occurrence": {
+                "location": ".pio/libdeps/esp32dev/PubSubClient/.piopm"
+              },
+              "value": "2.8.0",
+              "confidence": 9500
+            },
+            {
+              "field": "purl",
+              "technique": "manifest-analysis",
+              "source": "library-json",
+              "occurrence": {
+                "location": ".pio/libdeps/esp32dev/PubSubClient/library.json"
+              },
+              "value": "pkg:generic/PubSubClient@2.8?vcs_url=git%2Bhttps:%2F%2Fgithub.com%2Fknolleary%2Fpubsubclient.git",
+              "confidence": 7000
+            }
+          ]
+        },
+        {
+          "kind": "library",
+          "name": "mathertel/OneButton",
+          "version": "2.6.1",
+          "purl": "pkg:generic/mathertel/OneButton@2.6.1?repository_url=https:%2F%2Fregistry.platformio.org",
+          "licence": "BSD-3-Clause",
+          "evidence": [
+            {
+              "field": "name",
+              "technique": "manifest-analysis",
+              "source": "piopm",
+              "occurrence": {
+                "location": ".pio/libdeps/esp32dev/OneButton/.piopm"
+              },
+              "value": "mathertel/OneButton",
+              "confidence": 9500
+            },
+            {
+              "field": "name",
+              "technique": "manifest-analysis",
+              "source": "platformio-ini",
+              "occurrence": {
+                "location": "platformio.ini",
+                "line": 21
+              },
+              "value": "mathertel/OneButton @ 2.6.1",
+              "confidence": 8000
+            },
+            {
+              "field": "version",
+              "technique": "manifest-analysis",
+              "source": "library-json",
+              "occurrence": {
+                "location": ".pio/libdeps/esp32dev/OneButton/library.json"
+              },
+              "value": "2.6.1",
+              "confidence": 9000
+            },
+            {
+              "field": "version",
+              "technique": "manifest-analysis",
+              "source": "piopm",
+              "occurrence": {
+                "location": ".pio/libdeps/esp32dev/OneButton/.piopm"
+              },
+              "value": "2.6.1",
+              "confidence": 9500
+            },
+            {
+              "field": "purl",
+              "technique": "manifest-analysis",
+              "source": "library-json",
+              "occurrence": {
+                "location": ".pio/libdeps/esp32dev/OneButton/library.json"
+              },
+              "value": "pkg:generic/OneButton@2.6.1?vcs_url=git%2Bhttps:%2F%2Fgithub.com%2Fmathertel%2FOneButton",
+              "confidence": 7000
+            },
+            {
+              "field": "licence",
+              "technique": "manifest-analysis",
+              "source": "library-json",
+              "occurrence": {
+                "location": ".pio/libdeps/esp32dev/OneButton/library.json"
+              },
+              "value": "BSD-3-Clause",
+              "confidence": 9000
+            }
+          ]
+        },
+        {
+          "kind": "platform",
+          "name": "espressif32",
+          "version": "6.10.0",
+          "purl": "pkg:generic/platformio/espressif32@6.10.0?repository_url=https:%2F%2Fregistry.platformio.org",
+          "licence": "Apache-2.0",
+          "scope": "excluded",
+          "evidence": [
+            {
+              "field": "name",
+              "technique": "manifest-analysis",
+              "source": "platformio-ini",
+              "occurrence": {
+                "location": "platformio.ini",
+                "line": 11
+              },
+              "value": "espressif32 @ 6.10.0",
+              "confidence": 8000
+            },
+            {
+              "field": "version",
+              "technique": "manifest-analysis",
+              "source": "piopm",
+              "occurrence": {
+                "location": "pio-core/platforms/espressif32/.piopm"
+              },
+              "value": "6.10.0",
+              "confidence": 9500
+            },
+            {
+              "field": "version",
+              "technique": "manifest-analysis",
+              "source": "platform-json",
+              "occurrence": {
+                "location": "pio-core/platforms/espressif32/platform.json"
+              },
+              "value": "6.10.0",
+              "confidence": 9000
+            },
+            {
+              "field": "licence",
+              "technique": "manifest-analysis",
+              "source": "platform-json",
+              "occurrence": {
+                "location": "pio-core/platforms/espressif32/platform.json"
+              },
+              "value": "Apache-2.0",
+              "confidence": 9000
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "image:a569c89091cfbe061545cd1384a6d783": [
+      "component:40f80ec86ed7e9549fb48086c876a392",
+      "component:68e065f0ef229a1d159427b369e8c198",
+      "component:8c88e5435494f8212ed29e2e928d77a8",
+      "component:97d09529f181fe024d5c66dc461d1a7a"
+    ],
+    "product:b7bf9757f2e4ce1598482ac5b4d7eaa2": [
+      "image:a569c89091cfbe061545cd1384a6d783"
+    ]
+  }
+}
