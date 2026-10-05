@@ -2300,3 +2300,118 @@ fn book_toml_sources_docs_and_registers_the_link_preprocessor() {
         assert!(ci.contains(needle), "ci.yml lacks {needle:?}");
     }
 }
+
+/// Runs `scripts/tolerate-pending-release-link.sh TAG RC REPORT` with `rows` (check-doc-links
+/// table rows: where, result, target, detail) as the report; its exit code.
+fn tolerate_pending_release_link(tag: &str, rc: &str, rows: &[(&str, &str, &str, &str)]) -> i32 {
+    let dir = tempfile::tempdir().expect("temporary directory");
+    let mut report = String::from("LINK                  RESULT  TARGET  DETAIL\n");
+    for (place, result, target, detail) in rows {
+        report.push_str(&format!("{place:<20}  {result:<6}  {target}  {detail}\n"));
+    }
+    let failed = rows.iter().any(|r| r.1 == "FAIL");
+    report.push_str(if failed {
+        "\ncheck-doc-links: FAIL\n"
+    } else {
+        "\ncheck-doc-links: PASS (1 checked, 0 skipped)\n"
+    });
+    let path = dir.path().join("links.txt");
+    std::fs::write(&path, report).expect("write the report");
+    let out = std::process::Command::new("bash")
+        .arg(repo_root().join("scripts/tolerate-pending-release-link.sh"))
+        .args([tag, rc])
+        .arg(&path)
+        .output()
+        .expect("bash runs");
+    out.status.code().expect("exited with a code")
+}
+
+/// SHA-125 (ci.yml docs-links, the tag-only step): on a release tag's own CI run only an HTTP
+/// 404 on exactly that tag's GitHub Release page is tolerated (release.yml creates it after
+/// the run); every other failure fails the step.
+#[test]
+fn tag_run_tolerates_only_this_tags_release_page_404() {
+    const URL: &str = "https://github.com/smhasan94/rollcall/releases/tag/v0.1.0";
+    let this_404 = (
+        "CHANGELOG.md:69",
+        "FAIL",
+        URL,
+        "HTTP 404 https://github.com/smhasan94/rollcall/releases/tag/v0.1.0",
+    );
+    let ok_row = (
+        "SECURITY.md:3",
+        "PASS",
+        "https://semver.org/",
+        "HTTP 200 https://semver.org/",
+    );
+    // Tolerated: this tag's release page answers 404, everything else passes.
+    assert_eq!(
+        tolerate_pending_release_link("v0.1.0", "1", &[ok_row, this_404]),
+        0
+    );
+    // A clean run passes.
+    assert_eq!(tolerate_pending_release_link("v0.1.0", "0", &[ok_row]), 0);
+    // Rejected: the same URL failing any other way.
+    let other_failures = [
+        (
+            "CHANGELOG.md:69",
+            "FAIL",
+            URL,
+            "HTTP 500 https://github.com/smhasan94/rollcall/releases/tag/v0.1.0",
+        ),
+        (
+            "CHANGELOG.md:69",
+            "FAIL",
+            URL,
+            "HTTP 0 (curl exit 6: Could not resolve host: github.com)",
+        ),
+        (
+            "CHANGELOG.md:69",
+            "FAIL",
+            URL,
+            "HTTP 404 https://github.com/smhasan94/rollcall/releases (redirected up to a parent page)",
+        ),
+        // Another tag's release page.
+        (
+            "CHANGELOG.md:70",
+            "FAIL",
+            "https://github.com/smhasan94/rollcall/releases/tag/v9.9.9",
+            "HTTP 404 https://github.com/smhasan94/rollcall/releases/tag/v9.9.9",
+        ),
+        // Another URL.
+        (
+            "docs/ci.md:10",
+            "FAIL",
+            "https://github.com/smhasan94/rollcall-example-zephyr",
+            "HTTP 404 https://github.com/smhasan94/rollcall-example-zephyr",
+        ),
+        // A link inside the repository.
+        (
+            "docs/versioning.md:5",
+            "FAIL",
+            "release.md#nope",
+            "no heading for #nope in docs/release.md",
+        ),
+    ];
+    for row in other_failures {
+        assert_eq!(
+            tolerate_pending_release_link("v0.1.0", "1", &[row]),
+            1,
+            "tolerated {row:?}"
+        );
+        // Not tolerated alongside this tag's 404 either.
+        assert_eq!(
+            tolerate_pending_release_link("v0.1.0", "1", &[this_404, row]),
+            1,
+            "tolerated {row:?} next to the pending release page"
+        );
+    }
+    // The 404 of v0.1.0's page is not tolerated on another tag's run.
+    assert_eq!(tolerate_pending_release_link("v0.2.0", "1", &[this_404]), 1);
+    // Exit 1 without any failing row is not a link failure it understands.
+    assert_eq!(tolerate_pending_release_link("v0.1.0", "1", &[ok_row]), 1);
+    // A setup error of check-doc-links.sh keeps its code; bad arguments are a usage error.
+    assert_eq!(tolerate_pending_release_link("v0.1.0", "2", &[]), 2);
+    assert_eq!(tolerate_pending_release_link("main", "1", &[this_404]), 2);
+    assert_eq!(tolerate_pending_release_link("v0.1.0", "x", &[this_404]), 2);
+}

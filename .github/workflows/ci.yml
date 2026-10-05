@@ -192,8 +192,9 @@ jobs:
       - name: Check the release documents' links inside the repository
         run: scripts/check-doc-links.sh --offline docs/ci.md docs/versioning.md docs/releases/*.md docs/README.md docs/SUMMARY.md README.md CHANGELOG.md SECURITY.md
       # On the tag's own run, release.yml has not created the GitHub Release yet, so the
-      # CHANGELOG's link to it (releases/tag/vX.Y.Z) still 404s; that one URL may fail here,
-      # and every other link must pass. (The docs site's link check covers it once it exists.)
+      # CHANGELOG's link to it (releases/tag/<this tag>) still 404s. That one 404, and nothing
+      # else, is tolerated: scripts/tolerate-pending-release-link.sh (tested in
+      # crates/rollcall-core/tests/docs.rs). The docs site's link check covers the page later.
       - name: Check the release documents' links (release tags)
         if: startsWith(github.ref, 'refs/tags/v')
         run: |
@@ -202,14 +203,7 @@ jobs:
           scripts/check-doc-links.sh docs/ci.md docs/versioning.md docs/releases/*.md \
             docs/README.md CHANGELOG.md SECURITY.md > "$RUNNER_TEMP/release-links.txt" || rc=$?
           cat "$RUNNER_TEMP/release-links.txt"
-          [ "$rc" -eq 0 ] && exit 0
-          [ "$rc" -eq 1 ] || exit "$rc"
-          others="$(awk '$1 ~ /:[0-9]+$/ && $2 == "FAIL" && $3 !~ /^https:\/\/github\.com\/smhasan94\/rollcall\/releases\/tag\//' "$RUNNER_TEMP/release-links.txt")"
-          if [ -n "$others" ]; then
-            printf '%s\n' "$others"
-            exit 1
-          fi
-          echo "only the GitHub Release page is missing (release.yml creates it after this run)"
+          scripts/tolerate-pending-release-link.sh "$GITHUB_REF_NAME" "$rc" "$RUNNER_TEMP/release-links.txt"
 
   # crates/rollcall-core/db/subsystems.yaml against the pinned Zephyr tree (every source path
   # and Kconfig symbol real, `size` claims backed). Needs the network on a cache miss.
