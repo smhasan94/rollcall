@@ -4,14 +4,31 @@ build-backend = "uv_build"
 
 [project]
 name = "rollcall"
+# The PEP 440 form of the Rust workspace version (scripts/release-version.sh check).
 version = "0.0.1"
-description = "Placeholder for the rollcall SBOM CLI wrapper (pip install rollcall). See https://github.com/smhasan94/rollcall"
+description = "CRA-grade CycloneDX SBOMs from firmware build metadata: installs the rollcall command (downloads and verifies the matching release binary)"
 readme = "README.md"
 license = "Apache-2.0"
 license-files = ["LICENSE"]
 authors = [{ name = "Sharukh Hasan" }]
 requires-python = ">=3.9"
-classifiers = ["Development Status :: 1 - Planning"]
+# No runtime dependencies: the wrapper uses the standard library only.
+dependencies = []
+keywords = ["sbom", "cyclonedx", "firmware", "zephyr", "cra"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Operating System :: MacOS",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
+    "Topic :: Security",
+    "Topic :: Software Development :: Build Tools",
+]
+
+[project.scripts]
+rollcall = "rollcall._cli:main"
 
 [project.urls]
 Homepage = "https://github.com/smhasan94/rollcall"

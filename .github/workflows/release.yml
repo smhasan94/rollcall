@@ -1,0 +1,361 @@
+# The release: on a tag v<version> (or by hand for an existing tag), build the four static
+# binaries, write SHA256SUMS, create the GitHub Release and upload its assets, publish the
+# crates to crates.io and the wrapper to PyPI, then check both installs. docs/release.md is the
+# runbook.
+#
+# Every step is idempotent, so a failed or partial release is finished by re-running it
+# (`gh run rerun --failed`): the release is created only if missing, and its assets, once
+# uploaded, are never replaced (scripts/release-upload.sh: a rebuild uses the published assets,
+# and different ones fail the run); scripts/publish-crates.sh skips crate versions already on
+# crates.io and fails naming what it published and what it did not; the PyPI uploads skip
+# files already there.
+#
+# Secrets: none when trusted publishing is set up (crates.io: environment `crates-io`; PyPI:
+# environment `pypi`; TestPyPI: environment `testpypi`). A CARGO_REGISTRY_TOKEN secret, if set,
+# is used instead of crates.io trusted publishing.
+#
+# Every action is pinned to a full commit SHA. The tag reaches shell scripts only through the
+# TAG environment variable, and scripts/release-version.sh rejects anything but a release tag.
+name: Release
+
+on:
+  push:
+    tags: ["v[0-9]*"]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "The release tag to (re)build and publish, e.g. v0.1.0 (it must exist)"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+# One run per tag at a time; a re-run waits for the previous one rather than cancelling it.
+concurrency:
+  group: release-${{ inputs.tag || github.ref_name }}
+  cancel-in-progress: false
+
+env:
+  CARGO_TERM_COLOR: always
+  TAG: ${{ inputs.tag || github.ref_name }}
+
+jobs:
+  # The tag names the workspace version, and every place the version is written agrees; the
+  # crates package and build as they would be published.
+  preflight:
+    runs-on: ubuntu-24.04
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      pep440: ${{ steps.version.outputs.pep440 }}
+      prerelease: ${{ steps.version.outputs.prerelease }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: refs/tags/${{ env.TAG }}
+          persist-credentials: false
+      # Keep in sync with rust-toolchain.toml.
+      - uses: dtolnay/rust-toolchain@7e38f4b43b4db5c8dd498af069a4f6196df1d067 # master
+        with:
+          toolchain: "1.91.1"
+      - name: Check the tag against the versions
+        id: version
+        run: scripts/release-version.sh check "$TAG"
+      - name: cargo publish --dry-run
+        run: cargo publish --workspace --dry-run --locked
+
+  build:
+    needs: preflight
+    strategy:
+      fail-fast: true
+      matrix:
+        include:
+          - platform: linux-amd64
+            os: ubuntu-24.04
+            targets: x86_64-unknown-linux-musl
+          - platform: linux-arm64
+            os: ubuntu-24.04-arm
+            targets: aarch64-unknown-linux-musl
+          - platform: darwin-universal
+            os: macos-15
+            targets: aarch64-apple-darwin,x86_64-apple-darwin
+          - platform: windows-amd64
+            os: windows-2025
+            targets: x86_64-pc-windows-msvc
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
+    env:
+      PLATFORM: ${{ matrix.platform }}
+      TARGETS: ${{ matrix.targets }}
+      VERSION: ${{ needs.preflight.outputs.version }}
+      CARGO_INCREMENTAL: "0"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: refs/tags/${{ env.TAG }}
+          persist-credentials: false
+      # Keep in sync with rust-toolchain.toml.
+      - uses: dtolnay/rust-toolchain@7e38f4b43b4db5c8dd498af069a4f6196df1d067 # master
+        with:
+          toolchain: "1.91.1"
+          targets: ${{ matrix.targets }}
+      - name: Install musl-tools
+        if: startsWith(matrix.platform, 'linux-')
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends musl-tools
+      # The dist profile (Cargo.toml): fat LTO, one codegen unit, symbols stripped. Build paths
+      # are remapped and SOURCE_DATE_EPOCH is the tagged commit's time, so nothing about the
+      # runner leaks into the binary or the archive.
+      - name: Build
+        run: |
+          set -euo pipefail
+          SOURCE_DATE_EPOCH="$(git log -1 --format=%ct)"
+          export SOURCE_DATE_EPOCH
+          echo "SOURCE_DATE_EPOCH=$SOURCE_DATE_EPOCH" >> "$GITHUB_ENV"
+          workspace="$GITHUB_WORKSPACE" cargo_home="${CARGO_HOME:-$HOME/.cargo}"
+          rustflags=""
+          if [[ "$PLATFORM" == windows-* ]]; then
+            # rustc sees Windows paths there, not Git Bash's /c/... ones.
+            workspace="$(cygpath -w "$workspace")" cargo_home="$(cygpath -w "$cargo_home")"
+            # Link the C runtime statically: no VC++ redistributable needed.
+            rustflags="-C target-feature=+crt-static"
+          fi
+          export RUSTFLAGS="--remap-path-prefix=$workspace=/rollcall --remap-path-prefix=$cargo_home=/cargo $rustflags"
+          exe=rollcall
+          [[ "$PLATFORM" != windows-* ]] || exe=rollcall.exe
+          bins=()
+          IFS=, read -r -a targets <<< "$TARGETS"
+          for target in "${targets[@]}"; do
+            cargo build --profile dist --locked -p rollcall --target "$target"
+            bins+=("target/$target/dist/$exe")
+          done
+          mkdir -p dist-bin
+          if [[ "$PLATFORM" == darwin-universal ]]; then
+            lipo -create -output "dist-bin/$exe" "${bins[@]}"
+            lipo -info "dist-bin/$exe"
+          else
+            cp "${bins[0]}" "dist-bin/$exe"
+          fi
+      - name: Check the binary
+        run: |
+          set -euo pipefail
+          exe=dist-bin/rollcall
+          [[ "$PLATFORM" != windows-* ]] || exe=dist-bin/rollcall.exe
+          if [[ "$PLATFORM" == linux-* ]]; then
+            file "$exe"
+            file "$exe" | grep -Eq 'statically linked|static-pie linked'
+          fi
+          if [[ "$PLATFORM" == windows-* ]]; then
+            # The C runtime is linked in (+crt-static): the binary imports no VC++ runtime or
+            # UCRT DLL, only system DLLs.
+            rustup component add llvm-tools
+            readobj="$(rustc --print sysroot)/lib/rustlib/x86_64-pc-windows-msvc/bin/llvm-readobj.exe"
+            dlls="$("$readobj" --coff-imports "$exe" | sed -n 's/^ *Name: //p' | sort -u)"
+            echo "$dlls"
+            test -n "$dlls"
+            if grep -Eiq '^(vcruntime|msvcp|api-ms-win-crt-|ucrtbase)' <<< "$dlls"; then
+              echo "::error::$exe imports the C runtime dynamically"
+              exit 1
+            fi
+          fi
+          first="$("$exe" --version | head -n 1 | tr -d '\r')"
+          echo "$first"
+          test "$first" = "rollcall $VERSION"
+          "$exe" --help > /dev/null
+      - name: Package
+        env:
+          # Windows runners have python, and python3 may be the Microsoft Store stub there.
+          PYTHON: ${{ runner.os == 'Windows' && 'python' || 'python3' }}
+        run: |
+          set -euo pipefail
+          exe=dist-bin/rollcall
+          [[ "$PLATFORM" != windows-* ]] || exe=dist-bin/rollcall.exe
+          scripts/package-release.sh "$exe" "$TAG" "$PLATFORM" dist
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: asset-${{ matrix.platform }}
+          path: dist/
+          if-no-files-found: error
+
+  # SHA256SUMS, then the wrapper built against it and checked end to end against the real
+  # assets (served locally) before anything is published: the right binary installs through
+  # the wheel, and a wheel with a tampered checksum refuses it.
+  assemble:
+    needs: [preflight, build]
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: refs/tags/${{ env.TAG }}
+          persist-credentials: false
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          pattern: asset-*
+          path: dist
+          merge-multiple: true
+      - name: SHA256SUMS
+        run: scripts/release-sums.sh dist "$TAG"
+      # Once a release has assets they are never replaced (the PyPI wrapper embeds their
+      # SHA256SUMS and can never be replaced either): a re-run uses the published assets, so
+      # the wheel built below always matches what the release serves.
+      - name: Use the published assets, if any
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: scripts/release-upload.sh adopt "$TAG" dist
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        with:
+          version: "0.8.4"
+          enable-cache: false
+      - name: Build the wheel and sdist
+        run: |
+          set -euo pipefail
+          python python/scripts/embed-release.py --sums dist/SHA256SUMS --tag "$TAG"
+          uv build python --out-dir pydist
+          ls -l pydist
+      - name: Unit tests
+        run: |
+          python -m pip install --disable-pip-version-check "pytest==8.4.2"
+          python -m pytest python/tests
+      - name: Install the wheel against the real assets, and a tampered one
+        run: |
+          set -euo pipefail
+          python -m http.server 8765 --bind 127.0.0.1 --directory dist > /dev/null 2>&1 &
+          server=$!
+          trap 'kill "$server"' EXIT
+          # Wait until it answers (http.server resolves the host's name before it listens).
+          for _ in $(seq 60); do
+            curl -fsS -o /dev/null http://127.0.0.1:8765/SHA256SUMS && break
+            sleep 1
+          done
+          export ROLLCALL_RELEASE_BASE_URL=http://127.0.0.1:8765
+          scripts/install-check-pip.sh "$TAG" --wheel pydist/*.whl
+          python python/scripts/embed-release.py --sums dist/SHA256SUMS --tag "$TAG" --tamper
+          uv build python --wheel --out-dir pydist-tampered
+          scripts/install-check-tamper.sh "$TAG" --wheel pydist-tampered/*.whl
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: release-assets
+          path: dist/
+          if-no-files-found: error
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: python-dist
+          path: pydist/
+          if-no-files-found: error
+
+  github-release:
+    needs: [preflight, assemble]
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      PRERELEASE: ${{ needs.preflight.outputs.prerelease }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: refs/tags/${{ env.TAG }}
+          persist-credentials: false
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: release-assets
+          path: dist
+      # upload=false when the release already has exactly these assets (a re-run); fails when
+      # it has different ones, which are never replaced.
+      - name: Compare with the release
+        id: upload
+        run: scripts/release-upload.sh check "$TAG" dist
+      - uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        if: steps.upload.outputs.upload == 'true'
+        with:
+          subject-path: "dist/rollcall-*"
+      # The release is created only if missing, so a re-run keeps its notes and any edits made
+      # since; the notes are docs/releases/<tag>.md when the tagged commit has it. The assets
+      # go up only when the release has none yet, SHA256SUMS last.
+      - name: Create the release and upload the assets
+        run: scripts/release-upload.sh publish "$TAG" dist
+
+  publish-crates:
+    needs: [preflight, github-release]
+    runs-on: ubuntu-24.04
+    environment: crates-io
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      HAS_CARGO_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN != '' }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: refs/tags/${{ env.TAG }}
+          persist-credentials: false
+      # Keep in sync with rust-toolchain.toml.
+      - uses: dtolnay/rust-toolchain@7e38f4b43b4db5c8dd498af069a4f6196df1d067 # master
+        with:
+          toolchain: "1.91.1"
+      # crates.io trusted publishing: a short-lived token for this run, unless the
+      # CARGO_REGISTRY_TOKEN secret is set.
+      - uses: rust-lang/crates-io-auth-action@c6f97d42243bad5fab37ca0427f495c86d5b1a18 # v1.0.5
+        id: auth
+        if: env.HAS_CARGO_TOKEN != 'true'
+      - name: Publish the crates
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN || steps.auth.outputs.token }}
+        run: scripts/publish-crates.sh
+
+  # Pre-releases go to TestPyPI as well, so the upload path is exercised there first.
+  publish-testpypi:
+    needs: [preflight, github-release]
+    if: needs.preflight.outputs.prerelease == 'true'
+    runs-on: ubuntu-24.04
+    environment: testpypi
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: python-dist
+          path: pydist
+      - uses: pypa/gh-action-pypi-publish@dc37677b2e1c63e2034f94d8a5b11f265b73ba33 # v1.14.2
+        with:
+          repository-url: https://test.pypi.org/legacy/
+          packages-dir: pydist/
+          skip-existing: true
+
+  # After the GitHub Release (the wrapper downloads its binary from there), and for a
+  # pre-release after TestPyPI.
+  publish-pypi:
+    needs: [preflight, github-release, publish-testpypi]
+    if: >-
+      !cancelled() && needs.github-release.result == 'success' &&
+      (needs.publish-testpypi.result == 'success' || needs.publish-testpypi.result == 'skipped')
+    runs-on: ubuntu-24.04
+    environment: pypi
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: python-dist
+          path: pydist
+      - uses: pypa/gh-action-pypi-publish@dc37677b2e1c63e2034f94d8a5b11f265b73ba33 # v1.14.2
+        with:
+          packages-dir: pydist/
+          skip-existing: true
+
+  install-check:
+    needs: [publish-crates, publish-pypi]
+    permissions:
+      contents: read
+    uses: ./.github/workflows/install-check.yml
+    with:
+      tag: ${{ inputs.tag || github.ref_name }}
+      test_pypi: false

@@ -133,15 +133,31 @@ fn generate_serial_number_override_is_used() {
     assert_eq!(diff[0].1, format!("  \"serialNumber\": \"{serial}\","));
 }
 
+/// SPDX export is deferred (rollcall#37): `--format spdx` is not a value at all, so clap
+/// rejects it as a usage error naming the only format, and `--help` says why.
 #[test]
-fn generate_format_spdx_is_not_implemented_exit_64() {
+fn generate_format_spdx_is_rejected_exit_64() {
     let out = generate("minimal", &["--format", "spdx"]);
     assert_eq!(out.status.code(), Some(64));
     assert!(out.stdout.is_empty());
-    assert_eq!(
-        String::from_utf8(out.stderr).unwrap(),
-        "rollcall generate --format spdx: not implemented\n"
+    let stderr = String::from_utf8(out.stderr).unwrap();
+    assert!(
+        stderr.contains("invalid value 'spdx' for '--format <FORMAT>'"),
+        "{stderr}"
     );
+    assert!(stderr.contains("[possible values: cyclonedx]"), "{stderr}");
+    let help = Command::new(env!("CARGO_BIN_EXE_rollcall"))
+        .args(["generate", "--help"])
+        .output()
+        .unwrap();
+    assert_eq!(help.status.code(), Some(0));
+    let help = String::from_utf8(help.stdout).unwrap();
+    assert!(
+        help.contains("SPDX export is deferred")
+            && help.contains("https://github.com/smhasan94/rollcall/issues/37"),
+        "{help}"
+    );
+    assert!(!help.contains("- spdx"), "{help}");
     // The default and explicit cyclonedx format agree.
     let a = stdout_of(&generate("minimal", &["--timestamp", GOLDEN_TIMESTAMP]));
     let b = stdout_of(&generate(

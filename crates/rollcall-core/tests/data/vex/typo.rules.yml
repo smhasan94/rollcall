@@ -2,7 +2,7 @@
 # rule for CVE-2026-11368 with its Kconfig symbol misspelt (CONFIG_BTT for CONFIG_BT). No
 # .config contains CONFIG_BTT, so the condition is never true and the rule never applies;
 # `rollcall vex lint` warns about the unknown symbol. Used by tests/vex_starter.rs,
-# rollcall-cli tests/vex_lint.rs and docs/vex-rules.md (example 4).
+# rollcall tests/vex_lint.rs and docs/vex-rules.md (example 4).
 version: 1
 rules:
   - id: zephyr-bluetooth-off-typo

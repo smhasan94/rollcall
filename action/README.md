@@ -72,7 +72,7 @@ upload the artifact that pull requests are compared with.
 | `env` | | PlatformIO: the environment to describe (default: the one `default_envs` names, else the project's only one) |
 | `pio-core` | | PlatformIO: the core directory the build used, read for the installed platform and framework versions (`rollcall generate --pio-core`). After `pio run` on the runner that is `~/.platformio` (a leading `~/` is the runner's home). Without it, the versions come from exact pins in `platformio.ini`, and are unknown (a warning) for a range |
 | `scanner` | `grype` | `grype`, or `auto`: grype and osv-scanner (both pinned) |
-| `rollcall-version` | `source` | `source`: build rollcall from the action's own checkout (cached per action repository and ref); or a release tag such as `v0.1.0`: download `rollcall-<tag>-<os>-<arch>.tar.gz` and verify it against the release's `SHA256SUMS` |
+| `rollcall-version` | `source` | `source`: build rollcall from the action's own checkout (cached per action repository and ref); or a release tag such as `v0.1.0`: download `rollcall-<tag>-<os>-<arch>.tar.gz` (`darwin-universal` on both Macs) and verify it against the release's `SHA256SUMS` |
 | `artifact-name` | `rollcall` | The workflow artifact's name. The base is the base branch's artifact of the same name, and the comment is keyed on it, so give each job its own |
 | `comment` | `true` | Post (or update) the pull-request comment |
 | `github-token` | `${{ github.token }}` | Token for the comment and the base artifact |
@@ -180,5 +180,5 @@ ROLLCALL_BIN=target/debug/rollcall RC_BUILD_DIR=fixtures/zephyr/tls RC_OUT_DIR=/
 RC_OUT_DIR=/tmp/out ROLLCALL_BIN=target/debug/rollcall RC_FAIL_ON=high action/scripts/diff.sh
 ```
 
-(grype and jq must be on `PATH`). `crates/rollcall-cli/tests/action.rs` runs them this way with
+(grype and jq must be on `PATH`). `crates/rollcall/tests/action.rs` runs them this way with
 a fake grype and a fake `gh`.

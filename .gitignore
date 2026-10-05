@@ -10,3 +10,11 @@ python/build/
 /scripts/fixture-src/*/target/
 # The official CSAF validator's npm dependencies (scripts/csaf-check.sh --install).
 /scripts/csaf-validator/node_modules/
+# The PyPI wrapper's release record, generated at release time by python/scripts/embed-release.py
+# (SHA-124); a checkout never has one, so a package built from it is not a release build.
+/python/src/rollcall/release.json
+# Release assets and wrapper builds made locally (docs/release.md).
+/dist/
+/pydist/
+# Python bytecode (the PyPI wrapper and its tests).
+__pycache__/

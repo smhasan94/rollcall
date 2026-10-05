@@ -7,8 +7,8 @@ output produced by `scripts/regen-fixtures.sh`).
 
 | File | What it is | Used by |
 |------|------------|---------|
-| `minimal.model.json` | `sensor-node` 1.0.0: one application image (`sensor-app`) with `littlefs` 2.9.0 and `tinycrypt` 0.2.8, every node under `components[]` carrying a `pkg:generic` purl. It has no known-vulnerable components, so scanners should report **zero findings**. | `tests/cyclonedx.rs` (schema validation, golden `tests/golden/minimal.cdx.json`), `rollcall-cli` `tests/generate.rs` and `tests/validate.rs`, and `scripts/smoke-scan.sh` (grype and osv-scanner must load it without warnings and find nothing) |
-| `clean.model.json` | **Hand-written** `sensor-node` 1.0.0: a bootloader (`mcuboot`), an application (`sensor-app` with `littlefs`, `mbedtls`, `zephyr`) and a blob (`radio-fw` with `sdc`). Every node, the product included, has a supplier, a version, a purl and/or cpe, a licence, and SHA-256 and SHA-512 hashes. The digests are made-up repeated hex, not hashes of real files. Its `dependencies` give product → every image and image → every direct component. The bom-refs in `dependencies` were copied from `rollcall generate --model` output, and a wrong one fails `Product::validate`. It is the "clean fixture" that passes the `cisa-2026` and `cra` validation profiles with zero warnings, so other tickets can reuse it for the same purpose (e.g. SHA-120). | `tests/cyclonedx.rs` (golden `tests/golden/clean.cdx.json`), `tests/validate.rs` (clean, stripped and orphan cases; goldens under `tests/golden/validate/`), `rollcall-cli` `tests/validate_profile.rs` |
+| `minimal.model.json` | `sensor-node` 1.0.0: one application image (`sensor-app`) with `littlefs` 2.9.0 and `tinycrypt` 0.2.8, every node under `components[]` carrying a `pkg:generic` purl. It has no known-vulnerable components, so scanners should report **zero findings**. | `tests/cyclonedx.rs` (schema validation, golden `tests/golden/minimal.cdx.json`), `rollcall` `tests/generate.rs` and `tests/validate.rs`, and `scripts/smoke-scan.sh` (grype and osv-scanner must load it without warnings and find nothing) |
+| `clean.model.json` | **Hand-written** `sensor-node` 1.0.0: a bootloader (`mcuboot`), an application (`sensor-app` with `littlefs`, `mbedtls`, `zephyr`) and a blob (`radio-fw` with `sdc`). Every node, the product included, has a supplier, a version, a purl and/or cpe, a licence, and SHA-256 and SHA-512 hashes. The digests are made-up repeated hex, not hashes of real files. Its `dependencies` give product → every image and image → every direct component. The bom-refs in `dependencies` were copied from `rollcall generate --model` output, and a wrong one fails `Product::validate`. It is the "clean fixture" that passes the `cisa-2026` and `cra` validation profiles with zero warnings, so other tickets can reuse it for the same purpose (e.g. SHA-120). | `tests/cyclonedx.rs` (golden `tests/golden/clean.cdx.json`), `tests/validate.rs` (clean, stripped and orphan cases; goldens under `tests/golden/validate/`), `rollcall` `tests/validate_profile.rs` |
 | `widget.model.json` | A verbatim copy of `tests/golden/base.json`: three images (bootloader, application, blob), nested subcomponents, evidence from several sources, and dependency edges. | Same tests (golden `tests/golden/widget.cdx.json`) and `scripts/smoke-scan.sh` (loaded without warnings; findings are not asserted) |
 
 Every file here must parse with `Product::from_json`. Every `*.model.json` is rendered and
@@ -24,7 +24,7 @@ a few bytes of text standing in for vendor files, so their SHA-256s can be pinne
 
 | File | What it is | Used by |
 |------|------------|---------|
-| `blobs.yaml` | A manifest with two entries: the fake SoftDevice (name, version and supplier left to the built-in recogniser, licence given) and `libphy.a` (every key given, `license` spelling). | `tests/blob.rs` (golden `tests/golden/blobs.cdx.json`), `rollcall-cli` `tests/merge.rs` |
+| `blobs.yaml` | A manifest with two entries: the fake SoftDevice (name, version and supplier left to the built-in recogniser, licence given) and `libphy.a` (every key given, `license` spelling). | `tests/blob.rs` (golden `tests/golden/blobs.cdx.json`), `rollcall` `tests/merge.rs` |
 | `s140_nrf52_7.3.0_softdevice.hex` | A fake Nordic SoftDevice: four Intel-HEX-shaped text lines, not a real image. Its SHA-256 (`sha256sum`) is pinned in `fake_softdevice_hash_matches_sha256sum`. | same |
 | `libphy.a` | A fake Espressif PHY library: an `!<arch>` line and a note. | same |
 | `bad-*.yaml` | Malformed manifests: missing `path`, unknown key, missing blob file, duplicate entry, truncated YAML, invalid licence, unrecognised file with no name. | `tests/blob.rs` (`malformed_manifest_and_missing_file_error_never_panic`) |
@@ -39,7 +39,7 @@ fixtures' other modules (`cmsis_6`, `hal_nordic`, `mcuboot`).
 
 | File | What it is | Used by |
 |------|------------|---------|
-| `identifiers-stub.yaml` | Three entries; the fixtures' other three modules are unmapped on purpose. | `tests/identify.rs` (every fixture module resolves or is reported unknown exactly once), `rollcall-cli` `tests/generate_zephyr.rs` (`--identifier-db`) |
+| `identifiers-stub.yaml` | Three entries; the fixtures' other three modules are unmapped on purpose. | `tests/identify.rs` (every fixture module resolves or is reported unknown exactly once), `rollcall` `tests/generate_zephyr.rs` (`--identifier-db`) |
 
 ## `identifiers/` — hand-written identifier databases for the lint and version pin (SHA-104)
 
@@ -50,32 +50,32 @@ comment.
 
 | Case | What is wrong | Used by |
 |------|---------------|---------|
-| `bad-purl` | `beta`'s purl `pkg:github/foo` has no `{version}` (line 17) | `tests/identify_lint.rs` (`bad_purl_reports_path_line_and_reason`), `rollcall-cli` `tests/identifiers.rs` (`lint_bad_purl_exits_1_with_message`) |
+| `bad-purl` | `beta`'s purl `pkg:github/foo` has no `{version}` (line 17) | `tests/identify_lint.rs` (`bad_purl_reports_path_line_and_reason`), `rollcall` `tests/identifiers.rs` (`lint_bad_purl_exits_1_with_message`) |
 | `bad-cpe` | `beta`'s cpe has too few fields | `tests/identify_lint.rs` (`bad_cpe_reports_reason`) |
-| `duplicate-name` | `alpha` is listed twice (lines 6 and 22) | `tests/identify_lint.rs` (`duplicate_name_reports_both_lines`), `rollcall-cli` `tests/identifiers.rs` (`lint_duplicate_exits_1_naming_both_lines`) |
-| `too-old` | valid, but `db_version` 0.9.0 is below the minimum 1.0.0 | `tests/identify_source.rs`, `tests/identify_lint.rs`, `rollcall-cli` `tests/identifiers.rs` (`too_old_explicit_db_is_exit_65`) |
+| `duplicate-name` | `alpha` is listed twice (lines 6 and 22) | `tests/identify_lint.rs` (`duplicate_name_reports_both_lines`), `rollcall` `tests/identifiers.rs` (`lint_duplicate_exits_1_naming_both_lines`) |
+| `too-old` | valid, but `db_version` 0.9.0 is below the minimum 1.0.0 | `tests/identify_source.rs`, `tests/identify_lint.rs`, `rollcall` `tests/identifiers.rs` (`too_old_explicit_db_is_exit_65`) |
 | `schema-2` | valid schema-1 text, but `db_version` 2.0.0 is another major version | same (`schema_major_2_explicit_db_is_exit_65`) |
 
 ## `old-*.model.json`, `findings/`, `vex/` — VEX evaluator test data (SHA-111)
 
 | File | What it is | Used by |
 |------|------------|---------|
-| `old-mbedtls.model.json` | **Hand-written** model: `old-tls-node` with `mbedtls` 2.28.0 (`pkg:github/mbed-tls/mbedtls@v2.28.0`, `cpe:2.3:a:arm:mbed_tls:2.28.0:…`) and `zephyr` 3.7.0. A stand-in for a real old-mbedTLS build until one exists as a fixture. | `tests/vex.rs`, `rollcall-cli` `tests/vex.rs`, `scripts/capture-findings.sh` |
-| `old-heapless.model.json` | **Hand-written** model: `rust-node` with `heapless` 0.5.0 (`pkg:cargo/heapless@0.5.0`), which has published RustSec/GHSA advisories, so osv-scanner reports real vulnerabilities. | same, and the `rollcall scan` tests (`tests/scan.rs`, `rollcall-cli` `tests/scan.rs` and `tests/scan_scanners.rs`) |
+| `old-mbedtls.model.json` | **Hand-written** model: `old-tls-node` with `mbedtls` 2.28.0 (`pkg:github/mbed-tls/mbedtls@v2.28.0`, `cpe:2.3:a:arm:mbed_tls:2.28.0:…`) and `zephyr` 3.7.0. A stand-in for a real old-mbedTLS build until one exists as a fixture. | `tests/vex.rs`, `rollcall` `tests/vex.rs`, `scripts/capture-findings.sh` |
+| `old-heapless.model.json` | **Hand-written** model: `rust-node` with `heapless` 0.5.0 (`pkg:cargo/heapless@0.5.0`), which has published RustSec/GHSA advisories, so osv-scanner reports real vulnerabilities. | same, and the `rollcall scan` tests (`tests/scan.rs`, `rollcall` `tests/scan.rs` and `tests/scan_scanners.rs`) |
 | `findings/*.json` (not the hand-written `findings/starter/`), `findings/CAPTURE.txt` | **Captured, not hand-written**: real grype 0.119.0 and osv-scanner 2.6.0 output for the two models above (and the real build below), written only by `scripts/capture-findings.sh` (absolute paths replaced with `<capture>`, `<repo>`, `<home>`; tool versions and the grype database in `CAPTURE.txt`). Never edit them by hand; re-capturing changes the findings and so the VEX and scan goldens. `scripts/capture-findings.sh --only NAME` re-captures one file and keeps the others. | same, and the `rollcall scan` tests |
-| `findings/old-heapless.grype.json` | **Captured** (SHA-117, `scripts/capture-findings.sh --only old-heapless.grype`): grype on old-heapless, one match, GHSA-qgwf-r2jj-2ccv with related CVE-2020-36464. The same advisory osv-scanner reports in `old-heapless.osv.json`, so it is the grype/osv-scanner overlap `rollcall scan` normalises to one id and component. | `tests/scan.rs` (`overlapping_findings_identical_between_grype_and_osv_old_heapless`, golden `tests/golden/scan/old-heapless.scan.*`), `rollcall-cli` `tests/scan.rs` |
-| `vex/old-mbedtls.rules.yml` | **Hand-written** illustrative rules (not a security assessment) evaluated against the grype capture and the real `fixtures/zephyr/tls/http_server/zephyr/.config`. | `tests/vex.rs` (golden `tests/golden/vex/old-mbedtls.vex.json`), `rollcall-cli` `tests/vex.rs` |
+| `findings/old-heapless.grype.json` | **Captured** (SHA-117, `scripts/capture-findings.sh --only old-heapless.grype`): grype on old-heapless, one match, GHSA-qgwf-r2jj-2ccv with related CVE-2020-36464. The same advisory osv-scanner reports in `old-heapless.osv.json`, so it is the grype/osv-scanner overlap `rollcall scan` normalises to one id and component. | `tests/scan.rs` (`overlapping_findings_identical_between_grype_and_osv_old_heapless`, golden `tests/golden/scan/old-heapless.scan.*`), `rollcall` `tests/scan.rs` |
+| `vex/old-mbedtls.rules.yml` | **Hand-written** illustrative rules (not a security assessment) evaluated against the grype capture and the real `fixtures/zephyr/tls/http_server/zephyr/.config`. | `tests/vex.rs` (golden `tests/golden/vex/old-mbedtls.vex.json`), `rollcall` `tests/vex.rs` |
 | `vex/zephyr-old-mbedtls.rules.yml` | **Hand-written, illustrative** rules (not a security assessment) for the real Zephyr v4.2.0 build `fixtures/zephyr-old-mbedtls/old-mbedtls/` (Mbed TLS 3.6.4): CVE-2026-34873 (TLS 1.3 session resumption) is `not_affected` / `vulnerable_code_not_present` because that build's own `.config` has `# CONFIG_MBEDTLS_TLS_VERSION_1_3 is not set`. Evaluated against live grype output, not a capture. | `scripts/vex-check.sh` (grype `--vex` on the real build, SHA-113) |
-| `findings/zephyr-old-mbedtls.grype.json` | **Captured, not hand-written**: real grype 0.119.0 output for the real Zephyr v4.2.0 sysbuild build `fixtures/zephyr-old-mbedtls/old-mbedtls/` (generated with its west list and the seed identifier database): the 13 Mbed TLS 3.6.4 CVEs, in both images. Written only by `scripts/capture-findings.sh`. | `tests/vex_starter.rs`, `rollcall-cli` `tests/vex_lint.rs`, `docs/vex-rules.md` (examples 1 and 5) |
+| `findings/zephyr-old-mbedtls.grype.json` | **Captured, not hand-written**: real grype 0.119.0 output for the real Zephyr v4.2.0 sysbuild build `fixtures/zephyr-old-mbedtls/old-mbedtls/` (generated with its west list and the seed identifier database): the 13 Mbed TLS 3.6.4 CVEs, in both images. Written only by `scripts/capture-findings.sh`. | `tests/vex_starter.rs`, `rollcall` `tests/vex_lint.rs`, `docs/vex-rules.md` (examples 1 and 5) |
 | `findings/starter/*.grype.json` | **Hand-written** (SHA-115), each labelled so in its `_comment`: one grype-format match each, CVE-2026-11368 (Bluetooth) and CVE-2026-7007 (ext2), against Zephyr 4.4.2 as rollcall's SBOMs name it. Both CVEs really affect Zephyr 4.4.2 (NVD). Hand-written because grype reports no Zephyr CVEs for rollcall's SBOMs today (the `zephyr` component is typed `operating-system`). | `docs/vex-rules.md` (examples 2 to 4) |
-| `vex/typo.rules.yml` | **Hand-written**: the starter pack's Bluetooth rule for CVE-2026-11368 with its symbol misspelt `CONFIG_BTT`; it must never fire, and `rollcall vex lint` must warn. | `tests/vex_starter.rs`, `rollcall-cli` `tests/vex_lint.rs`, `docs/vex-rules.md` (example 4) |
+| `vex/typo.rules.yml` | **Hand-written**: the starter pack's Bluetooth rule for CVE-2026-11368 with its symbol misspelt `CONFIG_BTT`; it must never fire, and `rollcall vex lint` must warn. | `tests/vex_starter.rs`, `rollcall` `tests/vex_lint.rs`, `docs/vex-rules.md` (example 4) |
 | `vex/conflict.rules.yml` | **Hand-written**: two equally ranked rules that disagree about one CVE. | conflict-warning tests |
-| `vex/bad-status.rules.yml` | **Hand-written** malformed rules file (unknown status on line 7). | `rollcall-cli` `tests/vex.rs` |
+| `vex/bad-status.rules.yml` | **Hand-written** malformed rules file (unknown status on line 7). | `rollcall` `tests/vex.rs` |
 
 The three captured-findings inputs (`old-mbedtls` with `tests/golden/vex/old-mbedtls.openvex.json`,
 `old-heapless`, and `zephyr-old-mbedtls` with `tests/golden/zephyr/old-mbedtls.cdx.json`) are
 also the fixtures of `rollcall csaf` (SHA-132): `tests/csaf.rs` (golden
-`tests/golden/csaf/old-mbedtls.csaf.json`), `rollcall-cli` `tests/csaf.rs` and
+`tests/golden/csaf/old-mbedtls.csaf.json`), `rollcall` `tests/csaf.rs` and
 `scripts/csaf-check.sh` (the official CSAF validator, CI job `csaf`).
 
 ## `old-mbedtls-expected-cves.txt` — hand-written expected-CVE list

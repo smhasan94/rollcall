@@ -32,7 +32,7 @@
 #   ROLLCALL_TOOLS_DIR      where the scanners live (default .cache/tools), else PATH
 #   GRYPE_DB_CACHE_DIR      grype's database directory (default .cache/grype-db)
 #   GRYPE_DB_AUTO_UPDATE    default false (use the cached database as is)
-#   ROLLCALL_BIN            the rollcall binary (default: built with `cargo build -p rollcall-cli`)
+#   ROLLCALL_BIN            the rollcall binary (default: built with `cargo build -p rollcall`)
 #
 # Captures, each from `rollcall generate --model tests/data/<model>.model.json` rendered with
 # the golden timestamp:
@@ -148,7 +148,7 @@ fi
 if [[ -n "${ROLLCALL_BIN:-}" ]]; then
     ROLLCALL="$ROLLCALL_BIN"
 else
-    cargo build -q -p rollcall-cli --locked
+    cargo build -q -p rollcall --locked
     ROLLCALL="${CARGO_TARGET_DIR:-target}/debug/rollcall"
 fi
 [[ -x "$ROLLCALL" ]] || die "rollcall binary not found at $ROLLCALL"

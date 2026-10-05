@@ -174,7 +174,7 @@ into the description.
 
 This is a complete entry, as added by following the steps above. A test
 (`contributing_walkthrough_adds_trusted_firmware_a_and_resolves` in
-`crates/rollcall-cli/tests/identifiers.rs`) inserts it into a copy of the database, lints the
+`crates/rollcall/tests/identifiers.rs`) inserts it into a copy of the database, lints the
 copy and resolves each of its rows, so the example stays correct.
 
 <!-- example:start -->

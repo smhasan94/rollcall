@@ -37,7 +37,7 @@ This page covers:
 From the repository root:
 
 ```sh
-cargo build -p rollcall-cli
+cargo build -p rollcall
 scripts/check-doc-examples.sh docs/zephyr-gaps.md
 scripts/check-doc-links.sh docs/zephyr-gaps.md
 ```

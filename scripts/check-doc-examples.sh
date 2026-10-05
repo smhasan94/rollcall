@@ -15,7 +15,7 @@
 # shared by the document's later examples. `rollcall` is first on PATH.
 #
 # Environment:
-#   ROLLCALL_BIN   the rollcall binary (default: built with `cargo build -p rollcall-cli`)
+#   ROLLCALL_BIN   the rollcall binary (default: built with `cargo build -p rollcall`)
 #
 # Prints a PASS/FAIL row per command; exits 1 if any output differs or a command fails, 2 on
 # a setup error. Needs bash, jq (the examples use it), diff and awk.
@@ -68,7 +68,7 @@ fi
 if [[ -n "${ROLLCALL_BIN:-}" ]]; then
     ROLLCALL="$ROLLCALL_BIN"
 else
-    cargo build -q -p rollcall-cli --locked || die "cargo build failed"
+    cargo build -q -p rollcall --locked || die "cargo build failed"
     ROLLCALL="${CARGO_TARGET_DIR:-target}/debug/rollcall"
 fi
 [[ -x "$ROLLCALL" ]] || die "rollcall binary not found at $ROLLCALL"

@@ -2,7 +2,6 @@
 resolver = "3"
 members = [
     "crates/rollcall-core",
-    "crates/rollcall-cli",
     "crates/rollcall-assay",
     "crates/rollcall-identifiers",
     "crates/rollcall",
@@ -47,3 +46,11 @@ rollcall-identifiers = { path = "crates/rollcall-identifiers", version = "1.0.0"
 
 [workspace.lints.rust]
 unsafe_code = "forbid"
+
+# The release binaries (.github/workflows/release.yml, docs/release.md): `cargo build
+# --profile dist`. `cargo install rollcall` uses the plain release profile.
+[profile.dist]
+inherits = "release"
+lto = "fat"
+codegen-units = 1
+strip = "symbols"

@@ -1,0 +1,121 @@
+# Install checks of a published release (SHA-124): `cargo install rollcall` and
+# `pip install rollcall` give a working `rollcall --version` on Ubuntu and macOS, a wrapper
+# with a tampered checksum refuses the real binary, and the Windows binary runs `--help`.
+#
+# Called by release.yml after publishing; run it by hand (workflow_dispatch) to re-check a
+# release, e.g. once the registries have caught up. The scripts are taken from the tag.
+name: Install check
+
+on:
+  workflow_call:
+    inputs:
+      tag:
+        description: "The release tag to check, e.g. v0.1.0"
+        required: true
+        type: string
+      test_pypi:
+        description: "pip-install from TestPyPI instead of PyPI"
+        required: false
+        type: boolean
+        default: false
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "The release tag to check, e.g. v0.1.0"
+        required: true
+        type: string
+      test_pypi:
+        description: "pip-install from TestPyPI instead of PyPI"
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+env:
+  TAG: ${{ inputs.tag }}
+
+jobs:
+  cargo-install:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, macos-15]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: refs/tags/${{ inputs.tag }}
+          persist-credentials: false
+      # Keep in sync with rust-toolchain.toml.
+      - uses: dtolnay/rust-toolchain@7e38f4b43b4db5c8dd498af069a4f6196df1d067 # master
+        with:
+          toolchain: "1.91.1"
+      - name: cargo install rollcall
+        run: scripts/install-check-cargo.sh "$TAG"
+
+  pip-install:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, macos-15]
+        python: ["3.9", "3.12"]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: refs/tags/${{ inputs.tag }}
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: ${{ matrix.python }}
+      - name: pip install rollcall
+        env:
+          ROLLCALL_PYTHON: python
+          TEST_PYPI: ${{ inputs.test_pypi }}
+        run: |
+          set -euo pipefail
+          if [[ "$TEST_PYPI" == true ]]; then
+            scripts/install-check-pip.sh "$TAG" --test-pypi
+          else
+            scripts/install-check-pip.sh "$TAG"
+          fi
+
+  # The wrapper built from this checkout with every digest of the release's real SHA256SUMS
+  # flipped by one digit must refuse the real download: exit 65, a clear message, nothing cached.
+  pip-tamper:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: refs/tags/${{ inputs.tag }}
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        with:
+          version: "0.8.4"
+          enable-cache: false
+      - name: Tampered checksum aborts the install
+        env:
+          ROLLCALL_PYTHON: python
+        run: |
+          set -euo pipefail
+          curl -fsSL --retry 3 -o SHA256SUMS \
+            "https://github.com/${GITHUB_REPOSITORY}/releases/download/${TAG}/SHA256SUMS"
+          python python/scripts/embed-release.py --sums SHA256SUMS --tag "$TAG" --tamper
+          uv build python --wheel --out-dir tampered
+          scripts/install-check-tamper.sh "$TAG" --wheel tampered/*.whl
+
+  windows-help:
+    runs-on: windows-2025
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: refs/tags/${{ inputs.tag }}
+          persist-credentials: false
+      - name: rollcall.exe --help
+        shell: pwsh
+        run: ./scripts/install-check-windows.ps1 -Tag $env:TAG

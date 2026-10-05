@@ -11,6 +11,16 @@ authors.workspace = true
 keywords.workspace = true
 # Categories are permanent once published; library crates are not command-line utilities.
 categories = ["development-tools"]
+# What the library needs to build: its sources and the files they include_str! (db, profiles,
+# schemas, and the pins file the test-only seed module reads). The integration tests and their
+# goldens read the repository's fixtures/, so they are not shipped (they could not run there).
+include = [
+    "src/**",
+    "db/**",
+    "profiles/**",
+    "schema/**",
+    "tests/data/zephyr-manifest-pins.txt",
+]
 
 [dependencies]
 serde.workspace = true

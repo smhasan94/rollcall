@@ -37,10 +37,10 @@ test -f "$root/$version/identifiers.yaml"
 cmp "$root/$version/identifiers.yaml" crates/rollcall-identifiers/db/identifiers.yaml
 cmp "$root/$version/vex-rules.yaml" crates/rollcall-identifiers/db/vex-rules.yaml
 
-cargo build -q -p rollcall-cli --locked
+cargo build -q -p rollcall --locked
 rollcall() {
     env -u ROLLCALL_IDENTIFIERS -u XDG_CACHE_HOME ROLLCALL_CACHE_DIR="$tmp" \
-        cargo run -q -p rollcall-cli --locked -- "$@"
+        cargo run -q -p rollcall --locked -- "$@"
 }
 fail() {
     echo "check-identifiers-package: $*" >&2

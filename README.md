@@ -28,19 +28,61 @@ osv-scanner findings for an SBOM with VEX rules and Kconfig evidence (see [VEX r
 them with VEX documents and exits 0–3 for CI (see [Scanning](#scanning)).
 `assay` is not implemented yet; it prints `not implemented` and exits 64. The 0.0.1 releases of `rollcall`,
 `rollcall-core`, `rollcall-cli` and `rollcall-assay` on crates.io and `rollcall` on PyPI are
-placeholders that reserve the names.
+placeholders that reserved the names; later releases install the real tool (see
+[Installing](#installing)). `rollcall-cli` stays a 0.0.1 placeholder: the binary crate is
+`rollcall`.
+
+## Installing
+
+Each release (from v0.1.0) ships the same `rollcall` binary three ways:
+
+```sh
+# From crates.io: builds from source (Rust 1.91 or newer).
+cargo install rollcall --locked
+
+# From PyPI: on first run, downloads the release binary for this platform, checks its
+# SHA-256 and caches it.
+pip install rollcall
+
+# Or download it from the GitHub Release (static binaries for Linux x86_64 and aarch64, a
+# universal binary for macOS, and Windows x86_64), with its checksum.
+curl -fsSLO https://github.com/smhasan94/rollcall/releases/download/v0.1.0/rollcall-v0.1.0-linux-amd64.tar.gz
+curl -fsSLO https://github.com/smhasan94/rollcall/releases/download/v0.1.0/SHA256SUMS
+sha256sum -c --ignore-missing SHA256SUMS
+tar -xzf rollcall-v0.1.0-linux-amd64.tar.gz
+rollcall-v0.1.0-linux-amd64/rollcall --version
+```
+
+The release assets are `rollcall-<tag>-<platform>.tar.gz` for `linux-amd64`, `linux-arm64`
+and `darwin-universal`, and `rollcall-<tag>-windows-amd64.zip`; each holds a directory of the
+same name with the binary, `LICENSE` and `README.md`. `SHA256SUMS` lists all four, and each
+asset has a GitHub build-provenance attestation (`gh attestation verify <file> --repo
+smhasan94/rollcall`). The macOS binary is not notarised: a copy downloaded with a browser is
+quarantined by Gatekeeper (`xattr -d com.apple.quarantine rollcall` releases it); `curl`,
+`cargo install` and `pip install` are not affected.
+
+The PyPI package (`python/`) is a pure-Python wrapper with no dependencies (Python 3.9 or
+newer). Its version is the release's, in PEP 440 form (`0.1.0rc1` for `v0.1.0-rc.1`), and it
+holds the SHA-256 of every platform's asset, recorded at release time. The first `rollcall`
+command downloads the asset for this platform from the GitHub Release, refuses it unless its
+SHA-256 matches (exit 65: `rollcall: checksum mismatch for <asset>: expected <sha256>, got
+<sha256>; the download was discarded`), and caches the binary in
+`<cache>/rollcall/bin/<tag>/<platform>/`, where `<cache>` is `$ROLLCALL_CACHE_DIR`, else
+`$XDG_CACHE_HOME`, else `~/.cache` (`%LOCALAPPDATA%` on Windows), as for the identifier
+database. Later runs start the cached binary directly. A platform with no release binary, or a
+download that fails, exits 69. `ROLLCALL_BIN` runs a given binary instead, and
+`ROLLCALL_RELEASE_BASE_URL` downloads from a mirror.
 
 ## Workspace layout
 
 | Crate            | Purpose                                                        |
 |------------------|----------------------------------------------------------------|
+| `rollcall`       | The `rollcall` binary (`cargo install rollcall`).              |
 | `rollcall-core`  | Component-graph model and ingestion.                           |
-| `rollcall-cli`   | The `rollcall` binary.                                         |
 | `rollcall-assay` | Cryptographic inventory (CycloneDX CBOM), run as `rollcall assay`. |
 | `rollcall-identifiers` | The identifier database (data only), versioned on its own (`db_version`). |
-| `rollcall`       | Name-reservation placeholder; no code.                         |
 
-`python/` holds the placeholder for the `pip install rollcall` wrapper.
+`python/` holds the `pip install rollcall` wrapper (see [Installing](#installing)).
 
 ## Subcommands
 
@@ -124,7 +166,8 @@ rollcall generate . --ecosystem platformio --env esp32dev -o app.cdx.json
 rollcall detect build
 ```
 
-`generate --format spdx` is reserved and not implemented yet. The same model and options
+The output is CycloneDX 1.6 JSON. SPDX export is deferred
+([#37](https://github.com/smhasan94/rollcall/issues/37)); `--format` accepts only `cyclonedx`. The same model and options
 always produce byte-identical output; changing only `--timestamp` changes only the
 `timestamp` line. How each model field maps to CycloneDX is documented in the
 `rollcall_core::cyclonedx` module docs (`cargo doc -p rollcall-core --open`).
@@ -750,7 +793,7 @@ rollcall diff --sbom sbom.cdx.json --scan scan.json --report report.json \
 | 1    | `validate`: the document has schema violations or error-severity profile findings; `vex verify`: the signature does not verify; `identifiers lint`: the database has findings; `scan`: an open finding at or above `--fail-on`; `diff`: a new open finding at or above `--fail-on`; `csaf`: no finding about a component of the product, so nothing to export (nothing is written; the warnings say what was left out) |
 | 2    | `scan`: an unresolved finding, with `--fail-on-unresolved` |
 | 3    | `scan`: a scanner is missing or failed, or its output cannot be read |
-| 64   | Usage error (bad arguments, `validate` without `--schema` or `--profile` or with an unknown profile name, bad `--timestamp`, `--serial-number` or `--product`, a `generate DIR` that several ecosystems match, a `generate` flag of another ecosystem than the input's, a `--env` the PlatformIO project does not have (or several environments and no `--env` or single `default_envs`), `detect` on a directory several ecosystems match, `report` or `diff` without `--format`, `diff --base-scan` or `--base-report` without `--base-sbom`, `merge --blob-manifest` without inputs or `--product`, a `vex --kconfig` that names no image of the product, names one twice, or omits `IMAGE=` for a multi-image product; `vex` flags that do not combine, such as `--embed` without `--format cyclonedx`, `--format cyclonedx` without `--sbom`, or `--sign` without `-o`; `csaf` without `--scan`, with a bad `--id` or `--tlp`, or without a publisher: no `--publisher`/`--publisher-namespace` and no SBOM supplier name/URL, or a namespace that is not an absolute URI), or subcommand/format not implemented |
+| 64   | Usage error (bad arguments, `validate` without `--schema` or `--profile` or with an unknown profile name, bad `--timestamp`, `--serial-number` or `--product`, a `generate DIR` that several ecosystems match, a `generate` flag of another ecosystem than the input's, a `--env` the PlatformIO project does not have (or several environments and no `--env` or single `default_envs`), `detect` on a directory several ecosystems match, `report` or `diff` without `--format`, `diff --base-scan` or `--base-report` without `--base-sbom`, `merge --blob-manifest` without inputs or `--product`, a `vex --kconfig` that names no image of the product, names one twice, or omits `IMAGE=` for a multi-image product; `vex` flags that do not combine, such as `--embed` without `--format cyclonedx`, `--format cyclonedx` without `--sbom`, or `--sign` without `-o`; `csaf` without `--scan`, with a bad `--id` or `--tlp`, or without a publisher: no `--publisher`/`--publisher-namespace` and no SBOM supplier name/URL, or a namespace that is not an absolute URI), or subcommand not implemented |
 | 65   | Input is malformed: not JSON, not UTF-8, too deeply nested, or an invalid model; or a Zephyr input (SPDX, `west list`, `.config`, `build_info.yml`) or the identifier database (`--identifier-db`, `--identifiers`, `$ROLLCALL_IDENTIFIERS`, also for `--version`) is malformed or has a `db_version` this rollcall does not accept, or `--zephyr` names a sysbuild top-level directory without `--sysbuild` (or an image directory with it); or a `merge` input is not a readable CycloneDX 1.6 document, the inputs conflict (including different product names or versions without `--product`), or the blob manifest is malformed; or a `vex` input (SBOM, model, `--kconfig`, findings, rules, signing key, signature file) is malformed, with `file:line:column` for rules, or the SBOM cannot take the requested VEX output (no `serialNumber` for `--format cyclonedx`, a `serialNumber` that is not a lowercase `urn:uuid:` or a `version` below 1, a non-empty `vulnerabilities` for `--embed`); or a `validate --profile` file is malformed; or a `report` input (the SBOM, a `--scan` or a `--vex` file) is malformed or not a format it reads; or a `diff` input (an SBOM, a scan or a report) is malformed or has the wrong `schema`; or a `scan` SBOM or `--vex` document is malformed; or a `csaf` input (the SBOM, a `--scan` or a `--vex` file) is malformed or not a format it reads; or `cargo metadata` output (`--cargo-metadata`, or `--cargo` when cargo fails) is malformed, has no root package or names two packages the binary's list cannot tell apart, or the `--elf` has no `.dep-v0` section, a malformed one, or was built from another package; or an `--esp-idf` input (`project_description.json`, `sdkconfig`, `dependencies.lock`, an `idf_component.yml`, the link map) is malformed; or a `--platformio` input (`platformio.ini`, with its line; a `library.json`, `.piopm`, `platform.json` or `package.json`) is malformed |
 | 66   | Input file missing or unreadable (including a directory), including a required Zephyr input, the `--west-list` file or an explicit identifier database (`--identifier-db`, `--identifiers` or `$ROLLCALL_IDENTIFIERS`, also for `--version`), a `merge` input, the blob manifest or a blob it lists, a `vex` input, a `report` input, a `csaf` input, a `diff` input, a `validate --profile` file, or a `scan` SBOM, `--vex` document or `--db-path` directory, or the `--cargo-metadata` file, the `--elf` file or `--cargo DIR`'s `Cargo.toml`, or `--esp-idf DIR`'s `sdkconfig` or `build/project_description.json`, or `--platformio DIR`'s `platformio.ini`; or a `generate DIR` or `detect DIR` that is not a directory or that no ecosystem matches (or not the one `--ecosystem` names) |
 | 69   | `vex --sign cosign` / `vex verify --cosign`: cosign is not installed, or keyless signing failed (no OIDC identity); `generate --cargo`: cargo cannot be run (`$CARGO`, else `cargo` on PATH) |
@@ -812,20 +855,21 @@ the files rollcall reads, the linked blob archives and `MANIFEST.json`. They are
 by `scripts/regen-fixtures-esp-idf.sh` (`scripts/regen-fixtures.sh --variant esp-idf`); see
 [docs/esp-idf.md](docs/esp-idf.md#fixtures).
 
-## Publishing the placeholders
+## Publishing
 
-Crates must be published dependencies first: `rollcall-identifiers`, then `rollcall-core`
-and `rollcall-assay`, then `rollcall-cli`, then `rollcall` (or simply
-`cargo publish --workspace`, which orders them). `rollcall-identifiers` is versioned on its
-own (its version is the database's `db_version`); a database-only release is
-`cargo publish -p rollcall-identifiers` plus the tarball from `scripts/package-identifiers.sh`.
-Then the PyPI placeholder:
+Releases are made by `.github/workflows/release.yml` on a `v<version>` tag: it checks that the
+tag and every written version agree, builds the four static binaries, writes `SHA256SUMS`,
+creates the GitHub Release, publishes the crates (`rollcall-identifiers`, then
+`rollcall-core`, `rollcall-assay` and `rollcall`, skipping any version already on crates.io)
+and the PyPI wrapper, and then checks `cargo install rollcall` and `pip install rollcall` on
+Ubuntu and macOS and the Windows binary's `--help` (`install-check.yml`). Every step is safe to
+re-run. The procedure, the one-time setup and what to do when a step fails are in
+[docs/release.md](docs/release.md).
 
-```sh
-cd python && uv build && uv publish
-```
-
-Check the reservations with `ROLLCALL_CRATES_OWNER=<crates.io login> ./scripts/check-names.sh`.
+`rollcall-identifiers` is versioned on its own (its version is the database's `db_version`); a
+database-only release is `cargo publish -p rollcall-identifiers` plus the tarball from
+`scripts/package-identifiers.sh`. Check the 0.0.1 name reservations with
+`ROLLCALL_CRATES_OWNER=<crates.io login> ./scripts/check-names.sh`.
 
 ## Licence
 

@@ -16,7 +16,7 @@
 #
 # Environment:
 #   ROLLCALL_CSAF_OUT  output directory, emptied first (default .cache/csaf)
-#   ROLLCALL_BIN       the rollcall binary (default: built with `cargo build -p rollcall-cli`)
+#   ROLLCALL_BIN       the rollcall binary (default: built with `cargo build -p rollcall`)
 #
 # Fixtures (the inputs with captured scanner findings, crates/rollcall-core/tests/data/findings/):
 #   old-mbedtls         tests/data/old-mbedtls.model.json, grype + osv-scanner captures, and the
@@ -73,7 +73,7 @@ if [[ ! -d "$VALIDATOR/node_modules/@secvisogram/csaf-validator-lib" ]]; then
 fi
 
 if [[ -z "${ROLLCALL_BIN:-}" ]]; then
-    cargo build -p rollcall-cli --locked >&2 || exit 2
+    cargo build -p rollcall --locked >&2 || exit 2
     ROLLCALL_BIN=target/debug/rollcall
 fi
 

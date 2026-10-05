@@ -794,7 +794,7 @@ fn zephyr_gaps_doc_has_required_sections() {
         (
             "## How to reproduce",
             &[
-                "cargo build -p rollcall-cli",
+                "cargo build -p rollcall",
                 "scripts/check-doc-examples.sh docs/zephyr-gaps.md",
                 "scripts/check-doc-links.sh docs/zephyr-gaps.md",
                 "scripts/regen-fixtures.sh",
