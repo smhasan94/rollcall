@@ -8,6 +8,10 @@ policy. The identifier database (`rollcall-identifiers`) is versioned on its own
 
 ## [Unreleased]
 
+### Changed
+
+- README simplified; reference material moved into docs/ (installing, cli, building).
+
 ## [0.1.0] - 2026-10-23
 
 The first release. Release notes: [docs/releases/v0.1.0.md](docs/releases/v0.1.0.md).

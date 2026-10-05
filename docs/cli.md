@@ -43,7 +43,7 @@ Where each is documented:
 west list -f "{name} {path} {revision} {url}" > west-list.txt
 rollcall generate --zephyr build/app --west-list west-list.txt --include-sdk -o app.cdx.json
 
-# Render a model as CycloneDX 1.6 JSON.
+# Render a model (the `rollcall-model/1` JSON form) as CycloneDX 1.6 JSON.
 rollcall generate --model product.model.json -o product.cdx.json
 
 # Pin the timestamp (RFC 3339, normalised to UTC) and/or the serial number for

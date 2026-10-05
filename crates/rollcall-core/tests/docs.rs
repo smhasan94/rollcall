@@ -2563,3 +2563,88 @@ fn check_doc_links_skips_only_a_403_from_a_host_that_blocks_ci() {
         "{out}"
     );
 }
+
+/// Runs `scripts/check-doc-links.sh --offline` on a document holding one link to each of
+/// `urls`; its exit code and stdout.
+fn check_doc_links_offline(urls: &[&str]) -> (i32, String) {
+    let dir = tempfile::tempdir().expect("temporary directory");
+    let doc: String = urls.iter().map(|u| format!("- [link]({u})\n")).collect();
+    let doc_path = dir.path().join("doc.md");
+    std::fs::write(&doc_path, doc).expect("write the document");
+    let out = std::process::Command::new("bash")
+        .arg(repo_root().join("scripts/check-doc-links.sh"))
+        .arg("--offline")
+        .arg(&doc_path)
+        .output()
+        .expect("bash runs");
+    (
+        out.status.code().expect("exited with a code"),
+        String::from_utf8_lossy(&out.stdout).into_owned(),
+    )
+}
+
+const OWN_BLOB: &str = "https://github.com/smhasan94/rollcall/blob/main/";
+
+/// README review (S1): a link into this repository on GitHub (`blob/main/` or `tree/main/`)
+/// is resolved against the working tree offline, like a relative link: the file or directory
+/// must exist, spelled as on disk, and an anchor on a Markdown file must name a heading.
+#[test]
+fn check_doc_links_resolves_own_repo_links_against_the_working_tree() {
+    let good = format!("{OWN_BLOB}docs/cli.md#usage");
+    let tree = "https://github.com/smhasan94/rollcall/tree/main/docs";
+    let (code, out) = check_doc_links_offline(&[&good, tree]);
+    assert_eq!(code, 0, "{out}");
+    assert!(
+        out.lines().any(|l| l.contains("PASS")
+            && l.contains(&good)
+            && l.contains("local: docs/cli.md#usage found")),
+        "{out}"
+    );
+    assert!(
+        out.lines()
+            .any(|l| l.contains("PASS") && l.contains(tree) && l.contains("local: docs found")),
+        "{out}"
+    );
+    assert!(
+        out.contains("check-doc-links: PASS (2 checked, 0 skipped)"),
+        "{out}"
+    );
+
+    for (url, why) in [
+        (format!("{OWN_BLOB}docs/no-such-page.md"), "does not exist"),
+        (
+            format!("{OWN_BLOB}docs/cli.md#no-such-heading"),
+            "no heading for #no-such-heading",
+        ),
+        (format!("{OWN_BLOB}docs/CLI.md"), "not spelled as on disk"),
+        (
+            "https://github.com/smhasan94/rollcall/tree/main/no-such-dir".to_string(),
+            "does not exist",
+        ),
+    ] {
+        let (code, out) = check_doc_links_offline(&[&url]);
+        assert_eq!(code, 1, "{url} passed:\n{out}");
+        assert!(
+            out.lines().any(|l| l.contains("FAIL")
+                && l.contains(&url)
+                && l.contains("local: ")
+                && l.contains(why)),
+            "{url}: {out}"
+        );
+    }
+}
+
+/// README review (S1): online too, a link into this repository is resolved locally and never
+/// fetched. The fake curl answers 404 for it, so a fetch would fail the run.
+#[cfg(unix)]
+#[test]
+fn check_doc_links_never_fetches_own_repo_links() {
+    let good = format!("{OWN_BLOB}docs/cli.md#exit-codes");
+    let (code, out) = check_doc_links_with_fake_curl(&[(&good, 404, 0, &good)]);
+    assert_eq!(code, 0, "{out}");
+    assert!(
+        out.lines()
+            .any(|l| l.contains("PASS") && l.contains("local: docs/cli.md#exit-codes found")),
+        "{out}"
+    );
+}

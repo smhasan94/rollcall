@@ -25,7 +25,14 @@
 #   link is listed as SKIP ("HTTP 403 from a host that blocks CI runners"). Any other result
 #   from them (404, 5xx, a curl error, a redirect to a parent page) still fails. The file says
 #   why and when each host was added.
-# - --offline skips http(s) targets (they are listed as SKIP) and checks the rest.
+# - A link into this repository's own files on GitHub,
+#   `https://github.com/smhasan94/rollcall/blob/main/<path>[#anchor]` or `.../tree/main/<path>`,
+#   is never fetched: it is resolved against the local working tree (the repository this
+#   script is in), online and offline alike, as a relative link would be: the path must exist
+#   with every component spelled in exactly the case on disk, and an anchor on a `.md` target
+#   must match one of its headings. The DETAIL says `local: <path>[#anchor] found`. (The
+#   README links its docs this way, so that the links also work on crates.io.)
+# - --offline skips the other http(s) targets (they are listed as SKIP) and checks the rest.
 # - mailto: and other schemes are listed as SKIP.
 #
 # Prints a PASS/FAIL/SKIP row per link and a summary of links checked and skipped; exits 1
@@ -75,7 +82,9 @@ BLOCKED_HOSTS="$(dirname "$0")/link-check-blocked-hosts.txt"
     exit 2
 }
 
-exec python3 - "$offline" "$BLOCKED_HOSTS" "${files[@]}" <<'PY'
+REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+
+exec python3 - "$offline" "$BLOCKED_HOSTS" "$REPO_ROOT" "${files[@]}" <<'PY'
 import os
 import re
 import subprocess
@@ -84,7 +93,8 @@ import urllib.parse
 
 offline = sys.argv[1] == "1"
 blocked_file = sys.argv[2]
-files = sys.argv[3:]
+repo_root = sys.argv[3]
+files = sys.argv[4:]
 
 
 def read_blocked(path):
@@ -190,6 +200,28 @@ def check_local(doc, target):
     return "PASS", "exists" + (f", #{frag} found" if frag else "")
 
 
+# A link to one of this repository's own files on GitHub, on the default branch.
+OWN_REPO = re.compile(r"^https://github\.com/smhasan94/rollcall/(?:blob|tree)/main/([^?#]+)(?:\?[^#]*)?(?:#(.*))?$")
+
+
+def check_own_repo(url):
+    """(result, detail) for a link into this repository on GitHub, resolved against the local
+    working tree; None for any other URL."""
+    m = OWN_REPO.match(url)
+    if not m:
+        return None
+    path = urllib.parse.unquote(m.group(1)).rstrip("/")
+    frag = m.group(2) or ""
+    if not path or path.startswith("/") or ".." in path.split("/"):
+        return "FAIL", f"local: {path!r} is not a path inside the repository"
+    # check_local resolves a target relative to a document's directory: here, the root.
+    target = path + (f"#{frag}" if frag else "")
+    result, detail = check_local(os.path.join(repo_root, "README.md"), target)
+    if result == "PASS":
+        return "PASS", f"local: {target} found"
+    return "FAIL", f"local: {detail}"
+
+
 _http_cache = {}
 
 
@@ -270,7 +302,10 @@ for doc in files:
         sys.exit(2)
     for n, target in links(doc):
         scheme = urllib.parse.urlsplit(target).scheme.lower()
-        if scheme in ("http", "https"):
+        own = check_own_repo(target) if scheme in ("http", "https") else None
+        if own is not None:
+            result, detail = own
+        elif scheme in ("http", "https"):
             if offline:
                 result, detail = "SKIP", "offline"
             else:

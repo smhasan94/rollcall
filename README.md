@@ -38,8 +38,7 @@ shows how, and has an example build if you have none):
 rollcall detect build                                  # prints: zephyr
 rollcall generate build --identify -o sbom.cdx.json    # write the SBOM
 rollcall validate --schema sbom.cdx.json               # check it against CycloneDX 1.6
-rollcall validate --profile all sbom.cdx.json          # check it against the CRA and CISA rules
-rollcall report --format md -o report.md sbom.cdx.json # a readiness report with a score
+rollcall report --format md -o report.md sbom.cdx.json # score it, and list what the CRA and CISA rules still want
 ```
 
 The [quickstart](https://github.com/smhasan94/rollcall/blob/main/docs/quickstart.md) walks
@@ -59,9 +58,10 @@ through each step and what the output means.
 | [`csaf`](https://github.com/smhasan94/rollcall/blob/main/docs/cra-clock.md#rollcall-csaf) | Export scan and VEX results as a CSAF 2.0 VEX advisory |
 | [`detect`](https://github.com/smhasan94/rollcall/blob/main/docs/cli.md#auto-detect) | Say which ecosystem a build or project directory is |
 
-Every flag and exit code is in the
-[command-line reference](https://github.com/smhasan94/rollcall/blob/main/docs/cli.md).
-The same input always gives a byte-identical SBOM.
+Every command and exit code is in the
+[command-line reference](https://github.com/smhasan94/rollcall/blob/main/docs/cli.md), and each
+command's own page has its flags. The same input gives a byte-identical SBOM apart from the
+timestamp; pass `--timestamp` to pin it too.
 
 ## GitHub Action
 
@@ -70,7 +70,9 @@ pull request, posts a comment and fails the check on new findings at or above `f
 
 ```yaml
 steps:
-  - uses: actions/checkout@v4
+  - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+    with:
+      persist-credentials: false
   - run: scripts/build.sh  # your build: west spdx --init, west build, west spdx, west list
   - uses: smhasan94/rollcall/action@v0.1.0
     with:
