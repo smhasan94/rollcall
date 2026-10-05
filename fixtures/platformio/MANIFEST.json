@@ -60,8 +60,8 @@
   "format": "rollcall-fixtures/1",
   "generator": "scripts/regen-fixtures-platformio.sh",
   "host": {
-    "arch": "arm64",
-    "os": "darwin"
+    "arch": "x86_64",
+    "os": "linux"
   },
   "platformio": {
     "container_core_dir": "/pio-core",
