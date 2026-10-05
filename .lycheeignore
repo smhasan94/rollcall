@@ -2,5 +2,3 @@
 # Each line is a regular expression; remove it once its page exists, and the online link check
 # then proves it.
 #
-# The docs site itself, live once GitHub Pages is enabled with source "GitHub Actions".
-^https://smhasan94\.github\.io/rollcall
