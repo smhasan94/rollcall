@@ -3,7 +3,7 @@
   "generated": "2026-01-02T03:04:05Z",
   "tool": {
     "name": "rollcall",
-    "version": "0.1.0-rc.1"
+    "version": "0.1.0"
   },
   "product": {
     "name": "mbedtls",

@@ -1517,11 +1517,17 @@ fn release_upload_creates_the_release_and_uploads_when_there_is_none() {
     let t = tag();
     let log = s.read_state("gh.log");
     let calls: Vec<&str> = log.lines().collect();
+    // The release body is docs/releases/TAG.md when the repository has it (a final release),
+    // else notes GitHub generates (a pre-release such as v0.1.0-rc.1).
+    let notes = workspace().join(format!("docs/releases/{t}.md"));
+    let notes = if notes.is_file() {
+        format!("--notes-file {}", notes.canonicalize().unwrap().display())
+    } else {
+        "--generate-notes".to_string()
+    };
     assert_eq!(
         calls[1],
-        format!(
-            "release create {t} --verify-tag --title rollcall {t} --prerelease --generate-notes"
-        )
+        format!("release create {t} --verify-tag --title rollcall {t} --prerelease {notes}")
     );
     // The assets first, SHA256SUMS last: a release with SHA256SUMS has all four.
     assert!(
