@@ -11,6 +11,44 @@ findings and statuses.
 > and its findings and statuses match `rollcall scan` row for row (see
 > [Import test](#import-test-old-mbedtls)). Run the cra-clock steps there once cra-clock exists.
 
+## `rollcall csaf`
+
+`rollcall csaf` writes an SBOM's scan and VEX results as a CSAF 2.0 document with the VEX
+profile (`csaf_vex`), for advisory tooling and CRA vulnerability handling:
+
+```sh
+rollcall csaf product.cdx.json --scan grype.json --scan osv.json --vex product.openvex.json \
+  --publisher "Example Devices Ltd" --publisher-namespace https://devices.example -o product.csaf.json
+```
+
+It takes the inputs `rollcall report` takes and triages the findings exactly as `rollcall
+scan --vex` does, so each product status is the scan's triage: `affected` is
+`known_affected` (with a remediation whose category comes from the claim's CycloneDX
+`analysis.response`, else `none_available`, whose text names any version fixed upstream),
+`not_affected` and `false_positive` are `known_not_affected` (with a flag
+for the justification, or an impact statement), `fixed` is `fixed`, and anything unresolved
+is `under_investigation`. Every status is about a component *as part of the product* (a CSAF
+relationship product, `<component bom-ref>@<product bom-ref>`), not the bare component. The
+product tree holds the product under its vendor, name and version branches, and each
+component a finding names as a product whose id is its `bom-ref`, with the SBOM's purl and
+CPE carried byte for byte. Findings on packages the SBOM does not list, or on components of
+scope `excluded`, are left out with a warning. The publisher defaults to the SBOM product's
+supplier (name, and first URL as the namespace); with neither, the command exits 64.
+`--title`, `--tlp` (none by default), `--timestamp` and `--id` (default: derived from the
+content) are optional, so the output is reproducible. Each document is `tracking.version` 1
+with a single revision: since the default id changes with the findings, pass the same
+`--id` for every update of one advisory (numbered revisions are a follow-up).
+
+A document is written only if it passes the vendored (non-strict) OASIS CSAF 2.0 schema and
+the 12 CSAF mandatory tests rollcall implements (6.1.1, 6.1.2, 6.1.6, 6.1.23, 6.1.33 and the
+VEX-profile tests 6.1.27.4/5/7/8/9/10/11); with no finding about a component of the
+product there is nothing to export, and it exits 1 after printing the warnings that say
+why. `rollcall validate --schema` recognises a CSAF document and checks it the same way. In
+CI, the documents of every fixture with captured findings also pass the official validator
+library: the strict CSAF 2.0 schema and the full §6.1 mandatory suite
+(`scripts/csaf-check.sh --install`). The mapping is documented in the `rollcall_core::csaf`
+module, and the handoff to cra-clock in the rest of this page.
+
 ## The pipeline
 
 ```sh

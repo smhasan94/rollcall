@@ -757,16 +757,22 @@ fn exit_code_table_in_docs_matches_behaviour() {
     env.fake("grype", Fake::Fails(1));
     assert_eq!(code(&env.scan(&sbom, &[])), 3, "{}", meaning(3));
 
-    // The README's exit-code table lists the scan codes too.
-    let readme =
-        std::fs::read_to_string(PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../README.md"))
-            .unwrap();
+    // The command-line reference's exit-code table (docs/cli.md) lists the scan codes too.
+    let reference = std::fs::read_to_string(
+        PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../docs/cli.md"),
+    )
+    .unwrap();
+    let table: Vec<&str> = reference
+        .lines()
+        .skip_while(|l| *l != "## Exit codes")
+        .take_while(|l| !l.starts_with("## ") || *l == "## Exit codes")
+        .collect();
     for row in ["| 2    |", "| 3    |"] {
         assert!(
-            readme
-                .lines()
+            table
+                .iter()
                 .any(|l| l.starts_with(row) && l.contains("scan")),
-            "README exit-code table lacks a scan row {row:?}"
+            "docs/cli.md exit-code table lacks a scan row {row:?}"
         );
     }
 }

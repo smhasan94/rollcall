@@ -216,29 +216,31 @@ fn help_and_version_exit_zero() {
 }
 
 #[test]
-fn readme_generate_section_documents_product_flag() {
-    let path = concat!(env!("CARGO_MANIFEST_DIR"), "/../../README.md");
-    let readme = std::fs::read_to_string(path).expect("read README.md");
-    let usage = readme
-        .split_once("## Usage")
+fn cli_reference_generate_section_documents_product_flag() {
+    // The command-line reference (docs/cli.md) holds the generate usage moved out of the
+    // README.
+    let path = concat!(env!("CARGO_MANIFEST_DIR"), "/../../docs/cli.md");
+    let reference = std::fs::read_to_string(path).expect("read docs/cli.md");
+    let usage = reference
+        .split_once("\n## Usage\n")
         .and_then(|(_, rest)| rest.split_once("```sh"))
         .and_then(|(_, rest)| rest.split_once("```"))
         .map(|(block, _)| block)
-        .expect("README has a ## Usage sh block");
+        .expect("docs/cli.md has a ## Usage sh block");
     assert!(
         usage.lines().any(|line| line.contains("rollcall generate")
             && line.contains("--sysbuild")
             && line.contains("--product")),
         "Usage block has no `generate … --sysbuild --product` example:\n{usage}"
     );
-    let after_usage = readme
-        .split_once("## Usage")
+    let after_usage = reference
+        .split_once("\n## Usage\n")
         .map(|(_, rest)| rest)
-        .expect("README has a ## Usage section");
+        .expect("docs/cli.md has a ## Usage section");
     let generate_section = after_usage
-        .split_once("### Merging")
+        .split_once("\n## Merging\n")
         .map(|(section, _)| section)
-        .expect("README has a ### Merging section after ## Usage");
+        .expect("docs/cli.md has a ## Merging section after ## Usage");
     assert!(
         generate_section
             .split("\n\n")

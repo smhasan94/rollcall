@@ -12,7 +12,7 @@
 # `rollcall validate --schema` failing (the SBOM breaks CycloneDX 1.6) fails the step, as does
 # any other command failing; `rollcall scan` exiting 3 (a scanner failed) is fatal too. When
 # `rollcall detect` or `rollcall generate` fails, the step exits with rollcall's own exit code
-# (64 usage, 65 malformed input, 66 missing input; see the README's exit codes).
+# (64 usage, 65 malformed input, 66 missing input; see docs/cli.md#exit-codes).
 #
 # Inputs (environment): RC_BUILD_DIR (required), RC_ECOSYSTEM
 # (auto|zephyr|cargo|esp-idf|platformio; auto runs `rollcall detect`, the same detection as

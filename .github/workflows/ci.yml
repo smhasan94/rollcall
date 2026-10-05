@@ -193,7 +193,7 @@ jobs:
       - name: Check the quickstart, FAQ and contribution guide links
         run: scripts/check-doc-links.sh docs/quickstart.md docs/faq-cra-cisa.md docs/contributing-identifiers.md
       - name: Check the release documents' links inside the repository
-        run: scripts/check-doc-links.sh --offline docs/ci.md docs/versioning.md docs/releases/*.md docs/README.md docs/SUMMARY.md README.md CHANGELOG.md SECURITY.md
+        run: scripts/check-doc-links.sh --offline docs/ci.md docs/versioning.md docs/releases/*.md docs/README.md docs/SUMMARY.md README.md CHANGELOG.md SECURITY.md docs/installing.md docs/cli.md docs/building.md
       # On the tag's own run, release.yml has not created the GitHub Release yet, so the
       # CHANGELOG's link to it (releases/tag/<this tag>) still 404s. That one 404, and nothing
       # else, is tolerated: scripts/tolerate-pending-release-link.sh (tested in

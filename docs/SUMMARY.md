@@ -9,6 +9,8 @@ checks it. -->
 # Getting started
 
 - [Quickstart](quickstart.md)
+- [Installing](installing.md)
+- [Command-line reference](cli.md)
 - [CI with the GitHub Action](ci.md)
 - [FAQ: what the CRA and CISA ask of an SBOM](faq-cra-cisa.md)
 
@@ -38,6 +40,7 @@ checks it. -->
 
 # Project
 
+- [Building from source](building.md)
 - [Versioning, MSRV and releasing](versioning.md)
   - [Releasing rollcall](release.md)
 - [Release notes v0.1.0](releases/v0.1.0.md)

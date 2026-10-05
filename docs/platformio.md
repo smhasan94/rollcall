@@ -6,7 +6,8 @@ lists, for one environment:
 
 - the framework (Arduino, ESP-IDF, Zephyr) as one component. For a framework package in
   rollcall's table it names the upstream project, with its version, purl, CPE, supplier and
-  licence: `framework-arduinoespressif32` 3.20017.241212 is `arduino-esp32` 2.0.17;
+  licence: `framework-arduinoespressif32` 3.20017.241212 is `arduino-esp32` 2.0.17, supplier
+  Espressif Systems, licence LGPL-2.1-or-later;
 - the development platform (`espressif32`) as a `platform` component with CycloneDX
   `scope: excluded`, because it is build tooling and is not shipped;
 - every library PlatformIO installed for the environment, as `<owner>/<name>` with its version,

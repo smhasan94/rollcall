@@ -19,6 +19,9 @@ This page covers:
 - [Rule format](#rule-format): every field, and how rules are applied
 - [Starter pack](#starter-pack): the rules rollcall ships
 - [Checking your rules](#checking-your-rules): `rollcall vex lint`
+- [Command summary](#command-summary): every input of `rollcall vex` in one place
+- [VEX documents and signing](#vex-documents-and-signing): OpenVEX and CycloneDX VEX output,
+  `--embed`, and signing
 - [Worked examples](#worked-examples): five real CVEs against real builds
 - [Glossary](#glossary)
 
@@ -40,7 +43,8 @@ rollcall vex --sbom product.cdx.json \
 - `--rules FILE` adds your rules. Repeat it for more files. A rule id may appear only once
   across all of them, starter pack included.
 - `--format openvex` or `--format cyclonedx` writes a standard VEX document instead of
-  rollcall's report. See the README for those formats and for signing.
+  rollcall's report. See [VEX documents and signing](#vex-documents-and-signing) for those
+  formats and for signing.
 
 The report (`rollcall-vex/1` JSON) has a `statements` list and an `unresolved` list. Each
 unresolved finding says why no rule decided it, with a rule template you can fill in. A
@@ -259,6 +263,116 @@ The starter pack is clean against the `.config` files of all the builds under `f
 (`--lint-starter-symbols`, as CI checks), and against a Zephyr v4.2.0 tree. Against a Zephyr
 v4.3 or later tree, lint warns about `CONFIG_CUSTOM_MBEDTLS_CFG_FILE`: that symbol is gone
 there, and the Mbed TLS rules it guards do not apply to those releases anyway.
+
+## Command summary
+
+`rollcall vex` reads an SBOM (`--sbom`, CycloneDX 1.6) or a model (`--model`), scanner output
+(`--findings`, grype `-o json` or osv-scanner `--format json`, repeatable), VEX rules
+(`--rules`, YAML, repeatable) and optionally each image's Kconfig (`--kconfig IMAGE=FILE`,
+repeatable), and writes a `rollcall-vex/1` JSON report: a statement for each finding a rule
+decides, and each other finding under `unresolved` with a rule template to fill in.
+
+```sh
+rollcall vex --sbom product.cdx.json \
+  --kconfig mcuboot=build/mcuboot/zephyr/.config \
+  --kconfig app=build/app/zephyr/.config \
+  --findings grype.json --rules vex-rules.yml -o vex.json
+```
+
+```yaml
+version: 1
+rules:
+  - id: mbedtls-dtls-compiled-out
+    match:
+      purl: "pkg:github/mbed-tls/mbedtls@*"   # or name; * matches anything (case-sensitive,
+                                              # against the canonical purl)
+      cves: [CVE-2022-35409]                  # optional
+      versions: ">=2.28.0, <2.28.5"           # optional semver range
+    when:                                     # optional; all must hold
+      - kconfig_off: CONFIG_MBEDTLS_SSL_PROTO_DTLS
+    status: not_affected                      # not_affected | affected | fixed | under_investigation
+    justification: code_not_present           # CycloneDX or OpenVEX word, kept as written;
+                                              # only for not_affected
+    detail: DTLS is compiled out.
+```
+
+- **Kconfig is per image.** A `kconfig_off` condition on a component is judged only by the
+  `.config` of the component's own image (in a sysbuild product, MCUboot's mbedtls by
+  MCUboot's `.config`). A bare `--kconfig FILE` is accepted only for a single-image product;
+  naming an image the product does not have, or one image twice, is a usage error (64).
+  Evidence cites the file as `IMAGE/zephyr/.config`, never by the path given.
+- **Unknown is never true.** Without evidence for a condition (no `.config` for the image, or a
+  symbol the `.config` does not mention) it is unknown, and the finding stays unresolved
+  (needs evidence). The same goes for a version that is not a release version (a
+  git-describe or pre-release suffix such as `v3.7.0-123-gabc` or `-rc1`, or a git SHA with
+  no release version in the purl) when a rule has `versions` or `version_in`.
+- **Not yet evidenced from the CLI:** `cargo_feature_off` and `symbol_not_linked` conditions
+  always need evidence (the finding stays unresolved) because `rollcall vex` cannot yet
+  supply Cargo features or the linked-symbol list.
+- **Subsystems:** `match.subsystem` must name an entry of the subsystem table
+  (`crates/rollcall-core/db/subsystems.yaml`); any other name is a rules error at the rule's
+  line (exit 65). It matches a nested subcomponent by name: a subsystem split
+  out of the `zephyr` component (see [subsystems.md](subsystems.md)). It applies only to findings joined
+  to that subcomponent (by its subpath purl such as
+  `pkg:github/zephyrproject-rtos/zephyr@v4.4.2#subsys/bluetooth/host`, its cpe, or its name and
+  version). Real scanner findings do not join subsystems today: grype and osv-scanner report
+  Zephyr CVEs against the CPE `zephyrproject:zephyr`, which only the `zephyr` component has, so
+  a `match.subsystem` rule never applies to them.
+- **Precedence:** the most specific matching rule wins (naming CVEs, then a version range,
+  then exact purl over purl glob over name), then the higher `priority`; equally ranked
+  rules that disagree are a conflict, reported as a warning naming each rule, and the
+  finding stays unresolved.
+- **Aliases:** reports of one vulnerability under different ids (e.g. a RUSTSEC and a GHSA
+  advisory for the same CVE, or grype and osv-scanner) are merged per component; the entry's
+  id is the CVE when there is one.
+- **bom-refs:** with `--sbom`, statements cite the document's own `bom-ref`s.
+
+Unresolved findings and conflicts are summarised on stderr; the exit code stays 0.
+
+`--starter-rules` adds rollcall's starter rule pack (`vex-rules.yaml`, shipped with the
+identifier database): Mbed TLS modules compiled out, Bluetooth, the MCUmgr serial transports
+and file systems switched off, and the TLS client or server side not linked. `rollcall vex
+lint RULES… --kconfig FILE | --zephyr-tree DIR` warns about any `kconfig_off` symbol that does
+not exist (a misspelt symbol makes a rule silently never apply); exit 1 on any warning. The
+rule format, the starter pack and five worked examples are on this page.
+
+## VEX documents and signing
+
+`--format` picks what `rollcall vex` writes: `rollcall` (the default, the report above),
+`openvex` (an OpenVEX v0.2.0 document whose products are the components' purls, as grype's
+`--vex` matches them) or `cyclonedx` (a standalone CycloneDX 1.6 VEX document whose
+`vulnerabilities[].affects[].ref` are BOM-Links into the `--sbom`). Only statements are
+rendered; unresolved findings are listed on stderr. The SBOM itself stays VEX-free unless
+you ask for `--embed` (with `--format cyclonedx`), which writes a copy of the SBOM with a
+`vulnerabilities` array added and its `version` incremented by one (CycloneDX: a modified
+BOM's version should be incremented; the `serialNumber` stays). Only the `version` value
+and the added array differ from the input; an SBOM without `version` (implicitly 1) gets
+`"version": 2`. The input file is never modified. `--timestamp` and `--id` pin the
+document's timestamp and id for reproducible output; by default the id is derived from the
+statements, the SBOM and the format, so the OpenVEX and CycloneDX documents get different
+ids. The SBOM's `serialNumber` must be a lowercase `urn:uuid:` and its `version` at least 1.
+
+```sh
+rollcall vex --sbom product.cdx.json --kconfig app=build/app/zephyr/.config \
+  --findings grype.json --rules vex-rules.yml --format openvex -o product.openvex.json
+grype sbom:product.cdx.json --vex product.openvex.json   # not_affected findings suppressed
+```
+
+`--sign local:key.pem` writes a detached Ed25519 signature (`rollcall-signature/1` JSON) of
+the output to `OUTPUT.sig`; `rollcall vex verify OUTPUT --key key.pub.pem` checks it and
+says whether the document was modified, signed by another key, or carries an invalid
+signature (exit 1). Create a key with `openssl genpkey -algorithm ed25519 -out key.pem` and
+its public half with `openssl pkey -in key.pem -pubout -out key.pub.pem`.
+
+`--sign cosign` signs keylessly with Sigstore through `cosign sign-blob`, writing
+`OUTPUT.sigstore.json`; `rollcall vex verify OUTPUT --cosign --certificate-identity …
+--certificate-oidc-issuer …` verifies it with `cosign verify-blob`. This needs `cosign` on
+`PATH` and an OIDC identity (in GitHub Actions, `permissions: id-token: write`; elsewhere
+cosign prints a login URL on stderr, which rollcall passes through). Without cosign, or with
+an unreadable or malformed `--sign local:` key, rollcall exits (69, 66 or 65) before writing
+anything. `vex verify --cosign` requires `--certificate-identity` or
+`--certificate-identity-regexp`, and `--certificate-oidc-issuer`; a missing document or
+bundle is exit 66, so exit 1 always means the signature did not verify.
 
 ## Worked examples
 

@@ -12,6 +12,136 @@ scanners know the *upstream* project and release. The component keeps the fork c
 `version`; the database adds the upstream version as evidence and uses it to render the purl
 and CPE. Its schema is documented in the `rollcall_core::identify` module docs.
 
+## Using the database
+
+`--identify` resolves each module to its *upstream* project with the active identifier
+database (see [Database versions](#database-versions) below): the version of the fork revision the build used,
+and from it the upstream purl, cpe and supplier that vulnerability scanners match.
+`--identifier-db FILE` does the same with that file, as does the global `--identifiers PATH`.
+Resolution is optional; without any of these the output is unchanged.
+
+```yaml
+schema: 1
+modules:
+  mbedtls:
+    upstream:
+      name: Mbed TLS
+      homepage: https://github.com/Mbed-TLS/mbedtls   # optional
+      supplier: Arm                                   # optional
+    purl: 'pkg:generic/mbedtls@{version}?vcs_url=git+https://github.com/Mbed-TLS/mbedtls'
+    cpe: 'cpe:2.3:a:trustedfirmware:mbed_tls:{version}:*:*:*:*:*:*:*'   # optional
+    cpe_aliases: ['cpe:2.3:a:arm:mbed_tls:{version}:*:*:*:*:*:*:*']   # optional
+    version_rule:                                     # one of:
+      kind: manual                                    #   manual: revision -> version table
+      table:
+        'a3e190fe44c78d1ba67f55979e1257328cc7d0d8': '4.1.0'
+#   kind: git_tag,    pattern: '^v(?P<version>\d+\.\d+\.\d+)$'
+#   kind: file_regex, file: include/version.h, pattern: '...(?P<version>...)...'
+```
+
+`git_tag` matches the revision itself, or a tag pointing at it; `file_regex` searches a
+file in the module's sources. Both need the module sources, found with `--workspace DIR`
+(the west workspace: each module is at `DIR/<west list path>`, so `--workspace` requires
+`--west-list`, and `--identifier-db` or `--identify`; without either it is a usage error,
+exit 64).
+Quote revisions and versions, which YAML could otherwise read as numbers (`'2.0'`, or a
+commit such as `1e753266…`). The database is checked when it
+is loaded: a malformed entry, an unknown key, or a purl or cpe template that does not render
+to a valid purl or CPE 2.3 name is an error naming the file and line (exit 65); a missing
+file is exit 66.
+
+The module's `version` stays the git revision; the upstream version is recorded as evidence
+and drives the purl and cpe, which are only filled in when a version was found (otherwise a
+warning says why). A purl or cpe from `spdx/modules-deps.spdx` wins over the database (a
+differing purl or cpe is a warning, except a purl naming the same repository or a cpe that
+is one of the database's `cpe_aliases`). Every other CPE (the database's when the SPDX one won,
+and each of its `cpe_aliases`: further NVD vendor:products the same project's CVEs are filed
+under) is written as an additional CPE: a `syft:cpe23` property, which grype matches on, and
+an `evidence.identity` entry. A module the database does not list gets one warning per run
+(also across every image with `--sysbuild`), and after the warnings `rollcall generate`
+prints a stub entry for each such module to stderr, ready to paste under `modules:`: fill in
+the `""` blanks and `<vendor>`/`<product>` (or delete the lines marked optional). The exit
+code stays 0.
+
+rollcall carries a seed database, `crates/rollcall-identifiers/db/identifiers.yaml`,
+covering 33 common Zephyr modules, each fork revision pinned by Zephyr v4.2.0 to v4.4.2
+mapped to its upstream version (`pkg:generic` purls; CPEs only from the NVD CPE dictionary).
+Its conventions and how the versions are derived are below; how to add a module is in
+[CONTRIBUTING.md](../CONTRIBUTING.md). Separately, `crates/rollcall-core/db/subsystems.yaml`
+maps Zephyr subsystems to their Kconfig symbols and source paths, checked against the pinned
+Zephyr tree by `scripts/verify-subsystems.sh`; it ships only with rollcall (see
+[subsystems.md](subsystems.md)).
+
+## Database versions
+
+The identifier database is its own artifact: the `rollcall-identifiers` crate, whose version
+is the database's `db_version` (`db_version: '1.0.0'` in the YAML). A new database is a new
+release of that crate, or the tarball `scripts/package-identifiers.sh` builds, not a new
+rollcall. The active database is, in order:
+
+1. `--identifiers PATH` (global; read by `generate` and `--version` only), or
+   `generate --identifier-db FILE`;
+2. `$ROLLCALL_IDENTIFIERS`;
+3. the newest compatible database in the cache directory that is newer than the embedded
+   one: `<cache>/rollcall/identifiers/<db_version>/identifiers.yaml`, where `<cache>` is
+   `$ROLLCALL_CACHE_DIR`, else `$XDG_CACHE_HOME`, else `~/.cache` (`%LOCALAPPDATA%` on
+   Windows);
+4. the database embedded in rollcall.
+
+A PATH may be the YAML file or a directory holding `identifiers.yaml`, or the word
+`embedded` (`--identifiers embedded`, `ROLLCALL_IDENTIFIERS=embedded`), which pins the
+embedded database and ignores the cache; a file called `embedded` is `./embedded`. rollcall
+accepts a
+`db_version` of at least 1.0.0 with major version 1: a MINOR bump adds modules, a PATCH bump
+fixes entries, and a MAJOR bump (a schema change) needs a newer rollcall. An explicit
+database outside that range is an error (exit 65); a database with no `db_version` (your own,
+built from stub entries) is used as is. Cache entries outside the range, older than the
+embedded database, malformed, or whose `db_version` is not their directory name are skipped
+with a warning.
+
+The cache is trusted only as far as its permissions: on Unix, a cache root, entry directory
+or `identifiers.yaml` writable by group or others (any of mode `0o022`) is skipped with a
+warning, as is a symlink that leads out of the cache root, since whoever can write there
+could change your SBOMs. Dotfiles, plain files and directories whose names are not versions
+are ignored silently, and a relative `$ROLLCALL_CACHE_DIR` or `$XDG_CACHE_HOME` is ignored.
+To rule the cache out entirely, pin the embedded database with `--identifiers embedded`.
+
+Installing a release without upgrading rollcall (distribution of the release tarballs:
+see [issue #16](https://github.com/smhasan94/rollcall/issues/16)):
+
+```sh
+mkdir -p ~/.cache/rollcall/identifiers
+tar -xzf rollcall-identifiers-1.1.0.tar.gz -C ~/.cache/rollcall/identifiers
+rollcall --version
+# rollcall 0.0.1
+# identifiers 1.1.0 (cache /home/me/.cache/rollcall/identifiers/1.1.0/identifiers.yaml)
+# identifiers 1.0.0 (embedded, minimum 1.0.0)
+```
+
+`rollcall --version` prints the active database (when it is not the embedded one) and the
+embedded one, side by side (`-V` with a subcommand, e.g. `rollcall --version vex`, prints the
+version and ignores the subcommand). `generate` names a database picked up from the cache in
+a note on stderr.
+
+Whenever modules are resolved, the SBOM records which database did it, without any path, so
+the output stays byte-identical wherever the database lives: `metadata.properties`
+`rollcall:identifiers:db-version` (the `db_version`, or `unversioned`) and
+`rollcall:identifiers:source` (`embedded`, `flag`, `env` or `cache`). `merge` carries them
+over, keeping every distinct value of its inputs.
+
+`scripts/package-identifiers.sh` builds the release tarball byte-identically on every run of
+a given toolchain (python3 and its zlib build; another zlib may compress differently), and
+`scripts/check-identifiers-package.sh` checks that and that rollcall reads the tarball from a
+cache directory.
+
+`rollcall identifiers lint [PATH] [--fixtures DIR]… [--expect-version VERSION]` checks a
+database (default: the embedded one, whose `db_version` must be the `rollcall-identifiers`
+version): schema, purl and CPE syntax, duplicate and unsorted modules, `db_version`, that every
+`manual` table row resolves, and with `--fixtures` that every module of those Zephyr builds
+resolves to a purl. Findings go to stderr as `file:line: rule: message`; exit 1 on any.
+`scripts/lint-identifiers.sh` runs it on the tree's database against `fixtures/zephyr`, as
+the CI job `identifiers-lint` does.
+
 ## PURL convention
 
 Every entry's purl is
