@@ -1043,13 +1043,9 @@ fn install_check_pip_checks_version_and_checksums() {
         "{}",
         text(&out)
     );
-    // --test-pypi installs from TestPyPI; --wheel installs the file.
+    // Only PyPI: no other index is ever passed. --wheel installs the file.
+    assert!(!pip.contains("--index-url"), "{pip}");
     let c = pip_case(&format!("rollcall {VERSION}"));
-    assert!(c.run(&["--test-pypi"]).status.success());
-    assert!(
-        c.s.read_state("pip.log")
-            .contains("--index-url https://test.pypi.org/simple/ rollcall==")
-    );
     let wheel = c.s.path("rollcall-x-py3-none-any.whl");
     std::fs::write(&wheel, "").unwrap();
     assert!(
@@ -1062,6 +1058,7 @@ fn install_check_pip_checks_version_and_checksums() {
         &["--wheel"][..],
         &["--wheel", "/nonexistent.whl"],
         &["--pypi"],
+        &["--test-pypi"],
     ] {
         let out = c.run(bad);
         assert_eq!(out.status.code(), Some(64), "{bad:?}: {}", text(&out));
@@ -1289,7 +1286,12 @@ fn install_check_workflow_covers_both_install_paths_and_windows() {
             w["on"][trigger]["inputs"]["tag"]["required"], true,
             "{trigger}"
         );
-        assert_eq!(w["on"][trigger]["inputs"]["test_pypi"]["type"], "boolean");
+        let inputs = w["on"][trigger]["inputs"].as_object().unwrap();
+        assert_eq!(
+            inputs.keys().collect::<Vec<_>>(),
+            ["tag"],
+            "{trigger}: the only input is the tag"
+        );
     }
 
     let r = workflow("release.yml");
@@ -1354,28 +1356,29 @@ fn release_workflow_builds_four_assets_and_reruns_safely() {
         })
         .unwrap();
     assert_eq!(attest["if"], "steps.upload.outputs.upload == 'true'");
-    // TestPyPI first for a pre-release.
-    let pypi_needs = jobs["publish-pypi"]["needs"].as_array().unwrap();
-    assert!(pypi_needs.iter().any(|n| n == "publish-testpypi"));
-    assert!(
-        jobs["publish-pypi"]["if"]
-            .as_str()
-            .unwrap()
-            .contains("needs.publish-testpypi.result == 'skipped'")
+    // PyPI right after the GitHub Release, pre-releases included (pip skips those unless
+    // asked), with no extra condition.
+    assert_eq!(
+        jobs["publish-pypi"]["needs"],
+        serde_json::json!(["preflight", "github-release"])
     );
+    assert!(jobs["publish-pypi"]["if"].is_null());
     // Windows: static C runtime, checked; Windows paths remapped.
     assert!(build.contains("+crt-static"));
     assert!(build.contains("cygpath -w"));
     assert!(build.contains("llvm-readobj") && build.contains("vcruntime"));
     assert!(step_runs(&jobs["publish-crates"]).contains("scripts/publish-crates.sh"));
-    for job in ["publish-crates", "publish-pypi", "publish-testpypi"] {
+    for (job, environment) in [("publish-crates", "crates-io"), ("publish-pypi", "pypi")] {
         let needs = jobs[job]["needs"].as_array().unwrap();
         assert!(
             needs.iter().any(|n| n == "github-release"),
             "{job} must wait for the GitHub Release"
         );
+        assert_eq!(jobs[job]["environment"], environment, "{job}");
+        assert_eq!(jobs[job]["permissions"]["id-token"], "write", "{job}");
     }
-    for job in ["publish-pypi", "publish-testpypi"] {
+    {
+        let job = "publish-pypi";
         let steps = jobs[job]["steps"].as_array().unwrap();
         let publish = steps
             .iter()
@@ -1386,11 +1389,45 @@ fn release_workflow_builds_four_assets_and_reruns_safely() {
             })
             .unwrap();
         assert_eq!(publish["with"]["skip-existing"], true, "{job}");
+        // The default index: no repository-url.
+        assert!(publish["with"]["repository-url"].is_null(), "{job}");
     }
-    assert_eq!(
-        jobs["publish-testpypi"]["if"],
-        "needs.preflight.outputs.prerelease == 'true'"
-    );
+}
+
+/// The release goes to PyPI only: no workflow, release script or runbook names another index.
+#[test]
+fn release_process_has_no_test_index() {
+    // Built from pieces so this file does not itself match a search for the names.
+    let needles = [
+        concat!("test", "pypi"),
+        concat!("test", ".pypi"),
+        concat!("test", "_pypi"),
+    ];
+    let dir = workspace().join(".github/workflows");
+    let mut files: Vec<_> = std::fs::read_dir(&dir)
+        .unwrap()
+        .map(|e| e.unwrap().path())
+        .collect();
+    files.sort();
+    assert!(!files.is_empty());
+    for extra in [
+        "scripts/install-check-pip.sh",
+        "docs/release.md",
+        "README.md",
+        "python/README.md",
+    ] {
+        files.push(workspace().join(extra));
+    }
+    for path in files {
+        let text = std::fs::read_to_string(&path).unwrap().to_lowercase();
+        for needle in needles {
+            assert!(
+                !text.contains(needle),
+                "{} mentions {needle}",
+                path.display()
+            );
+        }
+    }
 }
 
 // --- release-upload.sh -------------------------------------------------------------------------

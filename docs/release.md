@@ -11,7 +11,7 @@ a step fails.
 |---|---|
 | GitHub Release `v<version>` | `rollcall-v<version>-linux-amd64.tar.gz`, `-linux-arm64.tar.gz` (static, musl), `-darwin-universal.tar.gz` (arm64 + x86_64), `-windows-amd64.zip`, and `SHA256SUMS`; a build-provenance attestation for each asset |
 | crates.io | `rollcall-identifiers` (at its own version, the database's `db_version`), `rollcall-core`, `rollcall-assay`, `rollcall` (the binary; `cargo install rollcall`) |
-| PyPI (and TestPyPI for a pre-release) | `rollcall`, the wrapper: a pure-Python wheel and sdist at the PEP 440 version (`0.1.0rc1` for `v0.1.0-rc.1`) |
+| PyPI | `rollcall`, the wrapper: a pure-Python wheel and sdist at the PEP 440 version (`0.1.0rc1` for `v0.1.0-rc.1`) |
 
 Each archive holds one directory, `rollcall-v<version>-<platform>/`, with the binary, `LICENSE`
 and `README.md`; `scripts/package-release.sh` writes it, byte-identical for the same binary
@@ -39,9 +39,7 @@ GitHub's web settings):
    when it is set the workflow uses it instead of trusted publishing.)
 2. **PyPI.** Add a trusted publisher to the `rollcall` project: repository
    `smhasan94/rollcall`, workflow `release.yml`, environment `pypi`.
-3. **TestPyPI.** The same, as a pending publisher if the project does not exist there yet,
-   with environment `testpypi`.
-4. **GitHub.** Create the environments `crates-io`, `pypi` and `testpypi` (Settings →
+3. **GitHub.** Create the environments `crates-io` and `pypi` (Settings →
    Environments). Required reviewers on them are optional: they make every publish wait for an
    approval.
 
@@ -85,15 +83,13 @@ GitHub's web settings):
      no assets yet. A release whose `SHA256SUMS` is identical is left alone (no upload, no new
      attestation); one with a different `SHA256SUMS` fails the job, because published assets
      are never replaced;
-   - **publish-crates** (`scripts/publish-crates.sh`), and **publish-pypi** (for a
-     pre-release after **publish-testpypi**);
+   - **publish-crates** (`scripts/publish-crates.sh`), and **publish-pypi**;
    - **install-check** (`install-check.yml`): `cargo install rollcall` and `pip install
      rollcall` (Python 3.9 and 3.12) on Ubuntu 24.04 and macOS 15, a tampered wrapper against
      the published release (`pip-tamper`), and the Windows binary's `--help` on Windows Server
      2025.
 
-A pre-release (`v0.1.0-rc.1`) is published for real on crates.io and PyPI (crates.io has no
-test registry), but `cargo install rollcall` and `pip install rollcall` ignore pre-releases
+A pre-release (`v0.1.0-rc.1`) is published for real on crates.io and PyPI, but `cargo install rollcall` and `pip install rollcall` ignore pre-releases
 unless the version is given (`cargo install rollcall --version 0.1.0-rc.1`, `pip install
 rollcall==0.1.0rc1`).
 
@@ -106,6 +102,11 @@ remedy once anything has been published. Actions → Release → Run workflow wi
 github-release job never ran. If the release already has assets, the rebuild is discarded in
 favour of the published assets (the binaries are not guaranteed to be byte-identical, and the
 wheel on PyPI embeds the published `SHA256SUMS`), so even then nothing published changes.
+
+A re-run always uses the workflow file as it was at the tag. To finish a release with a
+workflow fixed on `main` since, start a new run instead: `gh workflow run release.yml -f
+tag=<tag>`. It checks out the tag's code, adopts the assets already published, and skips the
+crates already on crates.io and the files already on PyPI.
 
 - **preflight** fails when the tag and the versions disagree; the error names each file. Fix the
   versions, delete and re-push the tag (nothing has been published yet).
@@ -131,17 +132,17 @@ wheel on PyPI embeds the published `SHA256SUMS`), so even then nothing published
   If crates.io does not answer 200 or 404 for a version (an outage, rate limiting) after three
   attempts, it exits 2 without publishing anything more. A crate version, once published, can
   only be yanked, never replaced: a broken one needs a new version.
-- **publish-pypi / publish-testpypi** skip files already uploaded, so re-running is safe. Like
+- **publish-pypi** skips files already uploaded, so re-running is safe. Like
   crates.io, PyPI never accepts a different file under a published version.
 - **install-check** can fail just after publishing while the indexes catch up (the scripts
   retry for about five minutes). Re-run it alone with Actions → Install check → Run workflow
-  (`tag`, and `test_pypi` to install from TestPyPI).
+  (`tag`).
 
 ## Checking a release by hand
 
 ```sh
 scripts/install-check-cargo.sh v0.1.0
-scripts/install-check-pip.sh v0.1.0             # --test-pypi for TestPyPI
+scripts/install-check-pip.sh v0.1.0
 gh release download v0.1.0 -p SHA256SUMS
 python3 python/scripts/embed-release.py --sums SHA256SUMS --tag v0.1.0 --tamper
 uv build python --wheel --out-dir tampered

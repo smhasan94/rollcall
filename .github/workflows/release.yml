@@ -11,8 +11,8 @@
 # files already there.
 #
 # Secrets: none when trusted publishing is set up (crates.io: environment `crates-io`; PyPI:
-# environment `pypi`; TestPyPI: environment `testpypi`). A CARGO_REGISTRY_TOKEN secret, if set,
-# is used instead of crates.io trusted publishing.
+# environment `pypi`). A CARGO_REGISTRY_TOKEN secret, if set, is used instead of crates.io
+# trusted publishing.
 #
 # Every action is pinned to a full commit SHA. The tag reaches shell scripts only through the
 # TAG environment variable, and scripts/release-version.sh rejects anything but a release tag.
@@ -311,32 +311,10 @@ jobs:
           CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN || steps.auth.outputs.token }}
         run: scripts/publish-crates.sh
 
-  # Pre-releases go to TestPyPI as well, so the upload path is exercised there first.
-  publish-testpypi:
-    needs: [preflight, github-release]
-    if: needs.preflight.outputs.prerelease == 'true'
-    runs-on: ubuntu-24.04
-    environment: testpypi
-    permissions:
-      id-token: write
-    steps:
-      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
-        with:
-          name: python-dist
-          path: pydist
-      - uses: pypa/gh-action-pypi-publish@dc37677b2e1c63e2034f94d8a5b11f265b73ba33 # v1.14.2
-        with:
-          repository-url: https://test.pypi.org/legacy/
-          packages-dir: pydist/
-          skip-existing: true
-
-  # After the GitHub Release (the wrapper downloads its binary from there), and for a
-  # pre-release after TestPyPI.
+  # After the GitHub Release: the wrapper downloads its binary from there. A pre-release goes
+  # to PyPI too; pip ignores pre-releases unless asked for one by version or with --pre.
   publish-pypi:
-    needs: [preflight, github-release, publish-testpypi]
-    if: >-
-      !cancelled() && needs.github-release.result == 'success' &&
-      (needs.publish-testpypi.result == 'success' || needs.publish-testpypi.result == 'skipped')
+    needs: [preflight, github-release]
     runs-on: ubuntu-24.04
     environment: pypi
     permissions:
@@ -358,4 +336,3 @@ jobs:
     uses: ./.github/workflows/install-check.yml
     with:
       tag: ${{ inputs.tag || github.ref_name }}
-      test_pypi: false
