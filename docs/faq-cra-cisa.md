@@ -12,10 +12,11 @@ Every answer cites the primary source it rests on. The sources are:
   Page numbers are those of its PDF, as in [validate](validate.md#built-in-profile-cisa-2026).
 - **NTIA 2021**: [NTIA, The Minimum Elements For a Software Bill of Materials (SBOM), July 12, 2021](https://www.ntia.gov/report/2021/minimum-elements-software-bill-materials-sbom).
 - **CycloneDX 1.6**: the [CycloneDX 1.6 JSON reference](https://cyclonedx.org/docs/1.6/json/),
-  published as [ECMA-424](https://ecma-international.org/publications-and-standards/standards/ecma-424/).
+  published as [ECMA-424](https://ecma-international.org/publications-and-standards/standards/ecma-424/),
+  1st edition (June 2024). The 2nd edition (December 2025) is CycloneDX 1.7.
 - **BSI TR-03183-2**: [BSI TR-03183-2, Cyber Resilience Requirements for Manufacturers and Products, Part 2: Software Bill of Materials (SBOM), version 2.1.0, 2025-08-20](https://www.bsi.bund.de/SharedDocs/Downloads/EN/BSI/Publications/TechGuidelines/TR03183/BSI-TR-03183-2_v2_1_0.pdf),
-  the German federal guideline written for the CRA's SBOM requirement. It is guidance, not the
-  Regulation.
+  the German federal guideline written with the CRA in mind (its first version dates from 2023).
+  It is guidance, not the Regulation.
 
 ## Does the CRA require an SBOM?
 
@@ -25,7 +26,18 @@ vulnerabilities and components contained in products with digital elements, incl
 drawing up a software bill of materials in a commonly used and machine-readable format
 covering at the very least the top-level dependencies of the products".
 
-Source: CRA, Annex I, Part II, point (1).
+"At the very least" sets a floor, not a target. BSI TR-03183-2 and CISA 2026 (Coverage, p. 13)
+both expect the full tree of transitive dependencies, and rollcall writes the whole graph the
+build shows it.
+
+Who is covered: the duty falls on the *manufacturer*, whoever places the finished product on
+the market under their own name or trademark. Some products are outside the Regulation
+because other EU rules already cover them: medical devices, motor vehicles, certified aviation
+products and marine equipment. Spare parts that replace identical parts, and products made
+exclusively for national security or defence, are also excluded.
+
+Sources: CRA, Annex I, Part II, point (1); Article 2; Article 3, point (13); BSI TR-03183-2;
+CISA 2026, Practices and Processes.
 
 ## What does the CRA mean by "software bill of materials"?
 
@@ -40,8 +52,8 @@ Source: CRA, Article 3, point (39).
 
 The Regulation itself lists none. It asks for a "commonly used and machine-readable format"
 covering "at the very least the top-level dependencies", and lets the Commission specify "the
-format and elements of the software bill of materials" later, by implementing act. rollcall
-has not found such an implementing act as of this writing; check EUR-Lex for one.
+format and elements of the software bill of materials" later, by implementing act. As of
+October 2026 no such implementing act has been adopted; check EUR-Lex before relying on this.
 
 Until then, the most detailed CRA-aligned guidance is BSI TR-03183-2, which lists required
 fields per component (name, version, creator, hash, dependencies, licence and more). rollcall's
@@ -53,19 +65,24 @@ Table 3.
 
 ## Do I have to publish the SBOM?
 
-The Regulation does not require it. The SBOM belongs in the product's technical documentation,
-and is given to a market surveillance authority on a reasoned request. If you decide to make it
-available to users, the information that accompanies the product says where to find it.
+The Regulation does not require it. The SBOM is part of the product's technical documentation
+(Annex VII, point 2(b)), and is handed to a market surveillance authority on a reasoned request
+where that is necessary to check compliance (point 8). You keep the technical documentation
+for at least 10 years after the product is placed on the market, or for its support period if
+that is longer. If you decide to make the SBOM available to users, the information that
+accompanies the product says where to find it.
 
-Sources: CRA, Annex VII, points 2(b) and 8; Annex II, point 9.
+Sources: CRA, Annex VII, points 2(b) and 8; Article 13(13); Annex II, point 9.
 
 ## When do the CRA's obligations apply?
 
-The Regulation applies from 11 December 2027. The reporting obligations of Article 14 (notifying
-actively exploited vulnerabilities and severe incidents) apply earlier, from 11 September 2026,
-and also to products placed on the market before 11 December 2027.
+The Regulation, including the SBOM requirement in Annex I, applies from 11 December 2027.
+Products placed on the market before that date fall under it only if they are substantially
+modified afterwards. One exception: the reporting obligations of Article 14 (notifying actively
+exploited vulnerabilities and severe incidents) apply from 11 September 2026, to new and
+already-marketed products alike.
 
-Sources: CRA, Article 71(2); Article 69(3).
+Sources: CRA, Article 71(2); Article 69(2) and (3).
 
 ## Does the SBOM duty cover open-source components?
 
@@ -77,8 +94,10 @@ Sources: CRA, Annex I, Part II, point (1); Article 13(6).
 
 ## What are the CISA minimum elements?
 
-A US government list of what an SBOM should contain, written jointly by CISA, NSA, FBI and
-other agencies. The 2026 version replaces the NTIA 2021 list. It is guidance, not a law. Its
+A list of what an SBOM should contain, published by the US Cybersecurity and Infrastructure
+Security Agency (CISA) together with the NSA, the FBI and fifteen partner agencies from other
+countries, including Germany's BSI and France's ANSSI. The 2026 version replaces the NTIA 2021
+list. It is guidance, not a law. Its
 data fields are in two groups (Appendix A, Table 1, p. 19, lists each with its definition):
 
 - **SBOM metadata**: SBOM Author, SBOM Timestamp, SBOM Tool Name, SBOM Author Signature, SBOM
@@ -107,10 +126,10 @@ Source: NTIA 2021, sections Data Fields, Automation Support and Practices and Pr
 
 | Element (CISA 2026 / NTIA 2021) | CycloneDX 1.6 field | rollcall fills it from |
 |---------------------------------|---------------------|------------------------|
-| SBOM Author / Author of SBOM Data | `metadata.authors`, `metadata.manufacturer` | not yet (`metadata.tools` names rollcall; see [issue #14](https://github.com/smhasan94/rollcall/issues/14)) |
+| SBOM Author / Author of SBOM Data | `metadata.authors`, `metadata.manufacturer` | not yet (`metadata.tools` names rollcall as the tool; there is no `generate --author` option yet) |
 | SBOM Tool Name | `metadata.tools.components[]` | always |
 | SBOM Timestamp / Timestamp | `metadata.timestamp` | the time of generation, or `--timestamp` |
-| Component Producer / Supplier Name | `components[].supplier`, `manufacturer` | the identifier database (modules) |
+| Component Producer / Supplier Name | `components[].supplier`, `manufacturer` | the identifier database, for the modules it knows (Zephyr's today); not yet the product or its images ([issue #14](https://github.com/smhasan94/rollcall/issues/14)) |
 | Component Name, Version | `components[].name`, `version` | the build's inputs |
 | Component Identifiers / Other Unique Identifiers | `components[].purl`, `cpe` | the identifier database |
 | Component Hash | `components[].hashes[]` | binary blobs only (ESP-IDF blobs, `merge --blob-manifest`); not Zephyr images yet |
@@ -131,11 +150,31 @@ rollcall writes CycloneDX 1.6 JSON only; SPDX output is deferred
 Sources: CycloneDX 1.6 (ECMA-424); NTIA 2021, Automation Support; CISA 2026, Data Fields;
 Appendix A, Table 1 (p. 19); CRA, Annex I, Part II, point (1).
 
+## So what do I actually need to do?
+
+For the SBOM part of the CRA, as a firmware manufacturer:
+
+- Produce a machine-readable SBOM for every release you place on the market, covering at least
+  every top-level dependency (`rollcall generate` writes CycloneDX 1.6 JSON).
+- Keep it with the product's technical documentation, ready to hand to a market surveillance
+  authority on request, for at least 10 years after the product is placed on the market or for
+  its support period, whichever is longer.
+- If you choose to give users the SBOM, say where to find it in the information that comes with
+  the product.
+- Run `rollcall validate --schema --profile cra` (and `--profile cisa-2026` if you sell into the
+  US), fix what it reports, then read what the profiles do not check.
+- Update the SBOM whenever the components change, so it keeps matching what you ship.
+
+Sources: CRA, Annex I, Part II, point (1); Article 13(13); Annex VII, points 2(b) and 8; Annex
+II, point 9; CISA 2026, Practices and Processes.
+
 ## Does a "valid" SBOM from rollcall mean my product complies?
 
 No. `rollcall validate --schema` proves the document is well-formed CycloneDX 1.6.
-`--profile cisa-2026` and `--profile cra` check the fields above, and passing them means
-passing rollcall's checks, not compliance with any law: the CRA asks for much more than an SBOM
+`--profile cisa-2026` and `--profile cra` check some of the fields above (not, for example,
+Component License or SBOM Author Signature; [validate](validate.md) lists what each profile
+checks and what it does not), and passing them means passing rollcall's checks, not compliance
+with any law: the CRA asks for much more than an SBOM
 (secure design, vulnerability handling, updates, reporting), and the profiles are deliberately
 lenient in places, each listed in [validate](validate.md#citation-decisions-and-open-notes).
 
