@@ -2,11 +2,11 @@
 # Install check: `pip install rollcall` of a release gives a working `rollcall --version`, and
 # the binary it ran is the published one.
 #
-# Usage: scripts/install-check-pip.sh TAG [--test-pypi | --wheel FILE]
+# Usage: scripts/install-check-pip.sh TAG [--wheel FILE]
 #
-# In a fresh virtual environment: `pip install rollcall==<PEP 440 version>` from PyPI (from
-# TestPyPI with --test-pypi; FILE itself with --wheel, as the release workflow does before
-# publishing), retried while the upload propagates. Then, with an empty cache:
+# In a fresh virtual environment: `pip install rollcall==<PEP 440 version>` from PyPI (FILE
+# itself with --wheel, as the release workflow does before publishing), retried while the
+# upload propagates. Then, with an empty cache:
 #
 #   - `rollcall --version` (the wrapper's first run: download, verify, cache) starts with
 #     `rollcall <version>`, and `rollcall --help` exits 0;
@@ -36,7 +36,7 @@ die() {
 }
 
 usage() {
-    die 64 "usage: install-check-pip.sh TAG [--test-pypi | --wheel FILE]"
+    die 64 "usage: install-check-pip.sh TAG [--wheel FILE]"
 }
 
 [[ $# -ge 1 ]] || usage
@@ -44,13 +44,9 @@ tag="$1"
 shift
 [[ "$tag" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-(alpha|beta|rc)\.[0-9]+)?$ ]] ||
     die 64 "TAG must be a release tag such as v0.1.0, not '$tag'"
-index=() wheel=""
+wheel=""
 case "${1:-}" in
     "") ;;
-    --test-pypi)
-        [[ $# -eq 1 ]] || usage
-        index=(--index-url https://test.pypi.org/simple/)
-        ;;
     --wheel)
         [[ $# -eq 2 ]] || usage
         wheel="$2"
@@ -84,7 +80,7 @@ vpy="$bindir/python"
 spec="rollcall==$pep440"
 [[ -z "$wheel" ]] || spec="$wheel"
 attempt=1
-until "$vpy" -m pip install --disable-pip-version-check --no-cache-dir ${index[@]+"${index[@]}"} "$spec"; do
+until "$vpy" -m pip install --disable-pip-version-check --no-cache-dir "$spec"; do
     [[ "$attempt" -lt "$attempts" ]] || die 1 "pip install $spec failed $attempts times"
     echo "install-check-pip: attempt $attempt failed; retrying in ${delay}s (index propagation)" >&2
     attempt=$((attempt + 1))

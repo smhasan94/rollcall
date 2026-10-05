@@ -13,22 +13,12 @@ on:
         description: "The release tag to check, e.g. v0.1.0"
         required: true
         type: string
-      test_pypi:
-        description: "pip-install from TestPyPI instead of PyPI"
-        required: false
-        type: boolean
-        default: false
   workflow_dispatch:
     inputs:
       tag:
         description: "The release tag to check, e.g. v0.1.0"
         required: true
         type: string
-      test_pypi:
-        description: "pip-install from TestPyPI instead of PyPI"
-        required: false
-        type: boolean
-        default: false
 
 permissions:
   contents: read
@@ -73,14 +63,7 @@ jobs:
       - name: pip install rollcall
         env:
           ROLLCALL_PYTHON: python
-          TEST_PYPI: ${{ inputs.test_pypi }}
-        run: |
-          set -euo pipefail
-          if [[ "$TEST_PYPI" == true ]]; then
-            scripts/install-check-pip.sh "$TAG" --test-pypi
-          else
-            scripts/install-check-pip.sh "$TAG"
-          fi
+        run: scripts/install-check-pip.sh "$TAG"
 
   # The wrapper built from this checkout with every digest of the release's real SHA256SUMS
   # flipped by one digit must refuse the real download: exit 65, a clear message, nothing cached.
