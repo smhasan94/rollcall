@@ -39,6 +39,7 @@ checks it. -->
 # Project
 
 - [Versioning, MSRV and releasing](versioning.md)
+  - [Releasing rollcall](release.md)
 - [Release notes v0.1.0](releases/v0.1.0.md)
 - [Outreach: Zephyr working-group thread](outreach/zephyr-working-group-thread.md)
   - [Zephyr RFC #120474 comment](outreach/zephyr-rfc-120474-comment.md)

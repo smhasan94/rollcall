@@ -21,7 +21,7 @@ incompatibly:
 
 **Before 1.0** (the 0.x series), a breaking change bumps the minor version (0.1.x to 0.2.0) and
 everything else the patch version. From 1.0 the usual rules apply. Library crates
-(`rollcall-core`, `rollcall-assay`, `rollcall-cli`) share the workspace version but their Rust
+(`rollcall-core`, `rollcall-assay`) share the workspace version but their Rust
 APIs are not a stable interface before 1.0.
 
 The identifier database is versioned on its own: its `db_version`, which is the
@@ -45,48 +45,31 @@ Only the latest minor release gets fixes, including security fixes; see
 
 ## Releasing
 
-The steps, for a release `X.Y.Z` (tag `vX.Y.Z`). Pushing the tag is what publishes, so
-everything before it is a pull request like any other.
+[Releasing rollcall](release.md) is the runbook: the one-time registry setup, the version
+bump, tagging, what `release.yml` publishes and what to do when a step fails. What it leaves to
+this page:
 
 1. **Changelog and notes.** In `CHANGELOG.md`, move the `[Unreleased]` entries under
    `## [X.Y.Z] - YYYY-MM-DD` and add its link reference. Write the release notes in
-   `docs/releases/vX.Y.Z.md`: the release workflow uses that file as the GitHub Release body,
-   and the docs site lists it. Set the release date in CHANGELOG.md to the day you tag, and the
-   anchor in the release notes' CHANGELOG link to match it (`CHANGELOG.md#xyz---yyyy-mm-dd`,
-   GitHub's anchor for the heading); the changelog test fails while they disagree.
-2. **Version.** Set `version` in `[workspace.package]` and in the path dependencies of
-   `[workspace.dependencies]` in `Cargo.toml` to `X.Y.Z`, and the Python wrapper's version in
-   `python/pyproject.toml`; then `cargo update -w`. The changelog test checks that the top
-   released entry matches the workspace version.
-3. **Check.** From the workspace root:
-
-   ```sh
-   cargo fmt --all --check
-   cargo clippy --workspace --all-targets --locked -- -D warnings
-   cargo test --workspace --locked
-   cargo deny --all-features --locked check
-   RUSTDOCFLAGS=-Dwarnings cargo doc --workspace --no-deps --locked
-   scripts/build-docs.sh --install && scripts/check-site-links.sh
-   ```
-
-4. **Merge, then tag** the merge commit on `main`:
-
-   ```sh
-   git tag -a vX.Y.Z -m "rollcall vX.Y.Z"
-   git push origin vX.Y.Z
-   ```
-
-5. **Watch the tag's workflows.** `release.yml` builds the binaries
-   (`rollcall-vX.Y.Z-{linux-amd64,linux-arm64,darwin-universal}.tar.gz`,
-   `rollcall-vX.Y.Z-windows-amd64.zip`), writes `SHA256SUMS`, attests their build provenance,
-   creates the GitHub Release and publishes the crates and the Python wrapper. `ci.yml` runs
-   on the tag too, so `cargo deny check` and `cargo doc` with `-D warnings` are recorded for
-   the tagged commit.
-6. **After the release.** The docs site deploys from `main` (`docs.yml`); its "Verify live" step
-   checks the published pages. Run the clean-machine quickstart against the live site:
-   `gh workflow run quickstart-clean.yml` (it follows the published page with the release
-   binary, `cargo install` and `pip install`). Move
-   [rollcall-example-zephyr](https://github.com/smhasan94/rollcall-example-zephyr) to
-   `uses: smhasan94/rollcall/action@vX.Y.Z` with `rollcall-version: vX.Y.Z`. Remove the lines
-   of `.lycheeignore` whose pages now exist (the tag, the release, the example repository, the
-   live site), so the link check covers them from then on.
+   `docs/releases/vX.Y.Z.md`; the release uses that file as the GitHub Release body. Set the
+   release date in CHANGELOG.md to the day you tag, and the anchor in the release notes'
+   CHANGELOG link to match it (`CHANGELOG.md#xyz---yyyy-mm-dd`, GitHub's anchor for the
+   heading); the changelog test fails while they disagree.
+2. **The version.** For v0.1.0 the workspace moves from its placeholder version (0.0.1, or a
+   `-rc.N` while release candidates are tagged) to `0.1.0` everywhere
+   [the runbook](release.md#making-a-release) lists, and
+   `scripts/release-version.sh check v0.1.0` must pass: the tag has to match. While the
+   workspace is at 0.0.x or a pre-release, the changelog test only asks for a 0.1.0 entry;
+   from then on it checks that the top released entry is the workspace version.
+3. **At the tag.** `ci.yml` runs on `v*` tags too, so `cargo deny check` and `cargo doc` with
+   `-D warnings` are recorded for the tagged commit.
+4. **After the release.**
+   - The docs site deploys from `main` (`docs.yml`); its "Verify live" step checks the
+     published pages.
+   - Run the clean-machine quickstart against the live site, `gh workflow run
+     quickstart-clean.yml`: it follows the published page with the release binary,
+     `cargo install` and `pip install`.
+   - Move [rollcall-example-zephyr](https://github.com/smhasan94/rollcall-example-zephyr) to
+     `uses: smhasan94/rollcall/action@vX.Y.Z` with `rollcall-version: vX.Y.Z`.
+   - Remove the lines of `.lycheeignore` whose pages now exist (the tag, the release, the
+     example repository, the live site), so the link check covers them from then on.

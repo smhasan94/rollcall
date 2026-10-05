@@ -2130,13 +2130,13 @@ fn versioning_policy_states_msrv_equal_to_cargo_rust_version() {
     }
     let releasing = md_section(&doc, "## Releasing").join("\n");
     for needle in [
+        "[Releasing rollcall](release.md)",
         "CHANGELOG.md",
         "docs/releases/vX.Y.Z.md",
-        "cargo deny --all-features --locked check",
-        "RUSTDOCFLAGS=-Dwarnings cargo doc --workspace --no-deps --locked",
-        "git tag -a vX.Y.Z",
-        "SHA256SUMS",
+        "scripts/release-version.sh check v0.1.0",
+        "`cargo deny check` and `cargo doc`",
         "quickstart-clean.yml",
+        ".lycheeignore",
     ] {
         assert!(releasing.contains(needle), "Releasing lacks {needle:?}");
     }

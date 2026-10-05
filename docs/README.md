@@ -60,4 +60,5 @@ platformio
 | [diff.md](diff.md) | `rollcall diff` and the Action's pull-request comment |
 | [cra-clock.md](cra-clock.md) | the CSAF 2.0 handoff to cra-clock |
 | [versioning.md](versioning.md) | semantic versioning, the MSRV and how a release is made |
+| [release.md](release.md) | the release runbook: what a release publishes and how |
 | [releases/v0.1.0.md](releases/v0.1.0.md) | release notes for v0.1.0 |

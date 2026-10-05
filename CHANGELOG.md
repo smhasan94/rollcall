@@ -47,6 +47,11 @@ The first release. Release notes: [docs/releases/v0.1.0.md](docs/releases/v0.1.0
 - **Adoption (E9).** `rollcall csaf` exports CSAF 2.0 VEX documents for cra-clock; the Zephyr
   `west spdx` gap analysis.
 
+### Changed
+
+- The `rollcall` crate is now the command-line binary (`cargo install rollcall`), replacing the
+  `rollcall-cli` package, which is no longer published (its 0.0.1 placeholder stays).
+
 ### Removed
 
 - The reserved `rollcall generate --format spdx` value, which printed "not implemented". SPDX
