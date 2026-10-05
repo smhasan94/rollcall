@@ -178,6 +178,9 @@ jobs:
   # (`--offline` checks only the links inside the repository). Network-dependent: an external
   # site that is down fails this job, and re-running it is the remedy.
   #
+  # Hosts that answer 403 to GitHub's runners only (scripts/link-check-blocked-hosts.txt,
+  # each with its reason and date) give SKIP for a 403, and only for a 403.
+  #
   # The release documents link pages that exist only after the release's human steps (the
   # v0.1.0 tag, the example repository, the live docs site), so their http(s) links are
   # checked on release tags only; their links inside the repository on every run.

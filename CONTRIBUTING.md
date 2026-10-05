@@ -220,3 +220,10 @@ upstream `https://git.trustedfirmware.org/TF-A/trusted-firmware-a.git` and tag
   the pinned ESP-IDF release; see [docs/esp-idf.md](docs/esp-idf.md).
 - **Subsystem table** (`crates/rollcall-core/db/subsystems.yaml`): checked by
   `scripts/verify-subsystems.sh`; see [docs/subsystems.md](docs/subsystems.md).
+- **Docs and their links**: `scripts/check-doc-links.sh FILE.md...` checks every link of the
+  given Markdown files (CI job `docs-links`; `--offline` for the links inside the
+  repository), and `scripts/build-docs.sh` with `scripts/check-site-links.sh` builds the docs
+  site and checks it (workflow `docs.yml`). A few sites answer HTTP 403 to GitHub's CI runners
+  while serving everyone else; they are listed, each with the reason and the date, in
+  `scripts/link-check-blocked-hosts.txt`, and both checkers tolerate a 403 from them, and only
+  a 403. Add a host there only after seeing a CI-only 403, never to hide a broken link.

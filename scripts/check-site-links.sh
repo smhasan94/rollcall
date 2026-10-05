@@ -22,6 +22,9 @@
 #    - the patterns in .lycheeignore: pages that exist only once a human step is done (the
 #      released tag, the example repository, the live site). Remove each line when it is.
 #    GITHUB_TOKEN, if set, is passed to lychee for github.com links (rate limits).
+#    Hosts in scripts/link-check-blocked-hosts.txt (they reject GitHub's CI runners) are
+#    checked in a separate lychee run that also accepts HTTP 403, so the two link checkers
+#    tolerate the same thing: a 403 from those hosts only. Every other link accepts 2xx and 429.
 #
 # Either way, a lychee whose reported version is not the pinned one is refused.
 # Exits 1 if a link is broken, 2 on a setup error.
@@ -143,12 +146,23 @@ echo "check-site-links: pass 1, inside the site (${#pages[@]} pages, offline, wi
 if [[ "$offline" -eq 0 ]]; then
     echo "check-site-links: pass 2, outside the site (online)"
     args=(--no-progress --max-retries 3 --retry-wait-time 5 --timeout 30
-        --accept '200..=299,429' --exclude "$REPO_FILES" --scheme https --scheme http)
+        --exclude "$REPO_FILES" --scheme https --scheme http)
     # lychee reads .lycheeignore from the current directory (the repository root) itself.
     if [[ -n "${GITHUB_TOKEN:-}" ]]; then
         args+=(--github-token "$GITHUB_TOKEN")
     fi
-    "$LYCHEE" "${args[@]}" "${pages[@]}" || failed=1
+    # The listed hosts, as one regular expression (none: no second run).
+    blocked="$(sed -e 's/#.*//' -e 's/[[:space:]]//g' scripts/link-check-blocked-hosts.txt |
+        grep -v '^$' | sed 's/\./\\./g' | paste -sd '|' -)"
+    if [[ -n "$blocked" ]]; then
+        hosts="^https?://($blocked)(/|$)"
+        "$LYCHEE" "${args[@]}" --accept '200..=299,429' --exclude "$hosts" "${pages[@]}" || failed=1
+        echo "check-site-links: pass 2, hosts that block CI runners (403 accepted): $blocked"
+        "$LYCHEE" "${args[@]}" --accept '200..=299,403,429' --exclude '.*' --include "$hosts" \
+            "${pages[@]}" || failed=1
+    else
+        "$LYCHEE" "${args[@]}" --accept '200..=299,429' "${pages[@]}" || failed=1
+    fi
 fi
 
 if [[ "$failed" -ne 0 ]]; then

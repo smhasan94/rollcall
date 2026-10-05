@@ -1,0 +1,10 @@
+# Hosts that answer HTTP 403 to GitHub's CI runners while serving the same page to everyone
+# else (scripts/check-doc-links.sh). For a host listed here, and for a 403 only, the link is
+# reported as SKIP instead of FAIL; a 404, a 5xx, a curl error or a redirect to a parent page
+# still fails. Keep the list short, and give each host the reason and the date it was seen.
+#
+# One host name per line; `#` starts a comment.
+
+# 2026-10-05: www.cisa.gov answered 403 to the docs-links job (CI run 37260893063, PR #39) for
+# the 2026 minimum-elements page, which answers 200 outside GitHub's datacenter addresses.
+www.cisa.gov

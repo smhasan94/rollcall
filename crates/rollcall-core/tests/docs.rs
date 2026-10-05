@@ -2415,3 +2415,130 @@ fn tag_run_tolerates_only_this_tags_release_page_404() {
     assert_eq!(tolerate_pending_release_link("main", "1", &[this_404]), 2);
     assert_eq!(tolerate_pending_release_link("v0.1.0", "x", &[this_404]), 2);
 }
+
+#[cfg(unix)]
+/// Runs `scripts/check-doc-links.sh` (online) on a document linking each URL of `table`, with a
+/// fake `curl` first on PATH answering from `table` (URL, final status, curl exit code, final
+/// URL); its exit code and stdout.
+fn check_doc_links_with_fake_curl(table: &[(&str, u16, i32, &str)]) -> (i32, String) {
+    use std::os::unix::fs::PermissionsExt;
+    let dir = tempfile::tempdir().expect("temporary directory");
+    let bin = dir.path().join("bin");
+    std::fs::create_dir(&bin).expect("bin directory");
+    let fake = bin.join("curl");
+    std::fs::write(
+        &fake,
+        r#"#!/usr/bin/env bash
+# Fake curl: the URL is the last argument; FAKE_CURL_TABLE has `url status rc effective` rows.
+url="${!#}"
+while read -r u status rc effective; do
+    if [[ "$u" == "$url" ]]; then
+        printf '%s %s' "$status" "$effective"
+        [[ "$rc" -eq 0 ]] || echo "curl: ($rc) fake failure" >&2
+        exit "$rc"
+    fi
+done <"$FAKE_CURL_TABLE"
+echo "fake curl: no row for $url" >&2
+exit 99
+"#,
+    )
+    .expect("write the fake curl");
+    std::fs::set_permissions(&fake, std::fs::Permissions::from_mode(0o755)).expect("chmod");
+    let rows: String = table
+        .iter()
+        .map(|(url, status, rc, effective)| format!("{url} {status} {rc} {effective}\n"))
+        .collect();
+    let table_path = dir.path().join("table.txt");
+    std::fs::write(&table_path, rows).expect("write the table");
+    let doc: String = table
+        .iter()
+        .map(|(url, ..)| format!("- [link]({url})\n"))
+        .collect();
+    let doc_path = dir.path().join("doc.md");
+    std::fs::write(&doc_path, doc).expect("write the document");
+    let path = format!(
+        "{}:{}",
+        bin.display(),
+        std::env::var("PATH").unwrap_or_default()
+    );
+    let out = std::process::Command::new("bash")
+        .arg(repo_root().join("scripts/check-doc-links.sh"))
+        .arg(&doc_path)
+        .env("PATH", path)
+        .env("FAKE_CURL_TABLE", &table_path)
+        .env_remove("GITHUB_TOKEN")
+        .output()
+        .expect("bash runs");
+    (
+        out.status.code().expect("exited with a code"),
+        String::from_utf8_lossy(&out.stdout).into_owned(),
+    )
+}
+
+/// SHA-125 (CI docs-links): a host listed in scripts/link-check-blocked-hosts.txt (it rejects
+/// GitHub's CI runners) gets SKIP for an HTTP 403 and only for that; anything else from it
+/// still fails, and a 403 from any other host fails.
+#[cfg(unix)]
+#[test]
+fn check_doc_links_skips_only_a_403_from_a_host_that_blocks_ci() {
+    let blocked = repo_file("scripts/link-check-blocked-hosts.txt");
+    assert!(
+        blocked
+            .lines()
+            .any(|l| l.split('#').next().unwrap_or_default().trim() == "www.cisa.gov"),
+        "www.cisa.gov is not listed"
+    );
+    const CISA: &str = "https://www.cisa.gov/resources-tools/resources/2026-minimum-elements-software-bill-materials-sbom";
+    const OK: &str = "https://example.org/page";
+
+    // A 403 from the listed host is skipped; the run passes and counts it as skipped.
+    let (code, out) = check_doc_links_with_fake_curl(&[(CISA, 403, 0, CISA), (OK, 200, 0, OK)]);
+    assert_eq!(code, 0, "{out}");
+    assert!(
+        out.lines().any(|l| l.contains("SKIP") && l.contains(CISA) && l.contains(
+            "HTTP 403 from a host that blocks CI runners (listed in scripts/link-check-blocked-hosts.txt)"
+        )),
+        "{out}"
+    );
+    assert!(
+        out.contains("check-doc-links: PASS (1 checked, 1 skipped)"),
+        "{out}"
+    );
+
+    // Every other result from the listed host fails.
+    for (status, rc, effective, why) in [
+        (404, 0, CISA, "a 404"),
+        (503, 0, CISA, "a 503"),
+        (0, 6, "", "a curl error (DNS)"),
+        (
+            403,
+            0,
+            "https://www.cisa.gov/resources-tools",
+            "a 403 after a redirect up to a parent page",
+        ),
+        (
+            403,
+            0,
+            "https://blocked.example.net/elsewhere",
+            "a 403 after a redirect to an unlisted host",
+        ),
+    ] {
+        let (code, out) =
+            check_doc_links_with_fake_curl(&[(CISA, status, rc, effective), (OK, 200, 0, OK)]);
+        assert_eq!(code, 1, "{why} on the listed host passed:\n{out}");
+        assert!(
+            out.lines().any(|l| l.contains("FAIL") && l.contains(CISA)),
+            "{why}: {out}"
+        );
+        assert!(out.contains("check-doc-links: FAIL"), "{why}: {out}");
+    }
+
+    // A 403 from a host that is not listed fails.
+    const OTHER: &str = "https://www.example.com/forbidden";
+    let (code, out) = check_doc_links_with_fake_curl(&[(OTHER, 403, 0, OTHER), (OK, 200, 0, OK)]);
+    assert_eq!(code, 1, "{out}");
+    assert!(
+        out.lines().any(|l| l.contains("FAIL") && l.contains(OTHER)),
+        "{out}"
+    );
+}
