@@ -16,10 +16,14 @@
 # the old-mbedTLS model with its captures and the OpenVEX golden; SHA-132), and the ESP-IDF
 # ingestion goldens under tests/golden/esp-idf/ rendered from fixtures/esp-idf/ (SHA-129), and
 # the PlatformIO ingestion goldens under tests/golden/platformio/ rendered from
-# fixtures/platformio/ (SHA-131), then
+# fixtures/platformio/ (SHA-131), and the CBOM goldens under tests/golden/cbom/ rendered from
+# the hand-written model tests/data/cbom/sensor-node.cbom.model.json (the CycloneDX 1.6 CBOM by
+# rollcall-core's tests/cbom.rs, the Markdown summary by rollcall-assay's tests/summary.rs;
+# SHA-138), then
 # re-runs the golden tests and the reader round trips against them, and the CLI tests that
 # compare `rollcall generate`, `rollcall merge`, `rollcall vex`, `rollcall validate`,
-# `rollcall report`, `rollcall scan`, `rollcall diff` and `rollcall csaf` output with them.
+# `rollcall report`, `rollcall scan`, `rollcall diff`, `rollcall csaf` and `rollcall assay`
+# output with them.
 #
 # Golden files are only ever produced by this script, never edited by hand. Review the
 # resulting diff like code.
@@ -31,6 +35,8 @@ cd "$(dirname "$0")/.."
 # directories, which do not yet hold a golden being blessed for the first time. The second
 # pass runs them against the freshly written files.
 ROLLCALL_BLESS=1 cargo test -p rollcall-core --test golden --test cyclonedx --test zephyr --test cargo --test esp_idf --test platformio --test blob --test reader --test vex -- --skip every_committed
+ROLLCALL_BLESS=1 cargo test -p rollcall-core --test cbom -- --skip every_committed
+ROLLCALL_BLESS=1 cargo test -p rollcall-assay --test summary -- --skip every_committed
 # The validation goldens are derived from tests/golden/clean.cdx.json, so they are blessed
 # after it.
 ROLLCALL_BLESS=1 cargo test -p rollcall-core --test validate
@@ -38,8 +44,9 @@ ROLLCALL_BLESS=1 cargo test -p rollcall-core --test validate
 # goldens the Zephyr ones (tests/golden/zephyr/), so they are blessed after them. The diff and
 # CSAF bless passes skip the golden inventory, as above.
 ROLLCALL_BLESS=1 cargo test -p rollcall-core --test report --test scan --test diff --test csaf -- --skip every_committed
-cargo test -p rollcall-core --test golden --test cyclonedx --test zephyr --test cargo --test esp_idf --test platformio --test blob --test reader --test vex --test validate --test report --test scan --test diff --test csaf
-cargo test -p rollcall --test generate --test generate_zephyr --test generate_cargo --test generate_esp_idf --test generate_platformio --test merge --test vex --test validate_profile --test report --test scan --test diff --test csaf --test validate
+cargo test -p rollcall-core --test golden --test cyclonedx --test zephyr --test cargo --test esp_idf --test platformio --test blob --test reader --test vex --test validate --test report --test scan --test diff --test csaf --test cbom
+cargo test -p rollcall-assay --test summary
+cargo test -p rollcall --test generate --test generate_zephyr --test generate_cargo --test generate_esp_idf --test generate_platformio --test merge --test vex --test validate_profile --test report --test scan --test diff --test csaf --test validate --test assay
 
 git status --short -- crates/rollcall-core/tests/golden
 git diff --stat -- crates/rollcall-core/tests/golden

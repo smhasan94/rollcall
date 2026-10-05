@@ -70,6 +70,8 @@ fn cyclonedx_docs_have_mapping_section() {
         "evidence.occurrences",
         "evidence.licenses",
         "firmware",
+        "cryptoProperties",
+        "rollcall:crypto-evidence",
     ] {
         assert!(mapping.contains(term), "Mapping section lacks {term:?}");
     }

@@ -48,10 +48,7 @@ fn main() -> ExitCode {
         Command::Diff(args) => commands::diff::run(args),
         Command::Csaf(args) => commands::csaf::run(args),
         Command::Detect(args) => commands::detect::run(args),
-        other @ Command::Assay => {
-            eprintln!("rollcall {}: not implemented", other.name());
-            EXIT_USAGE
-        }
+        Command::Assay(args) => commands::assay::run(args),
     };
     ExitCode::from(code)
 }

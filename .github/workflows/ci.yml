@@ -68,6 +68,10 @@ jobs:
       # CSAF mandatory checks, offline (SHA-132; also run by the step above).
       - name: CSAF schema
         run: cargo test -p rollcall-core --test csaf csaf_validates_against_schema_for_every_fixture --locked
+      # The hand-written CBOM model fixture rendered as CycloneDX 1.6 (with cryptoProperties)
+      # and checked against the vendored schema (SHA-138; also run by the step above).
+      - name: CBOM schema
+        run: cargo test -p rollcall-core --test cbom cbom_fixture_validates_against_schema_1_6 --locked
       # Offline checks of the identifier-database version-table generator.
       - run: python3 scripts/version-tables.py --self-test
       # Offline checks of the docs site's link preprocessor (SHA-125).

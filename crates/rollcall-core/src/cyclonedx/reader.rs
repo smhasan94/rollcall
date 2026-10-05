@@ -18,12 +18,18 @@
 //!   component without a `cpe`, or when the value is not a CPE 2.3 name, they are dropped
 //!   (one repeating the `cpe` is ignored silently);
 //! - a `scope` on a product or image (the model holds scope on components only) is dropped;
+//! - `cryptoProperties` without `rollcall:crypto-evidence` properties (a CBOM rollcall did not
+//!   write: the model needs evidence for every crypto asset) are dropped, and the component
+//!   is read as a plain `cryptographic-asset` component; `cryptoProperties` or
+//!   `rollcall:crypto-evidence` on a product or image, and `rollcall:crypto-evidence`
+//!   without `cryptoProperties`, are dropped too;
 //! - components nested under `metadata.component` are dropped, and so is every dependency
 //!   edge to or from one of them or to or from a `services[]` entry.
 //!
 //! Hash digests are read case-insensitively (CycloneDX allows upper-case hex) and stored in
 //! lower case. Anything that does not fit the model (an unknown component type, an invalid
-//! purl, a dependency on a ref that is nowhere in the document, …) is a [`ReadError`]. The reader never panics; the nesting depth
+//! purl, a dependency on a ref that is nowhere in the document, `cryptoProperties` with
+//! fields or values the model does not hold, …) is a [`ReadError`]. The reader never panics; the nesting depth
 //! of a document read with [`read_str`] or [`read_bytes`] is bounded by `serde_json`'s
 //! recursion limit.
 
@@ -34,11 +40,11 @@ use serde::de::{IgnoredAny, IntoDeserializer};
 use serde_json::Value;
 
 use super::document::Property;
-use super::writer::{ADDITIONAL_CPE, EVIDENCE_PROPERTY, IMAGE_KIND};
+use super::writer::{ADDITIONAL_CPE, CRYPTO_EVIDENCE_PROPERTY, EVIDENCE_PROPERTY, IMAGE_KIND};
 use crate::model::{
-    BomRef, Component, ComponentKind, Cpe, Evidence, EvidenceSet, Hash, HashAlgorithm, IdError,
-    Image, ImageKind, ImageType, License, MergeError, NodePath, PathSegment, Product, Purl, Scope,
-    Supplier, ValidationError,
+    BomRef, Component, ComponentKind, Cpe, CryptoAsset, Evidence, EvidenceSet, Hash, HashAlgorithm,
+    IdError, Image, ImageKind, ImageType, License, MergeError, NodePath, PathSegment, Product,
+    Purl, Scope, Supplier, ValidationError,
 };
 use crate::warning::Warning;
 
@@ -124,6 +130,16 @@ pub enum ReadError {
         /// Why.
         source: serde_json::Error,
     },
+    /// A component's `cryptoProperties`, with its `rollcall:crypto-evidence` properties, is
+    /// not a crypto asset the model holds (an unknown field or value, a property block that
+    /// does not match `assetType`, a malformed evidence entry, …).
+    #[error("{at}: malformed cryptoProperties or {CRYPTO_EVIDENCE_PROPERTY} property: {reason}")]
+    Crypto {
+        /// The component.
+        at: String,
+        /// Why.
+        reason: String,
+    },
     /// Two components that merge into one node disagree about a fact.
     #[error(transparent)]
     Merge(#[from] MergeError),
@@ -183,6 +199,8 @@ struct RawComponent {
     licenses: Vec<RawLicenseChoice>,
     #[serde(default)]
     evidence: Option<IgnoredAny>,
+    #[serde(rename = "cryptoProperties", default)]
+    crypto_properties: Option<Value>,
     #[serde(default)]
     properties: Vec<RawProperty>,
     #[serde(default)]
@@ -333,6 +351,82 @@ impl Reader {
         }
     }
 
+    /// A component's crypto asset: its `cryptoProperties` with the `rollcall:crypto-evidence`
+    /// properties as the asset's evidence. Without those properties (a CBOM rollcall did not
+    /// write) the `cryptoProperties` are dropped with a warning; properties without
+    /// `cryptoProperties` are dropped with a warning too.
+    fn crypto(&mut self, raw: &RawComponent, at: &str) -> Result<Option<CryptoAsset>, ReadError> {
+        let crypto_err = |reason: String| ReadError::Crypto {
+            at: at.to_owned(),
+            reason,
+        };
+        let mut stray = raw
+            .properties
+            .iter()
+            .filter(|p| p.name == CRYPTO_EVIDENCE_PROPERTY)
+            .peekable();
+        let Some(properties) = &raw.crypto_properties else {
+            // Dropped without being parsed, so a malformed stray property is a warning too.
+            if stray.peek().is_some() {
+                self.warn(
+                    at,
+                    format!(
+                        "{CRYPTO_EVIDENCE_PROPERTY} properties without cryptoProperties; dropped"
+                    ),
+                );
+            }
+            return Ok(None);
+        };
+        let mut evidence = Vec::new();
+        for property in stray {
+            let value: Value = serde_json::from_str(property.value.as_deref().unwrap_or(""))
+                .map_err(|e| crypto_err(e.to_string()))?;
+            evidence.push(value);
+        }
+        if evidence.is_empty() {
+            self.warn(
+                at,
+                format!(
+                    "cryptoProperties without {CRYPTO_EVIDENCE_PROPERTY} properties are not \
+                     read (rollcall needs evidence for every crypto asset); dropped"
+                ),
+            );
+            return Ok(None);
+        }
+        let Value::Object(object) = properties else {
+            return Err(crypto_err("cryptoProperties is not an object".to_owned()));
+        };
+        if object.contains_key("evidence") {
+            return Err(crypto_err(
+                "cryptoProperties has an `evidence` field, which CycloneDX does not define"
+                    .to_owned(),
+            ));
+        }
+        let mut object = object.clone();
+        object.insert("evidence".to_owned(), Value::Array(evidence));
+        CryptoAsset::deserialize(Value::Object(object))
+            .map(Some)
+            .map_err(|e| crypto_err(e.to_string()))
+    }
+
+    /// Products and images hold no crypto asset: warns when the document gives one.
+    fn drop_crypto(&mut self, raw: &RawComponent, at: &str) {
+        if raw.crypto_properties.is_some()
+            || raw
+                .properties
+                .iter()
+                .any(|p| p.name == CRYPTO_EVIDENCE_PROPERTY)
+        {
+            self.warn(
+                at,
+                format!(
+                    "cryptoProperties and {CRYPTO_EVIDENCE_PROPERTY} on a product or image are \
+                     not read; dropped"
+                ),
+            );
+        }
+    }
+
     /// Products and images have no scope: warns when the document gives one.
     fn drop_scope(&mut self, raw: &RawComponent, at: &str) {
         if let Some(scope) = &raw.scope {
@@ -398,7 +492,11 @@ impl Reader {
                 })?;
             evidence.insert(entry);
         }
-        if raw.evidence.is_some() && !any_evidence_property {
+        let any_crypto_evidence = raw
+            .properties
+            .iter()
+            .any(|p| p.name == CRYPTO_EVIDENCE_PROPERTY);
+        if raw.evidence.is_some() && !any_evidence_property && !any_crypto_evidence {
             self.warn(
                 at,
                 format!("evidence without {EVIDENCE_PROPERTY} properties is not read; dropped"),
@@ -492,6 +590,7 @@ impl Reader {
                 )
             })
             .transpose()?;
+        component.crypto = self.crypto(raw, &at)?;
         apply_facts!(component, facts);
         for child in &raw.components {
             let child = self.component(child, &path)?;
@@ -568,6 +667,7 @@ impl Reader {
         let facts = self.facts(raw, &at)?;
         self.drop_additional_cpes(raw, &at);
         self.drop_scope(raw, &at);
+        self.drop_crypto(raw, &at);
         apply_facts!(image, facts);
         for child in &raw.components {
             let child = self.component(child, &path)?;
@@ -650,6 +750,7 @@ pub fn read(document: &Value) -> Result<Read, ReadError> {
     let facts = reader.facts(root_raw, &at)?;
     reader.drop_additional_cpes(root_raw, &at);
     reader.drop_scope(root_raw, &at);
+    reader.drop_crypto(root_raw, &at);
     apply_facts!(product, facts);
     if !root_raw.components.is_empty() {
         reader.warn(

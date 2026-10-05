@@ -7,6 +7,7 @@ use serde::{Deserialize, Serialize};
 
 use super::bom_ref::{BomRef, NodePath, PathSegment};
 use super::confidence::Confidence;
+use super::crypto::CryptoAsset;
 use super::evidence::{EvidenceField, EvidenceSet};
 use super::ids::{
     ComponentKind, Cpe, Hash, HashAlgorithm, IdError, ImageKind, ImageType, License, Purl, Scope,
@@ -123,6 +124,22 @@ pub enum ValidationError {
         /// The second path.
         second: NodePath,
     },
+    /// A component carries a crypto asset but is not of kind `cryptographic-asset`.
+    #[error("cryptoProperties at {path}, which is not a cryptographic-asset component")]
+    CryptoOnNonAsset {
+        /// The component.
+        path: NodePath,
+    },
+    /// A component's crypto asset breaks an invariant of [`CryptoAsset::check`] (no evidence,
+    /// a duplicate or invalid evidence entry, an empty oid, a certificate date that is not
+    /// RFC 3339).
+    #[error("invalid crypto asset at {path}: {reason}")]
+    InvalidCrypto {
+        /// The component.
+        path: NodePath,
+        /// Why.
+        reason: String,
+    },
 }
 
 /// A software or hardware component inside an image, or inside another component.
@@ -172,6 +189,12 @@ pub struct Component {
     /// Where each fact above came from, and how sure each source is.
     #[serde(default, skip_serializing_if = "EvidenceSet::is_empty")]
     pub evidence: EvidenceSet,
+    /// The crypto asset this component is (CycloneDX `cryptoProperties`, with its evidence).
+    /// Only a [`ComponentKind::CryptographicAsset`] component may have one
+    /// ([`Product::validate`]). Merging: missing takes the incoming asset, equal is kept,
+    /// different is a [`MergeError::Conflict`] on `crypto`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub crypto: Option<CryptoAsset>,
     /// Subcomponents, sorted by identity.
     #[serde(default, skip_serializing_if = "BTreeSet::is_empty")]
     pub components: BTreeSet<Component>,
@@ -461,6 +484,7 @@ impl Component {
             licence: None,
             scope: None,
             evidence: EvidenceSet::new(),
+            crypto: None,
             components: BTreeSet::new(),
         })
     }
@@ -468,6 +492,13 @@ impl Component {
     /// Sets the version and returns the component.
     pub fn with_version(mut self, version: &str) -> Self {
         self.version = Some(version.to_owned());
+        self
+    }
+
+    /// Sets the crypto asset and returns the component. The component must be a
+    /// [`ComponentKind::CryptographicAsset`] for the product to validate.
+    pub fn with_crypto(mut self, crypto: CryptoAsset) -> Self {
+        self.crypto = Some(crypto);
         self
     }
 
@@ -522,6 +553,7 @@ impl Component {
         let additional = other.additional_cpes.clone();
         self.scope = merge_scope(self.scope, other.scope);
         merge_facts!(path, self, other);
+        merge_option(path, "crypto", &mut self.crypto, other.crypto)?;
         self.additional_cpes.extend(additional);
         if let Some(cpe) = &self.cpe {
             self.additional_cpes.remove(cpe);
@@ -702,6 +734,15 @@ impl Product {
         out.into_iter()
     }
 
+    /// Every component that carries a crypto asset, in [`Product::walk`] order, with its path
+    /// and `bom-ref`.
+    pub fn crypto_assets(&self) -> impl Iterator<Item = (NodePath, BomRef, &Component)> {
+        self.walk().filter_map(|(path, bom_ref, node)| match node {
+            NodeRef::Component(c) if c.crypto.is_some() => Some((path, bom_ref, c)),
+            _ => None,
+        })
+    }
+
     /// The node with this `bom-ref`, if any.
     pub fn resolve(&self, bom_ref: &BomRef) -> Option<NodeRef<'_>> {
         self.walk()
@@ -713,8 +754,9 @@ impl Product {
     /// that are non-empty, not whitespace-only and free of control characters; no two
     /// siblings with the same identity; at most one digest per hash algorithm per node; every
     /// dependency ref resolves; no node depends on itself; a component's additional CPEs
-    /// need a primary CPE and never repeat it; and no two distinct paths derive the same
-    /// `bom-ref`.
+    /// need a primary CPE and never repeat it; only `cryptographic-asset` components carry a
+    /// crypto asset, and each passes [`CryptoAsset::check`]; and no two distinct paths derive
+    /// the same `bom-ref`.
     pub fn validate(&self) -> Result<(), ValidationError> {
         match self.schema {
             Schema::V1 => {}
@@ -754,6 +796,19 @@ impl Product {
                     NodeRef::Component(c) => adjacent_duplicate(&c.components, Component::key)
                         .map(PathSegment::of_component),
                 };
+            if let NodeRef::Component(c) = node
+                && let Some(crypto) = &c.crypto
+            {
+                if c.kind != ComponentKind::CryptographicAsset {
+                    return Err(ValidationError::CryptoOnNonAsset { path });
+                }
+                if let Err(e) = crypto.check() {
+                    return Err(ValidationError::InvalidCrypto {
+                        path,
+                        reason: e.to_string(),
+                    });
+                }
+            }
             if let NodeRef::Component(c) = node {
                 match &c.cpe {
                     None if !c.additional_cpes.is_empty() => {
@@ -1491,5 +1546,102 @@ mod tests {
             product.validate(),
             Err(ValidationError::InvalidName { .. })
         ));
+    }
+
+    fn crypto(symbol: &str) -> CryptoAsset {
+        use crate::model::{
+            AlgorithmProperties, ConfidenceLevel, CryptoAssetProperties, CryptoEvidence, Locator,
+        };
+        CryptoAsset::new(
+            CryptoAssetProperties::Algorithm(AlgorithmProperties::default()),
+            [CryptoEvidence::new(
+                Locator::KconfigSymbol {
+                    location: "build/zephyr/.config".to_owned(),
+                    line: None,
+                    symbol: symbol.to_owned(),
+                },
+                "kconfig",
+                ConfidenceLevel::High,
+                "enabled",
+            )
+            .unwrap()],
+        )
+        .unwrap()
+    }
+
+    fn asset(symbol: Option<&str>) -> Component {
+        let c = Component::new(ComponentKind::CryptographicAsset, "AES-128-GCM").unwrap();
+        match symbol {
+            Some(symbol) => c.with_crypto(crypto(symbol)),
+            None => c,
+        }
+    }
+
+    fn product_with(component: Component) -> Product {
+        let mut product = Product::new("widget").unwrap();
+        let mut image = app();
+        image.components.insert(component);
+        product.images.insert(image);
+        product
+    }
+
+    #[test]
+    fn crypto_on_non_asset_component_fails_validation() {
+        product_with(asset(Some("CONFIG_A"))).validate().unwrap();
+        let mut library = lib("mbedtls", "3.6.0");
+        library.crypto = Some(crypto("CONFIG_A"));
+        let err = product_with(library).validate().unwrap_err();
+        assert!(
+            matches!(&err, ValidationError::CryptoOnNonAsset { path }
+                if path.to_string() == "product:widget / application:app / library:mbedtls@3.6.0"),
+            "{err}"
+        );
+        // An asset whose evidence was emptied through the public field is invalid too.
+        let mut empty = asset(Some("CONFIG_A"));
+        if let Some(c) = empty.crypto.as_mut() {
+            c.evidence.clear();
+        }
+        assert!(matches!(
+            product_with(empty).validate(),
+            Err(ValidationError::InvalidCrypto { .. })
+        ));
+        // A cryptographic-asset component without crypto is valid (a foreign CBOM's assets
+        // read without their rollcall evidence).
+        product_with(asset(None)).validate().unwrap();
+        // The crypto assets are found in walk order.
+        let product = product_with(asset(Some("CONFIG_A")));
+        let found: Vec<String> = product
+            .crypto_assets()
+            .map(|(path, _, c)| format!("{path} {}", c.name))
+            .collect();
+        assert_eq!(
+            found,
+            vec!["product:widget / application:app / cryptographic-asset:AES-128-GCM AES-128-GCM"]
+        );
+    }
+
+    #[test]
+    fn crypto_merge_fills_missing_keeps_equal_and_conflicts_on_different() {
+        // Missing takes the incoming asset.
+        let mut target = asset(None);
+        target.merge(asset(Some("CONFIG_A"))).unwrap();
+        assert_eq!(target.crypto, Some(crypto("CONFIG_A")));
+        // Equal is kept; incoming missing changes nothing.
+        target.merge(asset(Some("CONFIG_A"))).unwrap();
+        target.merge(asset(None)).unwrap();
+        assert_eq!(target, asset(Some("CONFIG_A")));
+        // Different is a conflict on `crypto`, and the target is unchanged.
+        let before = target.clone();
+        let err = target.merge(asset(Some("CONFIG_B"))).unwrap_err();
+        let MergeError::Conflict { field, path, .. } = err;
+        assert_eq!(field, "crypto");
+        assert_eq!(path.to_string(), "cryptographic-asset:AES-128-GCM");
+        assert_eq!(target, before);
+        // Through an image, as ingesters add components.
+        let mut image = app();
+        image.add_component(asset(Some("CONFIG_A"))).unwrap();
+        assert!(image.add_component(asset(Some("CONFIG_B"))).is_err());
+        image.add_component(asset(None)).unwrap();
+        assert_eq!(image.components.len(), 1);
     }
 }

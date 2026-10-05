@@ -3,13 +3,13 @@
 use std::collections::{BTreeMap, BTreeSet};
 
 use super::document::{
-    Bom, Component, Dependency, Evidence, Hash, Identity, LicenseChoice, Metadata, Method,
-    NamedLicense, Occurrence, Property, Supplier, Tool, Tools,
+    Bom, Component, CryptoProperties, Dependency, Evidence, Hash, Identity, LicenseChoice,
+    Metadata, Method, NamedLicense, Occurrence, Property, Supplier, Tool, Tools,
 };
 use super::{SerialNumber, WriteError, WriteOptions};
 use crate::model::{
-    self, BomRef, Cpe, EvidenceField, EvidenceSet, ImageKind, License, NodePath, PathSegment,
-    Product, Purl, Scope,
+    self, BomRef, Cpe, CryptoAsset, EvidenceField, EvidenceSet, ImageKind, License, NodePath,
+    PathSegment, Product, Purl, Scope,
 };
 
 /// CycloneDX component type used for the product. Each image is written with its own
@@ -22,6 +22,9 @@ pub(super) const EVIDENCE_SOURCE: &str = "rollcall:evidence-source";
 /// Property carrying one [`Evidence`](crate::model::Evidence) entry, losslessly, as compact
 /// JSON in the model's form.
 pub(super) const EVIDENCE_PROPERTY: &str = "rollcall:evidence";
+/// Property carrying one [`CryptoEvidence`](crate::model::CryptoEvidence) entry of a crypto
+/// asset, losslessly, as compact JSON in the model's form.
+pub(super) const CRYPTO_EVIDENCE_PROPERTY: &str = "rollcall:crypto-evidence";
 /// Property marking a `blob` image's contents as not analysed.
 pub(super) const OPAQUE_PROPERTY: &str = "rollcall:opaque";
 /// Property carrying one of a component's additional CPEs, under the name syft and grype
@@ -53,6 +56,7 @@ struct Facts<'a> {
     licence: Option<&'a License>,
     scope: Option<Scope>,
     evidence: &'a EvidenceSet,
+    crypto: Option<&'a CryptoAsset>,
 }
 
 impl<'a> Facts<'a> {
@@ -68,6 +72,7 @@ impl<'a> Facts<'a> {
             licence: p.licence.as_ref(),
             scope: None,
             evidence: &p.evidence,
+            crypto: None,
         }
     }
 
@@ -83,6 +88,7 @@ impl<'a> Facts<'a> {
             licence: i.licence.as_ref(),
             scope: None,
             evidence: &i.evidence,
+            crypto: None,
         }
     }
 
@@ -98,6 +104,7 @@ impl<'a> Facts<'a> {
             licence: c.licence.as_ref(),
             scope: c.scope,
             evidence: &c.evidence,
+            crypto: c.crypto.as_ref(),
         }
     }
 
@@ -113,15 +120,22 @@ impl<'a> Facts<'a> {
     }
 
     /// The CycloneDX component for this node, without nested components. `properties` are
-    /// extra node-specific properties; evidence sources and one `rollcall:evidence` property
-    /// per evidence entry are added here, and all are sorted.
+    /// extra node-specific properties; evidence sources (and crypto detectors), one
+    /// `rollcall:evidence` property per evidence entry and one `rollcall:crypto-evidence`
+    /// property per crypto evidence entry are added here, and all are sorted.
     fn to_component(
         &self,
         kind: &'static str,
         bom_ref: &BomRef,
         mut properties: Vec<Property>,
     ) -> Result<Component, serde_json::Error> {
-        let sources: BTreeSet<&str> = self.evidence.iter().map(|e| e.source()).collect();
+        let crypto_evidence = self.crypto.into_iter().flat_map(|c| &c.evidence);
+        let sources: BTreeSet<&str> = self
+            .evidence
+            .iter()
+            .map(|e| e.source())
+            .chain(crypto_evidence.clone().map(|e| e.detector()))
+            .collect();
         properties.extend(sources.into_iter().map(|source| Property {
             name: EVIDENCE_SOURCE,
             value: source.to_owned(),
@@ -129,6 +143,12 @@ impl<'a> Facts<'a> {
         for entry in self.evidence.iter() {
             properties.push(Property {
                 name: EVIDENCE_PROPERTY,
+                value: serde_json::to_string(entry)?,
+            });
+        }
+        for entry in crypto_evidence {
+            properties.push(Property {
+                name: CRYPTO_EVIDENCE_PROPERTY,
                 value: serde_json::to_string(entry)?,
             });
         }
@@ -169,6 +189,7 @@ impl<'a> Facts<'a> {
                 })
                 .unwrap_or_default(),
             evidence: (!evidence.is_empty()).then_some(evidence),
+            crypto_properties: self.crypto.cloned().map(CryptoProperties),
             properties,
             components: Vec::new(),
         })
@@ -176,7 +197,9 @@ impl<'a> Facts<'a> {
 
     /// `evidence`: identity per field, de-duplicated occurrences and licence evidence.
     /// Supplier evidence has no CycloneDX evidence field and is not emitted (its source still
-    /// appears as a `rollcall:evidence-source` property).
+    /// appears as a `rollcall:evidence-source` property). A crypto asset's evidence adds one
+    /// `name` method per entry (after the node's own `name` methods; the entry's confidence is
+    /// the higher of the two) and one occurrence per entry, with its symbol and reason.
     fn evidence(&self) -> Evidence {
         let mut identity = Vec::new();
         for field in IDENTITY_FIELDS {
@@ -184,27 +207,52 @@ impl<'a> Facts<'a> {
                 identity.extend(self.cpe_identities());
                 continue;
             }
-            let methods = self.methods(field, |_| true);
+            let mut methods = self.methods(field, |_| true);
+            let mut confidence = self.evidence.confidence_for(field);
+            if field == EvidenceField::Name
+                && let Some(crypto) = self.crypto
+            {
+                methods.extend(crypto.evidence.iter().map(|e| Method {
+                    technique: e.technique(),
+                    confidence: e.confidence.as_confidence().as_f64(),
+                    value: e.locator.to_string(),
+                }));
+                confidence = confidence.combine(crypto.confidence().as_confidence());
+            }
             if !methods.is_empty() {
                 identity.push(Identity {
                     field,
-                    confidence: Some(self.evidence.confidence_for(field).as_f64()),
+                    confidence: Some(confidence.as_f64()),
                     concluded_value: self.concluded(field),
                     methods,
                 });
             }
         }
 
-        let occurrences: BTreeSet<&model::Occurrence> = self
+        // (location, line, symbol, additional context), so ordinary occurrences sort exactly
+        // as before and crypto ones beside them.
+        type Key = (String, Option<u32>, Option<String>, Option<String>);
+        let mut occurrences: BTreeSet<Key> = self
             .evidence
             .iter()
             .filter_map(|e| e.occurrence.as_ref())
+            .map(|o| (o.location().to_owned(), o.line(), None, None))
             .collect();
+        for entry in self.crypto.into_iter().flat_map(|c| &c.evidence) {
+            occurrences.insert((
+                entry.locator.location().to_owned(),
+                entry.locator.line(),
+                entry.locator.symbol(),
+                Some(entry.reason().to_owned()),
+            ));
+        }
         let occurrences = occurrences
             .into_iter()
-            .map(|o| Occurrence {
-                location: o.location().to_owned(),
-                line: o.line(),
+            .map(|(location, line, symbol, additional_context)| Occurrence {
+                location,
+                line,
+                symbol,
+                additional_context,
             })
             .collect();
 
@@ -384,4 +432,114 @@ pub(super) fn to_document(product: &Product, options: &WriteOptions) -> Result<B
         components,
         dependencies,
     })
+}
+
+#[cfg(test)]
+mod tests {
+    use serde_json::Value;
+
+    use super::*;
+    use crate::cyclonedx::Timestamp;
+    use crate::model::{
+        AlgorithmProperties, CertificateProperties, ComponentKind, ConfidenceLevel,
+        CryptoAssetProperties, CryptoEvidence, Image, Locator, ProtocolProperties,
+        RelatedCryptoMaterialProperties,
+    };
+
+    const BLOCKS: [&str; 4] = [
+        "algorithmProperties",
+        "protocolProperties",
+        "certificateProperties",
+        "relatedCryptoMaterialProperties",
+    ];
+
+    #[test]
+    fn crypto_properties_block_matches_asset_type() {
+        let cases = [
+            (
+                CryptoAssetProperties::Algorithm(AlgorithmProperties::default()),
+                "algorithm",
+                "algorithmProperties",
+            ),
+            (
+                CryptoAssetProperties::Protocol(ProtocolProperties::default()),
+                "protocol",
+                "protocolProperties",
+            ),
+            (
+                CryptoAssetProperties::Certificate(CertificateProperties::default()),
+                "certificate",
+                "certificateProperties",
+            ),
+            (
+                CryptoAssetProperties::RelatedCryptoMaterial(
+                    RelatedCryptoMaterialProperties::default(),
+                ),
+                "related-crypto-material",
+                "relatedCryptoMaterialProperties",
+            ),
+        ];
+        for (properties, asset_type, block) in cases {
+            let evidence = CryptoEvidence::new(
+                Locator::ElfSymbol {
+                    location: "zephyr.elf".to_owned(),
+                    symbol: "f".to_owned(),
+                },
+                "elf-symbols",
+                ConfidenceLevel::Medium,
+                "linked",
+            )
+            .unwrap();
+            let asset = CryptoAsset::new(properties, [evidence]).unwrap();
+            let component = model::Component::new(ComponentKind::CryptographicAsset, "x")
+                .unwrap()
+                .with_crypto(asset);
+            let mut image = Image::new(model::ImageKind::Application, "app").unwrap();
+            image.add_component(component).unwrap();
+            let mut product = Product::new("p").unwrap();
+            product.add_image(image).unwrap();
+            let options = WriteOptions::new(Timestamp::parse("2026-01-02T03:04:05Z").unwrap());
+            let bom = to_document(&product, &options).unwrap();
+            let doc = serde_json::to_value(&bom).unwrap();
+            let asset = &doc["components"][0]["components"][0];
+            assert_eq!(asset["type"], "cryptographic-asset");
+            let crypto = &asset["cryptoProperties"];
+            assert_eq!(crypto["assetType"], asset_type, "{crypto}");
+            assert!(crypto[block].is_object(), "{crypto}");
+            for other in BLOCKS.iter().filter(|b| **b != block) {
+                assert!(crypto.get(*other).is_none(), "{other} in {crypto}");
+            }
+            // The rollcall evidence is not in `cryptoProperties`; it is in properties and
+            // `evidence`.
+            assert!(crypto.get("evidence").is_none(), "{crypto}");
+            // Schema order: `evidence`, `cryptoProperties`, `properties`.
+            let text = serde_json::to_string(&bom.components[0].components[0]).unwrap();
+            let at = |key: &str| text.find(&format!("\"{key}\":")).unwrap();
+            assert!(
+                at("evidence") < at("cryptoProperties")
+                    && at("cryptoProperties") < at("properties"),
+                "{text}"
+            );
+            let names: Vec<&str> = asset["properties"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .map(|p| p["name"].as_str().unwrap())
+                .collect();
+            assert_eq!(
+                names,
+                vec![CRYPTO_EVIDENCE_PROPERTY, EVIDENCE_SOURCE],
+                "{names:?}"
+            );
+            assert_eq!(
+                asset["evidence"]["occurrences"][0],
+                serde_json::json!({"location": "zephyr.elf", "symbol": "f",
+                                   "additionalContext": "linked"})
+            );
+            assert_eq!(
+                asset["evidence"]["identity"][0]["confidence"],
+                Value::from(0.6)
+            );
+        }
+    }
 }

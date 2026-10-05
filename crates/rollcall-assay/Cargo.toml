@@ -12,5 +12,14 @@ keywords.workspace = true
 # Categories are permanent once published; library crates are not command-line utilities.
 categories = ["development-tools"]
 
+[dependencies]
+rollcall-core.workspace = true
+thiserror.workspace = true
+
+[dev-dependencies]
+serde_json.workspace = true
+tempfile.workspace = true
+pulldown-cmark.workspace = true
+
 [lints]
 workspace = true

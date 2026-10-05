@@ -1,0 +1,245 @@
+{
+  "schema": "rollcall-model/1",
+  "name": "sensor-node",
+  "version": "1.0.0",
+  "images": [
+    {
+      "kind": "bootloader",
+      "name": "sensor-boot",
+      "components": [
+        {
+          "kind": "library",
+          "name": "chacha20poly1305",
+          "version": "0.10.1",
+          "purl": "pkg:cargo/chacha20poly1305@0.10.1",
+          "components": [
+            {
+              "kind": "cryptographic-asset",
+              "name": "ChaCha20-Poly1305",
+              "crypto": {
+                "assetType": "algorithm",
+                "algorithmProperties": {
+                  "primitive": "ae",
+                  "parameterSetIdentifier": "256",
+                  "cryptoFunctions": [
+                    "encrypt",
+                    "decrypt",
+                    "tag"
+                  ],
+                  "classicalSecurityLevel": 256,
+                  "nistQuantumSecurityLevel": 5
+                },
+                "evidence": [
+                  {
+                    "locator": {
+                      "kind": "cargo-feature",
+                      "location": "Cargo.toml",
+                      "package": "chacha20poly1305",
+                      "feature": "default"
+                    },
+                    "detector": "cargo-features",
+                    "confidence": "high",
+                    "reason": "the crate is a dependency with its default features"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "application",
+      "name": "sensor-app",
+      "components": [
+        {
+          "kind": "library",
+          "name": "mbedtls",
+          "version": "3.6.0",
+          "purl": "pkg:github/mbed-tls/mbedtls@v3.6.0",
+          "components": [
+            {
+              "kind": "cryptographic-asset",
+              "name": "AES-128-GCM",
+              "crypto": {
+                "assetType": "algorithm",
+                "algorithmProperties": {
+                  "primitive": "ae",
+                  "parameterSetIdentifier": "128",
+                  "executionEnvironment": "software-plain-ram",
+                  "implementationPlatform": "armv7-m",
+                  "mode": "gcm",
+                  "cryptoFunctions": [
+                    "encrypt",
+                    "decrypt",
+                    "tag"
+                  ],
+                  "classicalSecurityLevel": 128,
+                  "nistQuantumSecurityLevel": 1
+                },
+                "oid": "2.16.840.1.101.3.4.1.6",
+                "evidence": [
+                  {
+                    "locator": {
+                      "kind": "elf-symbol",
+                      "location": "build/zephyr/zephyr.elf",
+                      "symbol": "mbedtls_gcm_setkey"
+                    },
+                    "detector": "elf-symbols",
+                    "confidence": "high",
+                    "reason": "the GCM key schedule is linked into the image"
+                  },
+                  {
+                    "locator": {
+                      "kind": "kconfig-symbol",
+                      "location": "build/zephyr/.config",
+                      "line": 812,
+                      "symbol": "CONFIG_MBEDTLS_CIPHER_MODE_GCM"
+                    },
+                    "detector": "kconfig",
+                    "confidence": "high",
+                    "reason": "CONFIG_MBEDTLS_CIPHER_MODE_GCM=y builds GCM into mbedtls"
+                  }
+                ]
+              }
+            },
+            {
+              "kind": "cryptographic-asset",
+              "name": "RSA-2048",
+              "crypto": {
+                "assetType": "algorithm",
+                "algorithmProperties": {
+                  "primitive": "signature",
+                  "parameterSetIdentifier": "2048",
+                  "cryptoFunctions": [
+                    "sign",
+                    "verify"
+                  ],
+                  "classicalSecurityLevel": 112,
+                  "nistQuantumSecurityLevel": 0
+                },
+                "evidence": [
+                  {
+                    "locator": {
+                      "kind": "kconfig-symbol",
+                      "location": "build/zephyr/.config",
+                      "line": 790,
+                      "symbol": "CONFIG_MBEDTLS_RSA_C"
+                    },
+                    "detector": "kconfig",
+                    "confidence": "low",
+                    "reason": "RSA is enabled in Kconfig; no call site was checked"
+                  }
+                ]
+              }
+            },
+            {
+              "kind": "cryptographic-asset",
+              "name": "SHA-256",
+              "crypto": {
+                "assetType": "algorithm",
+                "algorithmProperties": {
+                  "primitive": "hash",
+                  "parameterSetIdentifier": "256",
+                  "cryptoFunctions": [
+                    "digest"
+                  ],
+                  "nistQuantumSecurityLevel": 2
+                },
+                "oid": "2.16.840.1.101.3.4.2.1",
+                "evidence": [
+                  {
+                    "locator": {
+                      "kind": "source-line",
+                      "location": "modules/crypto/mbedtls/library/sha256.c",
+                      "line": 1
+                    },
+                    "detector": "source-scan",
+                    "confidence": "medium",
+                    "reason": "the mbedtls SHA-256 implementation is in the source tree"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "kind": "cryptographic-asset",
+          "name": "TLS",
+          "crypto": {
+            "assetType": "protocol",
+            "protocolProperties": {
+              "type": "tls",
+              "version": "1.2"
+            },
+            "evidence": [
+              {
+                "locator": {
+                  "kind": "kconfig-symbol",
+                  "location": "build/zephyr/.config",
+                  "line": 845,
+                  "symbol": "CONFIG_MBEDTLS_SSL_PROTO_TLS1_2"
+                },
+                "detector": "kconfig",
+                "confidence": "low",
+                "reason": "TLS 1.2 is enabled; the version negotiated at run time is not checked"
+              }
+            ]
+          }
+        },
+        {
+          "kind": "cryptographic-asset",
+          "name": "device-cert",
+          "crypto": {
+            "assetType": "certificate",
+            "certificateProperties": {
+              "subjectName": "CN=sensor-node-0001",
+              "issuerName": "CN=Example Devices CA",
+              "notValidBefore": "2026-01-01T00:00:00Z",
+              "notValidAfter": "2036-01-01T00:00:00Z",
+              "certificateFormat": "X.509"
+            },
+            "evidence": [
+              {
+                "locator": {
+                  "kind": "source-line",
+                  "location": "src/certs/device_cert.c",
+                  "line": 12
+                },
+                "detector": "source-scan",
+                "confidence": "medium",
+                "reason": "a PEM certificate is embedded as a string constant"
+              }
+            ]
+          }
+        },
+        {
+          "kind": "cryptographic-asset",
+          "name": "psk",
+          "crypto": {
+            "assetType": "related-crypto-material",
+            "relatedCryptoMaterialProperties": {
+              "type": "secret-key",
+              "id": "tls-psk",
+              "state": "active",
+              "size": 256
+            },
+            "evidence": [
+              {
+                "locator": {
+                  "kind": "kconfig-symbol",
+                  "location": "build/zephyr/.config",
+                  "line": 860,
+                  "symbol": "CONFIG_MBEDTLS_KEY_EXCHANGE_PSK_ENABLED"
+                },
+                "detector": "kconfig",
+                "confidence": "medium",
+                "reason": "PSK key exchange is enabled; the key itself is provisioned at run time"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
