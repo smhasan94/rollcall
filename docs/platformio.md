@@ -296,6 +296,14 @@ The fixture keeps only metadata, with no sources, toolchains or build output:
 - `pio-core/`, a copy of the platform's and the framework package's `.piopm`,
   `platform.json` and `package.json` from the build's core directory.
 
+**The fixture is not vulnerability-free.** Arduino-ESP32 2.0.17, the newest release
+PlatformIO's official `espressif32` platform ships, has known open CVEs, and scanners report
+them: grype matches them through the `cpe:2.3:a:espressif:arduino-esp32:2.0.17:*:*:*:*:*:*:*`
+CPE. The `rollcall example` workflow's `platformio` job therefore runs with `fail-on: none`.
+It proves the PlatformIO pipeline and CPE-based scanning rather than a clean bill: it asserts
+the scan reports open findings on `arduino-esp32`, and it pins no CVE ids, because the
+vulnerability database changes.
+
 `fixtures/platformio/MANIFEST.json` records the pins, the build command and every file's size
 and SHA-256. `crates/rollcall-core/tests/fixtures_platformio.rs` checks the committed tree.
 

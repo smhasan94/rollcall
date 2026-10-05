@@ -908,19 +908,59 @@ fn ecosystem_auto_uses_rollcall_detect_for_all_four_ecosystems() {
 }
 
 /// TP3, local proxy for the example workflow's `platformio` job: on the PlatformIO fixture
-/// with `ecosystem: auto`, the pipeline is green, detects PlatformIO, writes every file the
-/// upload step lists, and the SBOM names the framework and the three libraries.
+/// with `ecosystem: auto` and `fail-on: none` (Arduino-ESP32 2.0.17 has open CVEs), the
+/// pipeline detects PlatformIO, writes every file the upload step lists, names the framework
+/// and the three libraries, reports a (fake grype) finding on arduino-esp32 as open, and the
+/// gate stays clean on a pull request. The workflow's own check step is then run on those
+/// outputs, so its assertions are the ones tested here.
 #[test]
 fn pipeline_on_platformio_fixture_with_ecosystem_auto_is_clean() {
+    let fixture = "fixtures/platformio/arduino-mqtt";
     let r = Runner::new();
-    let outputs = r.pipeline_with(
-        "fixtures/platformio/arduino-mqtt",
-        "push",
-        "high",
-        &[("RC_ECOSYSTEM", "auto")],
-    );
+    // A first run for the framework's bom-ref, which the fake grype match points at.
+    r.pipeline_with(fixture, "push", "none", &[("RC_ECOSYSTEM", "auto")]);
+    let sbom: Value =
+        serde_json::from_slice(&std::fs::read(r.out().join("sbom.cdx.json")).unwrap()).unwrap();
+    let framework = sbom["components"][0]["components"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|c| c["name"] == "arduino-esp32")
+        .expect("an arduino-esp32 component")
+        .clone();
+    let cpe = framework["cpe"].as_str().unwrap();
+    r.grype(Some(json!({"matches": [{
+        "vulnerability": {
+            "id": "CVE-2099-0001",
+            "severity": "High",
+            "namespace": "nvd:cpe",
+            "fix": {"versions": [], "state": "not-fixed"}
+        },
+        "matchDetails": [{
+            "type": "cpe-match",
+            "matcher": "stock-matcher",
+            "searchedBy": {
+                "namespace": "nvd:cpe",
+                "cpes": [cpe],
+                "package": {"name": "arduino-esp32", "version": "2.0.17"}
+            }
+        }],
+        "artifact": {
+            "id": framework["bom-ref"],
+            "name": "arduino-esp32",
+            "version": "2.0.17",
+            "type": "UnknownPackage",
+            "purl": framework["purl"],
+            "cpes": [cpe],
+            "locations": null
+        }
+    }]})));
+    r.event(pr_event(REPO));
+    let outputs = r.pipeline_with(fixture, "pull_request", "none", &[("RC_ECOSYSTEM", "auto")]);
     assert_eq!(outputs["gate"], "clean");
-    assert_eq!(r.outputs("pipeline.sh")["ecosystem"], "platformio");
+    assert_eq!(outputs["new-findings"], "1");
+    let pipeline = r.outputs("pipeline.sh");
+    assert_eq!(pipeline["ecosystem"], "platformio");
     for file in artifact_files() {
         assert!(r.out().join(&file).is_file(), "{file} was not written");
     }
@@ -939,33 +979,84 @@ fn pipeline_on_platformio_fixture_with_ecosystem_auto_is_clean() {
     ] {
         assert!(purls.contains(&purl), "{purl} not in {purls:?}");
     }
-    // The example workflow's job runs the same: ecosystem auto on this fixture, then checks.
+    // fail-on none: the gate step passes on a pull request despite the open high finding.
+    let out = r.gate("clean", "none");
+    assert_eq!(out.status.code(), Some(0), "{}", text(&out));
+
+    // The example workflow's job: ecosystem auto, fail-on none, on this fixture.
     let example: Value = yaml_serde::from_str(
         &std::fs::read_to_string(workspace().join(".github/workflows/rollcall-example.yml"))
             .unwrap(),
     )
     .unwrap();
-    let job = &example["jobs"]["platformio"];
-    let steps = job["steps"].as_array().unwrap();
+    let steps = example["jobs"]["platformio"]["steps"].as_array().unwrap();
     let action = steps.iter().find(|s| s["uses"] == "./action").unwrap();
-    assert_eq!(
-        action["with"]["build-dir"],
-        "fixtures/platformio/arduino-mqtt"
-    );
+    assert_eq!(action["with"]["build-dir"], fixture);
     assert_eq!(action["with"]["ecosystem"], "auto");
+    assert_eq!(action["with"]["fail-on"], "none");
+    let id = action["id"].as_str().expect("the action step has an id");
     let check = steps
         .iter()
-        .find_map(|s| s["run"].as_str())
+        .find(|s| s["run"].is_string())
         .expect("a check step");
+    let script = check["run"].as_str().unwrap();
     for needle in [
-        "platformio",
         "ArduinoJson@7.2.1",
         "PubSubClient@2.8",
         "OneButton@2.6.1",
         "arduino-esp32",
     ] {
-        assert!(check.contains(needle), "the check step lacks {needle}");
+        assert!(script.contains(needle), "the check step lacks {needle}");
     }
+    // Its inputs come only through env, from the action's outputs.
+    assert!(
+        !script.contains("${{"),
+        "expression interpolated into shell"
+    );
+    let env = check["env"].as_object().unwrap();
+    let mut values = BTreeMap::new();
+    for (key, output) in [
+        ("ECOSYSTEM", "ecosystem"),
+        ("SBOM", "sbom"),
+        ("SCAN", "scan"),
+        ("GATE", "gate"),
+    ] {
+        assert_eq!(
+            env[key],
+            format!("${{{{ steps.{id}.outputs.{output} }}}}"),
+            "{key}"
+        );
+        let value = match output {
+            "gate" => outputs["gate"].clone(),
+            other => pipeline[other].clone(),
+        };
+        values.insert(key, value);
+    }
+    // Run the check step itself on this run's outputs: it passes...
+    let run_check = |values: &BTreeMap<&str, String>| {
+        let mut cmd = Command::new("bash");
+        cmd.arg("-c")
+            .arg(script)
+            .env_clear()
+            .env("PATH", "/usr/local/bin:/usr/bin:/bin:/opt/homebrew/bin")
+            .current_dir(workspace());
+        for (k, v) in values {
+            cmd.env(k, v);
+        }
+        cmd.output().unwrap()
+    };
+    let out = run_check(&values);
+    assert_eq!(out.status.code(), Some(0), "{}", text(&out));
+    assert!(String::from_utf8_lossy(&out.stdout).contains("open findings on arduino-esp32: 1"));
+    // ...and fails without a finding on the framework, or with a tripped gate.
+    let empty = r.path("empty-scan.json");
+    std::fs::write(&empty, r#"{"schema": "rollcall-scan/1", "findings": []}"#).unwrap();
+    let mut no_findings = values.clone();
+    no_findings.insert("SCAN", empty.display().to_string());
+    assert_eq!(run_check(&no_findings).status.code(), Some(1));
+    let mut tripped = values.clone();
+    tripped.insert("GATE", "findings".to_owned());
+    assert_eq!(run_check(&tripped).status.code(), Some(1));
 }
 
 /// The `pio-core` input passes the core directory to `rollcall generate --pio-core` (a leading
