@@ -5,7 +5,7 @@ build-backend = "uv_build"
 [project]
 name = "rollcall"
 # The PEP 440 form of the Rust workspace version (scripts/release-version.sh check).
-version = "0.0.1"
+version = "0.1.0rc1"
 description = "CRA-grade CycloneDX SBOMs from firmware build metadata: installs the rollcall command (downloads and verifies the matching release binary)"
 readme = "README.md"
 license = "Apache-2.0"

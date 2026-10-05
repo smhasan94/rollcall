@@ -198,8 +198,11 @@ jobs:
       # CHANGELOG's link to it (releases/tag/<this tag>) still 404s. That one 404, and nothing
       # else, is tolerated: scripts/tolerate-pending-release-link.sh (tested in
       # crates/rollcall-core/tests/docs.rs). The docs site's link check covers the page later.
+      # Pre-release tags (any `-`, e.g. v0.1.0-rc.1) skip this step: the release documents
+      # describe the final release, so they link its release page (releases/tag/v0.1.0), the
+      # docs site and the example repository, none of which exist yet on an rc's run.
       - name: Check the release documents' links (release tags)
-        if: startsWith(github.ref, 'refs/tags/v')
+        if: startsWith(github.ref, 'refs/tags/v') && !contains(github.ref_name, '-')
         run: |
           set -uo pipefail
           rc=0

@@ -2416,6 +2416,26 @@ fn tag_run_tolerates_only_this_tags_release_page_404() {
     assert_eq!(tolerate_pending_release_link("v0.1.0", "x", &[this_404]), 2);
 }
 
+/// SHA-124 (ci.yml docs-links): the tag-only online check of the release documents runs on
+/// release tags such as v0.1.0 but is skipped for pre-release tags (any `-`, e.g.
+/// v0.1.0-rc.1), whose run would hit the final release's not-yet-existing pages.
+#[test]
+fn tag_run_release_link_step_skips_pre_release_tags() {
+    let ci = repo_file(".github/workflows/ci.yml");
+    let step = ci
+        .split("\n      - name: ")
+        .find(|s| s.starts_with("Check the release documents' links (release tags)\n"))
+        .expect("ci.yml has the tag-only release-links step");
+    let condition = step
+        .lines()
+        .find_map(|l| l.trim().strip_prefix("if: "))
+        .expect("the tag-only release-links step has an if:");
+    assert_eq!(
+        condition,
+        "startsWith(github.ref, 'refs/tags/v') && !contains(github.ref_name, '-')"
+    );
+}
+
 #[cfg(unix)]
 /// Runs `scripts/check-doc-links.sh` (online) on a document linking each URL of `table`, with a
 /// fake `curl` first on PATH answering from `table` (URL, final status, curl exit code, final
