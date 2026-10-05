@@ -2,7 +2,7 @@
 
 This report checks how ready the software bill of materials (SBOM) of https\_request 1 is to hand to a customer or regulator. Its readiness score is 57 out of 100. The SBOM lists 14 items in total: the product, 7 firmware images and 6 software components. 13 of them carry an identifier (a PURL or CPE) that vulnerability databases can match, 6 a file hash that proves exactly which file was shipped, and 11 a licence. No unresolved modules. The SBOM is valid CycloneDX 1.6; the CISA 2026 and EU Cyber Resilience Act checks found 17 problems to fix and 0 recommendations. No vulnerability scan was supplied, so known vulnerabilities were not checked and are not part of the score.
 
-Generated 2026-01-02T03:04:05Z by rollcall 0.1.0-rc.1. Report schema `rollcall-report/1`; see `docs/report.md` for how the score is calculated.
+Generated 2026-01-02T03:04:05Z by rollcall 0.1.0. Report schema `rollcall-report/1`; see `docs/report.md` for how the score is calculated.
 
 ## Score
 

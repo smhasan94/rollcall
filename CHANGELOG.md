@@ -8,11 +8,7 @@ policy. The identifier database (`rollcall-identifiers`) is versioned on its own
 
 ## [Unreleased]
 
-### Changed
-
-- README simplified; reference material moved into docs/ (installing, cli, building).
-
-## [0.1.0] - 2026-10-23
+## [0.1.0] - 2026-10-05
 
 The first release. Release notes: [docs/releases/v0.1.0.md](docs/releases/v0.1.0.md).
 
@@ -55,6 +51,7 @@ The first release. Release notes: [docs/releases/v0.1.0.md](docs/releases/v0.1.0
 
 - The `rollcall` crate is now the command-line binary (`cargo install rollcall`), replacing the
   `rollcall-cli` package, which is no longer published (its 0.0.1 placeholder stays).
+- README simplified; reference material moved into docs/ (installing, cli, building).
 
 ### Removed
 

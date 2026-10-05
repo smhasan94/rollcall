@@ -4,7 +4,7 @@
   "author": "rollcall",
   "timestamp": "2026-01-02T03:04:05Z",
   "version": 1,
-  "tooling": "rollcall/0.1.0-rc.1",
+  "tooling": "rollcall/0.1.0",
   "statements": [
     {
       "vulnerability": {

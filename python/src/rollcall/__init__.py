@@ -5,6 +5,6 @@ this package at build time (``release.json``) before it is ever run. See ``rollc
 """
 
 # The PEP 440 form of the Rust workspace version; scripts/release-version.sh checks they agree.
-__version__ = "0.1.0rc1"
+__version__ = "0.1.0"
 # The GitHub release whose binaries this wrapper runs.
-TAG = "v0.1.0-rc.1"
+TAG = "v0.1.0"

@@ -8,7 +8,7 @@ members = [
 ]
 
 [workspace.package]
-version = "0.1.0-rc.1"
+version = "0.1.0"
 edition = "2024"
 rust-version = "1.91"
 license = "Apache-2.0"
@@ -39,8 +39,8 @@ semver = "1.0"
 pulldown-cmark = { version = "0.13", default-features = false }
 # The reference reader of the `.dep-v0` section `cargo auditable` embeds (SHA-127).
 auditable-info = { version = "0.10.1", default-features = false }
-rollcall-core = { path = "crates/rollcall-core", version = "0.1.0-rc.1" }
-rollcall-assay = { path = "crates/rollcall-assay", version = "0.1.0-rc.1" }
+rollcall-core = { path = "crates/rollcall-core", version = "0.1.0" }
+rollcall-assay = { path = "crates/rollcall-assay", version = "0.1.0" }
 # Versioned on its own: its version is the identifier database's db_version.
 rollcall-identifiers = { path = "crates/rollcall-identifiers", version = "1.0.0" }
 
