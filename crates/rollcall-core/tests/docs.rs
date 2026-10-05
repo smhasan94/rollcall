@@ -1535,3 +1535,1010 @@ fn every_ecosystem_guide_documents_auto_detect() {
         );
     }
 }
+
+// SHA-125: the docs site (book.toml, docs/SUMMARY.md, scripts/mdbook-repo-links.py), the
+// getting-started pages, the FAQ and the release documents (CHANGELOG.md, SECURITY.md,
+// docs/versioning.md, docs/releases/). The site itself is built by `scripts/build-docs.sh`
+// and its links checked by `scripts/check-site-links.sh` (CI workflow docs.yml); the
+// quickstart's console examples are run by `scripts/check-doc-examples.sh docs/quickstart.md`.
+
+/// Every Markdown file under `docs/`, relative to `docs/`, sorted.
+fn docs_markdown_files() -> Vec<String> {
+    fn walk(dir: &std::path::Path, base: &std::path::Path, out: &mut Vec<String>) {
+        let entries = std::fs::read_dir(dir).unwrap_or_else(|e| panic!("{}: {e}", dir.display()));
+        for entry in entries {
+            let path = entry.expect("readable directory entry").path();
+            if path.is_dir() {
+                walk(&path, base, out);
+            } else if path.extension().is_some_and(|x| x == "md") {
+                let rel = path.strip_prefix(base).expect("under docs/");
+                out.push(rel.to_string_lossy().replace('\\', "/"));
+            }
+        }
+    }
+    let base = repo_root().join("docs");
+    let mut out = Vec::new();
+    walk(&base, &base, &mut out);
+    out.sort();
+    out
+}
+
+/// The `version` of `[workspace.package]` in the workspace `Cargo.toml` (`key` = "version"),
+/// or its `rust-version`.
+fn workspace_package_field(key: &str) -> String {
+    let cargo = repo_file("Cargo.toml");
+    let mut in_section = false;
+    for line in cargo.lines() {
+        let line = line.trim();
+        if line.starts_with('[') {
+            in_section = line == "[workspace.package]";
+            continue;
+        }
+        if !in_section {
+            continue;
+        }
+        if let Some((k, v)) = line.split_once('=')
+            && k.trim() == key
+        {
+            return v.trim().trim_matches('"').to_string();
+        }
+    }
+    panic!("Cargo.toml [workspace.package] has no {key}")
+}
+
+/// The released versions of CHANGELOG.md (`## [x.y.z] - date` headings), newest first, with
+/// their dates.
+fn changelog_releases() -> Vec<(semver::Version, String)> {
+    repo_file("CHANGELOG.md")
+        .lines()
+        .filter_map(|l| l.strip_prefix("## ["))
+        .filter(|l| !l.starts_with("Unreleased]"))
+        .map(|l| {
+            let (version, rest) = l.split_once("] - ").unwrap_or_else(|| {
+                panic!("CHANGELOG heading `## [{l}` is not `## [x.y.z] - YYYY-MM-DD`")
+            });
+            let version = semver::Version::parse(version)
+                .unwrap_or_else(|e| panic!("CHANGELOG version {version:?}: {e}"));
+            (version, rest.to_string())
+        })
+        .collect()
+}
+
+/// The newest released version in CHANGELOG.md, which the docs pin (`v0.1.0`).
+fn top_release() -> semver::Version {
+    changelog_releases()
+        .into_iter()
+        .next()
+        .expect("CHANGELOG.md has a released version")
+        .0
+}
+
+/// The fenced blocks of `lang` anywhere in `doc`, with what follows the language on the fence
+/// line ignored.
+fn fenced_blocks(doc: &str, lang: &str) -> Vec<String> {
+    let lines: Vec<&str> = doc.lines().collect();
+    fenced(&lines, lang)
+}
+
+/// SHA-125 (docs site): docs/SUMMARY.md, the site's table of contents, links every Markdown
+/// file under docs/ exactly once and nothing else, so no page is missing from the site.
+#[test]
+fn summary_lists_every_docs_page_exactly_once() {
+    let summary = repo_file("docs/SUMMARY.md");
+    let mut listed = std::collections::BTreeMap::<String, usize>::new();
+    for target in link_targets(&summary) {
+        assert!(
+            !target.contains("://") && !target.contains('#'),
+            "SUMMARY.md links {target}: only pages, without anchors"
+        );
+        *listed.entry(target).or_default() += 1;
+    }
+    for (page, n) in &listed {
+        assert_eq!(*n, 1, "SUMMARY.md lists {page} {n} times");
+    }
+    let files: Vec<String> = docs_markdown_files()
+        .into_iter()
+        .filter(|f| f != "SUMMARY.md")
+        .collect();
+    let listed: Vec<String> = listed.into_keys().collect();
+    let missing: Vec<&String> = files.iter().filter(|f| !listed.contains(f)).collect();
+    let extra: Vec<&String> = listed.iter().filter(|f| !files.contains(f)).collect();
+    assert!(
+        missing.is_empty(),
+        "docs pages not in SUMMARY.md: {missing:?}"
+    );
+    assert!(
+        extra.is_empty(),
+        "SUMMARY.md lists files that do not exist: {extra:?}"
+    );
+    // The introduction is the docs index.
+    assert!(
+        summary.contains("\n[Introduction](README.md)\n"),
+        "SUMMARY.md does not start with the docs index as its introduction"
+    );
+    for page in [
+        "quickstart.md",
+        "zephyr.md",
+        "contributing-identifiers.md",
+        "vex-rules.md",
+        "ci.md",
+        "faq-cra-cisa.md",
+        "versioning.md",
+        "releases/v0.1.0.md",
+    ] {
+        assert!(files.iter().any(|f| f == page), "docs/{page} is missing");
+    }
+}
+
+/// SHA-125 (quickstart, TP1): the quickstart has the five steps in order (install, prepare,
+/// generate, validate, report), each install route as one `sh` block pinned to the released
+/// version, the example build in a `sh` block, and the generate, validate and report commands
+/// as console examples (which `scripts/check-doc-examples.sh` runs). The clean-machine
+/// workflow follows exactly these blocks.
+#[test]
+fn quickstart_doc_has_install_prepare_generate_validate_report_sections() {
+    let doc = repo_file("docs/quickstart.md");
+    let version = top_release();
+    let tag = format!("v{version}");
+    let headings = [
+        "# Quickstart",
+        "## 1. Install rollcall",
+        "### Release binary (Linux and macOS)",
+        "### cargo",
+        "### pip",
+        "## 2. Prepare a build directory",
+        "### Your own Zephyr build",
+        "### No build at hand: the example build",
+        "## 3. Generate the SBOM",
+        "## 4. Validate it",
+        "## 5. Report on it",
+    ];
+    let mut last = 0;
+    for heading in headings {
+        let at = doc
+            .lines()
+            .position(|l| l == heading)
+            .unwrap_or_else(|| panic!("quickstart lacks {heading:?}"));
+        assert!(at >= last, "{heading:?} is out of order");
+        last = at;
+    }
+    let sh = |heading: &str| -> String {
+        let blocks = fenced(&md_section(&doc, heading), "sh");
+        assert_eq!(blocks.len(), 1, "{heading}: expected one sh block");
+        blocks[0].clone()
+    };
+    let tarball = sh("### Release binary (Linux and macOS)");
+    for needle in [
+        format!("VERSION={tag}"),
+        "SHA256SUMS".to_string(),
+        "sha256sum --check".to_string(),
+        "rollcall-$VERSION-$TARGET.tar.gz".to_string(),
+        // The archive holds one directory, rollcall-<tag>-<target>/ (SHA-124's
+        // scripts/package-release.sh), with the binary inside it.
+        "install -m 0755 \"rollcall-$VERSION-$TARGET/rollcall\"".to_string(),
+        "rollcall --version".to_string(),
+    ] {
+        assert!(
+            tarball.contains(&needle),
+            "tarball install lacks {needle:?}"
+        );
+    }
+    let tarball_section = md_section(&doc, "### Release binary (Linux and macOS)").join("\n");
+    for target in ["linux-amd64", "linux-arm64", "darwin-universal"] {
+        assert!(
+            tarball_section.contains(target),
+            "tarball install does not name {target}"
+        );
+    }
+    assert!(
+        tarball_section.contains(&format!("rollcall-{tag}-windows-amd64.zip"))
+            && tarball_section.contains(&format!("rollcall-{tag}-windows-amd64\\rollcall.exe")),
+        "tarball install does not name the Windows zip and the binary's path in it"
+    );
+    assert!(
+        sh("### cargo").contains(&format!(
+            "cargo install rollcall --locked --version {version}"
+        )),
+        "cargo install is not pinned to {version}"
+    );
+    assert!(
+        sh("### pip").contains(&format!("pip install rollcall=={version}")),
+        "pip install is not pinned to {version}"
+    );
+    let example = sh("### No build at hand: the example build");
+    assert!(
+        example.contains(&format!("archive/refs/tags/{tag}.tar.gz"))
+            && example.contains(&format!("rollcall-{version}/fixtures/zephyr/tls")),
+        "the example build is not taken from the {tag} source archive"
+    );
+    assert!(
+        repo_root()
+            .join("fixtures/zephyr/tls/domains.yaml")
+            .exists(),
+        "fixtures/zephyr/tls is not a sysbuild build"
+    );
+    let own = sh("### Your own Zephyr build");
+    for needle in [
+        "west spdx --init",
+        "--sysbuild",
+        "CONFIG_BUILD_OUTPUT_META",
+        "west list",
+    ] {
+        assert!(own.contains(needle), "own-build steps lack {needle:?}");
+    }
+    let console = |heading: &str| -> String {
+        let blocks = fenced(&md_section(&doc, heading), "console");
+        assert!(!blocks.is_empty(), "{heading}: no console example");
+        blocks.join("")
+    };
+    assert!(console("## 3. Generate the SBOM").contains("$ rollcall generate fixtures/zephyr/tls"));
+    let validate = console("## 4. Validate it");
+    assert!(
+        validate.contains("$ rollcall validate --schema product.cdx.json\n")
+            && validate.contains("product.cdx.json: valid CycloneDX 1.6\n"),
+        "the validate example does not show a valid SBOM"
+    );
+    assert!(console("## 5. Report on it").contains("$ rollcall report --format md"));
+    // The clean-machine run follows these blocks for all three install routes.
+    let workflow = repo_file(".github/workflows/quickstart-clean.yml");
+    assert!(workflow.contains("method: [tarball, cargo, pip]"));
+    assert!(workflow.contains("scripts/quickstart-clean.sh"));
+    assert!(
+        !workflow.contains("actions/checkout"),
+        "the clean-machine run must not check out the repository"
+    );
+}
+
+/// SHA-125 (CI recipe): every use of the Action in docs/ci.md is pinned to the release tag,
+/// downloads that release's binary, and passes only inputs action/action.yml declares; the
+/// tuning table names only real inputs too.
+#[test]
+fn ci_recipe_doc_pins_the_action_to_the_release_tag_and_uses_real_inputs() {
+    let tag = format!("v{}", top_release());
+    let action: yaml_serde::Value =
+        yaml_serde::from_str(&repo_file("action/action.yml")).expect("action.yml parses");
+    let inputs: std::collections::BTreeSet<String> = action
+        .get("inputs")
+        .and_then(|i| i.as_mapping())
+        .expect("action.yml has inputs")
+        .keys()
+        .filter_map(|k| k.as_str().map(str::to_string))
+        .collect();
+    let doc = repo_file("docs/ci.md");
+    assert!(
+        !doc.contains("action@main"),
+        "docs/ci.md uses the Action at @main"
+    );
+    let workflows = fenced_blocks(&doc, "yaml");
+    assert!(!workflows.is_empty(), "docs/ci.md has no workflow");
+    let mut uses = 0;
+    for block in &workflows {
+        let workflow: yaml_serde::Value =
+            yaml_serde::from_str(block).unwrap_or_else(|e| panic!("docs/ci.md workflow: {e}"));
+        let jobs = workflow
+            .get("jobs")
+            .and_then(|j| j.as_mapping())
+            .expect("the workflow has jobs");
+        for job in jobs.values() {
+            for step in job
+                .get("steps")
+                .and_then(|s| s.as_sequence())
+                .expect("each job has steps")
+            {
+                let Some(name) = step.get("uses").and_then(|u| u.as_str()) else {
+                    continue;
+                };
+                if let Some(r) = name.strip_prefix("smhasan94/rollcall/action@") {
+                    uses += 1;
+                    assert_eq!(r, tag, "the Action is pinned to {r}, not {tag}");
+                    let with = step
+                        .get("with")
+                        .and_then(|w| w.as_mapping())
+                        .expect("the Action step has `with`");
+                    for key in with.keys().filter_map(|k| k.as_str()) {
+                        assert!(
+                            inputs.contains(key),
+                            "docs/ci.md passes unknown input {key}"
+                        );
+                    }
+                    assert_eq!(
+                        with.get("rollcall-version").and_then(|v| v.as_str()),
+                        Some(tag.as_str()),
+                        "rollcall-version is not the release tag"
+                    );
+                } else {
+                    assert!(
+                        name.split_once('@').is_some_and(
+                            |(_, r)| r.len() == 40 && r.chars().all(|c| c.is_ascii_hexdigit())
+                        ),
+                        "{name} is not pinned to a commit SHA"
+                    );
+                }
+            }
+        }
+    }
+    assert!(uses >= 1, "docs/ci.md never uses the Action");
+    let tuning = md_section(&doc, "## Tuning");
+    let mut keys = 0;
+    for line in tuning.iter().filter(|l| l.starts_with('|')) {
+        let cell = line.rsplit('|').nth(1).unwrap_or_default();
+        for code in cell.split('`').skip(1).step_by(2) {
+            if let Some((key, _)) = code.split_once(": ") {
+                keys += 1;
+                assert!(inputs.contains(key), "Tuning names unknown input {key}");
+            }
+        }
+    }
+    assert!(keys >= 5, "Tuning names {keys} inputs");
+}
+
+/// SHA-125 (FAQ): the FAQ carries the not-legal-advice disclaimer, every question (an H2
+/// ending in `?`) ends with a `Source:` or `Sources:` line naming a primary source from the
+/// list at the top, and that list links EUR-Lex, CISA (the same documents and URLs as
+/// docs/validate.md), NTIA and CycloneDX.
+#[test]
+fn faq_doc_cites_a_primary_source_per_question_and_disclaims_legal_advice() {
+    let doc = repo_file("docs/faq-cra-cisa.md");
+    let disclaimer: String = doc
+        .lines()
+        .take_while(|l| l.starts_with('>') || l.starts_with('#') || l.is_empty())
+        .filter_map(|l| l.strip_prefix('>'))
+        .collect::<Vec<_>>()
+        .join(" ");
+    let disclaimer = disclaimer.split_whitespace().collect::<Vec<_>>().join(" ");
+    assert!(
+        disclaimer.starts_with("**Not legal advice.**")
+            && disclaimer.contains("It is not legal advice"),
+        "the FAQ does not open with its disclaimer: {disclaimer:?}"
+    );
+    let validate = repo_file("docs/validate.md");
+    for url in [
+        "https://eur-lex.europa.eu/eli/reg/2024/2847/oj",
+        "https://www.cisa.gov/resources-tools/resources/2026-minimum-elements-software-bill-materials-sbom",
+        "https://www.bsi.bund.de/SharedDocs/Downloads/EN/BSI/Publications/TechGuidelines/TR03183/BSI-TR-03183-2_v2_1_0.pdf",
+    ] {
+        assert!(doc.contains(url), "the FAQ does not cite {url}");
+        assert!(
+            validate.contains(url),
+            "docs/validate.md does not cite {url}"
+        );
+    }
+    for url in [
+        "https://www.ntia.gov/report/2021/minimum-elements-software-bill-materials-sbom",
+        "https://cyclonedx.org/docs/1.6/json/",
+    ] {
+        assert!(doc.contains(url), "the FAQ does not cite {url}");
+    }
+    for title in [
+        "Regulation (EU) 2024/2847 of the European Parliament and of the Council of 23 October 2024 (Cyber Resilience Act), OJ L, 2024/2847, 20.11.2024",
+        "2026 Minimum Elements for a Software Bill of Materials (SBOM), version 2.1, July 29, 2026",
+    ] {
+        assert!(
+            doc.contains(title),
+            "the FAQ does not cite {title:?} as validate.md does"
+        );
+        assert!(validate.contains(title), "docs/validate.md lacks {title:?}");
+    }
+    let sources = [
+        "CRA",
+        "CISA 2026",
+        "NTIA 2021",
+        "CycloneDX 1.6",
+        "BSI TR-03183-2",
+    ];
+    let questions: Vec<&str> = doc.lines().filter(|l| l.starts_with("## ")).collect();
+    assert!(questions.len() >= 8, "{} questions", questions.len());
+    let mut cited = std::collections::BTreeSet::new();
+    for question in questions {
+        assert!(question.ends_with('?'), "{question:?} is not a question");
+        let body = md_section(&doc, question).join("\n");
+        let source = body
+            .split("\n\n")
+            .filter(|p| p.starts_with("Source: ") || p.starts_with("Sources: "))
+            .last()
+            .unwrap_or_else(|| panic!("{question:?} cites no source"));
+        let named: Vec<&str> = sources
+            .iter()
+            .copied()
+            .filter(|s| source.contains(s))
+            .collect();
+        assert!(
+            !named.is_empty(),
+            "{question:?}: {source:?} names no primary source"
+        );
+        cited.extend(named);
+    }
+    for source in ["CRA", "CISA 2026", "NTIA 2021", "CycloneDX 1.6"] {
+        assert!(cited.contains(source), "no answer cites {source}");
+    }
+}
+
+/// SHA-125 (release hygiene): CHANGELOG.md follows Keep a Changelog (title, `[Unreleased]`
+/// first, released versions newest first with ISO dates, only its section names, a link
+/// reference per version), and its top released entry is the workspace version. While the
+/// workspace is still at a 0.0.x placeholder or a pre-release (before the v0.1.0 bump), the
+/// 0.1.0 entry must exist instead.
+#[test]
+fn changelog_top_entry_matches_workspace_version_and_keep_a_changelog_layout() {
+    let doc = repo_file("CHANGELOG.md");
+    assert_eq!(doc.lines().next(), Some("# Changelog"));
+    assert!(doc.contains("[Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.1.0/)"));
+    let h2: Vec<&str> = doc.lines().filter(|l| l.starts_with("## ")).collect();
+    assert_eq!(
+        h2.first(),
+        Some(&"## [Unreleased]"),
+        "[Unreleased] is not first"
+    );
+    let releases = changelog_releases();
+    assert!(!releases.is_empty(), "no released version");
+    for (version, date) in &releases {
+        let ok = date.len() == 10
+            && date.char_indices().all(|(i, c)| {
+                if i == 4 || i == 7 {
+                    c == '-'
+                } else {
+                    c.is_ascii_digit()
+                }
+            });
+        assert!(ok, "{version}: date {date:?} is not YYYY-MM-DD");
+        assert!(
+            doc.lines()
+                .any(|l| l.starts_with(&format!("[{version}]: https://"))),
+            "{version} has no link reference"
+        );
+    }
+    assert!(doc.lines().any(|l| l.starts_with("[Unreleased]: https://")));
+    for pair in releases.windows(2) {
+        assert!(
+            pair[0].0 > pair[1].0,
+            "{} is listed above {}",
+            pair[0].0,
+            pair[1].0
+        );
+        assert!(
+            pair[0].1 >= pair[1].1,
+            "{} is dated before {}",
+            pair[0].0,
+            pair[1].0
+        );
+    }
+    for line in doc.lines().filter(|l| l.starts_with("### ")) {
+        assert!(
+            [
+                "### Added",
+                "### Changed",
+                "### Deprecated",
+                "### Removed",
+                "### Fixed",
+                "### Security"
+            ]
+            .contains(&line),
+            "{line:?} is not a Keep a Changelog section"
+        );
+    }
+    let workspace = semver::Version::parse(&workspace_package_field("version"))
+        .expect("the workspace version is semver");
+    let placeholder = (workspace.major == 0 && workspace.minor == 0) || !workspace.pre.is_empty();
+    if placeholder {
+        assert!(
+            releases
+                .iter()
+                .any(|(v, _)| *v == semver::Version::new(0, 1, 0)),
+            "the workspace is at {workspace} (before the v0.1.0 bump) and CHANGELOG.md has no 0.1.0 entry"
+        );
+    } else {
+        assert_eq!(
+            releases[0].0, workspace,
+            "the top released CHANGELOG entry is not the workspace version"
+        );
+    }
+    let notes = format!("docs/releases/v{}.md", releases[0].0);
+    assert!(repo_root().join(&notes).exists(), "{notes} is missing");
+    // The release notes link the release's CHANGELOG entry by the anchor of its heading, so
+    // a date change in the heading cannot leave the link stale.
+    for (version, date) in &releases {
+        let notes = format!("docs/releases/v{version}.md");
+        let Ok(text) = std::fs::read_to_string(repo_root().join(&notes)) else {
+            continue;
+        };
+        let anchor = github_slug(&format!("[{version}] - {date}"));
+        assert!(
+            heading_anchors(&doc).contains(&anchor),
+            "CHANGELOG.md has no heading anchor #{anchor}"
+        );
+        let changelog_links: Vec<String> = link_targets(&text)
+            .into_iter()
+            .filter(|t| t.starts_with("../../CHANGELOG.md"))
+            .collect();
+        assert!(
+            !changelog_links.is_empty(),
+            "{notes} does not link CHANGELOG.md"
+        );
+        for link in changelog_links {
+            assert_eq!(
+                link,
+                format!("../../CHANGELOG.md#{anchor}"),
+                "{notes} links {link}, not the CHANGELOG heading of {version}"
+            );
+        }
+    }
+}
+
+/// SHA-125 (release hygiene): SECURITY.md sends reporters to GitHub's private vulnerability
+/// reporting, has the supported-versions table with the current release series, and says
+/// what to expect and what is in scope.
+#[test]
+fn security_policy_names_private_vulnerability_reporting() {
+    let doc = repo_file("SECURITY.md");
+    for heading in [
+        "# Security policy",
+        "## Supported versions",
+        "## Reporting a vulnerability",
+        "## What to expect",
+        "## Scope",
+    ] {
+        assert!(
+            doc.lines().any(|l| l == heading),
+            "SECURITY.md lacks {heading:?}"
+        );
+    }
+    assert!(doc.contains("private vulnerability reporting"));
+    assert!(doc.contains("https://github.com/smhasan94/rollcall/security/advisories/new"));
+    assert!(doc.contains("Do not open a public issue"));
+    let release = top_release();
+    let series = format!("| {}.{}.x ", release.major, release.minor);
+    assert!(
+        md_section(&doc, "## Supported versions")
+            .iter()
+            .any(|l| l.starts_with(&series) && l.contains("Yes")),
+        "the supported-versions table does not support {series}"
+    );
+}
+
+/// SHA-125 (release hygiene): docs/versioning.md states the MSRV as the workspace
+/// `rust-version`, rust-toolchain.toml is not older than it, and the page has the release
+/// runbook.
+#[test]
+fn versioning_policy_states_msrv_equal_to_cargo_rust_version() {
+    let doc = repo_file("docs/versioning.md");
+    let msrv = workspace_package_field("rust-version");
+    assert!(
+        doc.contains(&format!("**Rust {msrv}**")),
+        "docs/versioning.md does not state the MSRV as Rust {msrv}"
+    );
+    let parse = |v: &str| -> Vec<u64> {
+        v.split('.')
+            .map(|p| p.parse().unwrap_or_else(|e| panic!("version {v:?}: {e}")))
+            .collect()
+    };
+    let toolchain = repo_file("rust-toolchain.toml");
+    let channel = toolchain
+        .lines()
+        .find_map(|l| l.trim().strip_prefix("channel = "))
+        .expect("rust-toolchain.toml has a channel")
+        .trim_matches('"');
+    assert!(
+        parse(channel) >= parse(&msrv),
+        "rust-toolchain.toml {channel} is older than the MSRV {msrv}"
+    );
+    assert!(doc.contains(&format!("rust-toolchain.toml` ({channel})")));
+    for heading in ["## Semantic versioning", "## MSRV", "## Releasing"] {
+        assert!(
+            doc.lines().any(|l| l == heading),
+            "versioning.md lacks {heading:?}"
+        );
+    }
+    let releasing = md_section(&doc, "## Releasing").join("\n");
+    for needle in [
+        "[Releasing rollcall](release.md)",
+        "CHANGELOG.md",
+        "docs/releases/vX.Y.Z.md",
+        "scripts/release-version.sh check v0.1.0",
+        "`cargo deny check` and `cargo doc`",
+        "quickstart-clean.yml",
+        ".lycheeignore",
+    ] {
+        assert!(releasing.contains(needle), "Releasing lacks {needle:?}");
+    }
+}
+
+/// SHA-125 (release notes, AC3): the v0.1.0 notes, which the release workflow publishes as the
+/// GitHub Release body, say the output is CycloneDX 1.6 only with SPDX deferred to #37 and a
+/// lossy converter named, list the known limitations (including Arduino-ESP32 2.0.17's open
+/// CVEs), and name the follow-ups #33, #35 and #37.
+#[test]
+fn release_notes_v0_1_0_say_cyclonedx_only_and_name_follow_ups() {
+    let doc = repo_file("docs/releases/v0.1.0.md");
+    assert_eq!(doc.lines().next(), Some("# rollcall v0.1.0"));
+    for needle in [
+        "**CycloneDX 1.6 JSON only**",
+        "[#37](https://github.com/smhasan94/rollcall/issues/37)",
+        "cyclonedx convert --input-file sbom.cdx.json",
+        "**lossy**",
+        "Arduino-ESP32 2.0.17",
+        "has open CVEs",
+        "SHA256SUMS",
+        "gh attestation verify",
+        "cargo install rollcall",
+        "pip install rollcall==0.1.0",
+        "smhasan94/rollcall/action@v0.1.0",
+    ] {
+        assert!(doc.contains(needle), "release notes lack {needle:?}");
+    }
+    for asset in [
+        "rollcall-v0.1.0-linux-amd64.tar.gz",
+        "rollcall-v0.1.0-linux-arm64.tar.gz",
+        "rollcall-v0.1.0-darwin-universal.tar.gz",
+        "rollcall-v0.1.0-windows-amd64.zip",
+    ] {
+        assert!(doc.contains(asset), "release notes do not list {asset}");
+    }
+    let limitations = md_section(&doc, "## Known limitations").join("\n");
+    for needle in [
+        "zephyr-gaps.md",
+        "esp-idf.md",
+        "platformio.md",
+        "Arduino-ESP32 2.0.17",
+    ] {
+        assert!(
+            limitations.contains(needle),
+            "Known limitations lack {needle:?}"
+        );
+    }
+    let follow_ups = md_section(&doc, "## Follow-ups").join("\n");
+    for issue in [33, 35, 37] {
+        assert!(
+            follow_ups.contains(&format!(
+                "[#{issue}](https://github.com/smhasan94/rollcall/issues/{issue})"
+            )),
+            "Follow-ups lack #{issue}"
+        );
+    }
+    let changelog = repo_file("CHANGELOG.md");
+    assert!(changelog.contains("[docs/releases/v0.1.0.md](docs/releases/v0.1.0.md)"));
+}
+
+/// SHA-125 (docs site): book.toml builds the site from docs/ under /rollcall/, fails on a
+/// SUMMARY.md typo, and runs the link preprocessor after mdBook's `links`; the identifier-DB
+/// guide is CONTRIBUTING.md's section, included by anchor; the build and link-check scripts
+/// pin mdBook and lychee by version and SHA-256; and docs.yml runs them with every action
+/// pinned to a commit SHA.
+#[test]
+fn book_toml_sources_docs_and_registers_the_link_preprocessor() {
+    let book = repo_file("book.toml");
+    let has = |line: &str| book.lines().any(|l| l.trim() == line);
+    for line in [
+        "src = \"docs\"",
+        "create-missing = false",
+        "[preprocessor.repo-links]",
+        "command = \"python3 scripts/mdbook-repo-links.py\"",
+        "after = [\"links\"]",
+        "site-url = \"/rollcall/\"",
+        "git-repository-url = \"https://github.com/smhasan94/rollcall\"",
+    ] {
+        assert!(has(line), "book.toml lacks {line:?}");
+    }
+    assert!(repo_root().join("scripts/mdbook-repo-links.py").exists());
+
+    let guide = repo_file("docs/contributing-identifiers.md");
+    assert!(guide.contains(
+        "<!-- repo-links: base=../CONTRIBUTING.md -->\n{{#include ../CONTRIBUTING.md:identifier-db}}\n<!-- repo-links: end -->"
+    ));
+    let contributing = repo_file("CONTRIBUTING.md");
+    let start = contributing
+        .find("ANCHOR: identifier-db")
+        .expect("CONTRIBUTING.md has the identifier-db anchor");
+    let end = contributing
+        .find("ANCHOR_END: identifier-db")
+        .expect("CONTRIBUTING.md closes the identifier-db anchor");
+    let section = &contributing[start..end];
+    assert!(section.contains("### 1. Check that the module is missing and pinned"));
+    assert!(section.contains("<!-- example:end -->"));
+
+    let sha256_pins = |script: &str, var: &str| {
+        let text = repo_file(script);
+        assert!(
+            text.lines().any(|l| l.starts_with(&format!("{var}="))),
+            "{script} does not pin {var}"
+        );
+        let hashes: Vec<&str> = text
+            .lines()
+            .filter_map(|l| {
+                l.trim()
+                    .split_once(") echo ")
+                    .map(|(_, h)| h.trim_end_matches(" ;;"))
+            })
+            .collect();
+        assert!(
+            hashes.len() >= 4,
+            "{script}: {} pinned SHA-256s",
+            hashes.len()
+        );
+        for h in hashes {
+            assert!(
+                h.len() == 64 && h.chars().all(|c| c.is_ascii_hexdigit()),
+                "{script}: {h:?} is not a SHA-256"
+            );
+        }
+    };
+    sha256_pins("scripts/build-docs.sh", "MDBOOK_VERSION");
+    sha256_pins("scripts/check-site-links.sh", "LYCHEE_VERSION");
+
+    let workflow = repo_file(".github/workflows/docs.yml");
+    for needle in [
+        "scripts/build-docs.sh --install",
+        "scripts/check-site-links.sh --install",
+        "python3 scripts/mdbook-repo-links.py --self-test",
+        "name: Check site links (lychee)",
+        "name: Verify live",
+        "path: target/book",
+        "if: github.event_name == 'push' && github.ref == 'refs/heads/main'",
+    ] {
+        assert!(workflow.contains(needle), "docs.yml lacks {needle:?}");
+    }
+    for workflow in ["docs.yml", "quickstart-clean.yml"] {
+        let text = repo_file(&format!(".github/workflows/{workflow}"));
+        for line in text
+            .lines()
+            .filter_map(|l| l.trim().strip_prefix("- uses: "))
+        {
+            let (_, r) = line.split_once('@').expect("uses names a ref");
+            let sha = r.split_whitespace().next().unwrap_or_default();
+            assert!(
+                sha.len() == 40 && sha.chars().all(|c| c.is_ascii_hexdigit()),
+                "{workflow}: {line} is not pinned to a commit SHA"
+            );
+        }
+    }
+    let ci = repo_file(".github/workflows/ci.yml");
+    for needle in [
+        "python3 scripts/mdbook-repo-links.py --self-test",
+        "tags: [\"v*\"]",
+        "EmbarkStudios/cargo-deny-action@3c6349835b2b7b196a839186cb8b78e02f7b5f25",
+        "docs/quickstart.md\n",
+    ] {
+        assert!(ci.contains(needle), "ci.yml lacks {needle:?}");
+    }
+}
+
+/// Runs `scripts/tolerate-pending-release-link.sh TAG RC REPORT` with `rows` (check-doc-links
+/// table rows: where, result, target, detail) as the report; its exit code.
+fn tolerate_pending_release_link(tag: &str, rc: &str, rows: &[(&str, &str, &str, &str)]) -> i32 {
+    let dir = tempfile::tempdir().expect("temporary directory");
+    let mut report = String::from("LINK                  RESULT  TARGET  DETAIL\n");
+    for (place, result, target, detail) in rows {
+        report.push_str(&format!("{place:<20}  {result:<6}  {target}  {detail}\n"));
+    }
+    let failed = rows.iter().any(|r| r.1 == "FAIL");
+    report.push_str(if failed {
+        "\ncheck-doc-links: FAIL\n"
+    } else {
+        "\ncheck-doc-links: PASS (1 checked, 0 skipped)\n"
+    });
+    let path = dir.path().join("links.txt");
+    std::fs::write(&path, report).expect("write the report");
+    let out = std::process::Command::new("bash")
+        .arg(repo_root().join("scripts/tolerate-pending-release-link.sh"))
+        .args([tag, rc])
+        .arg(&path)
+        .output()
+        .expect("bash runs");
+    out.status.code().expect("exited with a code")
+}
+
+/// SHA-125 (ci.yml docs-links, the tag-only step): on a release tag's own CI run only an HTTP
+/// 404 on exactly that tag's GitHub Release page is tolerated (release.yml creates it after
+/// the run); every other failure fails the step.
+#[test]
+fn tag_run_tolerates_only_this_tags_release_page_404() {
+    const URL: &str = "https://github.com/smhasan94/rollcall/releases/tag/v0.1.0";
+    let this_404 = (
+        "CHANGELOG.md:69",
+        "FAIL",
+        URL,
+        "HTTP 404 https://github.com/smhasan94/rollcall/releases/tag/v0.1.0",
+    );
+    let ok_row = (
+        "SECURITY.md:3",
+        "PASS",
+        "https://semver.org/",
+        "HTTP 200 https://semver.org/",
+    );
+    // Tolerated: this tag's release page answers 404, everything else passes.
+    assert_eq!(
+        tolerate_pending_release_link("v0.1.0", "1", &[ok_row, this_404]),
+        0
+    );
+    // A clean run passes.
+    assert_eq!(tolerate_pending_release_link("v0.1.0", "0", &[ok_row]), 0);
+    // Rejected: the same URL failing any other way.
+    let other_failures = [
+        (
+            "CHANGELOG.md:69",
+            "FAIL",
+            URL,
+            "HTTP 500 https://github.com/smhasan94/rollcall/releases/tag/v0.1.0",
+        ),
+        (
+            "CHANGELOG.md:69",
+            "FAIL",
+            URL,
+            "HTTP 0 (curl exit 6: Could not resolve host: github.com)",
+        ),
+        (
+            "CHANGELOG.md:69",
+            "FAIL",
+            URL,
+            "HTTP 404 https://github.com/smhasan94/rollcall/releases (redirected up to a parent page)",
+        ),
+        // Another tag's release page.
+        (
+            "CHANGELOG.md:70",
+            "FAIL",
+            "https://github.com/smhasan94/rollcall/releases/tag/v9.9.9",
+            "HTTP 404 https://github.com/smhasan94/rollcall/releases/tag/v9.9.9",
+        ),
+        // Another URL.
+        (
+            "docs/ci.md:10",
+            "FAIL",
+            "https://github.com/smhasan94/rollcall-example-zephyr",
+            "HTTP 404 https://github.com/smhasan94/rollcall-example-zephyr",
+        ),
+        // A link inside the repository.
+        (
+            "docs/versioning.md:5",
+            "FAIL",
+            "release.md#nope",
+            "no heading for #nope in docs/release.md",
+        ),
+    ];
+    for row in other_failures {
+        assert_eq!(
+            tolerate_pending_release_link("v0.1.0", "1", &[row]),
+            1,
+            "tolerated {row:?}"
+        );
+        // Not tolerated alongside this tag's 404 either.
+        assert_eq!(
+            tolerate_pending_release_link("v0.1.0", "1", &[this_404, row]),
+            1,
+            "tolerated {row:?} next to the pending release page"
+        );
+    }
+    // The 404 of v0.1.0's page is not tolerated on another tag's run.
+    assert_eq!(tolerate_pending_release_link("v0.2.0", "1", &[this_404]), 1);
+    // Exit 1 without any failing row is not a link failure it understands.
+    assert_eq!(tolerate_pending_release_link("v0.1.0", "1", &[ok_row]), 1);
+    // A setup error of check-doc-links.sh keeps its code; bad arguments are a usage error.
+    assert_eq!(tolerate_pending_release_link("v0.1.0", "2", &[]), 2);
+    assert_eq!(tolerate_pending_release_link("main", "1", &[this_404]), 2);
+    assert_eq!(tolerate_pending_release_link("v0.1.0", "x", &[this_404]), 2);
+}
+
+#[cfg(unix)]
+/// Runs `scripts/check-doc-links.sh` (online) on a document linking each URL of `table`, with a
+/// fake `curl` first on PATH answering from `table` (URL, final status, curl exit code, final
+/// URL); its exit code and stdout.
+fn check_doc_links_with_fake_curl(table: &[(&str, u16, i32, &str)]) -> (i32, String) {
+    use std::os::unix::fs::PermissionsExt;
+    let dir = tempfile::tempdir().expect("temporary directory");
+    let bin = dir.path().join("bin");
+    std::fs::create_dir(&bin).expect("bin directory");
+    let fake = bin.join("curl");
+    std::fs::write(
+        &fake,
+        r#"#!/usr/bin/env bash
+# Fake curl: the URL is the last argument; FAKE_CURL_TABLE has `url status rc effective` rows.
+url="${!#}"
+while read -r u status rc effective; do
+    if [[ "$u" == "$url" ]]; then
+        printf '%s %s' "$status" "$effective"
+        [[ "$rc" -eq 0 ]] || echo "curl: ($rc) fake failure" >&2
+        exit "$rc"
+    fi
+done <"$FAKE_CURL_TABLE"
+echo "fake curl: no row for $url" >&2
+exit 99
+"#,
+    )
+    .expect("write the fake curl");
+    std::fs::set_permissions(&fake, std::fs::Permissions::from_mode(0o755)).expect("chmod");
+    let rows: String = table
+        .iter()
+        .map(|(url, status, rc, effective)| format!("{url} {status} {rc} {effective}\n"))
+        .collect();
+    let table_path = dir.path().join("table.txt");
+    std::fs::write(&table_path, rows).expect("write the table");
+    let doc: String = table
+        .iter()
+        .map(|(url, ..)| format!("- [link]({url})\n"))
+        .collect();
+    let doc_path = dir.path().join("doc.md");
+    std::fs::write(&doc_path, doc).expect("write the document");
+    let path = format!(
+        "{}:{}",
+        bin.display(),
+        std::env::var("PATH").unwrap_or_default()
+    );
+    let out = std::process::Command::new("bash")
+        .arg(repo_root().join("scripts/check-doc-links.sh"))
+        .arg(&doc_path)
+        .env("PATH", path)
+        .env("FAKE_CURL_TABLE", &table_path)
+        .env_remove("GITHUB_TOKEN")
+        .output()
+        .expect("bash runs");
+    (
+        out.status.code().expect("exited with a code"),
+        String::from_utf8_lossy(&out.stdout).into_owned(),
+    )
+}
+
+/// SHA-125 (CI docs-links): a host listed in scripts/link-check-blocked-hosts.txt (it rejects
+/// GitHub's CI runners) gets SKIP for an HTTP 403 and only for that; anything else from it
+/// still fails, and a 403 from any other host fails.
+#[cfg(unix)]
+#[test]
+fn check_doc_links_skips_only_a_403_from_a_host_that_blocks_ci() {
+    let blocked = repo_file("scripts/link-check-blocked-hosts.txt");
+    assert!(
+        blocked
+            .lines()
+            .any(|l| l.split('#').next().unwrap_or_default().trim() == "www.cisa.gov"),
+        "www.cisa.gov is not listed"
+    );
+    const CISA: &str = "https://www.cisa.gov/resources-tools/resources/2026-minimum-elements-software-bill-materials-sbom";
+    const OK: &str = "https://example.org/page";
+
+    // A 403 from the listed host is skipped; the run passes and counts it as skipped.
+    let (code, out) = check_doc_links_with_fake_curl(&[(CISA, 403, 0, CISA), (OK, 200, 0, OK)]);
+    assert_eq!(code, 0, "{out}");
+    assert!(
+        out.lines().any(|l| l.contains("SKIP") && l.contains(CISA) && l.contains(
+            "HTTP 403 from a host that blocks CI runners (listed in scripts/link-check-blocked-hosts.txt)"
+        )),
+        "{out}"
+    );
+    assert!(
+        out.contains("check-doc-links: PASS (1 checked, 1 skipped)"),
+        "{out}"
+    );
+
+    // Every other result from the listed host fails.
+    for (status, rc, effective, why) in [
+        (404, 0, CISA, "a 404"),
+        (503, 0, CISA, "a 503"),
+        (0, 6, "", "a curl error (DNS)"),
+        (
+            403,
+            0,
+            "https://www.cisa.gov/resources-tools",
+            "a 403 after a redirect up to a parent page",
+        ),
+        (
+            403,
+            0,
+            "https://blocked.example.net/elsewhere",
+            "a 403 after a redirect to an unlisted host",
+        ),
+    ] {
+        let (code, out) =
+            check_doc_links_with_fake_curl(&[(CISA, status, rc, effective), (OK, 200, 0, OK)]);
+        assert_eq!(code, 1, "{why} on the listed host passed:\n{out}");
+        assert!(
+            out.lines().any(|l| l.contains("FAIL") && l.contains(CISA)),
+            "{why}: {out}"
+        );
+        assert!(out.contains("check-doc-links: FAIL"), "{why}: {out}");
+    }
+
+    // A 403 from a host that is not listed fails.
+    const OTHER: &str = "https://www.example.com/forbidden";
+    let (code, out) = check_doc_links_with_fake_curl(&[(OTHER, 403, 0, OTHER), (OK, 200, 0, OK)]);
+    assert_eq!(code, 1, "{out}");
+    assert!(
+        out.lines().any(|l| l.contains("FAIL") && l.contains(OTHER)),
+        "{out}"
+    );
+}

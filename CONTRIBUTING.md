@@ -10,6 +10,7 @@ The most common contribution is a module for the identifier database, so that co
 
 ## Adding a module to the identifier database
 
+<!-- ANCHOR: identifier-db (the docs site includes this section: docs/contributing-identifiers.md) -->
 The identifier database (`crates/rollcall-identifiers/db/identifiers.yaml`) tells rollcall,
 for each Zephyr module, which upstream project the fork is, its purl and CPE, and the upstream
 version of each fork commit Zephyr pins. Its conventions are in
@@ -205,6 +206,8 @@ dictionary has no entry yet for 2.10.0, 2.13.0 or 2.14.0. Step 5 used `"how": "t
 upstream `https://git.trustedfirmware.org/TF-A/trusted-firmware-a.git` and tag
 `^v(?P<v>\d+\.\d+\.\d+)$`.
 
+<!-- ANCHOR_END: identifier-db -->
+
 ## Other changes
 
 - **Golden files** (`crates/rollcall-core/tests/golden/`): run `scripts/regen-golden.sh` and
@@ -217,3 +220,10 @@ upstream `https://git.trustedfirmware.org/TF-A/trusted-firmware-a.git` and tag
   the pinned ESP-IDF release; see [docs/esp-idf.md](docs/esp-idf.md).
 - **Subsystem table** (`crates/rollcall-core/db/subsystems.yaml`): checked by
   `scripts/verify-subsystems.sh`; see [docs/subsystems.md](docs/subsystems.md).
+- **Docs and their links**: `scripts/check-doc-links.sh FILE.md...` checks every link of the
+  given Markdown files (CI job `docs-links`; `--offline` for the links inside the
+  repository), and `scripts/build-docs.sh` with `scripts/check-site-links.sh` builds the docs
+  site and checks it (workflow `docs.yml`). A few sites answer HTTP 403 to GitHub's CI runners
+  while serving everyone else; they are listed, each with the reason and the date, in
+  `scripts/link-check-blocked-hosts.txt`, and both checkers tolerate a 403 from them, and only
+  a 403. Add a host there only after seeing a CI-only 403, never to hide a broken link.

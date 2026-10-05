@@ -57,8 +57,10 @@ GitHub's web settings):
    `scripts/release-version.sh check v<version>` must pass; CI's `publish-dry-run` job runs it
    (without the tag) on every change, with `cargo publish --workspace --dry-run --locked` and a
    wheel build.
-2. Optionally write the release notes as `docs/releases/v<version>.md`; the release uses them
-   as its body, and GitHub's generated notes otherwise.
+2. Write the release notes as `docs/releases/v<version>.md`, with the CHANGELOG date and
+   anchor set as [Versioning](versioning.md#releasing) describes. The docs site lists the file
+   and the release uses it as its body; `release.yml` falls back to GitHub's generated notes
+   only if the file is missing.
 3. Merge, then tag the merge commit and push the tag:
 
    ```sh

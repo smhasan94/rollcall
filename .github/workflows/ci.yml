@@ -3,6 +3,9 @@ name: CI
 on:
   push:
     branches: [main]
+    # Release tags too, so `cargo deny check` and `cargo doc` with -D warnings are recorded for
+    # the tagged commit (SHA-125).
+    tags: ["v*"]
   pull_request:
 
 permissions:
@@ -67,12 +70,16 @@ jobs:
         run: cargo test -p rollcall-core --test csaf csaf_validates_against_schema_for_every_fixture --locked
       # Offline checks of the identifier-database version-table generator.
       - run: python3 scripts/version-tables.py --self-test
+      # Offline checks of the docs site's link preprocessor (SHA-125).
+      - run: python3 scripts/mdbook-repo-links.py --self-test
 
   deny:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: EmbarkStudios/cargo-deny-action@v2
+      # v2.1.1 runs cargo-deny 0.20.2 (the `deny_version` its Dockerfile pins). Run the same
+      # locally with `cargo deny --all-features --locked check`.
+      - uses: EmbarkStudios/cargo-deny-action@3c6349835b2b7b196a839186cb8b78e02f7b5f25 # v2.1.1
         with:
           command: check
           arguments: --all-features --locked
@@ -137,10 +144,11 @@ jobs:
       - run: scripts/lint-identifiers.sh
       - run: scripts/check-identifiers-package.sh
 
-  # The worked examples of docs/vex-rules.md (SHA-115) and the gap analysis in
-  # docs/zephyr-gaps.md (SHA-134): every `$ ` command in a ```console block runs and must
-  # print exactly the output shown under it. Offline. Run the same locally with
-  # `scripts/check-doc-examples.sh docs/vex-rules.md docs/zephyr-gaps.md docs/esp-idf.md docs/platformio.md docs/README.md docs/zephyr.md docs/cargo.md`.
+  # The worked examples of docs/vex-rules.md (SHA-115), the gap analysis in
+  # docs/zephyr-gaps.md (SHA-134) and the quickstart (SHA-125): every `$ ` command in a
+  # ```console block runs and must print exactly the output shown under it. Offline. Run the
+  # same locally with
+  # `scripts/check-doc-examples.sh docs/vex-rules.md docs/zephyr-gaps.md docs/esp-idf.md docs/platformio.md docs/README.md docs/zephyr.md docs/cargo.md docs/quickstart.md`.
   docs-examples:
     runs-on: ubuntu-latest
     steps:
@@ -151,7 +159,7 @@ jobs:
           toolchain: "1.91.1"
       - uses: Swatinem/rust-cache@v2
       - run: cargo build -p rollcall --locked
-      - run: ROLLCALL_BIN=target/debug/rollcall scripts/check-doc-examples.sh docs/vex-rules.md docs/zephyr-gaps.md docs/esp-idf.md docs/platformio.md docs/README.md docs/zephyr.md docs/cargo.md
+      - run: ROLLCALL_BIN=target/debug/rollcall scripts/check-doc-examples.sh docs/vex-rules.md docs/zephyr-gaps.md docs/esp-idf.md docs/platformio.md docs/README.md docs/zephyr.md docs/cargo.md docs/quickstart.md
       # The starter VEX rule pack's Kconfig symbols all exist in the real builds' .config files.
       - name: Lint the starter VEX rule pack
         run: |
@@ -162,18 +170,43 @@ jobs:
           done < <(find fixtures -path '*/zephyr/.config' | sort)
           target/debug/rollcall vex lint --starter-rules --lint-starter-symbols "${args[@]}"
 
-  # Every link in docs/zephyr-gaps.md and the outreach drafts in docs/outreach/ (SHA-134):
-  # links inside the repository must exist (with their #anchors), and http(s) links must
-  # answer 2xx or 3xx. Needs the network. Run the same locally with
-  # `scripts/check-doc-links.sh docs/zephyr-gaps.md docs/outreach/*.md` (`--offline` checks
-  # only the links inside the repository). Network-dependent: an external site that is down
-  # fails this job, and re-running it is the remedy.
+  # Every link in docs/zephyr-gaps.md and the outreach drafts in docs/outreach/ (SHA-134),
+  # and in the getting-started pages, the FAQ and the release documents (SHA-125): links
+  # inside the repository must exist (with their #anchors), and http(s) links must answer 2xx
+  # or 3xx. Needs the network. Run the same locally with
+  # `scripts/check-doc-links.sh docs/zephyr-gaps.md docs/outreach/*.md docs/quickstart.md docs/faq-cra-cisa.md docs/contributing-identifiers.md`
+  # (`--offline` checks only the links inside the repository). Network-dependent: an external
+  # site that is down fails this job, and re-running it is the remedy.
+  #
+  # Hosts that answer 403 to GitHub's runners only (scripts/link-check-blocked-hosts.txt,
+  # each with its reason and date) give SKIP for a 403, and only for a 403.
+  #
+  # The release documents link pages that exist only after the release's human steps (the
+  # v0.1.0 tag, the example repository, the live docs site), so their http(s) links are
+  # checked on release tags only; their links inside the repository on every run.
   docs-links:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - name: Check the gap analysis and outreach links
         run: scripts/check-doc-links.sh docs/zephyr-gaps.md docs/outreach/*.md
+      - name: Check the quickstart, FAQ and contribution guide links
+        run: scripts/check-doc-links.sh docs/quickstart.md docs/faq-cra-cisa.md docs/contributing-identifiers.md
+      - name: Check the release documents' links inside the repository
+        run: scripts/check-doc-links.sh --offline docs/ci.md docs/versioning.md docs/releases/*.md docs/README.md docs/SUMMARY.md README.md CHANGELOG.md SECURITY.md
+      # On the tag's own run, release.yml has not created the GitHub Release yet, so the
+      # CHANGELOG's link to it (releases/tag/<this tag>) still 404s. That one 404, and nothing
+      # else, is tolerated: scripts/tolerate-pending-release-link.sh (tested in
+      # crates/rollcall-core/tests/docs.rs). The docs site's link check covers the page later.
+      - name: Check the release documents' links (release tags)
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          set -uo pipefail
+          rc=0
+          scripts/check-doc-links.sh docs/ci.md docs/versioning.md docs/releases/*.md \
+            docs/README.md CHANGELOG.md SECURITY.md > "$RUNNER_TEMP/release-links.txt" || rc=$?
+          cat "$RUNNER_TEMP/release-links.txt"
+          scripts/tolerate-pending-release-link.sh "$GITHUB_REF_NAME" "$rc" "$RUNNER_TEMP/release-links.txt"
 
   # crates/rollcall-core/db/subsystems.yaml against the pinned Zephyr tree (every source path
   # and Kconfig symbol real, `size` claims backed). Needs the network on a cache miss.
