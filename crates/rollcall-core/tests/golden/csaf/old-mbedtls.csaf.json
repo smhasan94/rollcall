@@ -15,7 +15,7 @@
         "date": "2026-01-02T03:04:05Z",
         "engine": {
           "name": "rollcall",
-          "version": "0.0.1"
+          "version": "0.1.0-rc.1"
         }
       },
       "id": "rollcall-csaf-d9ec7f187e7bd531",

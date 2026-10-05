@@ -2,7 +2,7 @@
 
 This report checks how ready the software bill of materials (SBOM) of rust-node 1.0.0 is to hand to a customer or regulator. Its readiness score is 23 out of 100. The SBOM lists 3 items in total: the product, 1 firmware image and 1 software component. 1 of them carry an identifier (a PURL or CPE) that vulnerability databases can match, 0 a file hash that proves exactly which file was shipped, and 1 a licence. No unresolved modules. The SBOM is valid CycloneDX 1.6; the CISA 2026 and EU Cyber Resilience Act checks found 11 problems to fix and 0 recommendations. A vulnerability scan was supplied: 1 known vulnerability affects this product's components; 1 is still open (0 critical, 1 high) and 0 closed by VEX statements (not affected or fixed).
 
-Generated 2026-01-02T03:04:05Z by rollcall 0.0.1. Report schema `rollcall-report/1`; see `docs/report.md` for how the score is calculated.
+Generated 2026-01-02T03:04:05Z by rollcall 0.1.0-rc.1. Report schema `rollcall-report/1`; see `docs/report.md` for how the score is calculated.
 
 ## Score
 

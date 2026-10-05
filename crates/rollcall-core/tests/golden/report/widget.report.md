@@ -2,7 +2,7 @@
 
 This report checks how ready the software bill of materials (SBOM) of widget 1.0.0 is to hand to a customer or regulator. Its readiness score is 15 out of 100. The SBOM lists 11 items in total: the product, 3 firmware images and 7 software components. 3 of them carry an identifier (a PURL or CPE) that vulnerability databases can match, 2 a file hash that proves exactly which file was shipped, and 3 a licence. 1 module is not in rollcall's identifier database, so its identity may be incomplete (see Unresolved modules). 4 components have no PURL or CPE, so scanners cannot match them (see Unresolved modules). The SBOM is valid CycloneDX 1.6; the CISA 2026 and EU Cyber Resilience Act checks found 38 problems to fix and 0 recommendations. No vulnerability scan was supplied, so known vulnerabilities were not checked and are not part of the score.
 
-Generated 2026-01-02T03:04:05Z by rollcall 0.0.1. Report schema `rollcall-report/1`; see `docs/report.md` for how the score is calculated.
+Generated 2026-01-02T03:04:05Z by rollcall 0.1.0-rc.1. Report schema `rollcall-report/1`; see `docs/report.md` for how the score is calculated.
 
 ## Score
 
