@@ -1519,6 +1519,57 @@ esac
     assert!(path.trim_end().ends_with("tools"), "{path}");
 }
 
+/// common.sh: the rollcall release asset for both Macs is the one universal binary
+/// (`darwin_universal`, as release.yml builds it), while the pinned tools keep their
+/// per-architecture assets; an unsupported machine exits 1 naming it.
+#[test]
+fn rollcall_platform_maps_both_macs_to_the_universal_asset() {
+    let dir = tempfile::tempdir().unwrap();
+    let uname = dir.path().join("uname");
+    let run = |os: &str, arch: &str| {
+        write_exe(
+            &uname,
+            &format!("#!/bin/sh\ncase \"$1\" in -s) echo {os} ;; -m) echo {arch} ;; esac\n"),
+        );
+        Command::new("bash")
+            .arg("-c")
+            .arg(". \"$1\"; platform; rollcall_platform")
+            .arg("bash")
+            .arg(script("common.sh"))
+            .env(
+                "PATH",
+                format!(
+                    "{}:{}",
+                    dir.path().display(),
+                    std::env::var("PATH").unwrap_or_default()
+                ),
+            )
+            .output()
+            .unwrap()
+    };
+    for (os, arch, tool, asset) in [
+        ("Darwin", "arm64", "darwin_arm64", "darwin_universal"),
+        ("Darwin", "x86_64", "darwin_amd64", "darwin_universal"),
+        ("Linux", "x86_64", "linux_amd64", "linux_amd64"),
+        ("Linux", "aarch64", "linux_arm64", "linux_arm64"),
+    ] {
+        let out = run(os, arch);
+        assert_eq!(out.status.code(), Some(0), "{os} {arch}: {}", text(&out));
+        assert_eq!(
+            String::from_utf8_lossy(&out.stdout),
+            format!("{tool}\n{asset}\n"),
+            "{os} {arch}"
+        );
+    }
+    let out = run("Linux", "riscv64");
+    assert_eq!(out.status.code(), Some(1), "{}", text(&out));
+    assert!(
+        String::from_utf8_lossy(&out.stderr).contains("unsupported architecture riscv64"),
+        "{}",
+        text(&out)
+    );
+}
+
 /// Outside a pull request there is no base, so every open finding is new: the gate notes the
 /// outcome and passes unless `gate-on-push: true`; on a pull request it always applies; any
 /// other gate-on-push value exits 64.

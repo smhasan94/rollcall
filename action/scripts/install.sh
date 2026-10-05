@@ -4,9 +4,10 @@
 #
 # Inputs (environment):
 #   RC_ROLLCALL_VERSION      `source` (default): build rollcall from the action's own checkout
-#                            (`cargo build --release --locked -p rollcall-cli`); or a release
-#                            tag such as v0.1.0: download rollcall-<tag>-<os>-<arch>.tar.gz and
-#                            SHA256SUMS from that GitHub release and verify the tarball
+#                            (`cargo build --release --locked -p rollcall`); or a release
+#                            tag such as v0.1.0: download
+#                            rollcall-<tag>-<os>-<arch>.tar.gz (darwin-universal on both
+#                            Macs) and SHA256SUMS from that GitHub release and verify it
 #   RC_IDENTIFIERS_VERSION   `embedded` (default), or a db_version: download
 #                            rollcall-identifiers-<v>.tar.gz and SHA256SUMS from the release
 #                            identifiers-v<v> and verify it
@@ -82,12 +83,12 @@ install_rollcall() {
                 die "cannot install the Rust toolchain $channel"
         fi
         log "building rollcall from source in $root"
-        (cd "$root" && cargo build --release --locked -p rollcall-cli) >&2 ||
+        (cd "$root" && cargo build --release --locked -p rollcall) >&2 ||
             die "cargo build of rollcall failed"
         bin="${CARGO_TARGET_DIR:-$root/target}/release/rollcall"
     else
         local plat asset dir
-        plat="$(platform)"
+        plat="$(rollcall_platform)"
         asset="rollcall-${version}-${plat%_*}-${plat#*_}.tar.gz"
         dir="$TOOLS/rollcall-$version"
         mkdir -p "$dir"

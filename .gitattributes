@@ -29,3 +29,6 @@ fixtures/esp-idf/**/*.a binary
 # PlatformIO build fixture (scripts/regen-fixtures-platformio.sh, SHA-131): byte-exact like the
 # others (MANIFEST.json pins every SHA-256). It holds hidden files (.pio/, .piopm) on purpose.
 fixtures/platformio/** -text linguist-generated=true
+
+# Shell scripts run under Git Bash on the Windows release runner (SHA-124): keep LF there too.
+*.sh text eol=lf

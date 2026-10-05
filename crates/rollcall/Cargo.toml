@@ -1,6 +1,6 @@
 [package]
 name = "rollcall"
-description = "Reserves the rollcall crate name. The CLI is published as rollcall-cli (binary: rollcall); the library is rollcall-core."
+description = "rollcall: CRA-grade CycloneDX SBOMs from firmware build metadata"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
@@ -9,8 +9,28 @@ repository.workspace = true
 readme.workspace = true
 authors.workspace = true
 keywords.workspace = true
-# Categories are permanent once published; library crates are not command-line utilities.
-categories = ["development-tools"]
+categories.workspace = true
+# Only the sources: the integration tests run the repository's scripts and fixtures, which are
+# not in the published crate.
+include = ["src/**"]
+
+[[bin]]
+name = "rollcall"
+path = "src/main.rs"
+
+[dependencies]
+clap.workspace = true
+rollcall-core.workspace = true
+rollcall-assay.workspace = true
+rollcall-identifiers.workspace = true
+serde_json.workspace = true
+tempfile.workspace = true
+
+[dev-dependencies]
+assert_cmd.workspace = true
+predicates.workspace = true
+toml.workspace = true
+yaml_serde.workspace = true
 
 [lints]
 workspace = true

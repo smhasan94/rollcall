@@ -19,7 +19,7 @@
 # Environment:
 #   ROLLCALL_TOOLS_DIR  where the tools live (default .cache/tools)
 #   ROLLCALL_VEX_OUT    output directory, emptied first (default .cache/vex-check)
-#   ROLLCALL_BIN        the rollcall binary (default: built with `cargo build -p rollcall-cli`)
+#   ROLLCALL_BIN        the rollcall binary (default: built with `cargo build -p rollcall`)
 #   GRYPE_DB_CACHE_DIR  grype's database directory (default .cache/grype-db); set
 #                       GRYPE_DB_AUTO_UPDATE=false to use it offline as it is
 #
@@ -199,7 +199,7 @@ vexctl_reported="$(awk '$1 == "GitVersion:" {print $2}' <<<"$vexctl_out")"
 if [[ -n "${ROLLCALL_BIN:-}" ]]; then
     ROLLCALL="$ROLLCALL_BIN"
 else
-    cargo build -q -p rollcall-cli --locked
+    cargo build -q -p rollcall --locked
     ROLLCALL="${CARGO_TARGET_DIR:-target}/debug/rollcall"
 fi
 [[ -x "$ROLLCALL" ]] || die "rollcall binary not found at $ROLLCALL"

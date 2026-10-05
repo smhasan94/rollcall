@@ -77,6 +77,48 @@ jobs:
           command: check
           arguments: --all-features --locked
 
+  # The PyPI wrapper's tests (python/tests: download, checksum, cache and exec, against a
+  # local HTTP server; SHA-124) on every platform it supports, with the oldest and a current
+  # Python. Run the same locally with `python3 -m pytest python/tests`.
+  python:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, macos-15, windows-2025]
+        python: ["3.9", "3.12"]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: ${{ matrix.python }}
+      - run: python -m pip install --disable-pip-version-check "pytest==8.4.2"
+      - run: python -m pytest python/tests
+
+  # What the release workflow's preflight job checks, on every change (SHA-124): the versions
+  # agree (scripts/release-version.sh), every crate packages and builds as it would be
+  # published, and the wrapper's wheel and sdist build.
+  publish-dry-run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      # Keep in sync with rust-toolchain.toml.
+      - uses: dtolnay/rust-toolchain@7e38f4b43b4db5c8dd498af069a4f6196df1d067 # master
+        with:
+          toolchain: "1.91.1"
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+      - run: scripts/release-version.sh check
+      - run: cargo publish --workspace --dry-run --locked
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        with:
+          version: "0.8.4"
+          enable-cache: false
+      - run: uv build python --out-dir pydist
+
   # The identifier database lint (scripts/lint-identifiers.sh, offline): schema, purl and CPE
   # syntax, duplicate and unsorted modules, db_version equal to the rollcall-identifiers crate
   # version, every manual-table row resolving, and every module of the fixtures/zephyr builds
@@ -108,7 +150,7 @@ jobs:
         with:
           toolchain: "1.91.1"
       - uses: Swatinem/rust-cache@v2
-      - run: cargo build -p rollcall-cli --locked
+      - run: cargo build -p rollcall --locked
       - run: ROLLCALL_BIN=target/debug/rollcall scripts/check-doc-examples.sh docs/vex-rules.md docs/zephyr-gaps.md docs/esp-idf.md docs/platformio.md docs/README.md docs/zephyr.md docs/cargo.md
       # The starter VEX rule pack's Kconfig symbols all exist in the real builds' .config files.
       - name: Lint the starter VEX rule pack
@@ -182,7 +224,7 @@ jobs:
         with:
           toolchain: "1.91.1"
       - uses: Swatinem/rust-cache@v2
-      - run: cargo build -p rollcall-cli --locked
+      - run: cargo build -p rollcall --locked
       # One retry: the tool downloads, grype's database and osv.dev are all network calls.
       # Each attempt writes to its own directory, so the first attempt's logs survive.
       - name: Smoke scan (grype, osv-scanner)
@@ -213,7 +255,7 @@ jobs:
         with:
           toolchain: "1.91.1"
       - uses: Swatinem/rust-cache@v2
-      - run: cargo build -p rollcall-cli --locked
+      - run: cargo build -p rollcall --locked
       # One retry, as in the smoke job; each attempt keeps its own logs.
       - name: grype expected CVEs (old mbedTLS)
         run: |
@@ -243,7 +285,7 @@ jobs:
         with:
           toolchain: "1.91.1"
       - uses: Swatinem/rust-cache@v2
-      - run: cargo build -p rollcall-cli --locked
+      - run: cargo build -p rollcall --locked
       # One retry, as in the smoke job; each attempt keeps its own logs.
       - name: grype expected advisories (old heapless)
         run: |
@@ -277,7 +319,7 @@ jobs:
         with:
           toolchain: "1.91.1"
       - uses: Swatinem/rust-cache@v2
-      - run: cargo build -p rollcall-cli --locked
+      - run: cargo build -p rollcall --locked
       - name: Install the pinned scanners
         run: |
           ROLLCALL_SMOKE_OUT=.cache/scan-install scripts/smoke-scan.sh --install --only minimal || {
@@ -285,7 +327,7 @@ jobs:
             ROLLCALL_SMOKE_OUT=.cache/scan-install scripts/smoke-scan.sh --install --only minimal
           }
       - name: Scanner integration tests (online)
-        run: cargo test -p rollcall-cli --locked --test scan_scanners -- --ignored --skip offline
+        run: cargo test -p rollcall --locked --test scan_scanners -- --ignored --skip offline
       # Everything the offline test needs is fetched or built while the network is up: both
       # databases (osv-scanner's for the ecosystems of the SBOM it will scan) and the test
       # binary.
@@ -304,7 +346,7 @@ jobs:
             osv-scanner scan source -L .cache/scan-old-mbedtls.cdx.json --format json \
             --offline-vulnerabilities --download-offline-databases >/dev/null || rc=$?
           test "$rc" -le 1
-          bin="$(cargo test -p rollcall-cli --locked --test scan_scanners --no-run --message-format=json |
+          bin="$(cargo test -p rollcall --locked --test scan_scanners --no-run --message-format=json |
             jq -r 'select(.profile.test == true and .target.name == "scan_scanners") | .executable')"
           test -x "$bin"
           echo "bin=$bin" >> "$GITHUB_OUTPUT"
@@ -360,7 +402,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
-      - run: cargo build -p rollcall-cli --locked
+      - run: cargo build -p rollcall --locked
       - name: CSAF check (official validator)
         run: scripts/csaf-check.sh --install
       - uses: actions/upload-artifact@v4
@@ -383,7 +425,7 @@ jobs:
         with:
           toolchain: "1.91.1"
       - uses: Swatinem/rust-cache@v2
-      - run: cargo build -p rollcall-cli --locked
+      - run: cargo build -p rollcall --locked
       # One retry, as in the smoke job; each attempt keeps its own logs.
       - name: VEX check (vexctl, CycloneDX schema, grype --vex)
         run: |
@@ -419,7 +461,7 @@ jobs:
         with:
           toolchain: "1.91.1"
       - uses: Swatinem/rust-cache@v2
-      - run: cargo build -p rollcall-cli --locked
+      - run: cargo build -p rollcall --locked
       - uses: actions/upload-artifact@v4
         with:
           name: rollcall-vex-cosign-bin

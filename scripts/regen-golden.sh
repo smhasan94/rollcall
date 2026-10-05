@@ -39,7 +39,7 @@ ROLLCALL_BLESS=1 cargo test -p rollcall-core --test validate
 # CSAF bless passes skip the golden inventory, as above.
 ROLLCALL_BLESS=1 cargo test -p rollcall-core --test report --test scan --test diff --test csaf -- --skip every_committed
 cargo test -p rollcall-core --test golden --test cyclonedx --test zephyr --test cargo --test esp_idf --test platformio --test blob --test reader --test vex --test validate --test report --test scan --test diff --test csaf
-cargo test -p rollcall-cli --test generate --test generate_zephyr --test generate_cargo --test generate_esp_idf --test generate_platformio --test merge --test vex --test validate_profile --test report --test scan --test diff --test csaf --test validate
+cargo test -p rollcall --test generate --test generate_zephyr --test generate_cargo --test generate_esp_idf --test generate_platformio --test merge --test vex --test validate_profile --test report --test scan --test diff --test csaf --test validate
 
 git status --short -- crates/rollcall-core/tests/golden
 git diff --stat -- crates/rollcall-core/tests/golden

@@ -1,6 +1,6 @@
 [package]
 name = "rollcall-assay"
-description = "Cryptographic inventory (CycloneDX CBOM) for rollcall (placeholder 0.0.1)"
+description = "Cryptographic inventory (CycloneDX CBOM) for rollcall"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true

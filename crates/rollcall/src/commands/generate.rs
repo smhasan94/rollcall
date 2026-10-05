@@ -17,7 +17,7 @@ use rollcall_core::zephyr::{self, IngestOptions, Note, UnknownModule, Warning};
 
 use super::output::write_document;
 use crate::cli::{
-    EXIT_DATAERR, EXIT_NOINPUT, EXIT_UNAVAILABLE, EXIT_USAGE, EcosystemArg, Format, GenerateArgs,
+    EXIT_DATAERR, EXIT_NOINPUT, EXIT_UNAVAILABLE, EXIT_USAGE, EcosystemArg, GenerateArgs,
 };
 
 /// The input to render, from an input flag or a positional DIR.
@@ -191,10 +191,6 @@ fn check_flags_fit(args: &GenerateArgs, source: &Source) -> Result<(), (u8, Stri
 /// Runs `rollcall generate`, returning the exit code. `identifiers` is the global
 /// `--identifiers` path.
 pub fn run(args: GenerateArgs, identifiers: Option<&Path>) -> u8 {
-    if args.format == Format::Spdx {
-        eprintln!("rollcall generate --format spdx: not implemented");
-        return EXIT_USAGE;
-    }
     let source = match resolve_input(&args) {
         Ok(source) => source,
         Err((code, message)) => {

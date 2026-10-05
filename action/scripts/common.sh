@@ -92,3 +92,15 @@ platform() {
     esac
     echo "${os}_${arch}"
 }
+
+# rollcall_platform: the platform of the rollcall release asset for this machine, as
+# platform() spells it, except that both Macs use the one universal binary (darwin_universal).
+# The pinned tools (grype, osv-scanner) keep platform(): they ship one asset per architecture.
+rollcall_platform() {
+    local plat
+    plat="$(platform)"
+    case "$plat" in
+        darwin_*) echo darwin_universal ;;
+        *) echo "$plat" ;;
+    esac
+}

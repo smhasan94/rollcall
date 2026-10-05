@@ -4,7 +4,7 @@
 //!
 //! ```sh
 //! scripts/smoke-scan.sh --install --only minimal   # installs the pinned scanners
-//! ROLLCALL_TOOLS_DIR=$PWD/.cache/tools cargo test -p rollcall-cli --test scan_scanners \
+//! ROLLCALL_TOOLS_DIR=$PWD/.cache/tools cargo test -p rollcall --test scan_scanners \
 //!     -- --ignored --skip offline
 //! # then, with the databases primed in DIR and the network blocked:
 //! ROLLCALL_TOOLS_DIR=… ROLLCALL_SCAN_DB_DIR=DIR <test binary> --ignored --exact \

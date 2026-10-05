@@ -27,6 +27,6 @@ if [[ -z "$version" ]]; then
 fi
 
 # `cargo run` finds the binary wherever CARGO_TARGET_DIR puts it.
-exec cargo run -q -p rollcall-cli --locked -- identifiers lint "$db" \
+exec cargo run -q -p rollcall --locked -- identifiers lint "$db" \
     --expect-version "$version" \
     --fixtures fixtures/zephyr

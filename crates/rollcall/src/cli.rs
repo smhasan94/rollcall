@@ -114,8 +114,6 @@ impl Command {
 pub enum Format {
     /// CycloneDX 1.6 JSON.
     Cyclonedx,
-    /// SPDX (not implemented yet).
-    Spdx,
 }
 
 /// `--ecosystem`: which ingester a positional DIR is for.
@@ -319,7 +317,8 @@ pub struct GenerateArgs {
         conflicts_with_all = ["model", "cargo", "cargo_metadata", "platformio"]
     )]
     pub verbose: bool,
-    /// Output format
+    /// Output format. CycloneDX 1.6 JSON only; SPDX export is deferred
+    /// (rollcall#37: <https://github.com/smhasan94/rollcall/issues/37>)
     #[arg(long, value_enum, default_value_t = Format::Cyclonedx)]
     pub format: Format,
     /// Document timestamp, RFC 3339 (e.g. 2026-01-02T03:04:05Z); normalised to UTC.
