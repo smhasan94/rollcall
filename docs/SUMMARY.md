@@ -38,6 +38,10 @@ checks it. -->
 - [Diff and the pull-request comment](diff.md)
 - [CSAF handoff to cra-clock](cra-clock.md)
 
+# Crypto inventory
+
+- [Cryptographic inventory (CBOM)](assay.md)
+
 # Project
 
 - [Building from source](building.md)

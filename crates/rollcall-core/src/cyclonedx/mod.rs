@@ -58,6 +58,10 @@
 //! | each [`Evidence`](crate::model::Evidence) entry, whole | property `rollcall:evidence`, value = the entry as compact JSON in the model's form (`{"field":…,"technique":…,"source":…,"occurrence":…,"value":…,"confidence":9000}`); [`read()`] rebuilds the evidence from these alone |
 //! | [`ImageKind::Blob`](crate::model::ImageKind::Blob) image | property `rollcall:opaque` = `contents not analysed; hashes computed from the file` |
 //! | [`Confidence`](crate::model::Confidence) | a number from [`Confidence::as_f64`](crate::model::Confidence::as_f64), e.g. 9500 bp → `0.95` |
+//! | [`Component::crypto`](crate::model::Component::crypto) ([`CryptoAsset`](crate::model::CryptoAsset)) | `cryptoProperties`, after `evidence`: `assetType`, the one property block that matches it (`algorithmProperties`, `protocolProperties`, `certificateProperties` or `relatedCryptoMaterialProperties`, every absent field omitted) and `oid`; the asset's evidence is not written there |
+//! | each [`CryptoEvidence`](crate::model::CryptoEvidence) | one `evidence.identity[]` `name` method `{technique, confidence, value}`: technique from the [`Locator`](crate::model::Locator) kind (source line → `source-code-analysis`, ELF symbol → `binary-analysis`, Kconfig symbol or Cargo feature → `manifest-analysis`), confidence 0.9 / 0.6 / 0.3 for high / medium / low, value the locator as text (e.g. `zephyr/.config:812 CONFIG_MBEDTLS_CIPHER_MODE_GCM`); the `name` entry's `confidence` is the highest of all its methods. One `evidence.occurrences[]` entry `{location, line, symbol, additionalContext}` (symbol: the ELF or Kconfig symbol, or `package[feature]`; additionalContext: the one-line reason) |
+//! | crypto evidence detector | property `rollcall:evidence-source`, one per distinct detector (with the evidence sources) |
+//! | each [`CryptoEvidence`](crate::model::CryptoEvidence) entry, whole | property `rollcall:crypto-evidence`, value = the entry as compact JSON in the model's form (`{"locator":{"kind":…},"detector":…,"confidence":"high","reason":…}`); [`read()`] rebuilds the asset from `cryptoProperties` and these alone |
 //!
 //! Properties sort by (name, value). Empty arrays and an empty `evidence` object are omitted,
 //! except `dependsOn`, which is always present.
@@ -80,6 +84,19 @@
 //! - Which source reported which identity method: `methods[]` has no source field, so sources
 //!   are listed per node, not per method.
 //! - Which evidence entry an occurrence belongs to: occurrences are node-level in CycloneDX.
+//! - A crypto evidence entry's detector, and its confidence word (`high`, `medium`, `low`)
+//!   rather than the number it maps to (carried by the `rollcall:crypto-evidence`
+//!   properties).
+//!
+//! Not modelled from `cryptoProperties`, so neither written nor read (a document carrying them
+//! is a [`ReadError`] when it also has `rollcall:crypto-evidence` properties, and is dropped
+//! with a warning otherwise): `algorithmProperties.curve`, `padding` and
+//! `certificationLevel`; `protocolProperties.cipherSuites`, `ikev2TransformTypes` and
+//! `cryptoRefArray`; `certificateProperties.signatureAlgorithmRef` and `subjectPublicKeyRef`;
+//! `relatedCryptoMaterialProperties.algorithmRef`, its dates and `securedBy`; and the
+//! material's `value`, which rollcall never carries. A foreign CBOM (`cryptoProperties`
+//! without `rollcall:crypto-evidence` properties) is read with its crypto assets as plain
+//! `cryptographic-asset` components, each with a warning.
 //!
 //! Not at all: the internal schema tag (`rollcall-model/1`), which is always the same.
 //!
@@ -100,8 +117,8 @@ mod timestamp;
 mod writer;
 
 pub use document::{
-    Bom, Component, Dependency, Evidence, Hash, Identity, LicenseChoice, Metadata, Method,
-    NamedLicense, Occurrence, Property, Supplier, Tool, Tools,
+    Bom, Component, CryptoProperties, Dependency, Evidence, Hash, Identity, LicenseChoice,
+    Metadata, Method, NamedLicense, Occurrence, Property, Supplier, Tool, Tools,
 };
 pub use reader::{Read, ReadError, read, read_bytes, read_str};
 pub use schema::{

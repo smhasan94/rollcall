@@ -115,3 +115,15 @@ report for `heapless 0.5.6` in the SBOM rendered from the real `cargo auditable`
 | File | What it is | Used by |
 |------|------------|---------|
 | `cargo-old-heapless-expected-advisories.txt` | `GHSA-qgwf-r2jj-2ccv` (RUSTSEC-2020-0145), verified with grype 0.119.0 | `scripts/smoke-scan.sh --only cargo-old-heapless` (CI job `grype-cargo-advisory`), `tests/cargo.rs` (`old_heapless_fixture_lists_the_old_crate`) |
+
+## `cbom/` — hand-written CBOM model fixture (SHA-138)
+
+A **hand-written** internal-model fixture in the `rollcall-model/1` form, not real-build
+output: the model has no comment field, so this section is its hand-written marker. Its
+evidence (Kconfig lines, ELF symbols, source lines, a Cargo feature) is made up to cover the
+model, not observed in a build. It lives in a subdirectory so that `fixture_names()` (top-level
+`*.model.json` only) and the SBOM golden inventory do not pick it up.
+
+| File | What it is | Used by |
+|------|------------|---------|
+| `cbom/sensor-node.cbom.model.json` | `sensor-node` 1.0.0: an application image (`sensor-app`) whose `mbedtls` 3.6.0 implements `AES-128-GCM`, `SHA-256` and `RSA-2048` (algorithm assets), with an image-level `TLS` (protocol), `device-cert` (certificate) and `psk` (related crypto material); and a bootloader image (`sensor-boot`) whose `chacha20poly1305` 0.10.1 implements `ChaCha20-Poly1305`. Every asset type, every evidence locator (source line, ELF symbol, Kconfig symbol, Cargo feature), every confidence level (high, medium, low), omitted optional fields and a NIST quantum security level of 0 appear. It equals the code-built `cbom_product()` in `tests/common/mod.rs` (`cbom_fixture_equals_code_built_twin`). | `tests/cbom.rs` (schema validation, round trips, golden `tests/golden/cbom/sensor-node.cbom.json`), `rollcall-assay` `tests/summary.rs` (golden `tests/golden/cbom/sensor-node.cbom.md`), `rollcall` `tests/assay.rs` (`rollcall assay --model`) |

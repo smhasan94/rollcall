@@ -11,7 +11,7 @@ use rollcall_core::merge::ProductSpec;
 
 /// Exit code when a document fails validation.
 pub const EXIT_INVALID: u8 = 1;
-/// Exit code for usage errors and not-yet-implemented subcommands (`EX_USAGE` from sysexits.h).
+/// Exit code for usage errors (`EX_USAGE` from sysexits.h).
 pub const EXIT_USAGE: u8 = 64;
 /// Exit code when an input file is malformed (`EX_DATAERR`).
 pub const EXIT_DATAERR: u8 = 65;
@@ -77,7 +77,7 @@ pub enum Command {
     /// Scan an SBOM for known vulnerabilities
     Scan(ScanArgs),
     /// Produce a CycloneDX CBOM (cryptographic inventory) for a build
-    Assay,
+    Assay(AssayArgs),
     /// Inspect and lint the identifier database
     Identifiers(IdentifiersArgs),
     /// Produce a readiness report (Markdown or JSON) for an SBOM
@@ -88,25 +88,6 @@ pub enum Command {
     Csaf(CsafArgs),
     /// Print which ecosystem a build or project directory is (as `generate DIR` tells it)
     Detect(DetectArgs),
-}
-
-impl Command {
-    /// The subcommand's name as typed on the command line.
-    pub fn name(&self) -> &'static str {
-        match self {
-            Command::Generate(_) => "generate",
-            Command::Validate(_) => "validate",
-            Command::Merge(_) => "merge",
-            Command::Vex(_) => "vex",
-            Command::Scan(_) => "scan",
-            Command::Assay => "assay",
-            Command::Identifiers(_) => "identifiers",
-            Command::Report(_) => "report",
-            Command::Diff(_) => "diff",
-            Command::Csaf(_) => "csaf",
-            Command::Detect(_) => "detect",
-        }
-    }
 }
 
 /// Output formats for `rollcall generate`.
@@ -330,6 +311,57 @@ pub struct GenerateArgs {
     #[arg(long, value_name = "URN", value_parser = SerialNumber::from_str)]
     pub serial_number: Option<SerialNumber>,
     /// Write the document here instead of to stdout
+    #[arg(short, long, value_name = "FILE")]
+    pub output: Option<PathBuf>,
+}
+
+/// Output formats for `rollcall assay`.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, ValueEnum)]
+pub enum AssayFormat {
+    /// A CycloneDX 1.6 CBOM (JSON).
+    Cyclonedx,
+    /// A Markdown summary table, one row per asset and evidence entry.
+    Md,
+}
+
+/// Arguments of `rollcall assay`.
+#[derive(Debug, Args)]
+#[command(group = ArgGroup::new("input").required(true).multiple(true).args(["model", "source", "build", "elf"]))]
+pub struct AssayArgs {
+    /// Render a model (the `rollcall-model/1` JSON form, e.g. a hand-written CBOM model)
+    /// instead of taking an inventory of a build
+    #[arg(long, value_name = "FILE", conflicts_with_all = ["source", "build", "elf", "product"])]
+    pub model: Option<PathBuf>,
+    /// The source tree to take the inventory of
+    #[arg(long, value_name = "DIR")]
+    pub source: Option<PathBuf>,
+    /// The build directory to take the inventory of
+    #[arg(long, value_name = "DIR")]
+    pub build: Option<PathBuf>,
+    /// The linked ELF image to take the inventory of
+    #[arg(long, value_name = "FILE")]
+    pub elf: Option<PathBuf>,
+    /// The product the inventory is of (NAME, or NAME@VERSION, split at the last @); required
+    /// with --source, --build and --elf
+    #[arg(
+        long,
+        value_name = "NAME[@VERSION]",
+        value_parser = ProductSpec::from_str,
+        required_unless_present = "model"
+    )]
+    pub product: Option<ProductSpec>,
+    /// Output format
+    #[arg(long, value_enum, default_value_t = AssayFormat::Cyclonedx)]
+    pub format: AssayFormat,
+    /// Document timestamp, RFC 3339 (e.g. 2026-01-02T03:04:05Z); normalised to UTC.
+    /// Defaults to the current time
+    #[arg(long, value_name = "RFC3339", value_parser = Timestamp::from_str)]
+    pub timestamp: Option<Timestamp>,
+    /// Serial number (cyclonedx only): urn:uuid: followed by a lowercase UUID. Defaults to
+    /// one derived from the model's content
+    #[arg(long, value_name = "URN", value_parser = SerialNumber::from_str)]
+    pub serial_number: Option<SerialNumber>,
+    /// Write the CBOM or summary here instead of to stdout
     #[arg(short, long, value_name = "FILE")]
     pub output: Option<PathBuf>,
 }

@@ -5,9 +5,9 @@
 //! gives stable bytes. Collections are `Vec`s built from sorted (BTree) iteration by the
 //! writer; nothing here sorts.
 
-use serde::Serialize;
+use serde::{Serialize, Serializer};
 
-use crate::model::{EvidenceField, Technique};
+use crate::model::{CryptoAsset, EvidenceField, Technique};
 
 /// A CycloneDX 1.6 BOM.
 #[derive(Debug, Clone, PartialEq, Serialize)]
@@ -102,12 +102,27 @@ pub struct Component {
     /// Where the facts came from.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub evidence: Option<Evidence>,
+    /// The crypto asset's `cryptoProperties` (a `cryptographic-asset` component only).
+    #[serde(rename = "cryptoProperties", skip_serializing_if = "Option::is_none")]
+    pub crypto_properties: Option<CryptoProperties>,
     /// `rollcall:*` properties.
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub properties: Vec<Property>,
     /// Nested components.
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub components: Vec<Component>,
+}
+
+/// `cryptoProperties`: a model [`CryptoAsset`] written in CycloneDX's shape (`assetType`, its
+/// one property block, `oid`), without the asset's evidence, which goes to `evidence` and
+/// the `rollcall:crypto-evidence` properties instead.
+#[derive(Debug, Clone, PartialEq)]
+pub struct CryptoProperties(pub CryptoAsset);
+
+impl Serialize for CryptoProperties {
+    fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+        self.0.serialize_cyclonedx(serializer)
+    }
 }
 
 /// An organisational entity (`supplier`).
@@ -209,6 +224,13 @@ pub struct Occurrence {
     /// 1-based line.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub line: Option<u32>,
+    /// The symbol at the location (a crypto asset's ELF or Kconfig symbol, or
+    /// `package[feature]` for a Cargo feature).
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub symbol: Option<String>,
+    /// Why this occurrence is evidence (a crypto asset's one-line reason).
+    #[serde(rename = "additionalContext", skip_serializing_if = "Option::is_none")]
+    pub additional_context: Option<String>,
 }
 
 /// A `{name, value}` property.

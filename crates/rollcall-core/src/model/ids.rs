@@ -95,6 +95,20 @@ pub enum IdError {
         /// The rejected input.
         input: String,
     },
+    /// A cryptographic asset (CycloneDX `cryptoProperties`) is not valid: its asset type and
+    /// property block disagree, a value is out of range, or it has no evidence.
+    #[error("invalid cryptographic asset: {reason}")]
+    CryptoAsset {
+        /// Why it was rejected.
+        reason: String,
+    },
+    /// A cryptographic asset's evidence entry is not valid: an empty detector, a reason that
+    /// is empty, longer than one line or 200 characters, or an invalid locator.
+    #[error("invalid cryptographic-asset evidence: {reason}")]
+    CryptoEvidence {
+        /// Why it was rejected.
+        reason: String,
+    },
 }
 
 /// A package URL, stored in its canonical form.

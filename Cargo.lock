@@ -1017,6 +1017,13 @@ dependencies = [
 [[package]]
 name = "rollcall-assay"
 version = "0.1.0"
+dependencies = [
+ "pulldown-cmark",
+ "rollcall-core",
+ "serde_json",
+ "tempfile",
+ "thiserror",
+]
 
 [[package]]
 name = "rollcall-core"

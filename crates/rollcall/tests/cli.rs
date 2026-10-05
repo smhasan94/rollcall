@@ -120,17 +120,6 @@ fn version_prints_workspace_version() {
     );
 }
 
-fn assert_not_implemented(sub: &str) {
-    rollcall()
-        .arg(sub)
-        .assert()
-        .code(64)
-        .stdout(predicate::str::is_empty())
-        .stderr(predicate::str::starts_with(format!(
-            "rollcall {sub}: not implemented"
-        )));
-}
-
 #[test]
 fn generate_without_model_is_usage_error_exit_64() {
     rollcall()
@@ -183,8 +172,15 @@ fn scan_without_sbom_is_usage_error_exit_64() {
 }
 
 #[test]
-fn assay_exits_64_not_implemented() {
-    assert_not_implemented("assay");
+fn assay_without_input_is_usage_error_exit_64() {
+    rollcall()
+        .arg("assay")
+        .assert()
+        .code(64)
+        .stdout(predicate::str::is_empty())
+        .stderr(predicate::str::contains(
+            "--model <FILE>|--source <DIR>|--build <DIR>|--elf <FILE>",
+        ));
 }
 
 #[test]

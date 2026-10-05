@@ -140,9 +140,31 @@
 //! # Ok(())
 //! # }
 //! ```
+//!
+//! # Crypto assets
+//!
+//! A component of kind [`ComponentKind::CryptographicAsset`] may carry a [`CryptoAsset`]
+//! ([`Component::crypto`]): the CycloneDX 1.6 `cryptoProperties` of an algorithm, protocol,
+//! certificate or piece of related crypto material ([`CryptoAssetProperties`], whose variant
+//! is the `assetType`, so the property block always matches it), an optional `oid`, and the
+//! evidence that the asset is there. [`Product::validate`] rejects crypto on any other kind of
+//! component. Assets sit under the component that implements them (e.g. `AES-128-GCM` under
+//! `mbedtls`); a protocol, certificate or key that belongs to the image sits under the image.
+//!
+//! Each [`CryptoEvidence`] entry records a [`Locator`] (a source line, an ELF symbol, a
+//! Kconfig symbol or a Cargo feature), the detector that saw it, a [`ConfidenceLevel`]
+//! (`high`, `medium` or `low`, the word being the source of truth; CycloneDX gets 0.9, 0.6 or
+//! 0.3 from [`ConfidenceLevel::as_confidence`]) and a one-line reason. An asset's confidence
+//! is the highest of its evidence ([`CryptoAsset::confidence`]). Only the eight
+//! `algorithmProperties` fields of [`AlgorithmProperties`] are modelled; key material
+//! (`relatedCryptoMaterialProperties.value`) never is.
+//!
+//! Merging two components with different crypto assets is a [`MergeError::Conflict`] on the
+//! field `crypto`; a missing asset takes the incoming one.
 
 mod bom_ref;
 mod confidence;
+mod crypto;
 mod evidence;
 mod graph;
 mod ids;
@@ -150,6 +172,13 @@ mod json;
 
 pub use bom_ref::{BomRef, NodeLevel, NodePath, PathSegment};
 pub use confidence::Confidence;
+pub use crypto::{
+    AlgorithmProperties, AssetType, CertificateProperties, ConfidenceLevel, CryptoAsset,
+    CryptoAssetProperties, CryptoEvidence, CryptoEvidenceKey, CryptoFunction, ExecutionEnvironment,
+    ImplementationPlatform, Locator, MAX_REASON_CHARS, MaterialState, MaterialType, Mode,
+    Primitive, ProtocolProperties, ProtocolType, QuantumSecurityLevel,
+    RelatedCryptoMaterialProperties,
+};
 pub use evidence::{Evidence, EvidenceField, EvidenceKey, EvidenceSet, Occurrence, Technique};
 pub use graph::{Component, Image, MergeError, NodeRef, Product, Schema, ValidationError};
 pub use ids::{

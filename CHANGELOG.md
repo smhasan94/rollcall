@@ -8,6 +8,17 @@ policy. The identifier database (`rollcall-identifiers`) is versioned on its own
 
 ## [Unreleased]
 
+### Added
+
+- **`rollcall assay` skeleton and the CBOM model (SHA-138).** Crypto assets in the model
+  (`cryptographic-asset` components with CycloneDX 1.6 `cryptoProperties`: algorithm,
+  protocol, certificate and related crypto material), each with evidence (source line, ELF
+  symbol, Kconfig symbol or Cargo feature) and a high/medium/low confidence with a one-line
+  reason. The CycloneDX writer emits `cryptoProperties` and the reader reads them back
+  losslessly. `rollcall assay --model|--source|--build|--elf --format cyclonedx|md` writes a
+  CBOM or a Markdown summary table; it has no detectors yet, so a build gives an empty CBOM
+  marked `rollcall:assay:detectors` = `none`. See [docs/assay.md](docs/assay.md).
+
 ## [0.1.0] - 2026-10-05
 
 The first release. Release notes: [docs/releases/v0.1.0.md](docs/releases/v0.1.0.md).
