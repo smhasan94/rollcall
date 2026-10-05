@@ -2616,7 +2616,12 @@ fn check_doc_links_resolves_own_repo_links_against_the_working_tree() {
             format!("{OWN_BLOB}docs/cli.md#no-such-heading"),
             "no heading for #no-such-heading",
         ),
-        (format!("{OWN_BLOB}docs/CLI.md"), "not spelled as on disk"),
+        // A case-insensitive file system (macOS) finds the file and reports the spelling; a
+        // case-sensitive one (Linux CI) does not find it at all. Either way the link fails.
+        (
+            format!("{OWN_BLOB}docs/CLI.md"),
+            "not spelled as on disk|does not exist",
+        ),
         (
             "https://github.com/smhasan94/rollcall/tree/main/no-such-dir".to_string(),
             "does not exist",
@@ -2628,7 +2633,7 @@ fn check_doc_links_resolves_own_repo_links_against_the_working_tree() {
             out.lines().any(|l| l.contains("FAIL")
                 && l.contains(&url)
                 && l.contains("local: ")
-                && l.contains(why)),
+                && why.split('|').any(|w| l.contains(w))),
             "{url}: {out}"
         );
     }
