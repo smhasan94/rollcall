@@ -9,8 +9,8 @@ EU Cyber Resilience Act, that `west spdx` does not give today, and shows how rol
 each gap as a companion tool that reads `west spdx` output. It ends with four proposals for
 Zephyr. Every claim about `west spdx` output is shown with a command run against real build
 output in this repository; scanner behaviour is cited from
-[docs/identifiers.md](identifiers.md#scanner-behaviour) and the
-[README](../README.md#known-scanner-behaviour). The output printed under each command is
+[docs/identifiers.md](identifiers.md#scanner-behaviour) and
+[docs/scan.md](scan.md#known-scanner-behaviour). The output printed under each command is
 checked in CI.
 
 Everything here is pinned to **Zephyr v4.4.2** (commit `dccb0959`) and **west 1.5.0**, the
@@ -233,7 +233,7 @@ system). rollcall emits the same CPE on a CycloneDX `operating-system` component
 accurate label, but grype (0.119.0) does not scan CycloneDX `operating-system` components at
 all: it treats them as distro information. So Zephyr's own CVEs do not show up in grype from
 either SBOM once it is converted to CycloneDX (see
-[Known scanner behaviour](../README.md#known-scanner-behaviour)). How an RTOS kernel should
+[Known scanner behaviour](scan.md#known-scanner-behaviour)). How an RTOS kernel should
 be typed is an ecosystem question, and one of the proposals below.
 
 ```console
@@ -578,4 +578,4 @@ here, each with a link, as they arrive.
 - OpenSSF SBOM Everywhere SIG: <https://github.com/ossf/sbom-everywhere>
 - rollcall: [docs/identifiers.md](identifiers.md), [docs/subsystems.md](subsystems.md),
   [docs/validate.md](validate.md), [docs/vex-rules.md](vex-rules.md),
-  [docs/fixtures.md](fixtures.md), [README](../README.md#zephyr-ingestion)
+  [docs/fixtures.md](fixtures.md), [docs/zephyr.md](zephyr.md#ingestion)

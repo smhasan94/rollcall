@@ -11,7 +11,7 @@ What counts as the public interface, and so as a breaking change when it changes
 incompatibly:
 
 - the command line: subcommands, flags, their defaults, and the exit codes in the
-  [README](../README.md#exit-codes);
+  [command-line reference](cli.md#exit-codes);
 - the output formats: the CycloneDX 1.6 document rollcall writes (which fields it fills and the
   `rollcall:` property names), and the versioned JSON shapes (`rollcall-report/1`,
   `rollcall-scan/1`, `rollcall-validate` 1, the diff and the `rollcall-model/1` input);

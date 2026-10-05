@@ -11,7 +11,7 @@ A separate job follows this page, as published, on a clean machine (`scripts/qui
 ## 1. Install rollcall
 
 Pick one of the three. Each gives a `rollcall` command; check it with `rollcall --version`.
-The README's [Installing](../README.md#installing) section has the details: what each archive
+[Installing](installing.md) has the details: what each archive
 holds, the macOS Gatekeeper note, and how the pip wrapper verifies and caches the binary.
 
 ### Release binary (Linux and macOS)

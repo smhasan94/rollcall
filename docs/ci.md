@@ -10,6 +10,8 @@ outputs and permissions are documented in full in
 [rollcall-example-zephyr](https://github.com/smhasan94/rollcall-example-zephyr) is a complete
 repository wired up this way: a Zephyr sysbuild application with MCUboot, built in CI, with a
 readiness badge in its README.
+In this repository, `.github/workflows/rollcall-example.yml` runs the Action on rollcall's own
+fixtures.
 
 ## The workflow
 
@@ -109,3 +111,11 @@ rollcall report --format md -o report.md sbom.cdx.json
 `rollcall validate` exits 1 on an invalid SBOM, so the job fails. For the scan, VEX and
 pull-request diff, see [Scanning](scan.md), [VEX rules](vex-rules.md) and
 [Diff](diff.md).
+
+`rollcall diff` can also be run on its own:
+
+```sh
+rollcall diff --sbom sbom.cdx.json --scan scan.json --report report.json \
+  --base-sbom base/sbom.cdx.json --base-scan base/scan.json --base-report base/report.json \
+  --fail-on high --format md -o comment.md
+```

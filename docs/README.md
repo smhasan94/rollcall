@@ -1,7 +1,7 @@
 # rollcall documentation
 
 rollcall turns firmware build metadata into CycloneDX 1.6 SBOMs. This index lists the guides;
-the top-level [README](../README.md) has every command, flag and exit code. The same pages are
+the [command-line reference](cli.md) has every command, flag and exit code. The same pages are
 published as the docs site, <https://smhasan94.github.io/rollcall/> (built from this directory
 by `scripts/build-docs.sh`; the table of contents is [SUMMARY.md](SUMMARY.md)).
 
@@ -10,6 +10,8 @@ by `scripts/build-docs.sh`; the table of contents is [SUMMARY.md](SUMMARY.md)).
 | Page | What it covers |
 |------|----------------|
 | [quickstart.md](quickstart.md) | from a Zephyr build directory to a validated SBOM and a readiness report |
+| [installing.md](installing.md) | the release binaries, `cargo install` and the pip wrapper in detail |
+| [cli.md](cli.md) | every subcommand, the `generate`, `merge` and `validate` flags, auto-detection and the exit codes |
 | [ci.md](ci.md) | the GitHub Action recipe, and a readiness badge |
 | [faq-cra-cisa.md](faq-cra-cisa.md) | what the CRA and the CISA minimum elements ask of an SBOM, in plain language |
 
@@ -59,6 +61,7 @@ platformio
 | [report.md](report.md) | the readiness report |
 | [diff.md](diff.md) | `rollcall diff` and the Action's pull-request comment |
 | [cra-clock.md](cra-clock.md) | the CSAF 2.0 handoff to cra-clock |
+| [building.md](building.md) | building from source: the workspace layout, tests, golden files and the vendored schemas |
 | [versioning.md](versioning.md) | semantic versioning, the MSRV and how a release is made |
 | [release.md](release.md) | the release runbook: what a release publishes and how |
 | [releases/v0.1.0.md](releases/v0.1.0.md) | release notes for v0.1.0 |

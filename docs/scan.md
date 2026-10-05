@@ -180,6 +180,13 @@ CI runs this in the `scan` job: it installs the pinned grype 0.119.0 and osv-sca
 (SHA-256-verified), runs the scanner integration tests, primes the databases, then blocks the
 network with `iptables`/`ip6tables` (checked with `curl`) and scans with `--db-path`.
 
+## Known scanner behaviour
+
+grype (verified with 0.119.0) silently ignores CycloneDX components of type
+`operating-system`. It treats them as distro information, not packages, so it does not scan
+them for vulnerabilities. rollcall labels components accurately anyway: how an RTOS kernel
+such as Zephyr is typed is decided at ingestion. osv-scanner is unaffected.
+
 ## Known limitations
 
 - **Zephyr SBOMs have no grype/osv-scanner overlap today.** osv-scanner maps `pkg:github`

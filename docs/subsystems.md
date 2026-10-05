@@ -120,7 +120,7 @@ A missing or unusable map or `.config` is a warning, because the SBOM is then le
 ## Blobs
 
 Prebuilt vendor binaries are not compiled from Zephyr sources, so the split never attributes
-them; they are listed in a blob manifest (`rollcall merge --blob-manifest`, see the README).
+them; they are listed in a blob manifest (`rollcall merge --blob-manifest`, see [Merging](cli.md#merging)).
 A manifest entry's optional `image:` names the image the blob belongs to, and the blob becomes
 a dependency of that image instead of the product root. For example, the Nordic SoftDevice
 controller library that an nRF Bluetooth application links, and the SoftDevice image flashed

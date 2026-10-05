@@ -137,6 +137,14 @@ wheel on PyPI embeds the published `SHA256SUMS`), so even then nothing published
   retry for about five minutes). Re-run it alone with Actions → Install check → Run workflow
   (`tag`, and `test_pypi` to install from TestPyPI).
 
+## Database-only releases and name reservations
+
+`rollcall-identifiers` is versioned on its own (its version is the database's `db_version`); a
+database-only release is `cargo publish -p rollcall-identifiers` plus the tarball from
+`scripts/package-identifiers.sh` (see [Database versions](identifiers.md#database-versions)).
+Check the 0.0.1 name reservations with
+`ROLLCALL_CRATES_OWNER=<crates.io login> ./scripts/check-names.sh`.
+
 ## Checking a release by hand
 
 ```sh

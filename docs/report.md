@@ -11,6 +11,29 @@ rollcall report product.cdx.json --format md \
 `rollcall-report/1` JSON for machines, described by [`report-schema.json`](report-schema.json)
 (JSON Schema draft 2020-12). Both start with the same plain-language summary.
 
+## What the report holds
+
+From a Zephyr sysbuild build, with grype's findings and a VEX document:
+
+```sh
+rollcall generate --zephyr build --sysbuild --west-list west-list.txt --identify -o product.cdx.json
+rollcall report product.cdx.json --format md \
+  --scan grype.json --vex vex.cdx.json --timestamp 2026-01-02T03:04:05Z -o report.md
+```
+
+It opens with a plain-language summary, then gives a score out of 100, coverage (the share
+of the product, images and components with a PURL, CPE, hash and licence), one row per
+component, unresolved modules with a paste-ready identifier-database stub each, open
+findings by severity (`--scan`: grype or osv-scanner JSON, repeatable), VEX coverage
+(`--vex`: any `rollcall vex` output format, repeatable), and the CycloneDX schema and
+`cisa-2026`/`cra` profile results. The score is integer basis points rounded down, so only
+a perfect SBOM scores 100: identified 25, hashed 15, licensed 15, validation 25, modules
+resolved 10, vulnerabilities closed 10 (not assessed without `--scan`, and left out of the
+total). [Score](#score) documents the formula and [Inputs](#inputs) every input. The output
+is deterministic and leaves out the SBOM's serial number, timestamp and the input paths, so
+two builds' reports diff cleanly. The exit code is 0 whenever a report is written, whatever
+the score.
+
 ## Inputs
 
 - **The SBOM** (positional): a CycloneDX 1.6 JSON document, e.g. from `rollcall generate`.

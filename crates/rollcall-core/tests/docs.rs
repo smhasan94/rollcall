@@ -1525,13 +1525,14 @@ fn every_ecosystem_guide_documents_auto_detect() {
             "{guide} lacks {flag}"
         );
     }
-    // The README's Auto-detect section names every signal.
-    let readme = repo_file("README.md");
-    let section = md_section(&readme, "### Auto-detect").join("\n");
+    // The command-line reference's Auto-detect section (docs/cli.md, moved there from the
+    // README) names every signal.
+    let reference = repo_file("docs/cli.md");
+    let section = md_section(&reference, "## Auto-detect").join("\n");
     for (name, _, _, signal) in ECOSYSTEMS {
         assert!(
             section.contains(&format!("`{name}`")) && section.contains(signal),
-            "README Auto-detect lacks {name}"
+            "docs/cli.md Auto-detect lacks {name}"
         );
     }
 }
