@@ -1,7 +1,14 @@
+# cargo-deny configuration (CI job `deny` in .github/workflows/ci.yml, run on every pull
+# request, on main and on release tags; locally `cargo deny --all-features --locked check`).
+# Reviewed for v0.1.0 (SHA-125): every crate is from crates.io, the licence allow-list covers
+# the whole graph, and no advisory is ignored. See SECURITY.md.
+
 [graph]
 all-features = true
 
 [advisories]
+# No exceptions: an advisory (vulnerability or unmaintained, cargo-deny's default scope "all")
+# against any dependency fails the check.
 ignore = []
 yanked = "deny"
 

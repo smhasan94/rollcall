@@ -10,6 +10,7 @@ The most common contribution is a module for the identifier database, so that co
 
 ## Adding a module to the identifier database
 
+<!-- ANCHOR: identifier-db (the docs site includes this section: docs/contributing-identifiers.md) -->
 The identifier database (`crates/rollcall-identifiers/db/identifiers.yaml`) tells rollcall,
 for each Zephyr module, which upstream project the fork is, its purl and CPE, and the upstream
 version of each fork commit Zephyr pins. Its conventions are in
@@ -204,6 +205,8 @@ first and none under the second, so the entry has that `cpe` and no `cpe_aliases
 dictionary has no entry yet for 2.10.0, 2.13.0 or 2.14.0. Step 5 used `"how": "tag"` with
 upstream `https://git.trustedfirmware.org/TF-A/trusted-firmware-a.git` and tag
 `^v(?P<v>\d+\.\d+\.\d+)$`.
+
+<!-- ANCHOR_END: identifier-db -->
 
 ## Other changes
 

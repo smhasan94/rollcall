@@ -1,0 +1,96 @@
+# The docs site (SHA-125): the mdBook book of docs/ (book.toml), published to GitHub Pages at
+# https://smhasan94.github.io/rollcall/.
+#
+# - build (every pull request and push): builds the book with the pinned mdBook
+#   (scripts/build-docs.sh --install, SHA-256-verified), checks every link with the pinned
+#   lychee (scripts/check-site-links.sh: inside the site with fragments, offline; then every
+#   external link, online), and uploads the site as the Pages artifact.
+# - deploy (pushes to main only): publishes the artifact, then "Verify live" fetches the
+#   published pages and checks they are this commit's.
+#
+# Repository setting (once, by hand): Settings > Pages > Source "GitHub Actions".
+# Every action is pinned to a full commit SHA.
+name: docs
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      - name: Link preprocessor self-test
+        run: python3 scripts/mdbook-repo-links.py --self-test
+      - name: Build the book (mdBook)
+        run: scripts/build-docs.sh --install
+      # Network-dependent: an external site that is down fails this step, and re-running the
+      # job is the remedy.
+      - name: Check site links (lychee)
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: scripts/check-site-links.sh --install
+      - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+        with:
+          path: target/book
+
+  deploy:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+          sparse-checkout: docs/quickstart.md
+          sparse-checkout-cone-mode: false
+      - id: deployment
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1
+      # The site answers, the quickstart page is there, and the published quickstart source is
+      # byte-identical to this commit's. Pages' CDN can serve the previous deployment for about
+      # ten minutes, so every fetch carries this commit as a cache-busting query, and the step
+      # retries for 15 minutes.
+      - name: Verify live
+        env:
+          PAGE_URL: ${{ steps.deployment.outputs.page_url }}
+        run: |
+          set -euo pipefail
+          base="${PAGE_URL%/}"
+          bust="?$GITHUB_SHA"
+          for attempt in $(seq 1 30); do
+            if curl -fsS -H 'Cache-Control: no-cache' -o /tmp/index.html "$base/$bust" &&
+              curl -fsS -H 'Cache-Control: no-cache' -o /tmp/quickstart.html "$base/quickstart.html$bust" &&
+              curl -fsS -H 'Cache-Control: no-cache' -o /tmp/quickstart.md "$base/quickstart.md$bust" &&
+              cmp -s /tmp/quickstart.md docs/quickstart.md; then
+              grep -q '<title>.*rollcall</title>' /tmp/index.html
+              grep -q 'Quickstart' /tmp/quickstart.html
+              echo "live: $base/ (index, quickstart.html, quickstart.md match this commit)"
+              exit 0
+            fi
+            echo "attempt $attempt: not live yet"
+            sleep 30
+          done
+          echo "::error::$base/ is not serving this commit's site"
+          exit 1

@@ -1,0 +1,12 @@
+# Links the docs site may hold before they exist (scripts/check-site-links.sh, online pass).
+# Each line is a regular expression; remove it once its page exists, and the online link check
+# then proves it.
+#
+# The v0.1.0 tag and release (git push of the tag, SHA-125).
+^https://github\.com/smhasan94/rollcall/releases/(tag|download)/v0\.1\.0
+^https://github\.com/smhasan94/rollcall/compare/v0\.1\.0
+^https://github\.com/smhasan94/rollcall/archive/refs/tags/v0\.1\.0
+# The example repository, created by hand (SHA-125).
+^https://github\.com/smhasan94/rollcall-example-zephyr
+# The docs site itself, live once GitHub Pages is enabled with source "GitHub Actions".
+^https://smhasan94\.github\.io/rollcall

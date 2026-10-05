@@ -1,0 +1,67 @@
+# The quickstart, followed on a clean machine from the published docs site, not the
+# repository (SHA-125). Each matrix leg starts from a fresh ubuntu:24.04 container (pinned by
+# its index digest) with nothing installed, fetches scripts/quickstart-clean.sh at this commit,
+# and runs it against the live site: it reads the published quickstart page and runs its
+# install (release binary, cargo or pip), its example build and every console command,
+# checking their output.
+#
+# Run it after a release, once the docs site is live:
+#   gh workflow run quickstart-clean.yml
+# The machine setup below installs only what the page lists as prerequisites (curl and tar;
+# Rust for cargo; Python with venv for pip), plus python3, which the script itself needs.
+name: quickstart (clean machine)
+
+on:
+  workflow_dispatch:
+    inputs:
+      site:
+        description: The docs site to follow
+        required: false
+        default: https://smhasan94.github.io/rollcall
+
+permissions:
+  contents: read
+
+jobs:
+  quickstart:
+    runs-on: ubuntu-24.04
+    container:
+      image: ubuntu:24.04@sha256:534baea6a22c03a63003dbc8dbe78fe34bc0d7e595d9a9dc9834884ff530eb55
+    strategy:
+      fail-fast: false
+      matrix:
+        method: [tarball, cargo, pip]
+    steps:
+      - name: Machine setup (the page's prerequisites)
+        env:
+          METHOD: ${{ matrix.method }}
+        run: |
+          set -eu
+          export DEBIAN_FRONTEND=noninteractive
+          apt-get update -qq
+          packages="ca-certificates curl python3"
+          case "$METHOD" in
+            cargo) packages="$packages build-essential" ;;
+            pip) packages="$packages python3-venv" ;;
+          esac
+          # shellcheck disable=SC2086
+          apt-get install -y -qq --no-install-recommends $packages
+          if [ "$METHOD" = cargo ]; then
+            # Rust from rustup.rs, as the page says.
+            curl --proto '=https' --tlsv1.2 -fsSL https://sh.rustup.rs |
+              sh -s -- -y --profile minimal --default-toolchain stable
+            echo "$HOME/.cargo/bin" >> "$GITHUB_PATH"
+          fi
+      - name: Fetch the script (not a checkout)
+        env:
+          REPO: ${{ github.repository }}
+          SHA: ${{ github.sha }}
+        run: |
+          curl -fsSL --retry 3 -o /usr/local/bin/quickstart-clean \
+            "https://raw.githubusercontent.com/$REPO/$SHA/scripts/quickstart-clean.sh"
+          chmod +x /usr/local/bin/quickstart-clean
+      - name: Follow the published quickstart (${{ matrix.method }})
+        env:
+          METHOD: ${{ matrix.method }}
+          SITE: ${{ inputs.site }}
+        run: quickstart-clean --method "$METHOD" --site "$SITE" --workdir "$RUNNER_TEMP/quickstart"

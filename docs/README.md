@@ -1,7 +1,17 @@
 # rollcall documentation
 
 rollcall turns firmware build metadata into CycloneDX 1.6 SBOMs. This index lists the guides;
-the top-level [README](../README.md) has every command, flag and exit code.
+the top-level [README](../README.md) has every command, flag and exit code. The same pages are
+published as the docs site, <https://smhasan94.github.io/rollcall/> (built from this directory
+by `scripts/build-docs.sh`; the table of contents is [SUMMARY.md](SUMMARY.md)).
+
+## Getting started
+
+| Page | What it covers |
+|------|----------------|
+| [quickstart.md](quickstart.md) | from a Zephyr build directory to a validated SBOM and a readiness report |
+| [ci.md](ci.md) | the GitHub Action recipe, and a readiness badge |
+| [faq-cra-cisa.md](faq-cra-cisa.md) | what the CRA and the CISA minimum elements ask of an SBOM, in plain language |
 
 ## Ecosystems
 
@@ -38,6 +48,7 @@ platformio
 | [subsystems.md](subsystems.md) | splitting the `zephyr` component into subsystems |
 | [zephyr-gaps.md](zephyr-gaps.md) | what `west spdx` leaves out, and how rollcall fills it |
 | [identifiers.md](identifiers.md) | the identifier database: purl and CPE conventions for Zephyr modules |
+| [contributing-identifiers.md](contributing-identifiers.md) | adding a module to the identifier database |
 | [cargo.md](cargo.md) | Cargo ingestion in short |
 | [esp-idf.md](esp-idf.md) | ESP-IDF ingestion |
 | [platformio.md](platformio.md) | PlatformIO ingestion |
@@ -48,3 +59,5 @@ platformio
 | [report.md](report.md) | the readiness report |
 | [diff.md](diff.md) | `rollcall diff` and the Action's pull-request comment |
 | [cra-clock.md](cra-clock.md) | the CSAF 2.0 handoff to cra-clock |
+| [versioning.md](versioning.md) | semantic versioning, the MSRV and how a release is made |
+| [releases/v0.1.0.md](releases/v0.1.0.md) | release notes for v0.1.0 |

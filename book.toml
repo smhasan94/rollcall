@@ -1,0 +1,36 @@
+# The docs site (SHA-125): an mdBook book built straight from docs/, published to GitHub Pages
+# by .github/workflows/docs.yml. Build it with `scripts/build-docs.sh --install` (mdBook pinned
+# by version and SHA-256) and check its links with `scripts/check-site-links.sh`.
+#
+# Every page under docs/ is listed in docs/SUMMARY.md (a test checks that). Links that leave
+# docs/ are rewritten to GitHub links at build time by scripts/mdbook-repo-links.py, so the
+# Markdown files stay correct when read on GitHub.
+
+[book]
+title = "rollcall"
+description = "CRA-grade CycloneDX 1.6 SBOMs from firmware build metadata"
+authors = ["Sharukh Hasan"]
+language = "en"
+src = "docs"
+
+[build]
+build-dir = "target/book"
+# A typo in SUMMARY.md fails the build instead of creating an empty page.
+create-missing = false
+
+[preprocessor.repo-links]
+command = "python3 scripts/mdbook-repo-links.py"
+# After mdBook's own `links` preprocessor, so text pulled in with {{#include}} is rewritten too.
+after = ["links"]
+repository = "https://github.com/smhasan94/rollcall"
+branch = "main"
+
+[output.html]
+site-url = "/rollcall/"
+git-repository-url = "https://github.com/smhasan94/rollcall"
+edit-url-template = "https://github.com/smhasan94/rollcall/edit/main/{path}"
+default-theme = "light"
+preferred-dark-theme = "navy"
+
+[output.html.search]
+enable = true
