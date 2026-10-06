@@ -70,16 +70,19 @@ under the image.
 
 | `assetType` | Block | Fields rollcall models |
 |-------------|-------|------------------------|
-| `algorithm` | `algorithmProperties` | `primitive`, `parameterSetIdentifier`, `executionEnvironment`, `implementationPlatform`, `mode`, `cryptoFunctions`, `classicalSecurityLevel`, `nistQuantumSecurityLevel` |
+| `algorithm` | `algorithmProperties` | `primitive`, `parameterSetIdentifier`, `curve`, `executionEnvironment`, `implementationPlatform`, `mode`, `padding`, `cryptoFunctions`, `classicalSecurityLevel`, `nistQuantumSecurityLevel` |
 | `protocol` | `protocolProperties` | `type`, `version` |
 | `certificate` | `certificateProperties` | `subjectName`, `issuerName`, `notValidBefore`, `notValidAfter` (RFC 3339), `certificateFormat`, `certificateExtension` |
 | `related-crypto-material` | `relatedCryptoMaterialProperties` | `type`, `id`, `state`, `size`, `format` |
 
 Every field is optional and is left out, never written as `null`, when absent; a
-`nistQuantumSecurityLevel` of 0 is written as `0`. Not modelled: `curve`, `padding`,
-`certificationLevel`, `cipherSuites`, `ikev2TransformTypes`, the `*Ref` links and the
-related material's dates and `securedBy`. Key material (`value`) is never modelled: rollcall
-does not carry secrets.
+`nistQuantumSecurityLevel` of 0 is written as `0`. `curve` is the curve's name in the curve
+database CycloneDX recommends (`neuromancer.sk/std`), e.g. `secp256r1`. `padding` is one of the
+seven CycloneDX 1.6 words (`pkcs5`, `pkcs7`, `pkcs1v15`, `oaep`, `raw`, `other`, `unknown`);
+CycloneDX 1.6 has no word for PSS, so the algorithm catalogue's `pss` is written as `other`,
+and a document with `"padding": "pss"` is an error. Not modelled: `certificationLevel`,
+`cipherSuites`, `ikev2TransformTypes`, the `*Ref` links and the related material's dates and
+`securedBy`. Key material (`value`) is never modelled: rollcall does not carry secrets.
 
 Each evidence entry has a **locator**, a **detector**, a **confidence** and a one-line
 **reason** (at most 200 characters):

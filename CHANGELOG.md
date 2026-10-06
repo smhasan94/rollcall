@@ -27,6 +27,10 @@ policy. The identifier database (`rollcall-identifiers`) is versioned on its own
   `rollcall-assay` that returns the CycloneDX `algorithmProperties` (unknown entries are an
   error), a JSON Schema as the export contract, and `scripts/check-catalogue-sync.sh` for
   cbom-infra's copy. See [docs/catalogue.md](docs/catalogue.md).
+- **`curve` and `padding` in `algorithmProperties` (SHA-333).** `AlgorithmProperties` carries
+  the CycloneDX 1.6 `curve` (a neuromancer.sk curve name) and `padding` (one of the seven
+  CycloneDX words, as the new `Padding` enum); the writer and reader handle both, and the
+  catalogue's `algorithm_properties()` fills them, writing RSA-PSS's `pss` as `other`.
 
 ## [0.1.0] - 2026-10-05
 

@@ -18,7 +18,7 @@ use rollcall_core::cyclonedx::{self, ReadError, Timestamp, WriteOptions, validat
 use rollcall_core::model::{
     AlgorithmProperties, CertificateProperties, Component, ComponentKind, ConfidenceLevel,
     CryptoAsset, CryptoAssetProperties, CryptoEvidence, CryptoFunction, ExecutionEnvironment,
-    Image, ImageKind, ImplementationPlatform, Locator, MaterialState, MaterialType, Mode,
+    Image, ImageKind, ImplementationPlatform, Locator, MaterialState, MaterialType, Mode, Padding,
     Primitive, Product, ProtocolProperties, ProtocolType, QuantumSecurityLevel,
     RelatedCryptoMaterialProperties,
 };
@@ -94,9 +94,10 @@ fn crypto_components(doc: &Value) -> Vec<&Value> {
 }
 
 /// The fixture's assets and their asset types.
-const ASSETS: [(&str, &str); 7] = [
+const ASSETS: [(&str, &str); 8] = [
     ("AES-128-GCM", "algorithm"),
     ("ChaCha20-Poly1305", "algorithm"),
+    ("ECDSA-P256", "algorithm"),
     ("RSA-2048", "algorithm"),
     ("SHA-256", "algorithm"),
     ("TLS", "protocol"),
@@ -167,6 +168,97 @@ fn committed_cbom_golden_validates_against_schema_1_6() {
     assert_schema_valid(GOLDEN_JSON, &text);
 }
 
+/// SHA-333 AC1: a CBOM whose algorithm assets carry a `curve` and every CycloneDX 1.6
+/// `padding` word validates against the schema, and reads back unchanged with no warnings.
+#[test]
+fn cbom_with_curve_and_every_padding_word_validates_against_schema_1_6() {
+    let evidence = || {
+        [CryptoEvidence::new(
+            Locator::KconfigSymbol {
+                location: "build/zephyr/.config".to_owned(),
+                line: Some(1),
+                symbol: "CONFIG_X".to_owned(),
+            },
+            "kconfig",
+            ConfidenceLevel::Medium,
+            "enabled",
+        )
+        .unwrap()]
+    };
+    let mut product = Product::new("curves-and-paddings").unwrap();
+    let mut image = Image::new(ImageKind::Application, "app").unwrap();
+    let mut assets: Vec<(String, AlgorithmProperties)> = Padding::ALL
+        .iter()
+        .map(|padding| {
+            (
+                format!("RSA-{padding}"),
+                AlgorithmProperties {
+                    primitive: Some(Primitive::Pke),
+                    parameter_set_identifier: Some("2048".to_owned()),
+                    padding: Some(*padding),
+                    ..AlgorithmProperties::default()
+                },
+            )
+        })
+        .collect();
+    assets.push((
+        "ECDSA-P256".to_owned(),
+        AlgorithmProperties {
+            primitive: Some(Primitive::Signature),
+            parameter_set_identifier: Some("secp256r1".to_owned()),
+            curve: Some("secp256r1".to_owned()),
+            ..AlgorithmProperties::default()
+        },
+    ));
+    assets.push((
+        "ECDH-X25519-both".to_owned(),
+        AlgorithmProperties {
+            primitive: Some(Primitive::KeyAgree),
+            curve: Some("curve25519".to_owned()),
+            padding: Some(Padding::Raw),
+            ..AlgorithmProperties::default()
+        },
+    ));
+    for (name, properties) in &assets {
+        let asset = CryptoAsset::new(
+            CryptoAssetProperties::Algorithm(properties.clone()),
+            evidence(),
+        )
+        .unwrap();
+        image
+            .add_component(
+                Component::new(ComponentKind::CryptographicAsset, name)
+                    .unwrap()
+                    .with_crypto(asset),
+            )
+            .unwrap();
+    }
+    product.add_image(image).unwrap();
+
+    let text = render(&product);
+    assert_schema_valid("curve and padding CBOM", &text);
+    let doc: Value = serde_json::from_str(&text).unwrap();
+    let crypto = crypto_components(&doc);
+    assert_eq!(crypto.len(), assets.len());
+    for (name, properties) in &assets {
+        let block = &crypto
+            .iter()
+            .find(|c| c["name"] == name.as_str())
+            .unwrap_or_else(|| panic!("no {name}"))["cryptoProperties"]["algorithmProperties"];
+        match &properties.curve {
+            Some(curve) => assert_eq!(block["curve"], curve.as_str(), "{name}"),
+            None => assert!(block.get("curve").is_none(), "{name}"),
+        }
+        match properties.padding {
+            Some(padding) => assert_eq!(block["padding"], padding.as_str(), "{name}"),
+            None => assert!(block.get("padding").is_none(), "{name}"),
+        }
+    }
+    let read = cyclonedx::read_str(&text).unwrap();
+    assert_eq!(read.warnings, Vec::new());
+    assert_eq!(read.product, product);
+}
+
 /// TP2: the golden JSON, rendered with the fixed timestamp.
 #[test]
 fn cbom_fixture_matches_golden_json() {
@@ -196,9 +288,9 @@ fn every_asset_renders_json_with_crypto_properties_identity_and_occurrences() {
     for (_, _, c) in product.crypto_assets() {
         models.insert(c.name.as_str(), c);
     }
-    assert_eq!(models.len(), 7);
+    assert_eq!(models.len(), 8);
     let crypto = crypto_components(&doc);
-    assert_eq!(crypto.len(), 7);
+    assert_eq!(crypto.len(), 8);
     for c in crypto {
         let name = c["name"].as_str().unwrap();
         let asset = models[name].crypto.as_ref().unwrap();
@@ -293,7 +385,13 @@ fn cbom_document_contains_no_null_values() {
             .clone()
     };
     let sha = find("SHA-256");
-    for absent in ["mode", "executionEnvironment", "implementationPlatform"] {
+    for absent in [
+        "mode",
+        "executionEnvironment",
+        "implementationPlatform",
+        "curve",
+        "padding",
+    ] {
         assert!(
             sha["cryptoProperties"]["algorithmProperties"]
                 .get(absent)
@@ -301,6 +399,13 @@ fn cbom_document_contains_no_null_values() {
         );
     }
     assert!(find("RSA-2048")["cryptoProperties"].get("oid").is_none());
+    // SHA-333: present curve and padding are written, absent ones are left out.
+    let rsa = &find("RSA-2048")["cryptoProperties"]["algorithmProperties"];
+    assert_eq!(rsa["padding"], "pkcs1v15");
+    assert!(rsa.get("curve").is_none());
+    let ecdsa = &find("ECDSA-P256")["cryptoProperties"]["algorithmProperties"];
+    assert_eq!(ecdsa["curve"], "secp256r1");
+    assert!(ecdsa.get("padding").is_none());
     assert_eq!(
         find("RSA-2048")["cryptoProperties"]["algorithmProperties"]["nistQuantumSecurityLevel"],
         0
@@ -356,8 +461,8 @@ fn foreign_cbom_without_crypto_evidence_warns_and_drops_crypto() {
         .map(ToString::to_string)
         .filter(|w| w.contains("cryptoProperties without"))
         .collect();
-    assert_eq!(dropped.len(), 7, "{:?}", read.warnings);
-    assert_eq!(read.warnings.len(), 14, "{:?}", read.warnings);
+    assert_eq!(dropped.len(), 8, "{:?}", read.warnings);
+    assert_eq!(read.warnings.len(), 16, "{:?}", read.warnings);
     let mut assets = 0;
     for (_, _, node) in read.product.walk() {
         if let rollcall_core::model::NodeRef::Component(c) = node
@@ -367,7 +472,7 @@ fn foreign_cbom_without_crypto_evidence_warns_and_drops_crypto() {
             assert!(c.crypto.is_none());
         }
     }
-    assert_eq!(assets, 7);
+    assert_eq!(assets, 8);
 }
 
 fn strip_crypto_evidence(value: &mut Value) {
@@ -436,7 +541,14 @@ fn malformed_crypto_properties_in_cyclonedx_error_never_panic() {
         ("array", edited(&|a| a["cryptoProperties"] = json!([1, 2]))),
         (
             "unmodelled field",
-            edited(&|a| a["cryptoProperties"]["algorithmProperties"]["padding"] = json!("oaep")),
+            edited(&|a| {
+                a["cryptoProperties"]["algorithmProperties"]["certificationLevel"] =
+                    json!(["none"]);
+            }),
+        ),
+        (
+            "padding pss is not a CycloneDX word",
+            edited(&|a| a["cryptoProperties"]["algorithmProperties"]["padding"] = json!("pss")),
         ),
         (
             "level out of range",
@@ -619,21 +731,36 @@ fn arb_algorithm() -> impl Strategy<Value = CryptoAssetProperties> {
     (
         proptest::option::of(select(Primitive::ALL.to_vec())),
         proptest::option::of(arb_text()),
+        proptest::option::of(arb_text()),
         proptest::option::of(select(ExecutionEnvironment::ALL.to_vec())),
         proptest::option::of(select(ImplementationPlatform::ALL.to_vec())),
         proptest::option::of(select(Mode::ALL.to_vec())),
+        proptest::option::of(select(Padding::ALL.to_vec())),
         proptest::sample::subsequence(CryptoFunction::ALL.to_vec(), 0..=4),
         proptest::option::of(0u32..1024),
         proptest::option::of(0u8..=QuantumSecurityLevel::MAX),
     )
         .prop_map(
-            |(primitive, set, environment, platform, mode, functions, classical, nist)| {
+            |(
+                primitive,
+                set,
+                curve,
+                environment,
+                platform,
+                mode,
+                padding,
+                functions,
+                classical,
+                nist,
+            )| {
                 CryptoAssetProperties::Algorithm(AlgorithmProperties {
                     primitive,
                     parameter_set_identifier: set,
+                    curve,
                     execution_environment: environment,
                     implementation_platform: platform,
                     mode,
+                    padding,
                     crypto_functions: functions.into_iter().collect(),
                     classical_security_level: classical,
                     nist_quantum_security_level: nist

@@ -141,7 +141,7 @@ fn table_has_evidence_and_confidence_columns_and_one_row_per_evidence() {
                 .collect::<Vec<_>>()
         })
         .collect();
-    assert_eq!(entries.len(), 8);
+    assert_eq!(entries.len(), 9);
     assert_eq!(rows.len(), entries.len(), "{md}");
     for (row, (name, entry)) in rows.iter().zip(&entries) {
         assert_eq!(row.len(), HEADER.len(), "{row:?}");
@@ -160,6 +160,19 @@ fn table_has_evidence_and_confidence_columns_and_one_row_per_evidence() {
     assert!(aes[column("Details")].contains("gcm"), "{aes:?}");
     assert_eq!(aes[column("In")], "sensor-app / mbedtls@3.6.0");
     assert_eq!(aes[column("Type")], "algorithm");
+    // SHA-333: curve and padding are shown in the Details cell.
+    let ecdsa = rows.iter().find(|r| r[asset] == "ECDSA-P256").unwrap();
+    assert!(
+        ecdsa[column("Details")].contains("curve secp256r1"),
+        "{ecdsa:?}"
+    );
+    assert!(!ecdsa[column("Details")].contains("padding"), "{ecdsa:?}");
+    let rsa = rows.iter().find(|r| r[asset] == "RSA-2048").unwrap();
+    assert!(
+        rsa[column("Details")].contains("padding pkcs1v15"),
+        "{rsa:?}"
+    );
+    assert!(!rsa[column("Details")].contains("curve"), "{rsa:?}");
 }
 
 /// Determinism, and the timestamp is the only thing a different `--timestamp` changes.

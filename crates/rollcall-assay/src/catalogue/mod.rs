@@ -84,7 +84,7 @@ use std::io;
 use std::path::{Path, PathBuf};
 
 use rollcall_core::model::{
-    AlgorithmProperties, CryptoFunction, Mode, Primitive, QuantumSecurityLevel,
+    self, AlgorithmProperties, CryptoFunction, Mode, Primitive, QuantumSecurityLevel,
 };
 use serde::Deserialize;
 
@@ -138,7 +138,9 @@ impl fmt::Display for QuantumRisk {
     }
 }
 
-/// A padding scheme. Only RSA entries have one.
+/// A padding scheme, as the catalogue spells it. Only RSA entries have one. In a CBOM it is
+/// the CycloneDX word [`Padding::as_cyclonedx`] gives (`From<Padding> for
+/// rollcall_core::model::Padding` is the only mapping).
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Deserialize)]
 pub enum Padding {
     /// RSAES-OAEP.
@@ -168,10 +170,18 @@ impl Padding {
     /// The CycloneDX 1.6 `algorithmProperties.padding` word. CycloneDX 1.6 has no word for PSS,
     /// so `pss` is `other`.
     pub fn as_cyclonedx(self) -> &'static str {
-        match self {
-            Self::Oaep => "oaep",
-            Self::Pss => "other",
-            Self::Pkcs1v15 => "pkcs1v15",
+        model::Padding::from(self).as_str()
+    }
+}
+
+/// The CycloneDX 1.6 padding for a catalogue padding: `oaep` and `pkcs1v15` are the same word;
+/// CycloneDX 1.6 has no word for PSS, so `pss` is `other`.
+impl From<Padding> for model::Padding {
+    fn from(padding: Padding) -> Self {
+        match padding {
+            Padding::Oaep => Self::Oaep,
+            Padding::Pss => Self::Other,
+            Padding::Pkcs1v15 => Self::Pkcs1v15,
         }
     }
 }
@@ -252,17 +262,19 @@ pub struct Entry<'a> {
 
 impl Entry<'_> {
     /// The CycloneDX 1.6 `algorithmProperties` for an asset of this algorithm and parameter set:
-    /// `primitive`, `parameterSetIdentifier`, `mode`, `cryptoFunctions`,
-    /// `classicalSecurityLevel` and `nistQuantumSecurityLevel`. `executionEnvironment` and
-    /// `implementationPlatform` describe a build, not an algorithm, so they are left `None` for
-    /// the detector to fill in.
+    /// `primitive`, `parameterSetIdentifier`, `curve`, `mode`, `padding` (the catalogue's `pss`
+    /// is `other`), `cryptoFunctions`, `classicalSecurityLevel` and `nistQuantumSecurityLevel`.
+    /// `executionEnvironment` and `implementationPlatform` describe a build, not an algorithm,
+    /// so they are left `None` for the detector to fill in.
     pub fn algorithm_properties(&self) -> AlgorithmProperties {
         AlgorithmProperties {
             primitive: Some(self.algorithm.primitive),
             parameter_set_identifier: Some(self.parameter_set.id.clone()),
+            curve: self.parameter_set.curve.clone(),
             execution_environment: None,
             implementation_platform: None,
             mode: self.algorithm.mode,
+            padding: self.algorithm.padding.map(Into::into),
             crypto_functions: self.algorithm.crypto_functions.iter().copied().collect(),
             classical_security_level: Some(self.parameter_set.classical_security_level),
             nist_quantum_security_level: Some(self.parameter_set.nist_quantum_security_level),
@@ -274,12 +286,13 @@ impl Entry<'_> {
         self.parameter_set.oid.as_deref()
     }
 
-    /// The elliptic curve (not modelled in rollcall-core's `AlgorithmProperties`).
+    /// The elliptic curve, as [`Entry::algorithm_properties`] puts it in `curve`.
     pub fn curve(&self) -> Option<&str> {
         self.parameter_set.curve.as_deref()
     }
 
-    /// The padding scheme (not modelled in rollcall-core's `AlgorithmProperties`).
+    /// The padding scheme as the catalogue spells it; [`Entry::algorithm_properties`] puts its
+    /// CycloneDX word ([`Padding::as_cyclonedx`]) in `padding`.
     pub fn padding(&self) -> Option<Padding> {
         self.algorithm.padding
     }
@@ -519,5 +532,40 @@ impl Catalogue {
                     parameter_set,
                 })
         })
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// Drift guard: every catalogue padding maps to the CycloneDX word of the same spelling
+    /// when CycloneDX 1.6 has one, and to `other` when it does not; `as_cyclonedx` agrees.
+    #[test]
+    fn catalogue_padding_maps_to_same_cyclonedx_word_or_other() {
+        for padding in Padding::ALL {
+            let mapped = model::Padding::from(*padding);
+            let same = model::Padding::ALL
+                .iter()
+                .find(|word| word.as_str() == padding.as_str());
+            match same {
+                Some(word) => assert_eq!(mapped, *word, "{padding}"),
+                None => assert_eq!(mapped, model::Padding::Other, "{padding}"),
+            }
+            assert_eq!(padding.as_cyclonedx(), mapped.as_str(), "{padding}");
+        }
+    }
+
+    #[test]
+    fn pss_is_written_as_other() {
+        assert_eq!(model::Padding::from(Padding::Pss), model::Padding::Other);
+        assert_eq!(Padding::Pss.as_cyclonedx(), "other");
+        let json = serde_json::to_value(model::Padding::from(Padding::Pss)).unwrap();
+        assert_eq!(json, "other");
+        // And through an asset's `algorithmProperties`.
+        let catalogue = Catalogue::builtin().unwrap();
+        let entry = catalogue.lookup("RSA-PSS", "2048").unwrap();
+        let block = serde_json::to_value(entry.algorithm_properties()).unwrap();
+        assert_eq!(block["padding"], "other", "{block}");
     }
 }
