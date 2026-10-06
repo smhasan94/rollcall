@@ -2566,6 +2566,99 @@ fn check_doc_links_skips_only_a_403_from_a_host_that_blocks_ci() {
     );
 }
 
+/// The host names in a link-check host list (one per line, `#` comments), each with the
+/// comment block just above it.
+fn host_list_entries(text: &str) -> Vec<(String, String)> {
+    let mut entries = Vec::new();
+    let mut comment = String::new();
+    for line in text.lines() {
+        let trimmed = line.trim();
+        if let Some(c) = trimmed.strip_prefix('#') {
+            comment.push_str(c);
+            comment.push('\n');
+        } else if trimmed.is_empty() {
+            comment.clear();
+        } else {
+            let host = trimmed.split('#').next().unwrap_or_default().trim();
+            entries.push((host.to_owned(), std::mem::take(&mut comment)));
+        }
+    }
+    entries
+}
+
+/// SHA-344: a link to a host in scripts/link-check-outage-hosts.txt (down for everyone) is
+/// not fetched and is SKIP, so the run passes; a 5xx from any other host still fails.
+#[cfg(unix)]
+#[test]
+fn check_doc_links_skips_a_host_listed_as_having_an_outage() {
+    let outage = repo_file("scripts/link-check-outage-hosts.txt");
+    assert!(
+        host_list_entries(&outage)
+            .iter()
+            .any(|(host, _)| host == "eur-lex.europa.eu"),
+        "eur-lex.europa.eu is not listed"
+    );
+    const CRA: &str = "https://eur-lex.europa.eu/eli/reg/2024/2847/oj";
+    const OK: &str = "https://example.org/page";
+    const NOTE: &str =
+        "not fetched: host listed as having an outage (scripts/link-check-outage-hosts.txt)";
+
+    // The listed host answers 502 in the fake curl's table; it is skipped, not fetched.
+    let (code, out) = check_doc_links_with_fake_curl(&[(CRA, 502, 0, CRA), (OK, 200, 0, OK)]);
+    assert_eq!(code, 0, "{out}");
+    assert!(
+        out.lines()
+            .any(|l| l.contains("SKIP") && l.contains(CRA) && l.contains(NOTE)),
+        "{out}"
+    );
+    assert!(
+        out.contains("check-doc-links: PASS (1 checked, 1 skipped)"),
+        "{out}"
+    );
+
+    // A curl error on the listed host is skipped the same way (it is never fetched).
+    let (code, out) = check_doc_links_with_fake_curl(&[(CRA, 0, 28, ""), (OK, 200, 0, OK)]);
+    assert_eq!(code, 0, "{out}");
+
+    // A 502 or a timeout from an unlisted host fails.
+    const OTHER: &str = "https://example.org/down";
+    for (status, rc, why) in [(502, 0, "a 502"), (0, 28, "a curl timeout")] {
+        let (code, out) =
+            check_doc_links_with_fake_curl(&[(OTHER, status, rc, OTHER), (OK, 200, 0, OK)]);
+        assert_eq!(code, 1, "{why} from an unlisted host passed:\n{out}");
+        assert!(
+            out.lines().any(|l| l.contains("FAIL") && l.contains(OTHER)),
+            "{why}: {out}"
+        );
+    }
+}
+
+/// SHA-344: every host in the outage list carries a dated reason (it is removed once the host
+/// answers again), and the site checker reads the same list as the Markdown checker.
+#[test]
+fn outage_hosts_are_dated_and_read_by_both_link_checkers() {
+    let outage = repo_file("scripts/link-check-outage-hosts.txt");
+    let entries = host_list_entries(&outage);
+    assert!(!entries.is_empty(), "the outage list has no hosts");
+    let dated = regex::Regex::new(r"\b20\d\d-\d\d-\d\d\b").expect("date regex");
+    for (host, comment) in &entries {
+        assert!(
+            dated.is_match(comment),
+            "{host} has no dated comment above it in scripts/link-check-outage-hosts.txt"
+        );
+        assert!(
+            comment.split_whitespace().count() >= 8,
+            "{host}: the comment above it does not give a reason"
+        );
+    }
+    for script in ["scripts/check-doc-links.sh", "scripts/check-site-links.sh"] {
+        assert!(
+            repo_file(script).contains("link-check-outage-hosts.txt"),
+            "{script} does not read scripts/link-check-outage-hosts.txt"
+        );
+    }
+}
+
 /// Runs `scripts/check-doc-links.sh --offline` on a document holding one link to each of
 /// `urls`; its exit code and stdout.
 fn check_doc_links_offline(urls: &[&str]) -> (i32, String) {
