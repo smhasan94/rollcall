@@ -42,6 +42,7 @@ checks it. -->
 
 - [Cryptographic inventory (CBOM)](assay.md)
   - [Algorithm catalogue](catalogue.md)
+  - [Configuration detectors](assay-config.md)
 
 # Project
 

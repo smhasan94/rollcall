@@ -1,0 +1,41 @@
+# hand-written test data, SHA-144, not generated
+# Fixture: fixtures/zephyr/bt, assayed with --product bt.
+# sysbuild: beacon (MAIN, Bluetooth broadcaster; BT_CTLR_CRYPTO only, which is not reported), mcuboot (BOOTLOADER).
+# Each line was checked against the fixture's own .config / sdkconfig (symbol, value and line);
+# see README.md for the format. Do not regenerate: edit by hand, and review like code.
+
+# Assets: IMAGE / LIBRARY / ASSET [hardware] | every evidence locator, in file and line order.
+asset bootloader:mcuboot / mcuboot / RSA-PSS-2048 | mcuboot/zephyr/.config:16 CONFIG_BOOT_SIGNATURE_TYPE_RSA, mcuboot/zephyr/.config:17 CONFIG_BOOT_SIGNATURE_TYPE_RSA_LEN, zephyr/.config:55 SB_CONFIG_SIGNATURE_TYPE, zephyr/.config:57 SB_CONFIG_BOOT_SIGNATURE_TYPE_RSA
+asset bootloader:mcuboot / mcuboot / SHA2-256 | mcuboot/zephyr/.config:14 CONFIG_BOOT_IMG_HASH_ALG_SHA256
+asset bootloader:mcuboot / psa-crypto / RSA-PSS | mcuboot/zephyr/.config:409 CONFIG_PSA_WANT_ALG_RSA_PSS
+asset bootloader:mcuboot / psa-crypto / SHA2-256 | mcuboot/zephyr/.config:412 CONFIG_PSA_WANT_ALG_SHA_256
+
+# Compiled out (explicitly-off symbols), per image: IMAGE LIBRARY ALGORITHM.
+compiled-out bootloader:mcuboot psa-crypto AES-CBC
+compiled-out bootloader:mcuboot psa-crypto AES-CCM
+compiled-out bootloader:mcuboot psa-crypto AES-CTR
+compiled-out bootloader:mcuboot psa-crypto AES-ECB
+compiled-out bootloader:mcuboot psa-crypto AES-GCM
+compiled-out bootloader:mcuboot psa-crypto ChaCha20-Poly1305
+compiled-out bootloader:mcuboot psa-crypto DH
+compiled-out bootloader:mcuboot psa-crypto ECDH
+compiled-out bootloader:mcuboot psa-crypto ECDSA
+compiled-out bootloader:mcuboot psa-crypto HKDF
+compiled-out bootloader:mcuboot psa-crypto HMAC
+compiled-out bootloader:mcuboot psa-crypto PBKDF2
+compiled-out bootloader:mcuboot psa-crypto RSA-OAEP
+compiled-out bootloader:mcuboot psa-crypto RSA-PKCS1v15
+compiled-out bootloader:mcuboot psa-crypto SHA2-224
+compiled-out bootloader:mcuboot psa-crypto SHA2-384
+compiled-out bootloader:mcuboot psa-crypto SHA2-512
+compiled-out bootloader:mcuboot psa-crypto SHA3-224
+compiled-out bootloader:mcuboot psa-crypto SHA3-256
+compiled-out bootloader:mcuboot psa-crypto SHA3-384
+compiled-out bootloader:mcuboot psa-crypto SHA3-512
+compiled-out bootloader:mcuboot psa-crypto SHAKE-128
+compiled-out bootloader:mcuboot psa-crypto SHAKE-256
+compiled-out bootloader:mcuboot psa-crypto X25519
+
+# Notes, sorted.
+note mcuboot/zephyr/.config: uses the PSA Crypto API (CONFIG_MBEDTLS_PSA_CRYPTO_C)
+note mcuboot/zephyr/.config:525: CONFIG_MBEDTLS_HMAC_DRBG_C enables HMAC-DRBG, which the algorithm catalogue does not list yet; not reported

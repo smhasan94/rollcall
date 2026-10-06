@@ -1,0 +1,1165 @@
+# Zephyr configuration rules for `rollcall assay --build` (SHA-144).
+#
+# Maps Kconfig symbols of a Zephyr image's zephyr/.config, and of a sysbuild top-level
+# zephyr/.config (SB_CONFIG_*), to the algorithm catalogue (db/algorithms.yaml). Every algorithm
+# and parameter set named here is checked against the catalogue by
+# rollcall_assay::config::rules::RuleSet::lint; docs/assay-config.md explains the format.
+#
+# Sources of the symbol names: the fixtures under fixtures/zephyr*, the Zephyr 4.4
+# modules/mbedtls and drivers/crypto Kconfig, the Zephyr subsys/bluetooth Kconfig, and MCUboot's
+# boot/zephyr/Kconfig. The Zephyr 3.x legacy mbedTLS names keep the spelling of that release's
+# modules/mbedtls/Kconfig.tls-generic; the nRF Connect SDK legacy names (MBEDTLS_AES_C, ...)
+# that of NCS v3.1.0's subsys/nrf_security/Kconfig.legacy. The keelsign section is
+# PROVISIONAL (see below).
+format: rollcall-config-rules/1
+detector: kconfig
+
+api:
+  psa:
+    - CONFIG_MBEDTLS_PSA_CRYPTO_C
+    - CONFIG_PSA_CRYPTO
+    - CONFIG_NRF_SECURITY
+  legacy:
+    - CONFIG_MBEDTLS_RSA_C
+    - CONFIG_MBEDTLS_ECP_C
+    - CONFIG_MBEDTLS_ECDH_C
+    - CONFIG_MBEDTLS_ECDSA_C
+    - CONFIG_MBEDTLS_CIPHER_AES_ENABLED
+    - CONFIG_MBEDTLS_SHA1
+    - CONFIG_MBEDTLS_SHA224
+    - CONFIG_MBEDTLS_SHA256
+    - CONFIG_MBEDTLS_SHA384
+    - CONFIG_MBEDTLS_SHA512
+    - CONFIG_MBEDTLS_HKDF_C
+    - CONFIG_MBEDTLS_DHM_C
+    - CONFIG_MBEDTLS_LEGACY_CRYPTO_C
+    - CONFIG_MBEDTLS_AES_C
+    - CONFIG_MBEDTLS_SHA256_C
+
+dimensions:
+  ecdh-curve:
+    - {symbol: CONFIG_PSA_WANT_ECC_SECP_R1_256, parameter_set: secp256r1}
+    - {symbol: CONFIG_PSA_WANT_ECC_SECP_R1_384, parameter_set: secp384r1}
+    - {symbol: CONFIG_PSA_WANT_ECC_SECP_R1_521, parameter_set: secp521r1}
+    - {symbol: CONFIG_PSA_WANT_ECC_MONTGOMERY_255, algorithm: X25519, parameter_set: X25519}
+    - {symbol: CONFIG_PSA_WANT_ECC_MONTGOMERY_448, uncatalogued: curve448}
+    - {symbol: CONFIG_PSA_WANT_ECC_SECP_K1_256, uncatalogued: secp256k1}
+    - {symbol: CONFIG_PSA_WANT_ECC_BRAINPOOL_P_R1_256, uncatalogued: brainpoolP256r1}
+    - {symbol: CONFIG_PSA_WANT_ECC_BRAINPOOL_P_R1_384, uncatalogued: brainpoolP384r1}
+    - {symbol: CONFIG_PSA_WANT_ECC_BRAINPOOL_P_R1_512, uncatalogued: brainpoolP512r1}
+    - {symbol: CONFIG_MBEDTLS_ECP_DP_SECP256R1_ENABLED, parameter_set: secp256r1}
+    - {symbol: CONFIG_MBEDTLS_ECP_DP_SECP384R1_ENABLED, parameter_set: secp384r1}
+    - {symbol: CONFIG_MBEDTLS_ECP_DP_SECP521R1_ENABLED, parameter_set: secp521r1}
+    - {symbol: CONFIG_MBEDTLS_ECP_DP_CURVE25519_ENABLED, algorithm: X25519, parameter_set: X25519}
+    - {symbol: CONFIG_MBEDTLS_ECP_DP_SECP192R1_ENABLED, uncatalogued: secp192r1}
+    - {symbol: CONFIG_MBEDTLS_ECP_DP_SECP224R1_ENABLED, uncatalogued: secp224r1}
+    - {symbol: CONFIG_MBEDTLS_ECP_DP_SECP192K1_ENABLED, uncatalogued: secp192k1}
+    - {symbol: CONFIG_MBEDTLS_ECP_DP_SECP224K1_ENABLED, uncatalogued: secp224k1}
+    - {symbol: CONFIG_MBEDTLS_ECP_DP_SECP256K1_ENABLED, uncatalogued: secp256k1}
+    - {symbol: CONFIG_MBEDTLS_ECP_DP_BP256R1_ENABLED, uncatalogued: brainpoolP256r1}
+    - {symbol: CONFIG_MBEDTLS_ECP_DP_BP384R1_ENABLED, uncatalogued: brainpoolP384r1}
+    - {symbol: CONFIG_MBEDTLS_ECP_DP_BP512R1_ENABLED, uncatalogued: brainpoolP512r1}
+    - {symbol: CONFIG_MBEDTLS_ECP_DP_CURVE448_ENABLED, uncatalogued: curve448}
+  ecdsa-curve:
+    - {symbol: CONFIG_PSA_WANT_ECC_SECP_R1_256, parameter_set: secp256r1}
+    - {symbol: CONFIG_PSA_WANT_ECC_SECP_R1_384, parameter_set: secp384r1}
+    - {symbol: CONFIG_PSA_WANT_ECC_SECP_R1_521, parameter_set: secp521r1}
+    - {symbol: CONFIG_PSA_WANT_ECC_SECP_K1_256, uncatalogued: secp256k1}
+    - {symbol: CONFIG_PSA_WANT_ECC_BRAINPOOL_P_R1_256, uncatalogued: brainpoolP256r1}
+    - {symbol: CONFIG_PSA_WANT_ECC_BRAINPOOL_P_R1_384, uncatalogued: brainpoolP384r1}
+    - {symbol: CONFIG_PSA_WANT_ECC_BRAINPOOL_P_R1_512, uncatalogued: brainpoolP512r1}
+    - {symbol: CONFIG_MBEDTLS_ECP_DP_SECP256R1_ENABLED, parameter_set: secp256r1}
+    - {symbol: CONFIG_MBEDTLS_ECP_DP_SECP384R1_ENABLED, parameter_set: secp384r1}
+    - {symbol: CONFIG_MBEDTLS_ECP_DP_SECP521R1_ENABLED, parameter_set: secp521r1}
+    - {symbol: CONFIG_MBEDTLS_ECP_DP_SECP192R1_ENABLED, uncatalogued: secp192r1}
+    - {symbol: CONFIG_MBEDTLS_ECP_DP_SECP224R1_ENABLED, uncatalogued: secp224r1}
+    - {symbol: CONFIG_MBEDTLS_ECP_DP_SECP192K1_ENABLED, uncatalogued: secp192k1}
+    - {symbol: CONFIG_MBEDTLS_ECP_DP_SECP224K1_ENABLED, uncatalogued: secp224k1}
+    - {symbol: CONFIG_MBEDTLS_ECP_DP_SECP256K1_ENABLED, uncatalogued: secp256k1}
+    - {symbol: CONFIG_MBEDTLS_ECP_DP_BP256R1_ENABLED, uncatalogued: brainpoolP256r1}
+    - {symbol: CONFIG_MBEDTLS_ECP_DP_BP384R1_ENABLED, uncatalogued: brainpoolP384r1}
+    - {symbol: CONFIG_MBEDTLS_ECP_DP_BP512R1_ENABLED, uncatalogued: brainpoolP512r1}
+  dh-group:
+    - {symbol: CONFIG_PSA_WANT_DH_RFC7919_2048, parameter_set: ffdhe2048}
+    - {symbol: CONFIG_PSA_WANT_DH_RFC7919_3072, parameter_set: ffdhe3072}
+    - {symbol: CONFIG_PSA_WANT_DH_RFC7919_4096, parameter_set: ffdhe4096}
+    - {symbol: CONFIG_PSA_WANT_DH_RFC7919_6144, parameter_set: ffdhe6144}
+    - {symbol: CONFIG_PSA_WANT_DH_RFC7919_8192, parameter_set: ffdhe8192}
+  hmac-hash:
+    - {symbol: CONFIG_PSA_WANT_ALG_SHA_224, parameter_set: SHA-224}
+    - {symbol: CONFIG_PSA_WANT_ALG_SHA_256, parameter_set: SHA-256}
+    - {symbol: CONFIG_PSA_WANT_ALG_SHA_384, parameter_set: SHA-384}
+    - {symbol: CONFIG_PSA_WANT_ALG_SHA_512, parameter_set: SHA-512}
+    - {symbol: CONFIG_PSA_WANT_ALG_SHA3_224, parameter_set: SHA3-224}
+    - {symbol: CONFIG_PSA_WANT_ALG_SHA3_256, parameter_set: SHA3-256}
+    - {symbol: CONFIG_PSA_WANT_ALG_SHA3_384, parameter_set: SHA3-384}
+    - {symbol: CONFIG_PSA_WANT_ALG_SHA3_512, parameter_set: SHA3-512}
+    - {symbol: CONFIG_PSA_WANT_ALG_SHA_1, uncatalogued: SHA-1}
+    - {symbol: CONFIG_PSA_WANT_ALG_MD5, uncatalogued: MD5}
+    - {symbol: CONFIG_PSA_WANT_ALG_RIPEMD160, uncatalogued: RIPEMD-160}
+  hkdf-hash:
+    - {symbol: CONFIG_PSA_WANT_ALG_SHA_256, parameter_set: SHA-256}
+    - {symbol: CONFIG_PSA_WANT_ALG_SHA_384, parameter_set: SHA-384}
+    - {symbol: CONFIG_PSA_WANT_ALG_SHA_512, parameter_set: SHA-512}
+    - {symbol: CONFIG_PSA_WANT_ALG_SHA_1, uncatalogued: SHA-1}
+    - {symbol: CONFIG_PSA_WANT_ALG_SHA_224, uncatalogued: SHA-224}
+  pbkdf2-hash:
+    - {symbol: CONFIG_PSA_WANT_ALG_SHA_256, parameter_set: HMAC-SHA-256}
+    - {symbol: CONFIG_PSA_WANT_ALG_SHA_384, parameter_set: HMAC-SHA-384}
+    - {symbol: CONFIG_PSA_WANT_ALG_SHA_512, parameter_set: HMAC-SHA-512}
+    - {symbol: CONFIG_PSA_WANT_ALG_SHA_1, uncatalogued: HMAC-SHA-1}
+    - {symbol: CONFIG_PSA_WANT_ALG_SHA_224, uncatalogued: HMAC-SHA-224}
+
+rules:
+  # ---------------------------------------------------------------------------------------
+  # MCUboot (an image with CONFIG_MCUBOOT=y): image verification and encryption.
+  # ---------------------------------------------------------------------------------------
+  - id: mcuboot-signature-rsa
+    when: [CONFIG_BOOT_SIGNATURE_TYPE_RSA]
+    library: mcuboot
+    emit:
+      - {algorithm: RSA-PSS, parameter_set_from: {int: CONFIG_BOOT_SIGNATURE_TYPE_RSA_LEN}}
+    reason: MCUboot verifies image signatures with RSA-PSS (CONFIG_BOOT_SIGNATURE_TYPE_RSA, key length CONFIG_BOOT_SIGNATURE_TYPE_RSA_LEN)
+  - id: mcuboot-signature-ecdsa-p256
+    when: [CONFIG_BOOT_SIGNATURE_TYPE_ECDSA_P256]
+    library: mcuboot
+    emit: [ECDSA-secp256r1]
+    reason: MCUboot verifies image signatures with ECDSA on P-256 (CONFIG_BOOT_SIGNATURE_TYPE_ECDSA_P256)
+  - id: mcuboot-signature-ed25519
+    when: [CONFIG_BOOT_SIGNATURE_TYPE_ED25519]
+    library: mcuboot
+    emit: [Ed25519]
+    reason: MCUboot verifies image signatures with Ed25519 (CONFIG_BOOT_SIGNATURE_TYPE_ED25519)
+  - id: mcuboot-signature-pure
+    when: [CONFIG_BOOT_SIGNATURE_TYPE_PURE]
+    library: mcuboot
+    emit: [Ed25519]
+    reason: MCUboot verifies pure Ed25519 signatures over the whole image (CONFIG_BOOT_SIGNATURE_TYPE_PURE)
+  - id: mcuboot-signature-none
+    when: [CONFIG_BOOT_SIGNATURE_TYPE_NONE]
+    note: MCUboot does not verify image signatures (CONFIG_BOOT_SIGNATURE_TYPE_NONE)
+  - id: mcuboot-image-hash-sha256
+    when: [CONFIG_BOOT_IMG_HASH_ALG_SHA256]
+    library: mcuboot
+    emit: [SHA2-256]
+    reason: MCUboot hashes images with SHA-256 (CONFIG_BOOT_IMG_HASH_ALG_SHA256)
+  - id: mcuboot-image-hash-sha384
+    when: [CONFIG_BOOT_IMG_HASH_ALG_SHA384]
+    library: mcuboot
+    emit: [SHA2-384]
+    reason: MCUboot hashes images with SHA-384 (CONFIG_BOOT_IMG_HASH_ALG_SHA384)
+  - id: mcuboot-image-hash-sha512
+    when: [CONFIG_BOOT_IMG_HASH_ALG_SHA512]
+    library: mcuboot
+    emit: [SHA2-512]
+    reason: MCUboot hashes images with SHA-512 (CONFIG_BOOT_IMG_HASH_ALG_SHA512)
+  - id: mcuboot-encrypt-rsa
+    when: [CONFIG_BOOT_ENCRYPT_IMAGE, CONFIG_BOOT_ENCRYPT_RSA]
+    library: mcuboot
+    emit: [RSA-OAEP-2048]
+    reason: MCUboot unwraps the image encryption key with RSA-OAEP 2048 (CONFIG_BOOT_ENCRYPT_RSA)
+  - id: mcuboot-encrypt-ec256
+    when: [CONFIG_BOOT_ENCRYPT_IMAGE, CONFIG_BOOT_ENCRYPT_EC256]
+    library: mcuboot
+    emit: [ECDH-secp256r1, HKDF-SHA-256, HMAC-SHA-256]
+    reason: MCUboot derives the image encryption key by ECIES on P-256 with HKDF and HMAC-SHA-256 (CONFIG_BOOT_ENCRYPT_EC256)
+  - id: mcuboot-encrypt-x25519
+    when: [CONFIG_BOOT_ENCRYPT_IMAGE, CONFIG_BOOT_ENCRYPT_X25519]
+    library: mcuboot
+    emit: [X25519]
+    reason: MCUboot derives the image encryption key by ECIES on X25519 (CONFIG_BOOT_ENCRYPT_X25519)
+  - id: mcuboot-encrypt-x25519-default-hmac
+    when: [CONFIG_BOOT_ENCRYPT_IMAGE, CONFIG_BOOT_ENCRYPT_X25519]
+    unless: [CONFIG_BOOT_HMAC_SHA256, CONFIG_BOOT_HMAC_SHA512]
+    library: mcuboot
+    emit: [HKDF-SHA-256, HMAC-SHA-256]
+    reason: MCUboot's X25519 key exchange uses HKDF and HMAC with SHA-256 by default
+  - id: mcuboot-hmac-sha256
+    when: [CONFIG_BOOT_ENCRYPT_IMAGE, CONFIG_BOOT_HMAC_SHA256]
+    library: mcuboot
+    emit: [HKDF-SHA-256, HMAC-SHA-256]
+    reason: MCUboot's encryption key exchange uses HKDF and HMAC with SHA-256 (CONFIG_BOOT_HMAC_SHA256)
+  - id: mcuboot-hmac-sha512
+    when: [CONFIG_BOOT_ENCRYPT_IMAGE, CONFIG_BOOT_HMAC_SHA512]
+    library: mcuboot
+    emit: [HKDF-SHA-512, HMAC-SHA-512]
+    reason: MCUboot's encryption key exchange uses HKDF and HMAC with SHA-512 (CONFIG_BOOT_HMAC_SHA512)
+  - id: mcuboot-encrypt-aes-128
+    when: [CONFIG_BOOT_ENCRYPT_IMAGE, CONFIG_BOOT_ENCRYPT_ALG_AES_128]
+    library: mcuboot
+    emit: [AES-CTR-128]
+    reason: MCUboot decrypts images with AES-128 in CTR mode (CONFIG_BOOT_ENCRYPT_ALG_AES_128)
+  - id: mcuboot-encrypt-aes-256
+    when: [CONFIG_BOOT_ENCRYPT_IMAGE, CONFIG_BOOT_ENCRYPT_ALG_AES_256]
+    library: mcuboot
+    emit: [AES-CTR-256]
+    reason: MCUboot decrypts images with AES-256 in CTR mode (CONFIG_BOOT_ENCRYPT_ALG_AES_256)
+  - id: mcuboot-encrypt-aes-default
+    when: [CONFIG_BOOT_ENCRYPT_IMAGE]
+    unless: [CONFIG_BOOT_ENCRYPT_ALG_AES_128, CONFIG_BOOT_ENCRYPT_ALG_AES_256]
+    library: mcuboot
+    emit: [AES-CTR-128]
+    reason: MCUboot decrypts images with AES-128 in CTR mode by default (CONFIG_BOOT_ENCRYPT_IMAGE)
+
+  # Sysbuild (top-level zephyr/.config): the MCUboot signature type, as evidence on the
+  # MCUboot image's signature asset.
+  - id: sysbuild-signature-rsa
+    when: [SB_CONFIG_BOOT_SIGNATURE_TYPE_RSA]
+    library: mcuboot
+    emit: [RSA-PSS]
+    reason: sysbuild configures MCUboot for RSA-PSS image signatures (SB_CONFIG_BOOT_SIGNATURE_TYPE_RSA)
+  - id: sysbuild-signature-ecdsa-p256
+    when: [SB_CONFIG_BOOT_SIGNATURE_TYPE_ECDSA_P256]
+    library: mcuboot
+    emit: [ECDSA-secp256r1]
+    reason: sysbuild configures MCUboot for ECDSA P-256 image signatures (SB_CONFIG_BOOT_SIGNATURE_TYPE_ECDSA_P256)
+  - id: sysbuild-signature-ed25519
+    when: [SB_CONFIG_BOOT_SIGNATURE_TYPE_ED25519]
+    library: mcuboot
+    emit: [Ed25519]
+    reason: sysbuild configures MCUboot for Ed25519 image signatures (SB_CONFIG_BOOT_SIGNATURE_TYPE_ED25519)
+  - id: sysbuild-signature-type-rsa
+    when_value: {SB_CONFIG_SIGNATURE_TYPE: RSA}
+    library: mcuboot
+    emit: [RSA-PSS]
+    reason: sysbuild signs images for MCUboot with RSA-PSS (SB_CONFIG_SIGNATURE_TYPE="RSA")
+  - id: sysbuild-signature-type-ecdsa-p256
+    when_value: {SB_CONFIG_SIGNATURE_TYPE: ECDSA_P256}
+    library: mcuboot
+    emit: [ECDSA-secp256r1]
+    reason: sysbuild signs images for MCUboot with ECDSA P-256 (SB_CONFIG_SIGNATURE_TYPE="ECDSA_P256")
+  - id: sysbuild-signature-type-ed25519
+    when_value: {SB_CONFIG_SIGNATURE_TYPE: ED25519}
+    library: mcuboot
+    emit: [Ed25519]
+    reason: sysbuild signs images for MCUboot with Ed25519 (SB_CONFIG_SIGNATURE_TYPE="ED25519")
+
+  # ---------------------------------------------------------------------------------------
+  # keelsign post-quantum signature TLVs for MCUboot. PROVISIONAL: these symbol names are
+  # placeholders until keelsign's MCUboot integration fixes its Kconfig; see
+  # docs/assay-config.md. TLV types: 0x4BA1 ML-DSA-44, 0x4BA2 ML-DSA-65, 0x4BA3 HSS/LMS.
+  # ---------------------------------------------------------------------------------------
+  - id: keelsign-mldsa44
+    when: [CONFIG_BOOT_KEELSIGN_MLDSA44]
+    library: mcuboot
+    emit: [ML-DSA-44]
+    reason: keelsign verifies an ML-DSA-44 image signature TLV 0x4BA1 (CONFIG_BOOT_KEELSIGN_MLDSA44, provisional name)
+  - id: keelsign-mldsa65
+    when: [CONFIG_BOOT_KEELSIGN_MLDSA65]
+    library: mcuboot
+    emit: [ML-DSA-65]
+    reason: keelsign verifies an ML-DSA-65 image signature TLV 0x4BA2 (CONFIG_BOOT_KEELSIGN_MLDSA65, provisional name)
+  - id: keelsign-lms-hss
+    when: [CONFIG_BOOT_KEELSIGN_LMS_HSS]
+    library: mcuboot
+    emit:
+      - {algorithm: HSS, parameter_set_from: {string: CONFIG_BOOT_KEELSIGN_LMS_PARAMETER_SET}}
+    reason: keelsign verifies an HSS/LMS image signature TLV 0x4BA3 (CONFIG_BOOT_KEELSIGN_LMS_HSS, provisional name)
+
+  # ---------------------------------------------------------------------------------------
+  # PSA Crypto (Zephyr 4.x, TF-PSA-Crypto / mbedTLS 4): CONFIG_PSA_WANT_*.
+  # ---------------------------------------------------------------------------------------
+  - id: psa-aes-cbc-no-padding
+    when: [CONFIG_PSA_WANT_ALG_CBC_NO_PADDING, CONFIG_PSA_WANT_KEY_TYPE_AES]
+    library: psa-crypto
+    emit: [AES-CBC]
+    reason: PSA Crypto is built with AES in CBC mode (CONFIG_PSA_WANT_ALG_CBC_NO_PADDING, CONFIG_PSA_WANT_KEY_TYPE_AES)
+  - id: psa-aes-cbc-pkcs7
+    when: [CONFIG_PSA_WANT_ALG_CBC_PKCS7, CONFIG_PSA_WANT_KEY_TYPE_AES]
+    library: psa-crypto
+    emit: [AES-CBC]
+    reason: PSA Crypto is built with AES in CBC mode with PKCS#7 padding (CONFIG_PSA_WANT_ALG_CBC_PKCS7)
+  - id: psa-aes-ccm
+    when: [CONFIG_PSA_WANT_ALG_CCM, CONFIG_PSA_WANT_KEY_TYPE_AES]
+    library: psa-crypto
+    emit: [AES-CCM]
+    reason: PSA Crypto is built with AES-CCM (CONFIG_PSA_WANT_ALG_CCM, CONFIG_PSA_WANT_KEY_TYPE_AES)
+  - id: psa-aes-ctr
+    when: [CONFIG_PSA_WANT_ALG_CTR, CONFIG_PSA_WANT_KEY_TYPE_AES]
+    library: psa-crypto
+    emit: [AES-CTR]
+    reason: PSA Crypto is built with AES in CTR mode (CONFIG_PSA_WANT_ALG_CTR, CONFIG_PSA_WANT_KEY_TYPE_AES)
+  - id: psa-aes-ecb
+    when: [CONFIG_PSA_WANT_ALG_ECB_NO_PADDING, CONFIG_PSA_WANT_KEY_TYPE_AES]
+    library: psa-crypto
+    emit: [AES-ECB]
+    reason: PSA Crypto is built with AES in ECB mode (CONFIG_PSA_WANT_ALG_ECB_NO_PADDING, CONFIG_PSA_WANT_KEY_TYPE_AES)
+  - id: psa-aes-gcm
+    when: [CONFIG_PSA_WANT_ALG_GCM, CONFIG_PSA_WANT_KEY_TYPE_AES]
+    library: psa-crypto
+    emit: [AES-GCM]
+    reason: PSA Crypto is built with AES-GCM (CONFIG_PSA_WANT_ALG_GCM, CONFIG_PSA_WANT_KEY_TYPE_AES)
+  - id: psa-chacha20-poly1305
+    when: [CONFIG_PSA_WANT_ALG_CHACHA20_POLY1305, CONFIG_PSA_WANT_KEY_TYPE_CHACHA20]
+    library: psa-crypto
+    emit: [ChaCha20-Poly1305-256]
+    reason: PSA Crypto is built with ChaCha20-Poly1305 (CONFIG_PSA_WANT_ALG_CHACHA20_POLY1305)
+  - id: psa-ecdh
+    when: [CONFIG_PSA_WANT_ALG_ECDH]
+    library: psa-crypto
+    emit:
+      - {algorithm: ECDH, parameter_set_from: {dimension: ecdh-curve}}
+    reason: PSA Crypto is built with ECDH on each enabled curve (CONFIG_PSA_WANT_ALG_ECDH, CONFIG_PSA_WANT_ECC_*)
+  - id: psa-ecdsa
+    when: [CONFIG_PSA_WANT_ALG_ECDSA]
+    library: psa-crypto
+    emit:
+      - {algorithm: ECDSA, parameter_set_from: {dimension: ecdsa-curve}}
+    reason: PSA Crypto is built with ECDSA on each enabled curve (CONFIG_PSA_WANT_ALG_ECDSA, CONFIG_PSA_WANT_ECC_*)
+  - id: psa-deterministic-ecdsa
+    when: [CONFIG_PSA_WANT_ALG_DETERMINISTIC_ECDSA]
+    library: psa-crypto
+    emit:
+      - {algorithm: ECDSA, parameter_set_from: {dimension: ecdsa-curve}}
+    reason: PSA Crypto is built with deterministic ECDSA (CONFIG_PSA_WANT_ALG_DETERMINISTIC_ECDSA)
+  - id: psa-ffdh
+    when: [CONFIG_PSA_WANT_ALG_FFDH]
+    library: psa-crypto
+    emit:
+      - {algorithm: DH, parameter_set_from: {dimension: dh-group}}
+    reason: PSA Crypto is built with finite-field Diffie-Hellman (CONFIG_PSA_WANT_ALG_FFDH, CONFIG_PSA_WANT_DH_RFC7919_*)
+  - id: psa-hkdf
+    when: [CONFIG_PSA_WANT_ALG_HKDF]
+    library: psa-crypto
+    emit:
+      - {algorithm: HKDF, parameter_set_from: {dimension: hkdf-hash}}
+    reason: PSA Crypto is built with HKDF on each enabled hash (CONFIG_PSA_WANT_ALG_HKDF)
+  - id: psa-hkdf-extract
+    when: [CONFIG_PSA_WANT_ALG_HKDF_EXTRACT]
+    library: psa-crypto
+    emit:
+      - {algorithm: HKDF, parameter_set_from: {dimension: hkdf-hash}}
+    reason: PSA Crypto is built with HKDF-Extract (CONFIG_PSA_WANT_ALG_HKDF_EXTRACT)
+  - id: psa-hkdf-expand
+    when: [CONFIG_PSA_WANT_ALG_HKDF_EXPAND]
+    library: psa-crypto
+    emit:
+      - {algorithm: HKDF, parameter_set_from: {dimension: hkdf-hash}}
+    reason: PSA Crypto is built with HKDF-Expand (CONFIG_PSA_WANT_ALG_HKDF_EXPAND)
+  - id: psa-hmac
+    when: [CONFIG_PSA_WANT_ALG_HMAC]
+    library: psa-crypto
+    emit:
+      - {algorithm: HMAC, parameter_set_from: {dimension: hmac-hash}}
+    reason: PSA Crypto is built with HMAC on each enabled hash (CONFIG_PSA_WANT_ALG_HMAC, CONFIG_PSA_WANT_ALG_SHA_*)
+  - id: psa-pbkdf2-hmac
+    when: [CONFIG_PSA_WANT_ALG_PBKDF2_HMAC]
+    library: psa-crypto
+    emit:
+      - {algorithm: PBKDF2, parameter_set_from: {dimension: pbkdf2-hash}}
+    reason: PSA Crypto is built with PBKDF2-HMAC (CONFIG_PSA_WANT_ALG_PBKDF2_HMAC)
+  - id: psa-rsa-oaep
+    when: [CONFIG_PSA_WANT_ALG_RSA_OAEP]
+    library: psa-crypto
+    emit: [RSA-OAEP]
+    reason: PSA Crypto is built with RSA-OAEP (CONFIG_PSA_WANT_ALG_RSA_OAEP)
+  - id: psa-rsa-pkcs1v15-sign
+    when: [CONFIG_PSA_WANT_ALG_RSA_PKCS1V15_SIGN]
+    library: psa-crypto
+    emit: [RSA-PKCS1v15]
+    reason: PSA Crypto is built with RSA PKCS#1 v1.5 signatures (CONFIG_PSA_WANT_ALG_RSA_PKCS1V15_SIGN)
+  - id: psa-rsa-pss
+    when: [CONFIG_PSA_WANT_ALG_RSA_PSS]
+    library: psa-crypto
+    emit: [RSA-PSS]
+    reason: PSA Crypto is built with RSA-PSS signatures (CONFIG_PSA_WANT_ALG_RSA_PSS)
+  - id: psa-sha-224
+    when: [CONFIG_PSA_WANT_ALG_SHA_224]
+    library: psa-crypto
+    emit: [SHA2-224]
+    reason: PSA Crypto is built with SHA-224 (CONFIG_PSA_WANT_ALG_SHA_224)
+  - id: psa-sha-256
+    when: [CONFIG_PSA_WANT_ALG_SHA_256]
+    library: psa-crypto
+    emit: [SHA2-256]
+    reason: PSA Crypto is built with SHA-256 (CONFIG_PSA_WANT_ALG_SHA_256)
+  - id: psa-sha-384
+    when: [CONFIG_PSA_WANT_ALG_SHA_384]
+    library: psa-crypto
+    emit: [SHA2-384]
+    reason: PSA Crypto is built with SHA-384 (CONFIG_PSA_WANT_ALG_SHA_384)
+  - id: psa-sha-512
+    when: [CONFIG_PSA_WANT_ALG_SHA_512]
+    library: psa-crypto
+    emit: [SHA2-512]
+    reason: PSA Crypto is built with SHA-512 (CONFIG_PSA_WANT_ALG_SHA_512)
+  - id: psa-sha3-224
+    when: [CONFIG_PSA_WANT_ALG_SHA3_224]
+    library: psa-crypto
+    emit: [SHA3-224]
+    reason: PSA Crypto is built with SHA3-224 (CONFIG_PSA_WANT_ALG_SHA3_224)
+  - id: psa-sha3-256
+    when: [CONFIG_PSA_WANT_ALG_SHA3_256]
+    library: psa-crypto
+    emit: [SHA3-256]
+    reason: PSA Crypto is built with SHA3-256 (CONFIG_PSA_WANT_ALG_SHA3_256)
+  - id: psa-sha3-384
+    when: [CONFIG_PSA_WANT_ALG_SHA3_384]
+    library: psa-crypto
+    emit: [SHA3-384]
+    reason: PSA Crypto is built with SHA3-384 (CONFIG_PSA_WANT_ALG_SHA3_384)
+  - id: psa-sha3-512
+    when: [CONFIG_PSA_WANT_ALG_SHA3_512]
+    library: psa-crypto
+    emit: [SHA3-512]
+    reason: PSA Crypto is built with SHA3-512 (CONFIG_PSA_WANT_ALG_SHA3_512)
+  - id: psa-shake128
+    when: [CONFIG_PSA_WANT_ALG_SHAKE128]
+    library: psa-crypto
+    emit: [SHAKE-128]
+    reason: PSA Crypto is built with SHAKE128 (CONFIG_PSA_WANT_ALG_SHAKE128)
+  - id: psa-shake256
+    when: [CONFIG_PSA_WANT_ALG_SHAKE256]
+    library: psa-crypto
+    emit: [SHAKE-256]
+    reason: PSA Crypto is built with SHAKE256 (CONFIG_PSA_WANT_ALG_SHAKE256)
+  - id: psa-p256m-driver
+    when: [CONFIG_MBEDTLS_PSA_P256M_DRIVER_ENABLED]
+    library: psa-crypto
+    emit: [ECDH-secp256r1, ECDSA-secp256r1]
+    reason: the p256-m driver implements ECDH and ECDSA on P-256 for PSA Crypto (CONFIG_MBEDTLS_PSA_P256M_DRIVER_ENABLED)
+  - id: psa-pqcp-mldsa
+    when: [CONFIG_TF_PSA_CRYPTO_PQCP_MLDSA_ENABLED]
+    unless: [CONFIG_TF_PSA_CRYPTO_PQCP_MLDSA_87_ENABLED]
+    library: psa-crypto
+    emit: [ML-DSA]
+    reason: TF-PSA-Crypto is built with the PQCP mldsa-native ML-DSA driver (CONFIG_TF_PSA_CRYPTO_PQCP_MLDSA_ENABLED)
+  - id: psa-pqcp-mldsa-87
+    when: [CONFIG_TF_PSA_CRYPTO_PQCP_MLDSA_87_ENABLED]
+    library: psa-crypto
+    emit: [ML-DSA-87]
+    reason: TF-PSA-Crypto is built with ML-DSA-87 from the PQCP driver (CONFIG_TF_PSA_CRYPTO_PQCP_MLDSA_87_ENABLED)
+  - id: psa-sha-1
+    when: [CONFIG_PSA_WANT_ALG_SHA_1]
+    uncatalogued: [SHA-1]
+  - id: psa-md5
+    when: [CONFIG_PSA_WANT_ALG_MD5]
+    uncatalogued: [MD5]
+  - id: psa-ripemd160
+    when: [CONFIG_PSA_WANT_ALG_RIPEMD160]
+    uncatalogued: [RIPEMD-160]
+  - id: psa-cmac
+    when: [CONFIG_PSA_WANT_ALG_CMAC]
+    uncatalogued: [CMAC]
+  - id: psa-cfb
+    when: [CONFIG_PSA_WANT_ALG_CFB]
+    uncatalogued: [AES-CFB]
+  - id: psa-ofb
+    when: [CONFIG_PSA_WANT_ALG_OFB]
+    uncatalogued: [AES-OFB]
+  - id: psa-ccm-star
+    when: [CONFIG_PSA_WANT_ALG_CCM_STAR_NO_TAG]
+    uncatalogued: [AES-CCM*]
+  - id: psa-jpake
+    when: [CONFIG_PSA_WANT_ALG_JPAKE]
+    uncatalogued: [EC-JPAKE]
+  - id: psa-pbkdf2-aes-cmac
+    when: [CONFIG_PSA_WANT_ALG_PBKDF2_AES_CMAC_PRF_128]
+    uncatalogued: [PBKDF2/AES-CMAC-PRF-128]
+  - id: psa-chacha20
+    when: [CONFIG_PSA_WANT_ALG_STREAM_CIPHER, CONFIG_PSA_WANT_KEY_TYPE_CHACHA20]
+    uncatalogued: [ChaCha20]
+  - id: psa-rsa-pkcs1v15-crypt
+    when: [CONFIG_PSA_WANT_ALG_RSA_PKCS1V15_CRYPT]
+    uncatalogued: [RSAES-PKCS1-v1_5]
+  - id: psa-tls12-prf
+    when: [CONFIG_PSA_WANT_ALG_TLS12_PRF]
+    uncatalogued: [TLS12-PRF]
+  - id: psa-tls12-psk-to-ms
+    when: [CONFIG_PSA_WANT_ALG_TLS12_PSK_TO_MS]
+    uncatalogued: [TLS12-PSK-to-MS]
+  - id: psa-tls12-ecjpake-to-pms
+    when: [CONFIG_PSA_WANT_ALG_TLS12_ECJPAKE_TO_PMS]
+    uncatalogued: [TLS12-ECJPAKE-to-PMS]
+  - id: psa-aria
+    when: [CONFIG_PSA_WANT_KEY_TYPE_ARIA]
+    uncatalogued: [ARIA]
+  - id: psa-camellia
+    when: [CONFIG_PSA_WANT_KEY_TYPE_CAMELLIA]
+    uncatalogued: [Camellia]
+  - id: mbedtls-ctr-drbg
+    when: [CONFIG_MBEDTLS_CTR_DRBG_C]
+    uncatalogued: [CTR-DRBG]
+  - id: mbedtls-hmac-drbg
+    when: [CONFIG_MBEDTLS_HMAC_DRBG_C]
+    uncatalogued: [HMAC-DRBG]
+  - id: mbedtls-nist-kw
+    when: [CONFIG_MBEDTLS_NIST_KW_C]
+    uncatalogued: [AES-KW]
+  - id: mbedtls-lms-c
+    when: [CONFIG_MBEDTLS_LMS_C]
+    library: mbedtls
+    emit: [LMS]
+    reason: mbedTLS is built with LMS signature verification (CONFIG_MBEDTLS_LMS_C)
+
+  # ---------------------------------------------------------------------------------------
+  # TLS (mbedTLS): protocol versions and cipher suites.
+  # ---------------------------------------------------------------------------------------
+  - id: tls-1-2
+    when: [CONFIG_MBEDTLS_SSL_PROTO_TLS1_2]
+    library: mbedtls
+    protocol: {type: tls, version: "1.2"}
+    reason: mbedTLS is built with TLS 1.2 (CONFIG_MBEDTLS_SSL_PROTO_TLS1_2)
+  - id: tls-1-3
+    when: [CONFIG_MBEDTLS_SSL_PROTO_TLS1_3]
+    library: mbedtls
+    protocol: {type: tls, version: "1.3"}
+    reason: mbedTLS is built with TLS 1.3 (CONFIG_MBEDTLS_SSL_PROTO_TLS1_3)
+  - id: tls-version-1-2
+    when: [CONFIG_MBEDTLS_TLS_VERSION_1_2]
+    library: mbedtls
+    protocol: {type: tls, version: "1.2"}
+    reason: mbedTLS is built with TLS 1.2 (CONFIG_MBEDTLS_TLS_VERSION_1_2)
+  - id: tls-version-1-3
+    when: [CONFIG_MBEDTLS_TLS_VERSION_1_3]
+    library: mbedtls
+    protocol: {type: tls, version: "1.3"}
+    reason: mbedTLS is built with TLS 1.3 (CONFIG_MBEDTLS_TLS_VERSION_1_3)
+  - id: suite-ecdhe-ecdsa-aes-128-gcm-sha256
+    when: [CONFIG_MBEDTLS_CIPHERSUITE_TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256]
+    library: mbedtls
+    emit:
+      - {algorithm: ECDH, parameter_set_from: {dimension: ecdh-curve}}
+      - {algorithm: ECDSA, parameter_set_from: {dimension: ecdsa-curve}}
+      - AES-GCM-128
+      - HMAC-SHA-256
+    reason: TLS cipher suite TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256 is enabled
+  - id: suite-ecdhe-rsa-aes-128-cbc-sha256
+    when: [CONFIG_MBEDTLS_CIPHERSUITE_TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256]
+    library: mbedtls
+    emit:
+      - {algorithm: ECDH, parameter_set_from: {dimension: ecdh-curve}}
+      - RSA-PKCS1v15
+      - AES-CBC-128
+      - HMAC-SHA-256
+    reason: TLS cipher suite TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256 is enabled
+  - id: suite-ecdhe-rsa-aes-128-gcm-sha256
+    when: [CONFIG_MBEDTLS_CIPHERSUITE_TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256]
+    library: mbedtls
+    emit:
+      - {algorithm: ECDH, parameter_set_from: {dimension: ecdh-curve}}
+      - RSA-PKCS1v15
+      - AES-GCM-128
+      - HMAC-SHA-256
+    reason: TLS cipher suite TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256 is enabled
+  - id: suite-ecdhe-rsa-aes-256-gcm-sha384
+    when: [CONFIG_MBEDTLS_CIPHERSUITE_TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384]
+    library: mbedtls
+    emit:
+      - {algorithm: ECDH, parameter_set_from: {dimension: ecdh-curve}}
+      - RSA-PKCS1v15
+      - AES-GCM-256
+      - HMAC-SHA-384
+    reason: TLS cipher suite TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384 is enabled
+  - id: suite-ecdhe-ecdsa-aes-256-gcm-sha384
+    when: [CONFIG_MBEDTLS_CIPHERSUITE_TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384]
+    library: mbedtls
+    emit:
+      - {algorithm: ECDH, parameter_set_from: {dimension: ecdh-curve}}
+      - {algorithm: ECDSA, parameter_set_from: {dimension: ecdsa-curve}}
+      - AES-GCM-256
+      - HMAC-SHA-384
+    reason: TLS cipher suite TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384 is enabled
+  - id: suite-ecdhe-ecdsa-aes-128-ccm-8
+    when: [CONFIG_MBEDTLS_CIPHERSUITE_TLS_ECDHE_ECDSA_WITH_AES_128_CCM_8]
+    library: mbedtls
+    emit:
+      - {algorithm: ECDH, parameter_set_from: {dimension: ecdh-curve}}
+      - {algorithm: ECDSA, parameter_set_from: {dimension: ecdsa-curve}}
+      - AES-CCM-128
+      - HMAC-SHA-256
+    reason: TLS cipher suite TLS_ECDHE_ECDSA_WITH_AES_128_CCM_8 is enabled
+  - id: suite-ecdhe-psk-aes-256-cbc-sha384
+    when: [CONFIG_MBEDTLS_CIPHERSUITE_TLS_ECDHE_PSK_WITH_AES_256_CBC_SHA384]
+    library: mbedtls
+    emit:
+      - {algorithm: ECDH, parameter_set_from: {dimension: ecdh-curve}}
+      - AES-CBC-256
+      - HMAC-SHA-384
+    reason: TLS cipher suite TLS_ECDHE_PSK_WITH_AES_256_CBC_SHA384 is enabled
+  - id: suite-psk-aes-256-cbc-sha384
+    when: [CONFIG_MBEDTLS_CIPHERSUITE_TLS_PSK_WITH_AES_256_CBC_SHA384]
+    library: mbedtls
+    emit: [AES-CBC-256, HMAC-SHA-384]
+    reason: TLS cipher suite TLS_PSK_WITH_AES_256_CBC_SHA384 is enabled
+  - id: suite-psk-aes-128-gcm-sha256
+    when: [CONFIG_MBEDTLS_CIPHERSUITE_TLS_PSK_WITH_AES_128_GCM_SHA256]
+    library: mbedtls
+    emit: [AES-GCM-128, HMAC-SHA-256]
+    reason: TLS cipher suite TLS_PSK_WITH_AES_128_GCM_SHA256 is enabled
+  - id: suite-ecjpake-aes-128-ccm-8
+    when: [CONFIG_MBEDTLS_CIPHERSUITE_ECJPAKE_WITH_AES_128_CCM_8]
+    library: mbedtls
+    emit: [AES-CCM-128, HMAC-SHA-256]
+    uncatalogued: [EC-JPAKE]
+    reason: TLS cipher suite TLS_ECJPAKE_WITH_AES_128_CCM_8 is enabled
+  - id: suite-tls13-aes-256-gcm-sha384
+    when: [CONFIG_MBEDTLS_CIPHERSUITE_TLS1_3_AES_256_GCM_SHA384]
+    library: mbedtls
+    emit: [AES-GCM-256, HKDF-SHA-384]
+    reason: TLS 1.3 cipher suite TLS_AES_256_GCM_SHA384 is enabled
+  - id: suite-tls13-aes-128-gcm-sha256
+    when: [CONFIG_MBEDTLS_CIPHERSUITE_TLS1_3_AES_128_GCM_SHA256]
+    library: mbedtls
+    emit: [AES-GCM-128, HKDF-SHA-256]
+    reason: TLS 1.3 cipher suite TLS_AES_128_GCM_SHA256 is enabled
+  - id: suite-tls13-aes-128-ccm-sha256
+    when: [CONFIG_MBEDTLS_CIPHERSUITE_TLS1_3_AES_128_CCM_SHA256]
+    library: mbedtls
+    emit: [AES-CCM-128, HKDF-SHA-256]
+    reason: TLS 1.3 cipher suite TLS_AES_128_CCM_SHA256 is enabled
+  - id: suite-tls13-chacha20-poly1305-sha256
+    when: [CONFIG_MBEDTLS_CIPHERSUITE_TLS1_3_CHACHA20_POLY1305_SHA256]
+    library: mbedtls
+    emit: [ChaCha20-Poly1305-256, HKDF-SHA-256]
+    reason: TLS 1.3 cipher suite TLS_CHACHA20_POLY1305_SHA256 is enabled
+  # TLS 1.2 key exchanges. CONFIG_MBEDTLS_KEY_EXCHANGE_* is not gated on TLS in Kconfig (Zephyr
+  # 3.x Kconfig.tls-generic, Zephyr 4.4 Kconfig.mbedtls; MCUboot's mbedTLS sets one without TLS),
+  # and mbedTLS 3.6 (config_adjust_ssl.h) drops every MBEDTLS_KEY_EXCHANGE_*_ENABLED when
+  # MBEDTLS_SSL_PROTO_TLS1_2 is off: they are TLS 1.2 only. So each rule also needs TLS 1.2 on,
+  # spelt CONFIG_MBEDTLS_SSL_PROTO_TLS1_2 (Zephyr 4.3 and later, and every nRF Connect SDK) or
+  # CONFIG_MBEDTLS_TLS_VERSION_1_2 (Zephyr 3.x to 4.2).
+  - id: kx-rsa
+    when: [CONFIG_MBEDTLS_KEY_EXCHANGE_RSA_ENABLED]
+    when_any: [CONFIG_MBEDTLS_SSL_PROTO_TLS1_2, CONFIG_MBEDTLS_TLS_VERSION_1_2]
+    library: mbedtls
+    emit: [RSA-PKCS1v15]
+    reason: mbedTLS is built with the TLS 1.2 RSA key exchange (CONFIG_MBEDTLS_KEY_EXCHANGE_RSA_ENABLED)
+  - id: kx-dhe-rsa
+    when: [CONFIG_MBEDTLS_KEY_EXCHANGE_DHE_RSA_ENABLED]
+    when_any: [CONFIG_MBEDTLS_SSL_PROTO_TLS1_2, CONFIG_MBEDTLS_TLS_VERSION_1_2]
+    library: mbedtls
+    emit: [DH, RSA-PKCS1v15]
+    reason: mbedTLS is built with the TLS 1.2 DHE-RSA key exchange (CONFIG_MBEDTLS_KEY_EXCHANGE_DHE_RSA_ENABLED)
+  - id: kx-dhe-psk
+    when: [CONFIG_MBEDTLS_KEY_EXCHANGE_DHE_PSK_ENABLED]
+    when_any: [CONFIG_MBEDTLS_SSL_PROTO_TLS1_2, CONFIG_MBEDTLS_TLS_VERSION_1_2]
+    library: mbedtls
+    emit: [DH]
+    reason: mbedTLS is built with the TLS 1.2 DHE-PSK key exchange (CONFIG_MBEDTLS_KEY_EXCHANGE_DHE_PSK_ENABLED)
+  - id: kx-rsa-psk
+    when: [CONFIG_MBEDTLS_KEY_EXCHANGE_RSA_PSK_ENABLED]
+    when_any: [CONFIG_MBEDTLS_SSL_PROTO_TLS1_2, CONFIG_MBEDTLS_TLS_VERSION_1_2]
+    library: mbedtls
+    emit: [RSA-PKCS1v15]
+    reason: mbedTLS is built with the TLS 1.2 RSA-PSK key exchange (CONFIG_MBEDTLS_KEY_EXCHANGE_RSA_PSK_ENABLED)
+  - id: kx-ecdhe-rsa
+    when: [CONFIG_MBEDTLS_KEY_EXCHANGE_ECDHE_RSA_ENABLED]
+    when_any: [CONFIG_MBEDTLS_SSL_PROTO_TLS1_2, CONFIG_MBEDTLS_TLS_VERSION_1_2]
+    library: mbedtls
+    emit:
+      - {algorithm: ECDH, parameter_set_from: {dimension: ecdh-curve}}
+      - RSA-PKCS1v15
+    reason: mbedTLS is built with the TLS 1.2 ECDHE-RSA key exchange (CONFIG_MBEDTLS_KEY_EXCHANGE_ECDHE_RSA_ENABLED)
+  - id: kx-ecdhe-ecdsa
+    when: [CONFIG_MBEDTLS_KEY_EXCHANGE_ECDHE_ECDSA_ENABLED]
+    when_any: [CONFIG_MBEDTLS_SSL_PROTO_TLS1_2, CONFIG_MBEDTLS_TLS_VERSION_1_2]
+    library: mbedtls
+    emit:
+      - {algorithm: ECDH, parameter_set_from: {dimension: ecdh-curve}}
+      - {algorithm: ECDSA, parameter_set_from: {dimension: ecdsa-curve}}
+    reason: mbedTLS is built with the TLS 1.2 ECDHE-ECDSA key exchange (CONFIG_MBEDTLS_KEY_EXCHANGE_ECDHE_ECDSA_ENABLED)
+  - id: kx-ecdh-ecdsa
+    when: [CONFIG_MBEDTLS_KEY_EXCHANGE_ECDH_ECDSA_ENABLED]
+    when_any: [CONFIG_MBEDTLS_SSL_PROTO_TLS1_2, CONFIG_MBEDTLS_TLS_VERSION_1_2]
+    library: mbedtls
+    emit:
+      - {algorithm: ECDH, parameter_set_from: {dimension: ecdh-curve}}
+      - {algorithm: ECDSA, parameter_set_from: {dimension: ecdsa-curve}}
+    reason: mbedTLS is built with the TLS 1.2 ECDH-ECDSA key exchange (CONFIG_MBEDTLS_KEY_EXCHANGE_ECDH_ECDSA_ENABLED)
+  - id: kx-ecdh-rsa
+    when: [CONFIG_MBEDTLS_KEY_EXCHANGE_ECDH_RSA_ENABLED]
+    when_any: [CONFIG_MBEDTLS_SSL_PROTO_TLS1_2, CONFIG_MBEDTLS_TLS_VERSION_1_2]
+    library: mbedtls
+    emit:
+      - {algorithm: ECDH, parameter_set_from: {dimension: ecdh-curve}}
+      - RSA-PKCS1v15
+    reason: mbedTLS is built with the TLS 1.2 ECDH-RSA key exchange (CONFIG_MBEDTLS_KEY_EXCHANGE_ECDH_RSA_ENABLED)
+  - id: kx-ecdhe-psk
+    when: [CONFIG_MBEDTLS_KEY_EXCHANGE_ECDHE_PSK_ENABLED]
+    when_any: [CONFIG_MBEDTLS_SSL_PROTO_TLS1_2, CONFIG_MBEDTLS_TLS_VERSION_1_2]
+    library: mbedtls
+    emit:
+      - {algorithm: ECDH, parameter_set_from: {dimension: ecdh-curve}}
+    reason: mbedTLS is built with the TLS 1.2 ECDHE-PSK key exchange (CONFIG_MBEDTLS_KEY_EXCHANGE_ECDHE_PSK_ENABLED)
+  - id: kx-ecjpake
+    when: [CONFIG_MBEDTLS_KEY_EXCHANGE_ECJPAKE_ENABLED]
+    when_any: [CONFIG_MBEDTLS_SSL_PROTO_TLS1_2, CONFIG_MBEDTLS_TLS_VERSION_1_2]
+    uncatalogued: [EC-JPAKE]
+
+  # ---------------------------------------------------------------------------------------
+  # Legacy mbedTLS crypto (Zephyr 3.x and earlier, mbedTLS 2/3).
+  # ---------------------------------------------------------------------------------------
+  - id: legacy-rsa-pkcs1-v15
+    when: [CONFIG_MBEDTLS_RSA_C, CONFIG_MBEDTLS_PKCS1_V15]
+    library: mbedtls
+    emit: [RSA-PKCS1v15]
+    reason: mbedTLS is built with RSA PKCS#1 v1.5 (CONFIG_MBEDTLS_RSA_C, CONFIG_MBEDTLS_PKCS1_V15)
+  - id: legacy-rsa-pkcs1-v21
+    when: [CONFIG_MBEDTLS_RSA_C, CONFIG_MBEDTLS_PKCS1_V21]
+    library: mbedtls
+    emit: [RSA-PSS, RSA-OAEP]
+    reason: mbedTLS is built with RSA PKCS#1 v2.1, RSA-PSS and RSA-OAEP (CONFIG_MBEDTLS_RSA_C, CONFIG_MBEDTLS_PKCS1_V21)
+  - id: legacy-sha224
+    when: [CONFIG_MBEDTLS_SHA224]
+    library: mbedtls
+    emit: [SHA2-224]
+    reason: mbedTLS is built with SHA-224 (CONFIG_MBEDTLS_SHA224)
+  - id: legacy-sha256
+    when: [CONFIG_MBEDTLS_SHA256]
+    library: mbedtls
+    emit: [SHA2-256]
+    reason: mbedTLS is built with SHA-256 (CONFIG_MBEDTLS_SHA256)
+  - id: legacy-sha384
+    when: [CONFIG_MBEDTLS_SHA384]
+    library: mbedtls
+    emit: [SHA2-384]
+    reason: mbedTLS is built with SHA-384 (CONFIG_MBEDTLS_SHA384)
+  - id: legacy-sha512
+    when: [CONFIG_MBEDTLS_SHA512]
+    library: mbedtls
+    emit: [SHA2-512]
+    reason: mbedTLS is built with SHA-512 (CONFIG_MBEDTLS_SHA512)
+  - id: legacy-sha1
+    when: [CONFIG_MBEDTLS_SHA1]
+    uncatalogued: [SHA-1]
+  - id: legacy-md5
+    when: [CONFIG_MBEDTLS_MD5]
+    uncatalogued: [MD5]
+  - id: legacy-aes-cbc
+    when: [CONFIG_MBEDTLS_CIPHER_AES_ENABLED, CONFIG_MBEDTLS_CIPHER_MODE_CBC_ENABLED]
+    library: mbedtls
+    emit: [AES-CBC]
+    reason: mbedTLS is built with AES in CBC mode (CONFIG_MBEDTLS_CIPHER_MODE_CBC_ENABLED)
+  - id: legacy-aes-ctr
+    when: [CONFIG_MBEDTLS_CIPHER_AES_ENABLED, CONFIG_MBEDTLS_CIPHER_MODE_CTR_ENABLED]
+    library: mbedtls
+    emit: [AES-CTR]
+    reason: mbedTLS is built with AES in CTR mode (CONFIG_MBEDTLS_CIPHER_MODE_CTR_ENABLED)
+  - id: legacy-aes-gcm
+    when: [CONFIG_MBEDTLS_CIPHER_AES_ENABLED, CONFIG_MBEDTLS_CIPHER_GCM_ENABLED]
+    library: mbedtls
+    emit: [AES-GCM]
+    reason: mbedTLS is built with AES-GCM (CONFIG_MBEDTLS_CIPHER_GCM_ENABLED)
+  - id: legacy-aes-ccm
+    when: [CONFIG_MBEDTLS_CIPHER_AES_ENABLED, CONFIG_MBEDTLS_CIPHER_CCM_ENABLED]
+    library: mbedtls
+    emit: [AES-CCM]
+    reason: mbedTLS is built with AES-CCM (CONFIG_MBEDTLS_CIPHER_CCM_ENABLED)
+  - id: legacy-chachapoly
+    when: [CONFIG_MBEDTLS_CIPHER_CHACHA20_ENABLED, CONFIG_MBEDTLS_POLY1305]
+    library: mbedtls
+    emit: [ChaCha20-Poly1305-256]
+    reason: mbedTLS is built with ChaCha20 and Poly1305 (CONFIG_MBEDTLS_CIPHER_CHACHA20_ENABLED, CONFIG_MBEDTLS_POLY1305)
+  - id: legacy-camellia
+    when: [CONFIG_MBEDTLS_CIPHER_CAMELLIA_ENABLED]
+    uncatalogued: [Camellia]
+  - id: legacy-des
+    when: [CONFIG_MBEDTLS_CIPHER_DES_ENABLED]
+    uncatalogued: [DES/3DES]
+  - id: legacy-ecdh
+    when: [CONFIG_MBEDTLS_ECDH_C]
+    library: mbedtls
+    emit:
+      - {algorithm: ECDH, parameter_set_from: {dimension: ecdh-curve}}
+    reason: mbedTLS is built with ECDH on each enabled curve (CONFIG_MBEDTLS_ECDH_C, CONFIG_MBEDTLS_ECP_DP_*)
+  - id: legacy-ecdsa
+    when: [CONFIG_MBEDTLS_ECDSA_C]
+    library: mbedtls
+    emit:
+      - {algorithm: ECDSA, parameter_set_from: {dimension: ecdsa-curve}}
+    reason: mbedTLS is built with ECDSA on each enabled curve (CONFIG_MBEDTLS_ECDSA_C, CONFIG_MBEDTLS_ECP_DP_*)
+  - id: legacy-ecdsa-deterministic
+    when: [CONFIG_MBEDTLS_ECDSA_DETERMINISTIC]
+    library: mbedtls
+    emit:
+      - {algorithm: ECDSA, parameter_set_from: {dimension: ecdsa-curve}}
+    reason: mbedTLS is built with deterministic ECDSA (CONFIG_MBEDTLS_ECDSA_DETERMINISTIC)
+  - id: legacy-hkdf
+    when: [CONFIG_MBEDTLS_HKDF_C]
+    library: mbedtls
+    emit: [HKDF]
+    reason: mbedTLS is built with HKDF (CONFIG_MBEDTLS_HKDF_C)
+  - id: legacy-dhm
+    when: [CONFIG_MBEDTLS_DHM_C]
+    library: mbedtls
+    emit: [DH]
+    reason: mbedTLS is built with finite-field Diffie-Hellman (CONFIG_MBEDTLS_DHM_C)
+  - id: legacy-hmac-drbg
+    when: [CONFIG_MBEDTLS_HMAC_DRBG_ENABLED]
+    uncatalogued: [HMAC-DRBG]
+  - id: legacy-ctr-drbg
+    when: [CONFIG_MBEDTLS_CTR_DRBG_ENABLED]
+    uncatalogued: [CTR-DRBG]
+  - id: legacy-lms
+    when: [CONFIG_MBEDTLS_LMS]
+    library: mbedtls
+    emit: [LMS]
+    reason: mbedTLS is built with LMS signature verification (CONFIG_MBEDTLS_LMS)
+  - id: legacy-ecjpake
+    when: [CONFIG_MBEDTLS_ECJPAKE_C]
+    uncatalogued: [EC-JPAKE]
+
+  # ---------------------------------------------------------------------------------------
+  # nRF Connect SDK legacy mbedTLS crypto (nrf_security Kconfig.legacy, with
+  # CONFIG_MBEDTLS_LEGACY_CRYPTO_C). These are mbedTLS's own MBEDTLS_*_C names, unlike the
+  # Zephyr 3.x CONFIG_MBEDTLS_CIPHER_*_ENABLED ones; the names both trees share
+  # (CONFIG_MBEDTLS_RSA_C, _PKCS1_V15/_V21, _ECDH_C, _ECDSA_C, _ECDSA_DETERMINISTIC, _ECP_DP_*,
+  # _HKDF_C, _DHM_C, _ECJPAKE_C, _CTR_DRBG_C, _HMAC_DRBG_C) are mapped once, above.
+  # Not mapped, because they choose padding, table sizes, a key-length limit or which backend
+  # implements an algorithm rather than whether it is built: CONFIG_MBEDTLS_CIPHER_PADDING_*,
+  # CONFIG_MBEDTLS_AES_ROM_TABLES/_FEWER_TABLES, CONFIG_MBEDTLS_AES_ONLY_128_BIT_KEY_LENGTH,
+  # CONFIG_MBEDTLS_SHA256_SMALLER, CONFIG_MBEDTLS_512_SMALLER and every CONFIG_MBEDTLS_*_ALT.
+  # ---------------------------------------------------------------------------------------
+  - id: ncs-aes-cbc
+    when: [CONFIG_MBEDTLS_AES_C, CONFIG_MBEDTLS_CIPHER_MODE_CBC]
+    library: mbedtls
+    emit: [AES-CBC]
+    reason: mbedTLS is built with AES in CBC mode (CONFIG_MBEDTLS_AES_C, CONFIG_MBEDTLS_CIPHER_MODE_CBC)
+  - id: ncs-aes-ctr
+    when: [CONFIG_MBEDTLS_AES_C, CONFIG_MBEDTLS_CIPHER_MODE_CTR]
+    library: mbedtls
+    emit: [AES-CTR]
+    reason: mbedTLS is built with AES in CTR mode (CONFIG_MBEDTLS_AES_C, CONFIG_MBEDTLS_CIPHER_MODE_CTR)
+  - id: ncs-aes-xts
+    when: [CONFIG_MBEDTLS_AES_C, CONFIG_MBEDTLS_CIPHER_MODE_XTS]
+    uncatalogued: [AES-XTS]
+  - id: ncs-aes-ccm
+    when: [CONFIG_MBEDTLS_AES_C, CONFIG_MBEDTLS_CCM_C]
+    library: mbedtls
+    emit: [AES-CCM]
+    reason: mbedTLS is built with AES-CCM (CONFIG_MBEDTLS_AES_C, CONFIG_MBEDTLS_CCM_C)
+  - id: ncs-aes-gcm
+    when: [CONFIG_MBEDTLS_AES_C, CONFIG_MBEDTLS_GCM_C]
+    library: mbedtls
+    emit: [AES-GCM]
+    reason: mbedTLS is built with AES-GCM (CONFIG_MBEDTLS_AES_C, CONFIG_MBEDTLS_GCM_C)
+  - id: ncs-cmac
+    when: [CONFIG_MBEDTLS_CMAC_C]
+    uncatalogued: [CMAC]
+  - id: ncs-chachapoly
+    when: [CONFIG_MBEDTLS_CHACHAPOLY_C]
+    library: mbedtls
+    emit: [ChaCha20-Poly1305-256]
+    reason: mbedTLS is built with ChaCha20-Poly1305 (CONFIG_MBEDTLS_CHACHAPOLY_C)
+  - id: ncs-chacha20
+    when: [CONFIG_MBEDTLS_CHACHA20_C]
+    uncatalogued: [ChaCha20]
+  - id: ncs-md5
+    when: [CONFIG_MBEDTLS_MD5_C]
+    uncatalogued: [MD5]
+  - id: ncs-sha1
+    when: [CONFIG_MBEDTLS_SHA1_C]
+    uncatalogued: [SHA-1]
+  - id: ncs-sha224
+    when: [CONFIG_MBEDTLS_SHA224_C]
+    library: mbedtls
+    emit: [SHA2-224]
+    reason: mbedTLS is built with SHA-224 (CONFIG_MBEDTLS_SHA224_C)
+  - id: ncs-sha256
+    when: [CONFIG_MBEDTLS_SHA256_C]
+    library: mbedtls
+    emit: [SHA2-256]
+    reason: mbedTLS is built with SHA-256 (CONFIG_MBEDTLS_SHA256_C)
+  - id: ncs-sha384
+    when: [CONFIG_MBEDTLS_SHA384_C]
+    library: mbedtls
+    emit: [SHA2-384]
+    reason: mbedTLS is built with SHA-384 (CONFIG_MBEDTLS_SHA384_C)
+  - id: ncs-sha512
+    when: [CONFIG_MBEDTLS_SHA512_C]
+    library: mbedtls
+    emit: [SHA2-512]
+    reason: mbedTLS is built with SHA-512 (CONFIG_MBEDTLS_SHA512_C)
+
+  # ---------------------------------------------------------------------------------------
+  # Bluetooth LE security (Zephyr host and controller).
+  # ---------------------------------------------------------------------------------------
+  - id: bt-smp-secure-connections
+    when: [CONFIG_BT_SMP]
+    unless: [CONFIG_BT_SMP_LEGACY_PAIR_ONLY]
+    library: zephyr-bluetooth
+    emit: [ECDH-secp256r1]
+    uncatalogued: [AES-CMAC]
+    reason: LE Secure Connections pairing uses ECDH on P-256 (CONFIG_BT_SMP)
+  - id: bt-smp-legacy-pairing
+    when: [CONFIG_BT_SMP]
+    unless: [CONFIG_BT_SMP_SC_ONLY]
+    library: zephyr-bluetooth
+    emit: [AES-ECB-128]
+    reason: LE legacy pairing uses the AES-128 block function e (CONFIG_BT_SMP without CONFIG_BT_SMP_SC_ONLY)
+  - id: bt-ecc
+    when: [CONFIG_BT_ECC]
+    library: zephyr-bluetooth
+    emit: [ECDH-secp256r1]
+    reason: the Bluetooth host's ECC support runs ECDH on P-256 (CONFIG_BT_ECC)
+  - id: bt-privacy
+    when: [CONFIG_BT_PRIVACY]
+    library: zephyr-bluetooth
+    emit: [AES-ECB-128]
+    reason: resolvable private addresses use the AES-128 hash function ah (CONFIG_BT_PRIVACY)
+  - id: bt-host-crypto
+    when: [CONFIG_BT_HOST_CRYPTO]
+    library: zephyr-bluetooth
+    emit: [AES-ECB-128]
+    reason: the Bluetooth host provides AES-128 encryption itself (CONFIG_BT_HOST_CRYPTO)
+  - id: bt-ctlr-le-enc
+    when: [CONFIG_BT_CTLR_LE_ENC]
+    library: zephyr-bluetooth
+    emit:
+      - {algorithm: AES-CCM, parameter_set: "128", hardware: true}
+    reason: the Bluetooth controller encrypts LE links with AES-CCM in the radio's hardware (CONFIG_BT_CTLR_LE_ENC)
+  - id: bt-ctlr-ecdh
+    when: [CONFIG_BT_CTLR_ECDH]
+    library: zephyr-bluetooth
+    emit: [ECDH-secp256r1]
+    reason: the Bluetooth controller computes the LE Secure Connections ECDH on P-256 (CONFIG_BT_CTLR_ECDH)
+  - id: bt-signing
+    when: [CONFIG_BT_SIGNING]
+    uncatalogued: [AES-CMAC]
+
+  # ---------------------------------------------------------------------------------------
+  # Hardware crypto drivers (Zephyr drivers/crypto). Every AES engine of the list implements
+  # ECB and every hash engine SHA-256; only those are reported.
+  # ---------------------------------------------------------------------------------------
+  - id: crypto-nrf-ecb
+    when: [CONFIG_CRYPTO_NRF_ECB]
+    library: zephyr-crypto-nrf-ecb
+    emit:
+      - {algorithm: AES-ECB, parameter_set: "128", hardware: true}
+    reason: the nRF ECB peripheral driver provides AES-128 ECB in hardware (CONFIG_CRYPTO_NRF_ECB)
+  - id: crypto-esp32-aes
+    when: [CONFIG_CRYPTO_ESP32_AES]
+    library: zephyr-crypto-esp32
+    emit:
+      - {algorithm: AES-ECB, hardware: true}
+    reason: the ESP32 AES accelerator driver provides AES in hardware (CONFIG_CRYPTO_ESP32_AES)
+  - id: crypto-esp32-sha
+    when: [CONFIG_CRYPTO_ESP32_SHA]
+    library: zephyr-crypto-esp32
+    emit:
+      - {algorithm: SHA2, parameter_set: "256", hardware: true}
+    reason: the ESP32 SHA accelerator driver provides SHA-256 in hardware (CONFIG_CRYPTO_ESP32_SHA)
+  - id: crypto-stm32
+    when: [CONFIG_CRYPTO_STM32]
+    library: zephyr-crypto-stm32
+    emit:
+      - {algorithm: AES-ECB, hardware: true}
+    reason: the STM32 CRYP driver provides AES in hardware (CONFIG_CRYPTO_STM32)
+  - id: crypto-stm32-hash
+    when: [CONFIG_CRYPTO_STM32_HASH]
+    library: zephyr-crypto-stm32
+    emit:
+      - {algorithm: SHA2, parameter_set: "256", hardware: true}
+    reason: the STM32 HASH driver provides SHA-256 in hardware (CONFIG_CRYPTO_STM32_HASH)
+  - id: crypto-mchp-aes-g1
+    when: [CONFIG_CRYPTO_MCHP_AES_G1]
+    library: zephyr-crypto-mchp
+    emit:
+      - {algorithm: AES-ECB, hardware: true}
+    reason: the Microchip AES G1 driver provides AES in hardware (CONFIG_CRYPTO_MCHP_AES_G1)
+  - id: crypto-mchp-sha-g1
+    when: [CONFIG_CRYPTO_MCHP_SHA_G1]
+    library: zephyr-crypto-mchp
+    emit:
+      - {algorithm: SHA2, parameter_set: "256", hardware: true}
+    reason: the Microchip SHA G1 driver provides SHA-256 in hardware (CONFIG_CRYPTO_MCHP_SHA_G1)
+  - id: crypto-mchp-xec-symcr
+    when: [CONFIG_CRYPTO_MCHP_XEC_SYMCR]
+    library: zephyr-crypto-mchp
+    emit:
+      - {algorithm: SHA2, parameter_set: "256", hardware: true}
+    reason: the Microchip XEC symmetric crypto driver provides SHA-256 in hardware (CONFIG_CRYPTO_MCHP_XEC_SYMCR)
+  - id: crypto-bflb-aes
+    when: [CONFIG_CRYPTO_BFLB_SEC_ENG_AES]
+    library: zephyr-crypto-bflb
+    emit:
+      - {algorithm: AES-ECB, hardware: true}
+    reason: the Bouffalo Lab security engine driver provides AES in hardware (CONFIG_CRYPTO_BFLB_SEC_ENG_AES)
+  - id: crypto-bflb-sha
+    when: [CONFIG_CRYPTO_BFLB_SEC_ENG_SHA]
+    library: zephyr-crypto-bflb
+    emit:
+      - {algorithm: SHA2, parameter_set: "256", hardware: true}
+    reason: the Bouffalo Lab security engine driver provides SHA-256 in hardware (CONFIG_CRYPTO_BFLB_SEC_ENG_SHA)
+  - id: crypto-cc23x0
+    when: [CONFIG_CRYPTO_CC23X0]
+    library: zephyr-crypto-cc23x0
+    emit:
+      - {algorithm: AES-ECB, hardware: true}
+    reason: the TI CC23x0 AES driver provides AES in hardware (CONFIG_CRYPTO_CC23X0)
+  - id: crypto-mcux-dcp
+    when: [CONFIG_CRYPTO_MCUX_DCP]
+    library: zephyr-crypto-mcux-dcp
+    emit:
+      - {algorithm: AES-ECB, hardware: true}
+    reason: the NXP DCP driver provides AES in hardware (CONFIG_CRYPTO_MCUX_DCP)
+  - id: crypto-nxp-s32-hse
+    when: [CONFIG_CRYPTO_NXP_S32_HSE]
+    library: zephyr-crypto-nxp-s32-hse
+    emit:
+      - {algorithm: AES-ECB, hardware: true}
+    reason: the NXP S32 HSE driver provides AES in hardware (CONFIG_CRYPTO_NXP_S32_HSE)
+  - id: crypto-si32
+    when: [CONFIG_CRYPTO_SI32]
+    library: zephyr-crypto-si32
+    emit:
+      - {algorithm: AES-ECB, hardware: true}
+    reason: the SiM3U AES driver provides AES in hardware (CONFIG_CRYPTO_SI32)
+  - id: crypto-sifli-aes
+    when: [CONFIG_CRYPTO_SIFLI_AES]
+    library: zephyr-crypto-sf32lb
+    emit:
+      - {algorithm: AES-ECB, hardware: true}
+    reason: the SiFli SF32LB driver provides AES in hardware (CONFIG_CRYPTO_SIFLI_AES)
+  - id: crypto-sifli-hash
+    when: [CONFIG_CRYPTO_SIFLI_HASH]
+    library: zephyr-crypto-sf32lb
+    emit:
+      - {algorithm: SHA2, parameter_set: "256", hardware: true}
+    reason: the SiFli SF32LB driver provides SHA-256 in hardware (CONFIG_CRYPTO_SIFLI_HASH)
+  - id: crypto-smartbond
+    when: [CONFIG_CRYPTO_SMARTBOND]
+    library: zephyr-crypto-smartbond
+    emit:
+      - {algorithm: AES-ECB, hardware: true}
+    reason: the Renesas SmartBond crypto driver provides AES in hardware (CONFIG_CRYPTO_SMARTBOND)
+  - id: crypto-ataes132a
+    when: [CONFIG_CRYPTO_ATAES132A]
+    library: zephyr-crypto-ataes132a
+    emit:
+      - {algorithm: AES-CCM, parameter_set: "128", hardware: true}
+    reason: the Microchip ATAES132A secure element provides AES-128 CCM in hardware (CONFIG_CRYPTO_ATAES132A)
+  - id: crypto-intel-sha
+    when: [CONFIG_CRYPTO_INTEL_SHA]
+    library: zephyr-crypto-intel
+    emit:
+      - {algorithm: SHA2, parameter_set: "256", hardware: true}
+    reason: the Intel ADSP SHA driver provides SHA-256 in hardware (CONFIG_CRYPTO_INTEL_SHA)
+  - id: crypto-it8xxx2-sha
+    when: [CONFIG_CRYPTO_IT8XXX2_SHA]
+    library: zephyr-crypto-it8xxx2
+    emit:
+      - {algorithm: SHA2, parameter_set: "256", hardware: true}
+    reason: the ITE IT8xxx2 SHA driver provides SHA-256 in hardware (CONFIG_CRYPTO_IT8XXX2_SHA)
+  - id: crypto-it8xxx2-sha-v2
+    when: [CONFIG_CRYPTO_IT8XXX2_SHA_V2]
+    library: zephyr-crypto-it8xxx2
+    emit:
+      - {algorithm: SHA2, parameter_set: "256", hardware: true}
+    reason: the ITE IT8xxx2 SHA v2 driver provides SHA-256 in hardware (CONFIG_CRYPTO_IT8XXX2_SHA_V2)
+  - id: crypto-it51xxx-sha
+    when: [CONFIG_CRYPTO_IT51XXX_SHA]
+    library: zephyr-crypto-it51xxx
+    emit:
+      - {algorithm: SHA2, parameter_set: "256", hardware: true}
+    reason: the ITE IT51xxx SHA driver provides SHA-256 in hardware (CONFIG_CRYPTO_IT51XXX_SHA)
+  - id: crypto-npcx-sha
+    when: [CONFIG_CRYPTO_NPCX_SHA]
+    library: zephyr-crypto-npcx
+    emit:
+      - {algorithm: SHA2, parameter_set: "256", hardware: true}
+    reason: the Nuvoton NPCX SHA driver provides SHA-256 in hardware (CONFIG_CRYPTO_NPCX_SHA)
+  - id: crypto-rts5912-sha
+    when: [CONFIG_CRYPTO_RTS5912_SHA]
+    library: zephyr-crypto-rts5912
+    emit:
+      - {algorithm: SHA2, parameter_set: "256", hardware: true}
+    reason: the Realtek RTS5912 SHA driver provides SHA-256 in hardware (CONFIG_CRYPTO_RTS5912_SHA)
+  - id: crypto-rpi-pico-sha256
+    when: [CONFIG_CRYPTO_RPI_PICO_SHA256]
+    library: zephyr-crypto-rpi-pico
+    emit:
+      - {algorithm: SHA2, parameter_set: "256", hardware: true}
+    reason: the Raspberry Pi Pico SHA-256 accelerator driver provides SHA-256 in hardware (CONFIG_CRYPTO_RPI_PICO_SHA256)
+
+hardware:
+  # nRF Connect SDK's nrf_security with the CryptoCell or CRACEN PSA driver runs these PSA
+  # algorithms in the crypto accelerator. The driver symbols are nRF Connect SDK names.
+  # CryptoCell-310/312 hashes only up to SHA-256 (nrf_security src/drivers/Kconfig,
+  # PSA_USE_CC3XX_HASH_DRIVER: SHA-1, SHA-224, SHA-256), so only those sets are marked.
+  - when: [CONFIG_NRF_SECURITY, CONFIG_PSA_CRYPTO_DRIVER_CC3XX]
+    library: psa-crypto
+    algorithms: [AES-CBC, AES-CCM, AES-CTR, AES-ECB, ECDH, ECDSA, HMAC-SHA-224, HMAC-SHA-256, SHA2-224, SHA2-256]
+    reason: nRF Security runs this algorithm in the Arm CryptoCell accelerator (CONFIG_NRF_SECURITY, CONFIG_PSA_CRYPTO_DRIVER_CC3XX)
+  - when: [CONFIG_NRF_SECURITY, CONFIG_PSA_CRYPTO_DRIVER_CRACEN]
+    library: psa-crypto
+    algorithms: [AES-CBC, AES-CCM, AES-CTR, AES-ECB, AES-GCM, ChaCha20-Poly1305, ECDH, ECDSA, Ed25519, HMAC, SHA2, SHA3, X25519]
+    reason: nRF Security runs this algorithm in the CRACEN accelerator (CONFIG_NRF_SECURITY, CONFIG_PSA_CRYPTO_DRIVER_CRACEN)
+
+compiled_out:
+  # Each entry names the library the algorithms are compiled out of: psa-crypto for the
+  # PSA_WANT symbols, mbedtls for mbedTLS's own module switches. A source finding under another
+  # library is only down-weighted, never removed (see docs/assay-config.md).
+  # PSA Crypto: a PSA_WANT symbol that is explicitly off.
+  - {library: psa-crypto, when_all_off: [CONFIG_PSA_WANT_KEY_TYPE_AES], algorithms: [AES-CBC, AES-CCM, AES-CTR, AES-ECB, AES-GCM]}
+  - {library: psa-crypto, when_all_off: [CONFIG_PSA_WANT_ALG_CBC_NO_PADDING, CONFIG_PSA_WANT_ALG_CBC_PKCS7], algorithms: [AES-CBC]}
+  - {library: psa-crypto, when_all_off: [CONFIG_PSA_WANT_ALG_CCM], algorithms: [AES-CCM]}
+  - {library: psa-crypto, when_all_off: [CONFIG_PSA_WANT_ALG_CTR], algorithms: [AES-CTR]}
+  - {library: psa-crypto, when_all_off: [CONFIG_PSA_WANT_ALG_ECB_NO_PADDING], algorithms: [AES-ECB]}
+  - {library: psa-crypto, when_all_off: [CONFIG_PSA_WANT_ALG_GCM], algorithms: [AES-GCM]}
+  - {library: psa-crypto, when_all_off: [CONFIG_PSA_WANT_ALG_CHACHA20_POLY1305], algorithms: [ChaCha20-Poly1305]}
+  - {library: psa-crypto, when_all_off: [CONFIG_PSA_WANT_ALG_ECDH], algorithms: [ECDH, X25519]}
+  - {library: psa-crypto, when_all_off: [CONFIG_PSA_WANT_ALG_ECDSA, CONFIG_PSA_WANT_ALG_DETERMINISTIC_ECDSA], algorithms: [ECDSA]}
+  - {library: psa-crypto, when_all_off: [CONFIG_PSA_WANT_ALG_FFDH], algorithms: [DH]}
+  - {library: psa-crypto, when_all_off: [CONFIG_PSA_WANT_ALG_HKDF, CONFIG_PSA_WANT_ALG_HKDF_EXTRACT, CONFIG_PSA_WANT_ALG_HKDF_EXPAND], algorithms: [HKDF]}
+  - {library: psa-crypto, when_all_off: [CONFIG_PSA_WANT_ALG_HMAC], algorithms: [HMAC]}
+  - {library: psa-crypto, when_all_off: [CONFIG_PSA_WANT_ALG_PBKDF2_HMAC], algorithms: [PBKDF2]}
+  - {library: psa-crypto, when_all_off: [CONFIG_PSA_WANT_ALG_RSA_OAEP], algorithms: [RSA-OAEP]}
+  - {library: psa-crypto, when_all_off: [CONFIG_PSA_WANT_ALG_RSA_PKCS1V15_SIGN], algorithms: [RSA-PKCS1v15]}
+  - {library: psa-crypto, when_all_off: [CONFIG_PSA_WANT_ALG_RSA_PSS], algorithms: [RSA-PSS]}
+  - {library: psa-crypto, when_all_off: [CONFIG_PSA_WANT_ALG_SHA_224], algorithms: [SHA2-224]}
+  - {library: psa-crypto, when_all_off: [CONFIG_PSA_WANT_ALG_SHA_256], algorithms: [SHA2-256]}
+  - {library: psa-crypto, when_all_off: [CONFIG_PSA_WANT_ALG_SHA_384], algorithms: [SHA2-384]}
+  - {library: psa-crypto, when_all_off: [CONFIG_PSA_WANT_ALG_SHA_512], algorithms: [SHA2-512]}
+  - {library: psa-crypto, when_all_off: [CONFIG_PSA_WANT_ALG_SHA3_224], algorithms: [SHA3-224]}
+  - {library: psa-crypto, when_all_off: [CONFIG_PSA_WANT_ALG_SHA3_256], algorithms: [SHA3-256]}
+  - {library: psa-crypto, when_all_off: [CONFIG_PSA_WANT_ALG_SHA3_384], algorithms: [SHA3-384]}
+  - {library: psa-crypto, when_all_off: [CONFIG_PSA_WANT_ALG_SHA3_512], algorithms: [SHA3-512]}
+  - {library: psa-crypto, when_all_off: [CONFIG_PSA_WANT_ALG_SHAKE128], algorithms: [SHAKE-128]}
+  - {library: psa-crypto, when_all_off: [CONFIG_PSA_WANT_ALG_SHAKE256], algorithms: [SHAKE-256]}
+  # Legacy mbedTLS (Zephyr 3.x names, and the names both trees share): a module switch that is
+  # explicitly off.
+  - {library: mbedtls, when_all_off: [CONFIG_MBEDTLS_CIPHER_MODE_CBC_ENABLED], algorithms: [AES-CBC]}
+  - {library: mbedtls, when_all_off: [CONFIG_MBEDTLS_CIPHER_MODE_CTR_ENABLED], algorithms: [AES-CTR]}
+  - {library: mbedtls, when_all_off: [CONFIG_MBEDTLS_CIPHER_GCM_ENABLED], algorithms: [AES-GCM]}
+  - {library: mbedtls, when_all_off: [CONFIG_MBEDTLS_CIPHER_CCM_ENABLED], algorithms: [AES-CCM]}
+  - {library: mbedtls, when_all_off: [CONFIG_MBEDTLS_CIPHER_AES_ENABLED], algorithms: [AES-CBC, AES-CCM, AES-CTR, AES-ECB, AES-GCM]}
+  - {library: mbedtls, when_all_off: [CONFIG_MBEDTLS_CIPHER_CHACHA20_ENABLED], algorithms: [ChaCha20-Poly1305]}
+  - {library: mbedtls, when_all_off: [CONFIG_MBEDTLS_RSA_C], algorithms: [RSA-OAEP, RSA-PKCS1v15, RSA-PSS]}
+  - {library: mbedtls, when_all_off: [CONFIG_MBEDTLS_ECP_C], algorithms: [ECDH, ECDSA, X25519]}
+  - {library: mbedtls, when_all_off: [CONFIG_MBEDTLS_SHA224], algorithms: [SHA2-224]}
+  - {library: mbedtls, when_all_off: [CONFIG_MBEDTLS_SHA256], algorithms: [SHA2-256]}
+  - {library: mbedtls, when_all_off: [CONFIG_MBEDTLS_SHA384], algorithms: [SHA2-384]}
+  - {library: mbedtls, when_all_off: [CONFIG_MBEDTLS_SHA512], algorithms: [SHA2-512]}
+  - {library: mbedtls, when_all_off: [CONFIG_MBEDTLS_HKDF_C], algorithms: [HKDF]}
+  - {library: mbedtls, when_all_off: [CONFIG_MBEDTLS_DHM_C], algorithms: [DH]}
+  # Legacy mbedTLS (nRF Connect SDK names).
+  - {library: mbedtls, when_all_off: [CONFIG_MBEDTLS_CIPHER_MODE_CBC], algorithms: [AES-CBC]}
+  - {library: mbedtls, when_all_off: [CONFIG_MBEDTLS_AES_C], algorithms: [AES-CBC, AES-CCM, AES-CTR, AES-ECB, AES-GCM]}
+  - {library: mbedtls, when_all_off: [CONFIG_MBEDTLS_CIPHER_MODE_CTR], algorithms: [AES-CTR]}
+  - {library: mbedtls, when_all_off: [CONFIG_MBEDTLS_CCM_C], algorithms: [AES-CCM]}
+  - {library: mbedtls, when_all_off: [CONFIG_MBEDTLS_GCM_C], algorithms: [AES-GCM]}
+  - {library: mbedtls, when_all_off: [CONFIG_MBEDTLS_CHACHAPOLY_C], algorithms: [ChaCha20-Poly1305]}
+  - {library: mbedtls, when_all_off: [CONFIG_MBEDTLS_SHA224_C], algorithms: [SHA2-224]}
+  - {library: mbedtls, when_all_off: [CONFIG_MBEDTLS_SHA256_C], algorithms: [SHA2-256]}
+  - {library: mbedtls, when_all_off: [CONFIG_MBEDTLS_SHA384_C], algorithms: [SHA2-384]}
+  - {library: mbedtls, when_all_off: [CONFIG_MBEDTLS_SHA512_C], algorithms: [SHA2-512]}
+
+custom_config:
+  # A configuration header Kconfig does not generate can turn algorithms back on behind
+  # Kconfig's back, so an image with one gets no mbedtls or psa-crypto compiled-out entries
+  # (and a note). The defaults are the Kconfig-generated headers: config-tls-generic.h
+  # (Zephyr 3.x to 4.1, CONFIG_MBEDTLS_CFG_FILE), config-mbedtls.h (Zephyr 4.2 and later),
+  # config-tf-psa-crypto.h (Zephyr 4.4 TF-PSA-Crypto), and nRF Connect SDK nrf_security's
+  # nrf-config.h, nrf-psa-crypto-config.h and nrf-psa-crypto-user-config.h (NCS 2.9 to 3.3 name
+  # the PSA ones in CONFIG_MBEDTLS_PSA_CRYPTO_*CONFIG_FILE, NCS 3.4 in its
+  # Kconfig.tf-psa-crypto.defconfig defaults for CONFIG_TF_PSA_CRYPTO_*CONFIG_FILE); an empty
+  # CONFIG_MBEDTLS_CFG_FILE is Zephyr 4.4's unset deprecated alias.
+  - {symbol: CONFIG_MBEDTLS_USER_CONFIG_FILE, defaults: [""], libraries: [mbedtls, psa-crypto]}
+  - {symbol: CONFIG_MBEDTLS_CONFIG_FILE, defaults: [config-mbedtls.h, nrf-config.h], libraries: [mbedtls, psa-crypto]}
+  - {symbol: CONFIG_MBEDTLS_CFG_FILE, defaults: ["", config-tls-generic.h, config-mbedtls.h, nrf-config.h], libraries: [mbedtls, psa-crypto]}
+  - {symbol: CONFIG_TF_PSA_CRYPTO_CONFIG_FILE, defaults: [config-tf-psa-crypto.h, nrf-psa-crypto-config.h], libraries: [mbedtls, psa-crypto]}
+  - {symbol: CONFIG_TF_PSA_CRYPTO_USER_CONFIG_FILE, defaults: ["", nrf-psa-crypto-user-config.h], libraries: [mbedtls, psa-crypto]}
+  - {symbol: CONFIG_MBEDTLS_PSA_CRYPTO_CONFIG_FILE, defaults: [nrf-psa-crypto-config.h], libraries: [mbedtls, psa-crypto]}
+  - {symbol: CONFIG_MBEDTLS_PSA_CRYPTO_USER_CONFIG_FILE, defaults: [nrf-psa-crypto-user-config.h], libraries: [mbedtls, psa-crypto]}

@@ -10,10 +10,12 @@ rollcall assay --build build --product widget@1.2.3 -o widget.cbom.json
 rollcall assay --model product.model.json --format md -o crypto.md
 ```
 
-**This version has no detectors.** `rollcall assay --source/--build/--elf` checks its inputs and
-writes a valid but empty CBOM (see [Inputs](#inputs)). What is in place is the model, the
-CycloneDX writer and reader, and the Markdown summary, which a model written by hand (or by
-another tool, in the `rollcall-model/1` JSON form) can already use through `--model`.
+The detectors so far read a build's configuration: with `--build`, a Zephyr build directory or
+an ESP-IDF project or build directory, `assay` reports the algorithms, protocols, MCUboot
+signature and hardware crypto its Kconfig output enables ([configuration
+detectors](assay-config.md)). `--source` and `--elf` are checked but have no detector yet. A
+model written by hand (or by another tool, in the `rollcall-model/1` JSON form) can be rendered
+through `--model`.
 
 The facts about each algorithm (its primitive, parameter sets, classical and NIST post-quantum
 security levels and quantum-risk class) come from the [algorithm catalogue](catalogue.md), which
@@ -25,7 +27,7 @@ also explains where every number comes from.
 |------|---------|
 | `--model FILE` | Render a model (`rollcall-model/1` JSON) whose `cryptographic-asset` components carry crypto assets. Conflicts with the four flags below |
 | `--source DIR` | The source tree to take the inventory of |
-| `--build DIR` | The build directory |
+| `--build DIR` | The build directory: a Zephyr build directory or an ESP-IDF project/build directory ([configuration detectors](assay-config.md)) |
 | `--elf FILE` | The linked ELF image |
 | `--product NAME[@VERSION]` | The product the inventory is of; required with `--source`, `--build` and `--elf` |
 | `--format cyclonedx\|md` | A CycloneDX 1.6 CBOM (the default) or a Markdown summary |
@@ -35,25 +37,38 @@ also explains where every number comes from.
 
 At least one of `--model`, `--source`, `--build` and `--elf` is required. Exit codes: 0 when
 the output is written, 64 for a usage error (no input, `--source`/`--build`/`--elf` without
-`--product`, `--model` with any of them), 65 for a malformed `--model`, 66 for a missing input
-or one of the wrong kind (a `--build` that is a file, an `--elf` that is a directory), 74 when
-the output cannot be written.
+`--product`, `--model` with any of them), 65 for a malformed `--model` or a malformed file in
+the `--build` directory (a `.config` or `sdkconfig`, with its line; `build_info.yml`;
+`project_description.json`; a sysbuild image other than `MAIN` with the `--product` name), 66
+for a missing input or one of the wrong kind (a `--build` that is a file, an `--elf` that is a
+directory, a Zephyr build without its `.config`), 70 when rollcall's built-in configuration
+rules or algorithm catalogue fail to load, 74 when the output cannot be written.
 
 ## Inputs
 
 With `--source`, `--build` and/or `--elf`, `assay` checks each exists and is a directory
-(`--source`, `--build`) or a file (`--elf`), then runs its detectors. In this version there
-are none, so the CBOM is the product `--product` names with no components, and its
+(`--source`, `--build`) or a file (`--elf`), then runs its detectors:
+
+- `--build`: the configuration detectors read the build's `.config` files (Zephyr, sysbuild
+  included) or its `sdkconfig` (ESP-IDF) and add each asset under its image and library, with
+  `kconfig-symbol` evidence at confidence `high`. The CBOM's `metadata.properties` name the
+  detector that ran, `kconfig` or `sdkconfig`, and stderr has their notes (algorithms the
+  catalogue does not list yet, the crypto API in use, secure boot off). A directory that is
+  neither a Zephyr nor an ESP-IDF build is a note, not an error. See
+  [assay-config.md](assay-config.md) for the layouts, the mapping and the compiled-out list.
+- `--source`, `--elf`: no detector yet.
+
+When no detector ran, the CBOM is the product `--product` names with no components, and its
 `metadata.properties` say so:
 
 ```json
 {"name": "rollcall:assay:detectors", "value": "none"}
 ```
 
-and stderr has one note:
+and stderr has the note
 
 ```text
-rollcall assay: note: no cryptographic-asset detectors in this version; the inventory is empty
+rollcall assay: note: no cryptographic-asset detector ran for these inputs; the inventory is empty
 ```
 
 so an empty inventory is never mistaken for a build without cryptography. The exit code is 0.

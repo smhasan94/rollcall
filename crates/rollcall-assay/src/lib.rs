@@ -5,9 +5,11 @@
 //! carry [`CryptoAsset`](rollcall_core::model::CryptoAsset)s, written as a CycloneDX 1.6 CBOM
 //! by [`rollcall_core::cyclonedx::write`] or as a Markdown table by [`summary::to_markdown`].
 //!
-//! This version has no detectors yet: [`assay`] checks its inputs exist and returns an empty
-//! inventory, with [`Inventory::detectors`] empty and a note saying so. A CBOM written for it
-//! carries the document property [`DETECTORS_PROPERTY`] = [`NO_DETECTORS`], so an empty
+//! The detectors so far are the configuration detectors of [`config`]: with a `--build`
+//! directory (a Zephyr build, or an ESP-IDF project or build directory), [`assay`] reads its
+//! Kconfig output and reports the algorithms, protocols and MCUboot signature it configures.
+//! When no detector ran, [`Inventory::detectors`] is empty and a note says so; a CBOM written
+//! for it carries the document property [`DETECTORS_PROPERTY`] = [`NO_DETECTORS`], so an empty
 //! inventory is never mistaken for a build without cryptography.
 //!
 //! [`catalogue`] is the algorithm catalogue (`db/algorithms.yaml`): for each algorithm and
@@ -34,7 +36,9 @@
     )
 )]
 
+pub mod assets;
 pub mod catalogue;
+pub mod config;
 pub mod summary;
 
 use std::io;
@@ -43,6 +47,9 @@ use std::path::{Path, PathBuf};
 use rollcall_core::merge::{self, ProductSpec};
 use rollcall_core::model::Product;
 
+use crate::catalogue::{Catalogue, CatalogueError};
+use crate::config::ConfigError;
+
 /// The CBOM `metadata.properties` entry naming the detectors that ran, comma-separated, or
 /// [`NO_DETECTORS`] when none did.
 pub const DETECTORS_PROPERTY: &str = "rollcall:assay:detectors";
@@ -50,9 +57,9 @@ pub const DETECTORS_PROPERTY: &str = "rollcall:assay:detectors";
 /// The value of [`DETECTORS_PROPERTY`] when no detector ran.
 pub const NO_DETECTORS: &str = "none";
 
-/// The note [`assay`] returns while it has no detectors.
+/// The note [`assay`] returns when no detector ran.
 pub const NO_DETECTORS_NOTE: &str =
-    "no cryptographic-asset detectors in this version; the inventory is empty";
+    "no cryptographic-asset detector ran for these inputs; the inventory is empty";
 
 /// What to take an inventory of. At least one of `source`, `build` and `elf` should be given;
 /// each that is given must exist.
@@ -75,8 +82,13 @@ pub struct Inventory {
     /// component that implements it (or under the image, for a protocol, certificate or key
     /// that belongs to the image).
     pub product: Product,
-    /// The detectors that ran, sorted. Empty in this version.
+    /// The detectors that ran, sorted (`kconfig`, `sdkconfig`).
     pub detectors: Vec<&'static str>,
+    /// What the configuration detectors found compiled out, per image and library: what the
+    /// source detector passes to [`config::apply_compiled_out`]. Empty without `build`.
+    pub compiled_out: config::CompiledOut,
+    /// The crypto API each image with mbedTLS uses, from the configuration detectors.
+    pub apis: std::collections::BTreeMap<config::ImageKey, config::CryptoApi>,
     /// Things the user should know about the inventory, one line each.
     pub notes: Vec<String>,
 }
@@ -126,16 +138,23 @@ pub enum AssayError {
     /// The product could not be built.
     #[error(transparent)]
     Merge(#[from] merge::Error),
+    /// A configuration detector could not read the `--build` directory.
+    #[error(transparent)]
+    Config(#[from] ConfigError),
+    /// The built-in algorithm catalogue does not load.
+    #[error(transparent)]
+    Catalogue(#[from] CatalogueError),
 }
 
 impl AssayError {
     /// Whether the error is about an input path (missing, unreadable or the wrong kind),
     /// rather than about the model.
     pub fn is_input_error(&self) -> bool {
-        matches!(
-            self,
-            Self::MissingInput { .. } | Self::NotADirectory { .. } | Self::NotAFile { .. }
-        )
+        match self {
+            Self::MissingInput { .. } | Self::NotADirectory { .. } | Self::NotAFile { .. } => true,
+            Self::Config(e) => e.is_input_error(),
+            _ => false,
+        }
     }
 }
 
@@ -162,8 +181,9 @@ fn check_path(what: &'static str, path: &Path, dir: bool) -> Result<(), AssayErr
 /// Takes the cryptographic inventory of `inputs`.
 ///
 /// Checks each given input exists and is a directory (`source`, `build`) or a file (`elf`),
-/// then runs the detectors. There are none in this version, so the inventory is the empty
-/// product `inputs.product` names, with no detectors and the note [`NO_DETECTORS_NOTE`].
+/// then runs the detectors: with `build`, the configuration detectors
+/// ([`config::detect_build`]), whose images are merged into the product `inputs.product` names.
+/// The notes are the detectors' notes, plus [`NO_DETECTORS_NOTE`] when none ran.
 pub fn assay(inputs: &Inputs<'_>) -> Result<Inventory, AssayError> {
     if let Some(path) = inputs.source {
         check_path("--source", path, true)?;
@@ -174,11 +194,32 @@ pub fn assay(inputs: &Inputs<'_>) -> Result<Inventory, AssayError> {
     if let Some(path) = inputs.elf {
         check_path("--elf", path, false)?;
     }
-    let product = merge::merge(Vec::new(), Some(&inputs.product))?;
+    let mut product = inputs.product.empty_product();
+    let mut detectors = std::collections::BTreeSet::new();
+    let mut notes = Vec::new();
+    let mut compiled_out = config::CompiledOut::new();
+    let mut apis = std::collections::BTreeMap::new();
+    if let Some(build) = inputs.build {
+        let catalogue = Catalogue::builtin()?;
+        let found = config::detect_build(build, &inputs.product, &catalogue)?;
+        for image in found.images {
+            product.add_image(image).map_err(merge::Error::from)?;
+        }
+        detectors.extend(found.detectors);
+        notes.extend(found.notes);
+        compiled_out = found.compiled_out;
+        apis = found.apis;
+    }
+    let product = merge::merge(vec![product], Some(&inputs.product))?;
+    if detectors.is_empty() {
+        notes.push(NO_DETECTORS_NOTE.to_owned());
+    }
     Ok(Inventory {
         product,
-        detectors: Vec::new(),
-        notes: vec![NO_DETECTORS_NOTE.to_owned()],
+        detectors: detectors.into_iter().collect(),
+        compiled_out,
+        apis,
+        notes,
     })
 }
 
@@ -290,7 +331,7 @@ mod tests {
         std::fs::write(&file, b"\x7fELF").unwrap();
         let inventory = assay(&Inputs {
             source: Some(dir.path()),
-            build: Some(dir.path()),
+            build: None,
             elf: Some(&file),
             product: spec(),
         })
@@ -305,11 +346,27 @@ mod tests {
         // Deterministic.
         let again = assay(&Inputs {
             source: Some(dir.path()),
-            build: Some(dir.path()),
+            build: None,
             elf: Some(&file),
             product: spec(),
         })
         .unwrap();
         assert_eq!(again, inventory);
+        // A --build that is no build the configuration detectors read: a note saying so,
+        // then the no-detector note; still an empty inventory.
+        let inventory = assay(&Inputs {
+            source: None,
+            build: Some(dir.path()),
+            elf: None,
+            product: spec(),
+        })
+        .unwrap();
+        assert!(inventory.detectors.is_empty());
+        assert!(inventory.compiled_out.is_empty());
+        assert_eq!(inventory.compiled_out.images().count(), 0);
+        assert!(inventory.apis.is_empty());
+        assert_eq!(inventory.notes.len(), 2, "{:?}", inventory.notes);
+        assert!(inventory.notes[0].contains("not a Zephyr or ESP-IDF build"));
+        assert_eq!(inventory.notes[1], NO_DETECTORS_NOTE);
     }
 }

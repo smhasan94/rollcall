@@ -31,6 +31,18 @@ policy. The identifier database (`rollcall-identifiers`) is versioned on its own
   the CycloneDX 1.6 `curve` (a neuromancer.sk curve name) and `padding` (one of the seven
   CycloneDX words, as the new `Padding` enum); the writer and reader handle both, and the
   catalogue's `algorithm_properties()` fills them, writing RSA-PSS's `pss` as `other`.
+- **Kconfig and sdkconfig detectors (SHA-144).** `rollcall assay --build` reads a Zephyr build
+  (single image or sysbuild, every image's `zephyr/.config` and the `SB_CONFIG_*` settings) or
+  an ESP-IDF project or build directory (`sdkconfig`) and reports, with `kconfig-symbol`
+  evidence at high confidence: mbedTLS and PSA Crypto algorithms with their curves and hashes,
+  TLS versions and cipher suites, MCUboot's signature, image hash and encryption algorithms
+  (keelsign's post-quantum TLV options under provisional symbol names), Bluetooth LE security,
+  Zephyr crypto drivers and hardware acceleration, and ESP-IDF secure boot v2 and flash
+  encryption. The symbol mapping is data (`db/config-zephyr.yaml`, `db/config-esp-idf.yaml`),
+  checked against the algorithm catalogue. A per-image, per-library compiled-out list
+  (`Inventory::compiled_out`, `config::apply_compiled_out`) lets source findings for
+  algorithms compiled out of their own library be dropped, and down-weights the rest. See
+  [docs/assay-config.md](docs/assay-config.md).
 
 ## [0.1.0] - 2026-10-05
 

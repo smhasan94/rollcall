@@ -1,0 +1,51 @@
+# hand-written test data, SHA-144, not generated
+# Fixture: fixtures/esp-idf/hello-world, assayed with --product hello-world.
+# ESP-IDF 5.5.1 esp32 hello_world: the default mbedTLS configuration (as wifi-tls without CMAC); secure boot and flash encryption off.
+# Each line was checked against the fixture's own .config / sdkconfig (symbol, value and line);
+# see README.md for the format. Do not regenerate: edit by hand, and review like code.
+
+# Assets: IMAGE / LIBRARY / ASSET [hardware] | every evidence locator, in file and line order.
+asset application:hello-world / mbedtls / AES-CCM [hardware] | sdkconfig:934 CONFIG_MBEDTLS_HARDWARE_AES, sdkconfig:980 CONFIG_MBEDTLS_AES_C, sdkconfig:985 CONFIG_MBEDTLS_CCM_C
+asset application:hello-world / mbedtls / AES-GCM [hardware] | sdkconfig:934 CONFIG_MBEDTLS_HARDWARE_AES, sdkconfig:980 CONFIG_MBEDTLS_AES_C, sdkconfig:986 CONFIG_MBEDTLS_GCM_C
+asset application:hello-world / mbedtls / ECDH-secp256r1 | sdkconfig:963 CONFIG_MBEDTLS_KEY_EXCHANGE_ECDHE_RSA, sdkconfig:964 CONFIG_MBEDTLS_KEY_EXCHANGE_ECDHE_ECDSA, sdkconfig:965 CONFIG_MBEDTLS_KEY_EXCHANGE_ECDH_ECDSA, sdkconfig:966 CONFIG_MBEDTLS_KEY_EXCHANGE_ECDH_RSA, sdkconfig:970 CONFIG_MBEDTLS_SSL_PROTO_TLS1_2, sdkconfig:1005 CONFIG_MBEDTLS_ECDH_C, sdkconfig:1010 CONFIG_MBEDTLS_ECP_DP_SECP256R1_ENABLED
+asset application:hello-world / mbedtls / ECDH-secp384r1 | sdkconfig:963 CONFIG_MBEDTLS_KEY_EXCHANGE_ECDHE_RSA, sdkconfig:964 CONFIG_MBEDTLS_KEY_EXCHANGE_ECDHE_ECDSA, sdkconfig:965 CONFIG_MBEDTLS_KEY_EXCHANGE_ECDH_ECDSA, sdkconfig:966 CONFIG_MBEDTLS_KEY_EXCHANGE_ECDH_RSA, sdkconfig:970 CONFIG_MBEDTLS_SSL_PROTO_TLS1_2, sdkconfig:1005 CONFIG_MBEDTLS_ECDH_C, sdkconfig:1011 CONFIG_MBEDTLS_ECP_DP_SECP384R1_ENABLED
+asset application:hello-world / mbedtls / ECDH-secp521r1 | sdkconfig:963 CONFIG_MBEDTLS_KEY_EXCHANGE_ECDHE_RSA, sdkconfig:964 CONFIG_MBEDTLS_KEY_EXCHANGE_ECDHE_ECDSA, sdkconfig:965 CONFIG_MBEDTLS_KEY_EXCHANGE_ECDH_ECDSA, sdkconfig:966 CONFIG_MBEDTLS_KEY_EXCHANGE_ECDH_RSA, sdkconfig:970 CONFIG_MBEDTLS_SSL_PROTO_TLS1_2, sdkconfig:1005 CONFIG_MBEDTLS_ECDH_C, sdkconfig:1012 CONFIG_MBEDTLS_ECP_DP_SECP521R1_ENABLED
+asset application:hello-world / mbedtls / ECDSA-secp256r1 | sdkconfig:945 CONFIG_MBEDTLS_ECDSA_DETERMINISTIC, sdkconfig:964 CONFIG_MBEDTLS_KEY_EXCHANGE_ECDHE_ECDSA, sdkconfig:965 CONFIG_MBEDTLS_KEY_EXCHANGE_ECDH_ECDSA, sdkconfig:970 CONFIG_MBEDTLS_SSL_PROTO_TLS1_2, sdkconfig:1006 CONFIG_MBEDTLS_ECDSA_C, sdkconfig:1010 CONFIG_MBEDTLS_ECP_DP_SECP256R1_ENABLED
+asset application:hello-world / mbedtls / ECDSA-secp384r1 | sdkconfig:945 CONFIG_MBEDTLS_ECDSA_DETERMINISTIC, sdkconfig:964 CONFIG_MBEDTLS_KEY_EXCHANGE_ECDHE_ECDSA, sdkconfig:965 CONFIG_MBEDTLS_KEY_EXCHANGE_ECDH_ECDSA, sdkconfig:970 CONFIG_MBEDTLS_SSL_PROTO_TLS1_2, sdkconfig:1006 CONFIG_MBEDTLS_ECDSA_C, sdkconfig:1011 CONFIG_MBEDTLS_ECP_DP_SECP384R1_ENABLED
+asset application:hello-world / mbedtls / ECDSA-secp521r1 | sdkconfig:945 CONFIG_MBEDTLS_ECDSA_DETERMINISTIC, sdkconfig:964 CONFIG_MBEDTLS_KEY_EXCHANGE_ECDHE_ECDSA, sdkconfig:965 CONFIG_MBEDTLS_KEY_EXCHANGE_ECDH_ECDSA, sdkconfig:970 CONFIG_MBEDTLS_SSL_PROTO_TLS1_2, sdkconfig:1006 CONFIG_MBEDTLS_ECDSA_C, sdkconfig:1012 CONFIG_MBEDTLS_ECP_DP_SECP521R1_ENABLED
+asset application:hello-world / mbedtls / RSA-PKCS1v15 | sdkconfig:961 CONFIG_MBEDTLS_KEY_EXCHANGE_RSA, sdkconfig:963 CONFIG_MBEDTLS_KEY_EXCHANGE_ECDHE_RSA, sdkconfig:966 CONFIG_MBEDTLS_KEY_EXCHANGE_ECDH_RSA, sdkconfig:970 CONFIG_MBEDTLS_SSL_PROTO_TLS1_2
+asset application:hello-world / mbedtls / SHA2-256 [hardware] | sdkconfig:938 CONFIG_MBEDTLS_HARDWARE_SHA
+asset application:hello-world / mbedtls / SHA2-384 [hardware] | sdkconfig:205 CONFIG_SOC_SHA_SUPPORT_SHA384, sdkconfig:938 CONFIG_MBEDTLS_HARDWARE_SHA, sdkconfig:947 CONFIG_MBEDTLS_SHA512_C
+asset application:hello-world / mbedtls / SHA2-512 [hardware] | sdkconfig:206 CONFIG_SOC_SHA_SUPPORT_SHA512, sdkconfig:938 CONFIG_MBEDTLS_HARDWARE_SHA, sdkconfig:947 CONFIG_MBEDTLS_SHA512_C
+asset application:hello-world / mbedtls / TLS-1.2 | sdkconfig:970 CONFIG_MBEDTLS_SSL_PROTO_TLS1_2
+asset application:hello-world / mbedtls / X25519 | sdkconfig:963 CONFIG_MBEDTLS_KEY_EXCHANGE_ECDHE_RSA, sdkconfig:964 CONFIG_MBEDTLS_KEY_EXCHANGE_ECDHE_ECDSA, sdkconfig:965 CONFIG_MBEDTLS_KEY_EXCHANGE_ECDH_ECDSA, sdkconfig:966 CONFIG_MBEDTLS_KEY_EXCHANGE_ECDH_RSA, sdkconfig:970 CONFIG_MBEDTLS_SSL_PROTO_TLS1_2, sdkconfig:1005 CONFIG_MBEDTLS_ECDH_C, sdkconfig:1019 CONFIG_MBEDTLS_ECP_DP_CURVE25519_ENABLED
+
+# Compiled out (explicitly-off symbols), per image: IMAGE LIBRARY ALGORITHM.
+compiled-out application:hello-world mbedtls ChaCha20-Poly1305
+compiled-out application:hello-world mbedtls DH
+compiled-out application:hello-world mbedtls HKDF
+compiled-out application:hello-world mbedtls SHA3
+
+# Notes, sorted.
+note sdkconfig: uses the legacy mbedTLS crypto API (CONFIG_MBEDTLS_AES_C)
+note sdkconfig:1008: CONFIG_MBEDTLS_ECP_DP_SECP192R1_ENABLED enables ECDH on secp192r1, which the algorithm catalogue does not list yet; not reported
+note sdkconfig:1008: CONFIG_MBEDTLS_ECP_DP_SECP192R1_ENABLED enables ECDSA on secp192r1, which the algorithm catalogue does not list yet; not reported
+note sdkconfig:1009: CONFIG_MBEDTLS_ECP_DP_SECP224R1_ENABLED enables ECDH on secp224r1, which the algorithm catalogue does not list yet; not reported
+note sdkconfig:1009: CONFIG_MBEDTLS_ECP_DP_SECP224R1_ENABLED enables ECDSA on secp224r1, which the algorithm catalogue does not list yet; not reported
+note sdkconfig:1013: CONFIG_MBEDTLS_ECP_DP_SECP192K1_ENABLED enables ECDH on secp192k1, which the algorithm catalogue does not list yet; not reported
+note sdkconfig:1013: CONFIG_MBEDTLS_ECP_DP_SECP192K1_ENABLED enables ECDSA on secp192k1, which the algorithm catalogue does not list yet; not reported
+note sdkconfig:1014: CONFIG_MBEDTLS_ECP_DP_SECP224K1_ENABLED enables ECDH on secp224k1, which the algorithm catalogue does not list yet; not reported
+note sdkconfig:1014: CONFIG_MBEDTLS_ECP_DP_SECP224K1_ENABLED enables ECDSA on secp224k1, which the algorithm catalogue does not list yet; not reported
+note sdkconfig:1015: CONFIG_MBEDTLS_ECP_DP_SECP256K1_ENABLED enables ECDH on secp256k1, which the algorithm catalogue does not list yet; not reported
+note sdkconfig:1015: CONFIG_MBEDTLS_ECP_DP_SECP256K1_ENABLED enables ECDSA on secp256k1, which the algorithm catalogue does not list yet; not reported
+note sdkconfig:1016: CONFIG_MBEDTLS_ECP_DP_BP256R1_ENABLED enables ECDH on brainpoolP256r1, which the algorithm catalogue does not list yet; not reported
+note sdkconfig:1016: CONFIG_MBEDTLS_ECP_DP_BP256R1_ENABLED enables ECDSA on brainpoolP256r1, which the algorithm catalogue does not list yet; not reported
+note sdkconfig:1017: CONFIG_MBEDTLS_ECP_DP_BP384R1_ENABLED enables ECDH on brainpoolP384r1, which the algorithm catalogue does not list yet; not reported
+note sdkconfig:1017: CONFIG_MBEDTLS_ECP_DP_BP384R1_ENABLED enables ECDSA on brainpoolP384r1, which the algorithm catalogue does not list yet; not reported
+note sdkconfig:1018: CONFIG_MBEDTLS_ECP_DP_BP512R1_ENABLED enables ECDH on brainpoolP512r1, which the algorithm catalogue does not list yet; not reported
+note sdkconfig:1018: CONFIG_MBEDTLS_ECP_DP_BP512R1_ENABLED enables ECDSA on brainpoolP512r1, which the algorithm catalogue does not list yet; not reported
+note sdkconfig:358: secure boot not enabled (CONFIG_SECURE_BOOT is not set)
+note sdkconfig:359: flash encryption not enabled (CONFIG_SECURE_FLASH_ENC_ENABLED is not set)
+note sdkconfig:936: mbedTLS uses the MPI accelerator for big-number arithmetic (CONFIG_MBEDTLS_HARDWARE_MPI); RSA, DH and ECC still run in software around it, so none is marked as hardware
+note sdkconfig:939: CONFIG_MBEDTLS_ROM_MD5 enables MD5, which the algorithm catalogue does not list yet; not reported
+note sdkconfig:946: CONFIG_MBEDTLS_SHA1_C enables SHA-1, which the algorithm catalogue does not list yet; not reported

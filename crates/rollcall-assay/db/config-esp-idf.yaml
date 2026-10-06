@@ -1,0 +1,321 @@
+# ESP-IDF configuration rules for `rollcall assay --build` (SHA-144).
+#
+# Maps the symbols of an ESP-IDF project's sdkconfig to the algorithm catalogue
+# (db/algorithms.yaml); every algorithm and parameter set named here is checked against it by
+# rollcall_assay::config::rules::RuleSet::lint. docs/assay-config.md explains the format.
+#
+# Sources of the symbol names: the fixtures under fixtures/esp-idf (ESP-IDF 5.5.1), whose
+# sdkconfig lists every visible mbedTLS option and, as "# ... is not set" lines,
+# CONFIG_SECURE_BOOT, CONFIG_SECURE_SIGNED_APPS_NO_SECURE_BOOT and
+# CONFIG_SECURE_FLASH_ENC_ENABLED; the secure boot v2 scheme, ECDSA key length and flash
+# encryption key size and mode names are those of ESP-IDF 5.5.1's
+# components/bootloader/Kconfig.projbuild.
+#
+# ESP-IDF always builds SHA-256 and RSA into mbedTLS (they have no Kconfig switch). SHA-256 is
+# reported through CONFIG_MBEDTLS_HARDWARE_SHA, in hardware when it is y and in software when
+# it is n; on a build whose sdkconfig does not have that option at all (no SHA accelerator, or
+# the PSRAM cache workaround) SHA-256 is not reported. RSA is reported only through the
+# symbols that show it in use.
+format: rollcall-config-rules/1
+detector: sdkconfig
+
+api:
+  psa:
+    - CONFIG_MBEDTLS_PSA_CRYPTO_C
+  legacy:
+    - CONFIG_MBEDTLS_AES_C
+    - CONFIG_MBEDTLS_ECP_C
+    - CONFIG_MBEDTLS_ECDH_C
+    - CONFIG_MBEDTLS_ECDSA_C
+    - CONFIG_MBEDTLS_GCM_C
+    - CONFIG_MBEDTLS_CCM_C
+    - CONFIG_MBEDTLS_SHA1_C
+    - CONFIG_MBEDTLS_SHA512_C
+    - CONFIG_MBEDTLS_HKDF_C
+    - CONFIG_MBEDTLS_DHM_C
+    - CONFIG_MBEDTLS_CMAC_C
+
+dimensions:
+  ecdh-curve:
+    - {symbol: CONFIG_MBEDTLS_ECP_DP_SECP256R1_ENABLED, parameter_set: secp256r1}
+    - {symbol: CONFIG_MBEDTLS_ECP_DP_SECP384R1_ENABLED, parameter_set: secp384r1}
+    - {symbol: CONFIG_MBEDTLS_ECP_DP_SECP521R1_ENABLED, parameter_set: secp521r1}
+    - {symbol: CONFIG_MBEDTLS_ECP_DP_CURVE25519_ENABLED, algorithm: X25519, parameter_set: X25519}
+    - {symbol: CONFIG_MBEDTLS_ECP_DP_SECP192R1_ENABLED, uncatalogued: secp192r1}
+    - {symbol: CONFIG_MBEDTLS_ECP_DP_SECP224R1_ENABLED, uncatalogued: secp224r1}
+    - {symbol: CONFIG_MBEDTLS_ECP_DP_SECP192K1_ENABLED, uncatalogued: secp192k1}
+    - {symbol: CONFIG_MBEDTLS_ECP_DP_SECP224K1_ENABLED, uncatalogued: secp224k1}
+    - {symbol: CONFIG_MBEDTLS_ECP_DP_SECP256K1_ENABLED, uncatalogued: secp256k1}
+    - {symbol: CONFIG_MBEDTLS_ECP_DP_BP256R1_ENABLED, uncatalogued: brainpoolP256r1}
+    - {symbol: CONFIG_MBEDTLS_ECP_DP_BP384R1_ENABLED, uncatalogued: brainpoolP384r1}
+    - {symbol: CONFIG_MBEDTLS_ECP_DP_BP512R1_ENABLED, uncatalogued: brainpoolP512r1}
+  ecdsa-curve:
+    - {symbol: CONFIG_MBEDTLS_ECP_DP_SECP256R1_ENABLED, parameter_set: secp256r1}
+    - {symbol: CONFIG_MBEDTLS_ECP_DP_SECP384R1_ENABLED, parameter_set: secp384r1}
+    - {symbol: CONFIG_MBEDTLS_ECP_DP_SECP521R1_ENABLED, parameter_set: secp521r1}
+    - {symbol: CONFIG_MBEDTLS_ECP_DP_SECP192R1_ENABLED, uncatalogued: secp192r1}
+    - {symbol: CONFIG_MBEDTLS_ECP_DP_SECP224R1_ENABLED, uncatalogued: secp224r1}
+    - {symbol: CONFIG_MBEDTLS_ECP_DP_SECP192K1_ENABLED, uncatalogued: secp192k1}
+    - {symbol: CONFIG_MBEDTLS_ECP_DP_SECP224K1_ENABLED, uncatalogued: secp224k1}
+    - {symbol: CONFIG_MBEDTLS_ECP_DP_SECP256K1_ENABLED, uncatalogued: secp256k1}
+    - {symbol: CONFIG_MBEDTLS_ECP_DP_BP256R1_ENABLED, uncatalogued: brainpoolP256r1}
+    - {symbol: CONFIG_MBEDTLS_ECP_DP_BP384R1_ENABLED, uncatalogued: brainpoolP384r1}
+    - {symbol: CONFIG_MBEDTLS_ECP_DP_BP512R1_ENABLED, uncatalogued: brainpoolP512r1}
+  secure-boot-ecdsa-curve:
+    - {symbol: CONFIG_SECURE_BOOT_ECDSA_KEY_LEN_256_BITS, parameter_set: secp256r1}
+    - {symbol: CONFIG_SECURE_BOOT_ECDSA_KEY_LEN_384_BITS, parameter_set: secp384r1}
+    - {symbol: CONFIG_SECURE_BOOT_ECDSA_KEY_LEN_192_BITS, uncatalogued: secp192r1}
+
+rules:
+  # ---------------------------------------------------------------------------------------
+  # mbedTLS: ciphers, hashes, public-key algorithms.
+  # ---------------------------------------------------------------------------------------
+  - id: mbedtls-aes-gcm
+    when: [CONFIG_MBEDTLS_AES_C, CONFIG_MBEDTLS_GCM_C]
+    library: mbedtls
+    emit: [AES-GCM]
+    reason: mbedTLS is built with AES-GCM (CONFIG_MBEDTLS_AES_C, CONFIG_MBEDTLS_GCM_C)
+  - id: mbedtls-aes-ccm
+    when: [CONFIG_MBEDTLS_AES_C, CONFIG_MBEDTLS_CCM_C]
+    library: mbedtls
+    emit: [AES-CCM]
+    reason: mbedTLS is built with AES-CCM (CONFIG_MBEDTLS_AES_C, CONFIG_MBEDTLS_CCM_C)
+  - id: mbedtls-chachapoly
+    when: [CONFIG_MBEDTLS_CHACHA20_C, CONFIG_MBEDTLS_POLY1305_C]
+    library: mbedtls
+    emit: [ChaCha20-Poly1305-256]
+    reason: mbedTLS is built with ChaCha20 and Poly1305 (CONFIG_MBEDTLS_CHACHA20_C, CONFIG_MBEDTLS_POLY1305_C)
+  - id: mbedtls-sha256-hardware
+    when: [CONFIG_MBEDTLS_HARDWARE_SHA]
+    library: mbedtls
+    emit: [SHA2-256]
+    reason: mbedTLS computes SHA-256 with the SHA accelerator (CONFIG_MBEDTLS_HARDWARE_SHA)
+  - id: mbedtls-sha256-software
+    when_off: [CONFIG_MBEDTLS_HARDWARE_SHA]
+    library: mbedtls
+    emit: [SHA2-256]
+    reason: ESP-IDF always builds SHA-256 into mbedTLS; with CONFIG_MBEDTLS_HARDWARE_SHA off it runs in software
+  - id: mbedtls-hardware-mpi
+    when: [CONFIG_MBEDTLS_HARDWARE_MPI]
+    note: mbedTLS uses the MPI accelerator for big-number arithmetic (CONFIG_MBEDTLS_HARDWARE_MPI); RSA, DH and ECC still run in software around it, so none is marked as hardware
+  - id: mbedtls-sha512
+    when: [CONFIG_MBEDTLS_SHA512_C]
+    library: mbedtls
+    emit: [SHA2-384, SHA2-512]
+    reason: mbedTLS is built with SHA-384 and SHA-512 (CONFIG_MBEDTLS_SHA512_C)
+  - id: mbedtls-sha3
+    when: [CONFIG_MBEDTLS_SHA3_C]
+    library: mbedtls
+    emit: [SHA3]
+    reason: mbedTLS is built with SHA-3 (CONFIG_MBEDTLS_SHA3_C)
+  - id: mbedtls-ecdh
+    when: [CONFIG_MBEDTLS_ECDH_C]
+    library: mbedtls
+    emit:
+      - {algorithm: ECDH, parameter_set_from: {dimension: ecdh-curve}}
+    reason: mbedTLS is built with ECDH on each enabled curve (CONFIG_MBEDTLS_ECDH_C, CONFIG_MBEDTLS_ECP_DP_*)
+  - id: mbedtls-ecdsa
+    when: [CONFIG_MBEDTLS_ECDSA_C]
+    library: mbedtls
+    emit:
+      - {algorithm: ECDSA, parameter_set_from: {dimension: ecdsa-curve}}
+    reason: mbedTLS is built with ECDSA on each enabled curve (CONFIG_MBEDTLS_ECDSA_C, CONFIG_MBEDTLS_ECP_DP_*)
+  - id: mbedtls-ecdsa-deterministic
+    when: [CONFIG_MBEDTLS_ECDSA_DETERMINISTIC]
+    library: mbedtls
+    emit:
+      - {algorithm: ECDSA, parameter_set_from: {dimension: ecdsa-curve}}
+    reason: mbedTLS is built with deterministic ECDSA (CONFIG_MBEDTLS_ECDSA_DETERMINISTIC)
+  - id: mbedtls-hkdf
+    when: [CONFIG_MBEDTLS_HKDF_C]
+    library: mbedtls
+    emit: [HKDF]
+    reason: mbedTLS is built with HKDF (CONFIG_MBEDTLS_HKDF_C)
+  - id: mbedtls-dhm
+    when: [CONFIG_MBEDTLS_DHM_C]
+    library: mbedtls
+    emit: [DH]
+    reason: mbedTLS is built with finite-field Diffie-Hellman (CONFIG_MBEDTLS_DHM_C)
+  - id: mbedtls-sha1
+    when: [CONFIG_MBEDTLS_SHA1_C]
+    uncatalogued: [SHA-1]
+  - id: mbedtls-md5
+    when: [CONFIG_MBEDTLS_ROM_MD5]
+    uncatalogued: [MD5]
+  - id: mbedtls-cmac
+    when: [CONFIG_MBEDTLS_CMAC_C]
+    uncatalogued: [CMAC]
+  - id: mbedtls-camellia
+    when: [CONFIG_MBEDTLS_CAMELLIA_C]
+    uncatalogued: [Camellia]
+  - id: mbedtls-des
+    when: [CONFIG_MBEDTLS_DES_C]
+    uncatalogued: [DES/3DES]
+  - id: mbedtls-blowfish
+    when: [CONFIG_MBEDTLS_BLOWFISH_C]
+    uncatalogued: [Blowfish]
+  - id: mbedtls-xtea
+    when: [CONFIG_MBEDTLS_XTEA_C]
+    uncatalogued: [XTEA]
+  - id: mbedtls-nist-kw
+    when: [CONFIG_MBEDTLS_NIST_KW_C]
+    uncatalogued: [AES-KW]
+  - id: mbedtls-ripemd160
+    when: [CONFIG_MBEDTLS_RIPEMD160_C]
+    uncatalogued: [RIPEMD-160]
+  - id: mbedtls-ecjpake
+    when: [CONFIG_MBEDTLS_ECJPAKE_C]
+    uncatalogued: [EC-JPAKE]
+
+  # ---------------------------------------------------------------------------------------
+  # TLS: protocol versions and key exchanges. The CONFIG_MBEDTLS_KEY_EXCHANGE_* modes are TLS
+  # 1.2 only (mbedTLS 3.6 config_adjust_ssl.h drops them without MBEDTLS_SSL_PROTO_TLS1_2), so
+  # each key-exchange rule also needs CONFIG_MBEDTLS_SSL_PROTO_TLS1_2.
+  # ---------------------------------------------------------------------------------------
+  - id: tls-1-2
+    when: [CONFIG_MBEDTLS_SSL_PROTO_TLS1_2]
+    library: mbedtls
+    protocol: {type: tls, version: "1.2"}
+    reason: mbedTLS is built with TLS 1.2 (CONFIG_MBEDTLS_SSL_PROTO_TLS1_2)
+  - id: tls-1-3
+    when: [CONFIG_MBEDTLS_SSL_PROTO_TLS1_3]
+    library: mbedtls
+    protocol: {type: tls, version: "1.3"}
+    reason: mbedTLS is built with TLS 1.3 (CONFIG_MBEDTLS_SSL_PROTO_TLS1_3)
+  - id: kx-rsa
+    when: [CONFIG_MBEDTLS_KEY_EXCHANGE_RSA, CONFIG_MBEDTLS_SSL_PROTO_TLS1_2]
+    library: mbedtls
+    emit: [RSA-PKCS1v15]
+    reason: mbedTLS is built with the TLS 1.2 RSA key exchange (CONFIG_MBEDTLS_KEY_EXCHANGE_RSA, CONFIG_MBEDTLS_SSL_PROTO_TLS1_2)
+  - id: kx-ecdhe-rsa
+    when: [CONFIG_MBEDTLS_KEY_EXCHANGE_ECDHE_RSA, CONFIG_MBEDTLS_SSL_PROTO_TLS1_2]
+    library: mbedtls
+    emit:
+      - {algorithm: ECDH, parameter_set_from: {dimension: ecdh-curve}}
+      - RSA-PKCS1v15
+    reason: mbedTLS is built with the TLS 1.2 ECDHE-RSA key exchange (CONFIG_MBEDTLS_KEY_EXCHANGE_ECDHE_RSA, CONFIG_MBEDTLS_SSL_PROTO_TLS1_2)
+  - id: kx-ecdhe-ecdsa
+    when: [CONFIG_MBEDTLS_KEY_EXCHANGE_ECDHE_ECDSA, CONFIG_MBEDTLS_SSL_PROTO_TLS1_2]
+    library: mbedtls
+    emit:
+      - {algorithm: ECDH, parameter_set_from: {dimension: ecdh-curve}}
+      - {algorithm: ECDSA, parameter_set_from: {dimension: ecdsa-curve}}
+    reason: mbedTLS is built with the TLS 1.2 ECDHE-ECDSA key exchange (CONFIG_MBEDTLS_KEY_EXCHANGE_ECDHE_ECDSA, CONFIG_MBEDTLS_SSL_PROTO_TLS1_2)
+  - id: kx-ecdh-ecdsa
+    when: [CONFIG_MBEDTLS_KEY_EXCHANGE_ECDH_ECDSA, CONFIG_MBEDTLS_SSL_PROTO_TLS1_2]
+    library: mbedtls
+    emit:
+      - {algorithm: ECDH, parameter_set_from: {dimension: ecdh-curve}}
+      - {algorithm: ECDSA, parameter_set_from: {dimension: ecdsa-curve}}
+    reason: mbedTLS is built with the TLS 1.2 ECDH-ECDSA key exchange (CONFIG_MBEDTLS_KEY_EXCHANGE_ECDH_ECDSA, CONFIG_MBEDTLS_SSL_PROTO_TLS1_2)
+  - id: kx-ecdh-rsa
+    when: [CONFIG_MBEDTLS_KEY_EXCHANGE_ECDH_RSA, CONFIG_MBEDTLS_SSL_PROTO_TLS1_2]
+    library: mbedtls
+    emit:
+      - {algorithm: ECDH, parameter_set_from: {dimension: ecdh-curve}}
+      - RSA-PKCS1v15
+    reason: mbedTLS is built with the TLS 1.2 ECDH-RSA key exchange (CONFIG_MBEDTLS_KEY_EXCHANGE_ECDH_RSA, CONFIG_MBEDTLS_SSL_PROTO_TLS1_2)
+
+  # ---------------------------------------------------------------------------------------
+  # Secure boot and flash encryption (the second-stage bootloader).
+  # ---------------------------------------------------------------------------------------
+  #
+  # Who verifies an app signature (bootloader_support/Kconfig.projbuild): the bootloader at
+  # boot when CONFIG_SECURE_SIGNED_ON_BOOT (secure boot, or the v1 ECDSA scheme's
+  # CONFIG_SECURE_SIGNED_ON_BOOT_NO_SECURE_BOOT), and the running app on an OTA update when
+  # CONFIG_SECURE_SIGNED_ON_UPDATE (secure boot, or CONFIG_SECURE_SIGNED_ON_UPDATE_NO_SECURE_BOOT).
+  # Signed apps without secure boot (CONFIG_SECURE_SIGNED_APPS_NO_SECURE_BOOT) with the RSA or
+  # ECDSA v2 scheme are verified by the app only.
+  - id: secure-boot-off
+    when_off: [CONFIG_SECURE_BOOT]
+    note: secure boot not enabled (CONFIG_SECURE_BOOT is not set)
+  - id: signed-apps-rsa-scheme
+    when: [CONFIG_SECURE_SIGNED_APPS_RSA_SCHEME, CONFIG_SECURE_SIGNED_ON_BOOT]
+    library: bootloader_support
+    image: {kind: bootloader, name: bootloader}
+    emit: [RSA-PSS-3072, SHA2-256]
+    reason: the bootloader verifies app signatures at boot with RSA-PSS 3072 over a SHA-256 digest (CONFIG_SECURE_SIGNED_APPS_RSA_SCHEME)
+  - id: signed-apps-ecdsa-v2-scheme
+    when: [CONFIG_SECURE_SIGNED_APPS_ECDSA_V2_SCHEME, CONFIG_SECURE_SIGNED_ON_BOOT]
+    library: bootloader_support
+    image: {kind: bootloader, name: bootloader}
+    emit:
+      - {algorithm: ECDSA, parameter_set_from: {dimension: secure-boot-ecdsa-curve}}
+      - SHA2-256
+    reason: the bootloader verifies app signatures at boot with ECDSA over a SHA-256 digest (CONFIG_SECURE_SIGNED_APPS_ECDSA_V2_SCHEME)
+  - id: signed-apps-ecdsa-v1-scheme
+    when: [CONFIG_SECURE_SIGNED_APPS_ECDSA_SCHEME, CONFIG_SECURE_SIGNED_ON_BOOT]
+    library: bootloader_support
+    image: {kind: bootloader, name: bootloader}
+    emit: [ECDSA-secp256r1, SHA2-256]
+    reason: the bootloader verifies app signatures at boot with ECDSA on P-256 over a SHA-256 digest (CONFIG_SECURE_SIGNED_APPS_ECDSA_SCHEME)
+  - id: signed-apps-rsa-scheme-on-update
+    when: [CONFIG_SECURE_SIGNED_APPS_RSA_SCHEME, CONFIG_SECURE_SIGNED_ON_UPDATE]
+    library: bootloader_support
+    emit: [RSA-PSS-3072, SHA2-256]
+    reason: the app verifies OTA update signatures with RSA-PSS 3072 over a SHA-256 digest (CONFIG_SECURE_SIGNED_APPS_RSA_SCHEME, CONFIG_SECURE_SIGNED_ON_UPDATE)
+  - id: signed-apps-ecdsa-v2-scheme-on-update
+    when: [CONFIG_SECURE_SIGNED_APPS_ECDSA_V2_SCHEME, CONFIG_SECURE_SIGNED_ON_UPDATE]
+    library: bootloader_support
+    emit:
+      - {algorithm: ECDSA, parameter_set_from: {dimension: secure-boot-ecdsa-curve}}
+      - SHA2-256
+    reason: the app verifies OTA update signatures with ECDSA over a SHA-256 digest (CONFIG_SECURE_SIGNED_APPS_ECDSA_V2_SCHEME, CONFIG_SECURE_SIGNED_ON_UPDATE)
+  - id: signed-apps-ecdsa-v1-scheme-on-update
+    when: [CONFIG_SECURE_SIGNED_APPS_ECDSA_SCHEME, CONFIG_SECURE_SIGNED_ON_UPDATE]
+    library: bootloader_support
+    emit: [ECDSA-secp256r1, SHA2-256]
+    reason: the app verifies OTA update signatures with ECDSA on P-256 over a SHA-256 digest (CONFIG_SECURE_SIGNED_APPS_ECDSA_SCHEME, CONFIG_SECURE_SIGNED_ON_UPDATE)
+  - id: flash-encryption-off
+    when_off: [CONFIG_SECURE_FLASH_ENC_ENABLED]
+    note: flash encryption not enabled (CONFIG_SECURE_FLASH_ENC_ENABLED is not set)
+  # The original ESP32 encrypts flash with AES-256 and a per-block key tweak of its own; every
+  # later target (S2, S3, C2, C3, C5, C6, H2, P4, ...) uses XTS-AES.
+  - id: flash-encryption-esp32
+    when: [CONFIG_SECURE_FLASH_ENC_ENABLED, CONFIG_IDF_TARGET_ESP32]
+    uncatalogued: ["the ESP32 flash-encryption scheme (AES-256 with a per-block key tweak, not XTS)"]
+  - id: flash-encryption-xts
+    when: [CONFIG_SECURE_FLASH_ENC_ENABLED]
+    unless: [CONFIG_IDF_TARGET_ESP32]
+    uncatalogued: [XTS-AES]
+  - id: flash-encryption-development
+    when: [CONFIG_SECURE_FLASH_ENC_ENABLED, CONFIG_SECURE_FLASH_ENCRYPTION_MODE_DEVELOPMENT]
+    note: flash encryption is enabled in development mode (CONFIG_SECURE_FLASH_ENCRYPTION_MODE_DEVELOPMENT); the flash can still be re-flashed in plaintext
+  - id: flash-encryption-release
+    when: [CONFIG_SECURE_FLASH_ENC_ENABLED, CONFIG_SECURE_FLASH_ENCRYPTION_MODE_RELEASE]
+    note: flash encryption is enabled in release mode (CONFIG_SECURE_FLASH_ENCRYPTION_MODE_RELEASE)
+
+hardware:
+  - when: [CONFIG_MBEDTLS_HARDWARE_AES]
+    library: mbedtls
+    algorithms: [AES-CBC, AES-CCM, AES-CTR, AES-ECB, AES-GCM]
+    reason: mbedTLS runs AES in the AES accelerator (CONFIG_MBEDTLS_HARDWARE_AES)
+  # The SHA accelerator does SHA-256 on every target; SHA-384 and SHA-512 only where the SoC
+  # says so. CONFIG_MBEDTLS_HARDWARE_MPI only speeds up big-number arithmetic: a note, above.
+  - when: [CONFIG_MBEDTLS_HARDWARE_SHA]
+    library: mbedtls
+    algorithms: [SHA2-256]
+    reason: mbedTLS runs SHA-256 in the SHA accelerator (CONFIG_MBEDTLS_HARDWARE_SHA)
+  - when: [CONFIG_MBEDTLS_HARDWARE_SHA, CONFIG_SOC_SHA_SUPPORT_SHA384]
+    library: mbedtls
+    algorithms: [SHA2-384]
+    reason: mbedTLS runs SHA-384 in the SHA accelerator (CONFIG_MBEDTLS_HARDWARE_SHA, CONFIG_SOC_SHA_SUPPORT_SHA384)
+  - when: [CONFIG_MBEDTLS_HARDWARE_SHA, CONFIG_SOC_SHA_SUPPORT_SHA512]
+    library: mbedtls
+    algorithms: [SHA2-512]
+    reason: mbedTLS runs SHA-512 in the SHA accelerator (CONFIG_MBEDTLS_HARDWARE_SHA, CONFIG_SOC_SHA_SUPPORT_SHA512)
+
+compiled_out:
+  # mbedTLS module switches that are explicitly off; the algorithms are compiled out of mbedtls.
+  - {library: mbedtls, when_all_off: [CONFIG_MBEDTLS_AES_C], algorithms: [AES-CBC, AES-CCM, AES-CTR, AES-ECB, AES-GCM]}
+  - {library: mbedtls, when_all_off: [CONFIG_MBEDTLS_GCM_C], algorithms: [AES-GCM]}
+  - {library: mbedtls, when_all_off: [CONFIG_MBEDTLS_CCM_C], algorithms: [AES-CCM]}
+  - {library: mbedtls, when_all_off: [CONFIG_MBEDTLS_CHACHA20_C], algorithms: [ChaCha20-Poly1305]}
+  - {library: mbedtls, when_all_off: [CONFIG_MBEDTLS_POLY1305_C], algorithms: [ChaCha20-Poly1305]}
+  - {library: mbedtls, when_all_off: [CONFIG_MBEDTLS_SHA512_C], algorithms: [SHA2-384, SHA2-512]}
+  - {library: mbedtls, when_all_off: [CONFIG_MBEDTLS_SHA3_C], algorithms: [SHA3]}
+  - {library: mbedtls, when_all_off: [CONFIG_MBEDTLS_ECP_C], algorithms: [ECDH, ECDSA, X25519]}
+  - {library: mbedtls, when_all_off: [CONFIG_MBEDTLS_ECDH_C], algorithms: [ECDH, X25519]}
+  - {library: mbedtls, when_all_off: [CONFIG_MBEDTLS_ECDSA_C], algorithms: [ECDSA]}
+  - {library: mbedtls, when_all_off: [CONFIG_MBEDTLS_HKDF_C], algorithms: [HKDF]}
+  - {library: mbedtls, when_all_off: [CONFIG_MBEDTLS_DHM_C], algorithms: [DH]}

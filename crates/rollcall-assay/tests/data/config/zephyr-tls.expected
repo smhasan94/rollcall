@@ -1,0 +1,75 @@
+# hand-written test data, SHA-144, not generated
+# Fixture: fixtures/zephyr/tls, assayed with --product tls.
+# sysbuild: http_server (MAIN, PSA Crypto + mbedTLS TLS 1.2 with one ECDHE-ECDSA AES-128-GCM suite), mcuboot (BOOTLOADER).
+# Each line was checked against the fixture's own .config / sdkconfig (symbol, value and line);
+# see README.md for the format. Do not regenerate: edit by hand, and review like code.
+
+# Assets: IMAGE / LIBRARY / ASSET [hardware] | every evidence locator, in file and line order.
+asset bootloader:mcuboot / mcuboot / RSA-PSS-2048 | mcuboot/zephyr/.config:16 CONFIG_BOOT_SIGNATURE_TYPE_RSA, mcuboot/zephyr/.config:17 CONFIG_BOOT_SIGNATURE_TYPE_RSA_LEN, zephyr/.config:55 SB_CONFIG_SIGNATURE_TYPE, zephyr/.config:57 SB_CONFIG_BOOT_SIGNATURE_TYPE_RSA
+asset bootloader:mcuboot / mcuboot / SHA2-256 | mcuboot/zephyr/.config:14 CONFIG_BOOT_IMG_HASH_ALG_SHA256
+asset bootloader:mcuboot / psa-crypto / RSA-PSS | mcuboot/zephyr/.config:409 CONFIG_PSA_WANT_ALG_RSA_PSS
+asset bootloader:mcuboot / psa-crypto / SHA2-256 | mcuboot/zephyr/.config:412 CONFIG_PSA_WANT_ALG_SHA_256
+asset application:tls / mbedtls / AES-GCM-128 | http_server/zephyr/.config:495 CONFIG_MBEDTLS_CIPHERSUITE_TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256
+asset application:tls / mbedtls / ECDH-secp256r1 | http_server/zephyr/.config:354 CONFIG_PSA_WANT_ECC_SECP_R1_256, http_server/zephyr/.config:402 CONFIG_MBEDTLS_SSL_PROTO_TLS1_2, http_server/zephyr/.config:420 CONFIG_MBEDTLS_KEY_EXCHANGE_ECDHE_ECDSA_ENABLED, http_server/zephyr/.config:495 CONFIG_MBEDTLS_CIPHERSUITE_TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256
+asset application:tls / mbedtls / ECDSA-secp256r1 | http_server/zephyr/.config:354 CONFIG_PSA_WANT_ECC_SECP_R1_256, http_server/zephyr/.config:402 CONFIG_MBEDTLS_SSL_PROTO_TLS1_2, http_server/zephyr/.config:420 CONFIG_MBEDTLS_KEY_EXCHANGE_ECDHE_ECDSA_ENABLED, http_server/zephyr/.config:495 CONFIG_MBEDTLS_CIPHERSUITE_TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256
+asset application:tls / mbedtls / HMAC-SHA-256 | http_server/zephyr/.config:495 CONFIG_MBEDTLS_CIPHERSUITE_TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256
+asset application:tls / mbedtls / TLS-1.2 | http_server/zephyr/.config:402 CONFIG_MBEDTLS_SSL_PROTO_TLS1_2
+asset application:tls / psa-crypto / AES-GCM | http_server/zephyr/.config:319 CONFIG_PSA_WANT_ALG_GCM, http_server/zephyr/.config:366 CONFIG_PSA_WANT_KEY_TYPE_AES
+asset application:tls / psa-crypto / ECDH-secp256r1 | http_server/zephyr/.config:315 CONFIG_PSA_WANT_ALG_ECDH, http_server/zephyr/.config:354 CONFIG_PSA_WANT_ECC_SECP_R1_256
+asset application:tls / psa-crypto / ECDSA-secp256r1 | http_server/zephyr/.config:317 CONFIG_PSA_WANT_ALG_ECDSA, http_server/zephyr/.config:354 CONFIG_PSA_WANT_ECC_SECP_R1_256
+asset application:tls / psa-crypto / HMAC-SHA-256 | http_server/zephyr/.config:323 CONFIG_PSA_WANT_ALG_HMAC, http_server/zephyr/.config:335 CONFIG_PSA_WANT_ALG_SHA_256
+asset application:tls / psa-crypto / SHA2-256 | http_server/zephyr/.config:335 CONFIG_PSA_WANT_ALG_SHA_256
+
+# Compiled out (explicitly-off symbols), per image: IMAGE LIBRARY ALGORITHM.
+compiled-out bootloader:mcuboot psa-crypto AES-CBC
+compiled-out bootloader:mcuboot psa-crypto AES-CCM
+compiled-out bootloader:mcuboot psa-crypto AES-CTR
+compiled-out bootloader:mcuboot psa-crypto AES-ECB
+compiled-out bootloader:mcuboot psa-crypto AES-GCM
+compiled-out bootloader:mcuboot psa-crypto ChaCha20-Poly1305
+compiled-out bootloader:mcuboot psa-crypto DH
+compiled-out bootloader:mcuboot psa-crypto ECDH
+compiled-out bootloader:mcuboot psa-crypto ECDSA
+compiled-out bootloader:mcuboot psa-crypto HKDF
+compiled-out bootloader:mcuboot psa-crypto HMAC
+compiled-out bootloader:mcuboot psa-crypto PBKDF2
+compiled-out bootloader:mcuboot psa-crypto RSA-OAEP
+compiled-out bootloader:mcuboot psa-crypto RSA-PKCS1v15
+compiled-out bootloader:mcuboot psa-crypto SHA2-224
+compiled-out bootloader:mcuboot psa-crypto SHA2-384
+compiled-out bootloader:mcuboot psa-crypto SHA2-512
+compiled-out bootloader:mcuboot psa-crypto SHA3-224
+compiled-out bootloader:mcuboot psa-crypto SHA3-256
+compiled-out bootloader:mcuboot psa-crypto SHA3-384
+compiled-out bootloader:mcuboot psa-crypto SHA3-512
+compiled-out bootloader:mcuboot psa-crypto SHAKE-128
+compiled-out bootloader:mcuboot psa-crypto SHAKE-256
+compiled-out bootloader:mcuboot psa-crypto X25519
+compiled-out application:tls psa-crypto AES-CBC
+compiled-out application:tls psa-crypto AES-CCM
+compiled-out application:tls psa-crypto AES-CTR
+compiled-out application:tls psa-crypto AES-ECB
+compiled-out application:tls psa-crypto ChaCha20-Poly1305
+compiled-out application:tls psa-crypto DH
+compiled-out application:tls psa-crypto HKDF
+compiled-out application:tls psa-crypto PBKDF2
+compiled-out application:tls psa-crypto RSA-OAEP
+compiled-out application:tls psa-crypto RSA-PKCS1v15
+compiled-out application:tls psa-crypto RSA-PSS
+compiled-out application:tls psa-crypto SHA2-224
+compiled-out application:tls psa-crypto SHA2-384
+compiled-out application:tls psa-crypto SHA2-512
+compiled-out application:tls psa-crypto SHA3-224
+compiled-out application:tls psa-crypto SHA3-256
+compiled-out application:tls psa-crypto SHA3-384
+compiled-out application:tls psa-crypto SHA3-512
+compiled-out application:tls psa-crypto SHAKE-128
+compiled-out application:tls psa-crypto SHAKE-256
+
+# Notes, sorted.
+note http_server/zephyr/.config: uses the PSA Crypto API (CONFIG_MBEDTLS_PSA_CRYPTO_C)
+note http_server/zephyr/.config:333: CONFIG_PSA_WANT_ALG_SHA_1 enables HMAC on SHA-1, which the algorithm catalogue does not list yet; not reported
+note http_server/zephyr/.config:333: CONFIG_PSA_WANT_ALG_SHA_1 enables SHA-1, which the algorithm catalogue does not list yet; not reported
+note http_server/zephyr/.config:343: CONFIG_PSA_WANT_ALG_TLS12_PRF enables TLS12-PRF, which the algorithm catalogue does not list yet; not reported
+note mcuboot/zephyr/.config: uses the PSA Crypto API (CONFIG_MBEDTLS_PSA_CRYPTO_C)
+note mcuboot/zephyr/.config:525: CONFIG_MBEDTLS_HMAC_DRBG_C enables HMAC-DRBG, which the algorithm catalogue does not list yet; not reported
