@@ -542,16 +542,17 @@ fn crypto_component(name: &str, asset: rollcall_core::model::CryptoAsset) -> Com
 }
 
 /// The CBOM fixture built in code: `sensor-node` 1.0.0 with an application image
-/// (`sensor-app`: `mbedtls` 3.6.0 implementing AES-128-GCM, SHA-256 and RSA-2048, plus an
-/// image-level TLS protocol, device certificate and PSK) and a bootloader image
+/// (`sensor-app`: `mbedtls` 3.6.0 implementing AES-128-GCM, SHA-256, RSA-2048 and ECDSA-P256,
+/// plus an image-level TLS protocol, device certificate and PSK) and a bootloader image
 /// (`sensor-boot`: `chacha20poly1305` 0.10.1 implementing ChaCha20-Poly1305). Every asset
-/// type, every locator kind and every confidence level appear, as do omitted optional fields
-/// and a NIST quantum security level of 0.
+/// type, every locator kind and every confidence level appear, as do omitted optional fields,
+/// a NIST quantum security level of 0, a padding (RSA-2048, `pkcs1v15`) and a curve
+/// (ECDSA-P256, `secp256r1`; SHA-333).
 pub fn cbom_product() -> Product {
     use rollcall_core::model::{
         AlgorithmProperties, CertificateProperties, ConfidenceLevel::*, CryptoAsset,
         CryptoAssetProperties as P, CryptoFunction::*, ExecutionEnvironment,
-        ImplementationPlatform, Locator, MaterialState, MaterialType, Mode, Primitive,
+        ImplementationPlatform, Locator, MaterialState, MaterialType, Mode, Padding, Primitive,
         ProtocolProperties, ProtocolType, QuantumSecurityLevel, RelatedCryptoMaterialProperties,
     };
     let level = |n: u8| Some(QuantumSecurityLevel::new(n).unwrap());
@@ -566,6 +567,7 @@ pub fn cbom_product() -> Product {
             crypto_functions: [Encrypt, Decrypt, Tag].into_iter().collect(),
             classical_security_level: Some(128),
             nist_quantum_security_level: level(1),
+            ..AlgorithmProperties::default()
         }),
         [
             crypto_evidence(
@@ -615,6 +617,7 @@ pub fn cbom_product() -> Product {
         P::Algorithm(AlgorithmProperties {
             primitive: Some(Primitive::Signature),
             parameter_set_identifier: Some("2048".to_owned()),
+            padding: Some(Padding::Pkcs1v15),
             crypto_functions: [Sign, Verify].into_iter().collect(),
             classical_security_level: Some(112),
             nist_quantum_security_level: level(0),
@@ -625,6 +628,25 @@ pub fn cbom_product() -> Product {
             "kconfig",
             Low,
             "RSA is enabled in Kconfig; no call site was checked",
+        )],
+    )
+    .unwrap();
+
+    let ecdsa = CryptoAsset::new(
+        P::Algorithm(AlgorithmProperties {
+            primitive: Some(Primitive::Signature),
+            parameter_set_identifier: Some("secp256r1".to_owned()),
+            curve: Some("secp256r1".to_owned()),
+            crypto_functions: [Sign, Verify].into_iter().collect(),
+            classical_security_level: Some(128),
+            nist_quantum_security_level: level(0),
+            ..AlgorithmProperties::default()
+        }),
+        [crypto_evidence(
+            kconfig_at(798, "CONFIG_MBEDTLS_ECP_DP_SECP256R1_ENABLED"),
+            "kconfig",
+            Medium,
+            "the secp256r1 curve is enabled in Kconfig for ECDSA",
         )],
     )
     .unwrap();
@@ -708,7 +730,12 @@ pub fn cbom_product() -> Product {
     let mut app = Image::new(ImageKind::Application, "sensor-app").unwrap();
     let mut mbedtls = lib("mbedtls", "3.6.0");
     mbedtls.purl = Some(Purl::new("pkg:github/Mbed-TLS/mbedtls@v3.6.0").unwrap());
-    for (name, asset) in [("AES-128-GCM", aes), ("SHA-256", sha256), ("RSA-2048", rsa)] {
+    for (name, asset) in [
+        ("AES-128-GCM", aes),
+        ("SHA-256", sha256),
+        ("RSA-2048", rsa),
+        ("ECDSA-P256", ecdsa),
+    ] {
         mbedtls
             .add_component(crypto_component(name, asset))
             .unwrap();

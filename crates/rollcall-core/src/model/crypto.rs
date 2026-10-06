@@ -105,6 +105,20 @@ word_enum! {
 }
 
 word_enum! {
+    /// `algorithmProperties.padding`: the padding scheme. A scheme the schema has no word for,
+    /// such as RSA-PSS, is `other`.
+    Padding {
+        Pkcs5 => "pkcs5",
+        Pkcs7 => "pkcs7",
+        Pkcs1v15 => "pkcs1v15",
+        Oaep => "oaep",
+        Raw => "raw",
+        Other => "other",
+        Unknown => "unknown",
+    }
+}
+
+word_enum! {
     /// `algorithmProperties.executionEnvironment`: where the algorithm runs.
     ExecutionEnvironment {
         SoftwarePlainRam => "software-plain-ram",
@@ -285,8 +299,8 @@ fn evidence_err(reason: impl Into<String>) -> IdError {
     }
 }
 
-/// `algorithmProperties`: the eight fields rollcall models. `curve`, `padding` and
-/// `certificationLevel` are not modelled. Every field is optional and omitted when absent.
+/// `algorithmProperties`: the ten fields rollcall models, in schema order. Only
+/// `certificationLevel` is not modelled. Every field is optional and omitted when absent.
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct AlgorithmProperties {
@@ -296,6 +310,9 @@ pub struct AlgorithmProperties {
     /// The parameter set, e.g. the key or digest size (`128`, `256`) or a named set.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub parameter_set_identifier: Option<String>,
+    /// The elliptic curve, by its <https://neuromancer.sk/std/> name, e.g. `secp256r1`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub curve: Option<String>,
     /// Where the algorithm runs.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub execution_environment: Option<ExecutionEnvironment>,
@@ -305,6 +322,9 @@ pub struct AlgorithmProperties {
     /// The mode of operation.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub mode: Option<Mode>,
+    /// The padding scheme.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub padding: Option<Padding>,
     /// What the algorithm is used for, sorted in schema order; omitted when empty.
     #[serde(default, skip_serializing_if = "BTreeSet::is_empty")]
     pub crypto_functions: BTreeSet<CryptoFunction>,
@@ -1148,6 +1168,18 @@ mod tests {
             let text = value.to_string();
             assert!(!text.contains("null"), "{text}");
         }
+        // Absent `curve` and `padding` are left out, not written as null, beside present
+        // fields.
+        let partial = asset(CryptoAssetProperties::Algorithm(AlgorithmProperties {
+            primitive: Some(Primitive::Signature),
+            parameter_set_identifier: Some("2048".to_owned()),
+            ..AlgorithmProperties::default()
+        }));
+        let value = serde_json::to_value(&partial).unwrap();
+        let block = &value["algorithmProperties"];
+        assert!(block.get("curve").is_none(), "{value}");
+        assert!(block.get("padding").is_none(), "{value}");
+        assert!(!value.to_string().contains("null"), "{value}");
         // A KconfigSymbol without a line omits `line`.
         let evidence = CryptoEvidence::new(
             Locator::KconfigSymbol {
@@ -1172,6 +1204,65 @@ mod tests {
         assert_eq!(value["algorithmProperties"]["nistQuantumSecurityLevel"], 0);
         assert_eq!(value["algorithmProperties"]["classicalSecurityLevel"], 0);
         assert_eq!(serde_json::from_value::<CryptoAsset>(value).unwrap(), zero);
+    }
+
+    #[test]
+    fn curve_and_padding_round_trip_present_and_absent() {
+        let cases = [
+            (None, None),
+            (Some("secp256r1"), None),
+            (None, Some(Padding::Pkcs1v15)),
+            (Some("brainpoolP256r1"), Some(Padding::Other)),
+        ];
+        for (curve, padding) in cases {
+            let original = asset(CryptoAssetProperties::Algorithm(AlgorithmProperties {
+                primitive: Some(Primitive::Signature),
+                parameter_set_identifier: Some("256".to_owned()),
+                curve: curve.map(str::to_owned),
+                padding,
+                ..AlgorithmProperties::default()
+            }));
+            // Model JSON.
+            let text = serde_json::to_string(&original).unwrap();
+            let value: Value = serde_json::from_str(&text).unwrap();
+            let block = &value["algorithmProperties"];
+            match curve {
+                Some(curve) => assert_eq!(block["curve"], curve, "{text}"),
+                None => assert!(block.get("curve").is_none(), "{text}"),
+            }
+            match padding {
+                Some(padding) => assert_eq!(block["padding"], padding.as_str(), "{text}"),
+                None => assert!(block.get("padding").is_none(), "{text}"),
+            }
+            assert!(!text.contains("null"), "{text}");
+            let back: CryptoAsset = serde_json::from_str(&text).unwrap();
+            assert_eq!(back, original, "{text}");
+            // The CycloneDX form carries the same block and reads back too.
+            let mut document = Vec::new();
+            original
+                .serialize_cyclonedx(&mut serde_json::Serializer::new(&mut document))
+                .unwrap();
+            let document: Value = serde_json::from_slice(&document).unwrap();
+            assert_eq!(&document["algorithmProperties"], block);
+        }
+        // The fields sit in schema order: curve after parameterSetIdentifier, padding after
+        // mode.
+        let full = asset(CryptoAssetProperties::Algorithm(AlgorithmProperties {
+            parameter_set_identifier: Some("256".to_owned()),
+            curve: Some("secp256r1".to_owned()),
+            execution_environment: Some(ExecutionEnvironment::SoftwarePlainRam),
+            mode: Some(Mode::Cbc),
+            padding: Some(Padding::Pkcs7),
+            crypto_functions: BTreeSet::from([CryptoFunction::Encrypt]),
+            ..AlgorithmProperties::default()
+        }));
+        let text = serde_json::to_string(&full).unwrap();
+        let at = |key: &str| text.find(&format!("\"{key}\"")).unwrap();
+        assert!(at("parameterSetIdentifier") < at("curve"), "{text}");
+        assert!(at("curve") < at("executionEnvironment"), "{text}");
+        assert!(at("mode") < at("padding"), "{text}");
+        assert!(at("padding") < at("cryptoFunctions"), "{text}");
+        assert_eq!(serde_json::from_str::<CryptoAsset>(&text).unwrap(), full);
     }
 
     fn valid() -> Value {
@@ -1210,8 +1301,24 @@ mod tests {
                        "evidence": evidence, "extra": 1}),
             ),
             (
-                "unknown block field (curve is not modelled)",
-                json!({"assetType": "algorithm", "algorithmProperties": {"curve": "p-256"},
+                "unknown block field (certificationLevel is not modelled)",
+                json!({"assetType": "algorithm",
+                       "algorithmProperties": {"certificationLevel": ["none"]},
+                       "evidence": evidence}),
+            ),
+            (
+                "padding pss is not a CycloneDX word",
+                json!({"assetType": "algorithm", "algorithmProperties": {"padding": "pss"},
+                       "evidence": evidence}),
+            ),
+            (
+                "numeric padding",
+                json!({"assetType": "algorithm", "algorithmProperties": {"padding": 1},
+                       "evidence": evidence}),
+            ),
+            (
+                "numeric curve",
+                json!({"assetType": "algorithm", "algorithmProperties": {"curve": 256},
                        "evidence": evidence}),
             ),
             (
@@ -1464,6 +1571,10 @@ mod tests {
         assert_eq!(
             ours(Mode::ALL, Mode::as_str),
             words(&format!("{alg}/mode/enum"))
+        );
+        assert_eq!(
+            ours(Padding::ALL, Padding::as_str),
+            words(&format!("{alg}/padding/enum"))
         );
         assert_eq!(
             ours(ExecutionEnvironment::ALL, ExecutionEnvironment::as_str),

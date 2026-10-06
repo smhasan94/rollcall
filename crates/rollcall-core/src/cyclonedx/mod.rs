@@ -90,9 +90,9 @@
 //!
 //! Not modelled from `cryptoProperties`, so neither written nor read (a document carrying them
 //! is a [`ReadError`] when it also has `rollcall:crypto-evidence` properties, and is dropped
-//! with a warning otherwise): `algorithmProperties.curve`, `padding` and
-//! `certificationLevel`; `protocolProperties.cipherSuites`, `ikev2TransformTypes` and
-//! `cryptoRefArray`; `certificateProperties.signatureAlgorithmRef` and `subjectPublicKeyRef`;
+//! with a warning otherwise): `algorithmProperties.certificationLevel`;
+//! `protocolProperties.cipherSuites`, `ikev2TransformTypes` and `cryptoRefArray`;
+//! `certificateProperties.signatureAlgorithmRef` and `subjectPublicKeyRef`;
 //! `relatedCryptoMaterialProperties.algorithmRef`, its dates and `securedBy`; and the
 //! material's `value`, which rollcall never carries. A foreign CBOM (`cryptoProperties`
 //! without `rollcall:crypto-evidence` properties) is read with its crypto assets as plain

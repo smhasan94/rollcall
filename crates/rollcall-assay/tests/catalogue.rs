@@ -12,7 +12,7 @@ use rollcall_assay::catalogue::{
 };
 use rollcall_core::cyclonedx::{self, Timestamp, WriteOptions, validate_cyclonedx_1_6};
 use rollcall_core::model::{
-    AlgorithmProperties, Component, ComponentKind, ConfidenceLevel, CryptoAsset,
+    self, AlgorithmProperties, Component, ComponentKind, ConfidenceLevel, CryptoAsset,
     CryptoAssetProperties, CryptoEvidence, CryptoFunction, Image, ImageKind, Locator, Mode,
     Primitive, Product, QuantumSecurityLevel,
 };
@@ -313,9 +313,11 @@ fn lookup_returns_e1_1_algorithm_properties_that_validate_in_a_cbom() {
         AlgorithmProperties {
             primitive: Some(Primitive::Ae),
             parameter_set_identifier: Some("128".to_owned()),
+            curve: None,
             execution_environment: None,
             implementation_platform: None,
             mode: Some(Mode::Gcm),
+            padding: None,
             crypto_functions: [
                 CryptoFunction::Encrypt,
                 CryptoFunction::Decrypt,
@@ -814,10 +816,229 @@ fn padding_pss_maps_to_cyclonedx_other_and_curve_is_exposed() {
         catalogue.lookup("X25519", "X25519").unwrap().curve(),
         Some("Curve25519")
     );
-    // Neither is in rollcall-core's AlgorithmProperties: the properties are the same as without.
+    // SHA-333: both are carried in rollcall-core's AlgorithmProperties, `pss` as `other`.
     let properties = pss.algorithm_properties();
     assert_eq!(properties.primitive, Some(Primitive::Signature));
     assert_eq!(properties.mode, None);
+    assert_eq!(properties.padding, Some(model::Padding::Other));
+    assert_eq!(properties.curve, None);
+    let oaep = catalogue.lookup("RSA-OAEP", "3072").unwrap();
+    assert_eq!(
+        oaep.algorithm_properties().padding,
+        Some(model::Padding::Oaep)
+    );
+    for (name, id, curve) in [
+        ("ECDSA", "secp384r1", "secp384r1"),
+        ("Ed25519", "Ed25519", "Ed25519"),
+        ("X25519", "X25519", "Curve25519"),
+    ] {
+        let properties = catalogue.lookup(name, id).unwrap().algorithm_properties();
+        assert_eq!(properties.curve.as_deref(), Some(curve), "{name}/{id}");
+        assert_eq!(properties.padding, None, "{name}/{id}");
+    }
+}
+
+/// SHA-333 AC2 / TP2: ECDSA/secp256r1 gives `algorithmProperties` with its `curve`.
+#[test]
+fn lookup_ecdsa_secp256r1_fills_curve() {
+    let catalogue = builtin();
+    let entry = catalogue.lookup("ECDSA", "secp256r1").unwrap();
+    assert_eq!(entry.curve(), Some("secp256r1"));
+    assert_eq!(
+        entry.algorithm_properties(),
+        AlgorithmProperties {
+            primitive: Some(Primitive::Signature),
+            parameter_set_identifier: Some("secp256r1".to_owned()),
+            curve: Some("secp256r1".to_owned()),
+            execution_environment: None,
+            implementation_platform: None,
+            mode: None,
+            padding: None,
+            crypto_functions: [CryptoFunction::Sign, CryptoFunction::Verify]
+                .into_iter()
+                .collect(),
+            classical_security_level: Some(128),
+            nist_quantum_security_level: Some(level(0)),
+        }
+    );
+}
+
+/// SHA-333 AC2 / TP2: RSA-PSS gives `algorithmProperties` with `padding: other`.
+#[test]
+fn lookup_rsa_pss_fills_padding_other() {
+    let catalogue = builtin();
+    let entry = catalogue.lookup("RSA-PSS", "2048").unwrap();
+    assert_eq!(entry.padding(), Some(Padding::Pss));
+    let properties = entry.algorithm_properties();
+    assert_eq!(
+        properties,
+        AlgorithmProperties {
+            primitive: Some(Primitive::Signature),
+            parameter_set_identifier: Some("2048".to_owned()),
+            curve: None,
+            execution_environment: None,
+            implementation_platform: None,
+            mode: None,
+            padding: Some(model::Padding::Other),
+            crypto_functions: [CryptoFunction::Sign, CryptoFunction::Verify]
+                .into_iter()
+                .collect(),
+            classical_security_level: Some(112),
+            nist_quantum_security_level: Some(level(0)),
+        }
+    );
+    let block = serde_json::to_value(&properties).unwrap();
+    assert_eq!(block["padding"], "other", "{block}");
+    assert!(block.get("curve").is_none(), "{block}");
+}
+
+/// SHA-333 TP2: every catalogue entry's `algorithmProperties` carries exactly its parameter
+/// set's curve and its padding's CycloneDX word, and nothing when it has neither.
+#[test]
+fn every_entry_algorithm_properties_carry_its_curve_and_padding() {
+    let catalogue = builtin();
+    let (mut curves, mut paddings) = (0, 0);
+    for entry in catalogue.entries() {
+        let properties = entry.algorithm_properties();
+        let what = format!("{}/{}", entry.algorithm.name, entry.parameter_set.id);
+        assert_eq!(properties.curve.as_deref(), entry.curve(), "{what}");
+        assert_eq!(
+            properties.padding,
+            entry.padding().map(model::Padding::from),
+            "{what}"
+        );
+        if let Some(padding) = entry.padding() {
+            assert_eq!(
+                properties.padding.map(model::Padding::as_str),
+                Some(padding.as_cyclonedx()),
+                "{what}"
+            );
+        }
+        curves += usize::from(properties.curve.is_some());
+        paddings += usize::from(properties.padding.is_some());
+    }
+    // The catalogue has both kinds, so the loop above checked something.
+    assert!(curves > 0, "no entry has a curve");
+    assert!(paddings > 0, "no entry has a padding");
+}
+
+/// SHA-333 AC1: assets built from the ECDSA/secp256r1 and RSA-PSS lookups are valid
+/// CycloneDX 1.6 in a CBOM, with their `curve` and `padding` written, and read back unchanged.
+#[test]
+fn catalogue_curve_and_padding_assets_validate_in_a_cbom() {
+    let catalogue = builtin();
+    let mut product = Product::new("sensor-node").unwrap().with_version("1.0.0");
+    let mut image = Image::new(ImageKind::Application, "sensor-app").unwrap();
+    for (component, name, id, symbol) in [
+        (
+            "ECDSA-P256",
+            "ECDSA",
+            "secp256r1",
+            "CONFIG_MBEDTLS_ECP_DP_SECP256R1_ENABLED",
+        ),
+        (
+            "RSA-PSS-2048",
+            "RSA-PSS",
+            "2048",
+            "CONFIG_MBEDTLS_PKCS1_V21",
+        ),
+    ] {
+        let entry = catalogue.lookup(name, id).unwrap();
+        let evidence = CryptoEvidence::new(
+            Locator::KconfigSymbol {
+                location: "build/zephyr/.config".to_owned(),
+                line: Some(1),
+                symbol: symbol.to_owned(),
+            },
+            "kconfig",
+            ConfidenceLevel::Medium,
+            &format!("{symbol}=y"),
+        )
+        .unwrap();
+        let mut asset = CryptoAsset::new(
+            CryptoAssetProperties::Algorithm(entry.algorithm_properties()),
+            [evidence],
+        )
+        .unwrap();
+        if let Some(oid) = entry.oid() {
+            asset = asset.with_oid(oid).unwrap();
+        }
+        image
+            .add_component(
+                Component::new(ComponentKind::CryptographicAsset, component)
+                    .unwrap()
+                    .with_crypto(asset),
+            )
+            .unwrap();
+    }
+    product.add_image(image).unwrap();
+    let text = cyclonedx::write(
+        &product,
+        &WriteOptions::new(Timestamp::parse("2026-01-02T03:04:05Z").unwrap()),
+    )
+    .unwrap();
+    let document: Value = serde_json::from_str(&text).unwrap();
+    if let Err(violations) = validate_cyclonedx_1_6(&document) {
+        panic!("not valid CycloneDX 1.6: {violations:#?}\n{text}");
+    }
+    assert!(text.contains("\"curve\": \"secp256r1\""), "{text}");
+    assert!(text.contains("\"padding\": \"other\""), "{text}");
+    assert!(!text.contains("\"pss\""), "{text}");
+    let read = cyclonedx::read_str(&text).unwrap();
+    assert_eq!(read.warnings, Vec::new());
+    assert_eq!(read.product, product);
+}
+
+/// SHA-333: `docs/assay.md` lists `curve` and `padding` as modelled, and `docs/catalogue.md`'s
+/// CycloneDX mapping fills both from `algorithm_properties()` with `pss` written as `other`.
+#[test]
+fn docs_describe_curve_and_padding_as_modelled() {
+    let read = |name: &str| {
+        let path = repo_root().join(name);
+        std::fs::read_to_string(&path).unwrap_or_else(|e| panic!("{}: {e}", path.display()))
+    };
+    let assay = read("docs/assay.md");
+    let model = h2(&assay, "The model");
+    let row = model
+        .lines()
+        .find(|l| l.starts_with("| `algorithm` |"))
+        .expect("docs/assay.md has no algorithm row");
+    for field in ["`curve`", "`padding`"] {
+        assert!(row.contains(field), "algorithm row lacks {field}: {row}");
+    }
+    let not_modelled = model
+        .split("Not modelled:")
+        .nth(1)
+        .expect("docs/assay.md has no Not modelled list");
+    let not_modelled = not_modelled.split('.').next().unwrap_or_default();
+    for field in ["curve", "padding"] {
+        assert!(
+            !not_modelled.contains(field),
+            "docs/assay.md still lists {field} as not modelled: {not_modelled}"
+        );
+    }
+    assert!(
+        model.contains("`other`") && model.contains("`pss`"),
+        "{model}"
+    );
+
+    let catalogue = read("docs/catalogue.md");
+    let mapping = h2(&catalogue, "CycloneDX mapping");
+    assert!(
+        !mapping.contains("not modelled"),
+        "docs/catalogue.md still says not modelled:\n{mapping}"
+    );
+    for (field, target) in [
+        ("| `curve` |", "`algorithmProperties.curve`"),
+        ("| `padding` |", "`algorithmProperties.padding`"),
+    ] {
+        let row = mapping
+            .lines()
+            .find(|l| l.starts_with(field))
+            .unwrap_or_else(|| panic!("no {field} row in CycloneDX mapping"));
+        assert!(row.contains(target), "{row}");
+    }
+    assert!(mapping.contains("`pss` is written as `other`"), "{mapping}");
 }
 
 /// The `##` sections of a Markdown document, by heading.

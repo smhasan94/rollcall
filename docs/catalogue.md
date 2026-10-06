@@ -156,13 +156,13 @@ SP 800-208.
 |-----------|---------------|
 | `primitive` | `algorithmProperties.primitive` |
 | `id` | `algorithmProperties.parameterSetIdentifier` |
+| `curve` | `algorithmProperties.curve` (also `Entry::curve()`) |
 | `mode` | `algorithmProperties.mode` |
+| `padding` | `algorithmProperties.padding`, with `pss` written as `other` (also `Entry::padding()`, `Padding::as_cyclonedx()`) |
 | `crypto_functions` | `algorithmProperties.cryptoFunctions` |
 | `classical_security_level` | `algorithmProperties.classicalSecurityLevel` |
 | `nist_quantum_security_level` | `algorithmProperties.nistQuantumSecurityLevel` (`0` is written) |
 | `oid` | `cryptoProperties.oid` (`Entry::oid()`) |
-| `curve` | `algorithmProperties.curve` (`Entry::curve()`; not modelled by rollcall-core yet) |
-| `padding` | `algorithmProperties.padding` (`Entry::padding()`, `Padding::as_cyclonedx()`; not modelled by rollcall-core yet) |
 
 `executionEnvironment` and `implementationPlatform` describe a build, not an algorithm; the
 detector fills them in.
@@ -178,7 +178,8 @@ Conventions:
 - Curves are named as the curve database CycloneDX recommends names them (`neuromancer.sk/std`):
   `secp256r1`, `secp384r1`, `secp521r1`, `Ed25519`, `Curve25519`.
 - CycloneDX 1.6 has no padding word for PSS, so `pss` is written as `other`; `oaep` and
-  `pkcs1v15` are written as themselves.
+  `pkcs1v15` are written as themselves. `From<Padding> for rollcall_core::model::Padding` is
+  the one place that mapping lives.
 - An HSS signature uses LMS trees at every level; its parameter set is the LMS set used.
 - ECDSA and ECDH have no `oid`: their OIDs name either the signature together with its hash
   (`ecdsa-with-SHA256`) or the key type and curve, never the algorithm and parameter set the

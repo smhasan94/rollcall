@@ -6,7 +6,7 @@
 //!
 //! Generated 2026-01-02T03:04:05Z by rollcall 0.1.0.
 //!
-//! 7 cryptographic assets, 8 evidence entries.
+//! 8 cryptographic assets, 9 evidence entries.
 //!
 //! | Asset | Type | Details | In | Evidence | Confidence | Reason |
 //! |-------|------|---------|----|----------|------------|--------|
@@ -48,7 +48,9 @@ fn algorithm(p: &AlgorithmProperties) -> Vec<String> {
     let mut parts = Vec::new();
     parts.extend(p.primitive.map(|v| v.as_str().to_owned()));
     parts.extend(p.parameter_set_identifier.clone());
+    parts.extend(p.curve.as_ref().map(|v| format!("curve {v}")));
     parts.extend(p.mode.map(|v| v.as_str().to_owned()));
+    parts.extend(p.padding.map(|v| format!("padding {v}")));
     parts.extend(p.execution_environment.map(|v| v.as_str().to_owned()));
     parts.extend(p.implementation_platform.map(|v| v.as_str().to_owned()));
     if !p.crypto_functions.is_empty() {

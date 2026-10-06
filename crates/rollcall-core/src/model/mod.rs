@@ -175,7 +175,7 @@ pub use confidence::Confidence;
 pub use crypto::{
     AlgorithmProperties, AssetType, CertificateProperties, ConfidenceLevel, CryptoAsset,
     CryptoAssetProperties, CryptoEvidence, CryptoEvidenceKey, CryptoFunction, ExecutionEnvironment,
-    ImplementationPlatform, Locator, MAX_REASON_CHARS, MaterialState, MaterialType, Mode,
+    ImplementationPlatform, Locator, MAX_REASON_CHARS, MaterialState, MaterialType, Mode, Padding,
     Primitive, ProtocolProperties, ProtocolType, QuantumSecurityLevel,
     RelatedCryptoMaterialProperties,
 };
