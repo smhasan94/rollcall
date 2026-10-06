@@ -2,13 +2,17 @@
 # scripts/check-site-links.sh). A link to a host listed here is not fetched while the host is
 # listed: check-doc-links.sh reports it as SKIP, and check-site-links.sh leaves it out of its
 # online pass and says so. This is for an outage of a site we link to correctly; a moved or
-# deleted page is fixed in the docs instead. Give each host the date and the evidence, and
-# remove the line as soon as the host answers again (a 403 to CI runners only belongs in
-# scripts/link-check-blocked-hosts.txt instead).
+# deleted page is fixed in the docs instead. Give each host the date, the ticket ID and the
+# evidence, and remove the line as soon as the host answers again (a 403 to CI runners only
+# belongs in scripts/link-check-blocked-hosts.txt instead).
 #
 # One host name per line; `#` starts a comment.
 
-# 2026-10-06 (SHA-344): eur-lex.europa.eu answered 502 to CI (PR #50 build, run 37403107352;
-# PR #49), timed out on main's docs-links (curl exit 23) and timed out after 20 s from outside
-# GitHub. The link is the Cyber Resilience Act, Regulation (EU) 2024/2847, in docs/faq-cra-cisa.md.
-eur-lex.europa.eu
+# An entry looks like this (commented out here, so it lists nothing):
+#
+#   # 2026-10-06 (SHA-344): example.org answered 502 to CI (run 1234567890) and timed out
+#   # from outside GitHub. The link is <what it links> in docs/<page>.md.
+#   example.org
+#
+# The list is empty when no linked site has an outage, which is its normal state.
+# (2026-10-06, SHA-344: eur-lex.europa.eu was listed, and removed once it answered again.)

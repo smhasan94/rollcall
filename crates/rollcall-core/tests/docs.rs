@@ -2439,11 +2439,23 @@ fn tag_run_release_link_step_skips_pre_release_tags() {
     );
 }
 
+/// An outage-hosts list with no hosts (the normal state of scripts/link-check-outage-hosts.txt).
+#[cfg(unix)]
+const NO_OUTAGE: &str = "# Hosts that are down for everyone.\n#\n# One host name per line.\n";
+
+/// An outage-hosts list holding eur-lex.europa.eu, for the tests.
+#[cfg(unix)]
+const EUR_LEX_OUTAGE: &str = "# 2026-10-06 (SHA-344): a test list, eur-lex.europa.eu answered 502 to CI.\neur-lex.europa.eu\n";
+
 #[cfg(unix)]
 /// Runs `scripts/check-doc-links.sh` (online) on a document linking each URL of `table`, with a
 /// fake `curl` first on PATH answering from `table` (URL, final status, curl exit code, final
-/// URL); its exit code and stdout.
-fn check_doc_links_with_fake_curl(table: &[(&str, u16, i32, &str)]) -> (i32, String) {
+/// URL) and `outage_list` as the outage-hosts file (`ROLLCALL_OUTAGE_HOSTS_FILE`, so no test
+/// depends on what scripts/link-check-outage-hosts.txt lists); its exit code and stdout.
+fn check_doc_links_with_fake_curl(
+    table: &[(&str, u16, i32, &str)],
+    outage_list: &str,
+) -> (i32, String) {
     use std::os::unix::fs::PermissionsExt;
     let dir = tempfile::tempdir().expect("temporary directory");
     let bin = dir.path().join("bin");
@@ -2479,6 +2491,8 @@ exit 99
         .collect();
     let doc_path = dir.path().join("doc.md");
     std::fs::write(&doc_path, doc).expect("write the document");
+    let outage = dir.path().join("outage-hosts.txt");
+    std::fs::write(&outage, outage_list).expect("write the outage list");
     let path = format!(
         "{}:{}",
         bin.display(),
@@ -2489,6 +2503,7 @@ exit 99
         .arg(&doc_path)
         .env("PATH", path)
         .env("FAKE_CURL_TABLE", &table_path)
+        .env("ROLLCALL_OUTAGE_HOSTS_FILE", &outage)
         .env_remove("GITHUB_TOKEN")
         .output()
         .expect("bash runs");
@@ -2515,7 +2530,8 @@ fn check_doc_links_skips_only_a_403_from_a_host_that_blocks_ci() {
     const OK: &str = "https://example.org/page";
 
     // A 403 from the listed host is skipped; the run passes and counts it as skipped.
-    let (code, out) = check_doc_links_with_fake_curl(&[(CISA, 403, 0, CISA), (OK, 200, 0, OK)]);
+    let (code, out) =
+        check_doc_links_with_fake_curl(&[(CISA, 403, 0, CISA), (OK, 200, 0, OK)], NO_OUTAGE);
     assert_eq!(code, 0, "{out}");
     assert!(
         out.lines().any(|l| l.contains("SKIP") && l.contains(CISA) && l.contains(
@@ -2546,8 +2562,10 @@ fn check_doc_links_skips_only_a_403_from_a_host_that_blocks_ci() {
             "a 403 after a redirect to an unlisted host",
         ),
     ] {
-        let (code, out) =
-            check_doc_links_with_fake_curl(&[(CISA, status, rc, effective), (OK, 200, 0, OK)]);
+        let (code, out) = check_doc_links_with_fake_curl(
+            &[(CISA, status, rc, effective), (OK, 200, 0, OK)],
+            NO_OUTAGE,
+        );
         assert_eq!(code, 1, "{why} on the listed host passed:\n{out}");
         assert!(
             out.lines().any(|l| l.contains("FAIL") && l.contains(CISA)),
@@ -2558,7 +2576,8 @@ fn check_doc_links_skips_only_a_403_from_a_host_that_blocks_ci() {
 
     // A 403 from a host that is not listed fails.
     const OTHER: &str = "https://www.example.com/forbidden";
-    let (code, out) = check_doc_links_with_fake_curl(&[(OTHER, 403, 0, OTHER), (OK, 200, 0, OK)]);
+    let (code, out) =
+        check_doc_links_with_fake_curl(&[(OTHER, 403, 0, OTHER), (OK, 200, 0, OK)], NO_OUTAGE);
     assert_eq!(code, 1, "{out}");
     assert!(
         out.lines().any(|l| l.contains("FAIL") && l.contains(OTHER)),
@@ -2586,25 +2605,20 @@ fn host_list_entries(text: &str) -> Vec<(String, String)> {
     entries
 }
 
-/// SHA-344: a link to a host in scripts/link-check-outage-hosts.txt (down for everyone) is
-/// not fetched and is SKIP, so the run passes; a 5xx from any other host still fails.
+/// SHA-344: a link to a host in the outage-hosts list (scripts/link-check-outage-hosts.txt;
+/// here a temporary list holding eur-lex.europa.eu) is not fetched and is SKIP, so the run
+/// passes; a 5xx from any other host, or from the same host unlisted, still fails.
 #[cfg(unix)]
 #[test]
 fn check_doc_links_skips_a_host_listed_as_having_an_outage() {
-    let outage = repo_file("scripts/link-check-outage-hosts.txt");
-    assert!(
-        host_list_entries(&outage)
-            .iter()
-            .any(|(host, _)| host == "eur-lex.europa.eu"),
-        "eur-lex.europa.eu is not listed"
-    );
     const CRA: &str = "https://eur-lex.europa.eu/eli/reg/2024/2847/oj";
     const OK: &str = "https://example.org/page";
     const NOTE: &str =
         "not fetched: host listed as having an outage (scripts/link-check-outage-hosts.txt)";
 
     // The listed host answers 502 in the fake curl's table; it is skipped, not fetched.
-    let (code, out) = check_doc_links_with_fake_curl(&[(CRA, 502, 0, CRA), (OK, 200, 0, OK)]);
+    let (code, out) =
+        check_doc_links_with_fake_curl(&[(CRA, 502, 0, CRA), (OK, 200, 0, OK)], EUR_LEX_OUTAGE);
     assert_eq!(code, 0, "{out}");
     assert!(
         out.lines()
@@ -2616,47 +2630,402 @@ fn check_doc_links_skips_a_host_listed_as_having_an_outage() {
         "{out}"
     );
 
+    // Not listed (an empty outage list), the same 502 fails.
+    let (code, out) =
+        check_doc_links_with_fake_curl(&[(CRA, 502, 0, CRA), (OK, 200, 0, OK)], NO_OUTAGE);
+    assert_eq!(code, 1, "{out}");
+    assert!(
+        out.lines().any(|l| l.contains("FAIL") && l.contains(CRA)),
+        "{out}"
+    );
+
     // A curl error on the listed host is skipped the same way (it is never fetched).
-    let (code, out) = check_doc_links_with_fake_curl(&[(CRA, 0, 28, ""), (OK, 200, 0, OK)]);
+    let (code, out) =
+        check_doc_links_with_fake_curl(&[(CRA, 0, 28, ""), (OK, 200, 0, OK)], EUR_LEX_OUTAGE);
     assert_eq!(code, 0, "{out}");
 
     // A 502 or a timeout from an unlisted host fails.
     const OTHER: &str = "https://example.org/down";
     for (status, rc, why) in [(502, 0, "a 502"), (0, 28, "a curl timeout")] {
-        let (code, out) =
-            check_doc_links_with_fake_curl(&[(OTHER, status, rc, OTHER), (OK, 200, 0, OK)]);
+        let (code, out) = check_doc_links_with_fake_curl(
+            &[(OTHER, status, rc, OTHER), (OK, 200, 0, OK)],
+            EUR_LEX_OUTAGE,
+        );
         assert_eq!(code, 1, "{why} from an unlisted host passed:\n{out}");
         assert!(
             out.lines().any(|l| l.contains("FAIL") && l.contains(OTHER)),
             "{why}: {out}"
         );
     }
+
+    // The host is matched as a whole name, not as a prefix of the URL: a 502 from a host
+    // whose name only starts with the listed one fails.
+    const LOOKALIKE: &str = "https://eur-lex.europa.eu.evil/x";
+    let (code, out) = check_doc_links_with_fake_curl(
+        &[(LOOKALIKE, 502, 0, LOOKALIKE), (OK, 200, 0, OK)],
+        EUR_LEX_OUTAGE,
+    );
+    assert_eq!(code, 1, "a 502 from {LOOKALIKE} passed:\n{out}");
+    assert!(
+        out.lines()
+            .any(|l| l.contains("FAIL") && l.contains(LOOKALIKE)),
+        "{out}"
+    );
+}
+
+/// The problems of an outage-hosts list (`what` names it in the messages): each host must be
+/// a lowercase host name with a dated comment giving a reason just above it. A list with no
+/// hosts has none.
+fn outage_list_problems(what: &str, text: &str) -> Vec<String> {
+    let dated = regex::Regex::new(r"\b20\d\d-\d\d-\d\d\b").expect("date regex");
+    let host_name =
+        regex::Regex::new(r"^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+$")
+            .expect("host name regex");
+    let mut problems = Vec::new();
+    for (host, comment) in host_list_entries(text) {
+        if !host_name.is_match(&host) {
+            problems.push(format!("{host:?} in {what} is not a lowercase host name"));
+        }
+        if !dated.is_match(&comment) {
+            problems.push(format!("{host} has no dated comment above it in {what}"));
+        }
+        if comment.split_whitespace().count() < 8 {
+            problems.push(format!(
+                "{host}: the comment above it in {what} gives no reason"
+            ));
+        }
+    }
+    problems
 }
 
 /// SHA-344: every host in the outage list carries a dated reason (it is removed once the host
-/// answers again), and the site checker reads the same list as the Markdown checker.
+/// answers again) and is a lowercase host name; an empty list (the normal state) passes; the
+/// site checker reads the same list as the Markdown checker.
 #[test]
 fn outage_hosts_are_dated_and_read_by_both_link_checkers() {
-    let outage = repo_file("scripts/link-check-outage-hosts.txt");
-    let entries = host_list_entries(&outage);
-    assert!(!entries.is_empty(), "the outage list has no hosts");
-    let dated = regex::Regex::new(r"\b20\d\d-\d\d-\d\d\b").expect("date regex");
-    for (host, comment) in &entries {
-        assert!(
-            dated.is_match(comment),
-            "{host} has no dated comment above it in scripts/link-check-outage-hosts.txt"
-        );
-        assert!(
-            comment.split_whitespace().count() >= 8,
-            "{host}: the comment above it does not give a reason"
-        );
-    }
+    const LIST: &str = "scripts/link-check-outage-hosts.txt";
+    let problems = outage_list_problems(LIST, &repo_file(LIST));
+    assert!(problems.is_empty(), "{problems:#?}");
+
+    // The check bites: on lists of the same format, written here.
+    const HEADER: &str = "# Hosts that are down for everyone.\n#\n# One host name per line.\n\n";
+    const DATED: &str =
+        "# 2026-10-06 (SHA-344): example.org answered 502 to CI and timed out from outside.\n";
+    assert_eq!(outage_list_problems("empty", HEADER), Vec::<String>::new());
+    assert_eq!(
+        outage_list_problems(
+            "commented-out example",
+            &format!("{HEADER}#   {DATED}#   example.org\n")
+        ),
+        Vec::<String>::new()
+    );
+    assert_eq!(
+        outage_list_problems("dated", &format!("{HEADER}{DATED}example.org\n")),
+        Vec::<String>::new()
+    );
+    let undated = outage_list_problems(
+        "undated",
+        &format!(
+            "{HEADER}# example.org answered 502 to CI and timed out from outside.\nexample.org\n"
+        ),
+    );
+    assert!(
+        undated.iter().any(|p| p.contains("no dated comment")),
+        "an undated entry passed: {undated:?}"
+    );
+    // The header's comment block does not date an entry after a blank line.
+    let detached = outage_list_problems("detached", &format!("{HEADER}{DATED}\nexample.org\n"));
+    assert!(
+        detached.iter().any(|p| p.contains("no dated comment")),
+        "an entry without a comment of its own passed: {detached:?}"
+    );
+    let upper = outage_list_problems("uppercase", &format!("{HEADER}{DATED}Example.ORG\n"));
+    assert!(
+        upper
+            .iter()
+            .any(|p| p.contains("not a lowercase host name")),
+        "{upper:?}"
+    );
+    let url = outage_list_problems("url", &format!("{HEADER}{DATED}https://example.org/\n"));
+    assert!(
+        url.iter().any(|p| p.contains("not a lowercase host name")),
+        "{url:?}"
+    );
+
     for script in ["scripts/check-doc-links.sh", "scripts/check-site-links.sh"] {
+        let text = repo_file(script);
+        assert!(text.contains(LIST), "{script} does not read {LIST}");
         assert!(
-            repo_file(script).contains("link-check-outage-hosts.txt"),
-            "{script} does not read scripts/link-check-outage-hosts.txt"
+            text.contains("ROLLCALL_OUTAGE_HOSTS_FILE"),
+            "{script} has no ROLLCALL_OUTAGE_HOSTS_FILE override"
         );
     }
+}
+
+/// One run of `scripts/check-site-links.sh` with a fake lychee.
+#[cfg(unix)]
+struct SiteLinksRun {
+    code: i32,
+    stdout: String,
+    /// The arguments of each lychee invocation other than `--version`, in order.
+    lychee_calls: Vec<Vec<String>>,
+}
+
+#[cfg(unix)]
+impl SiteLinksRun {
+    /// The invocations of the online pass (pass 2): all but the `--offline` one.
+    fn online_calls(&self) -> Vec<&Vec<String>> {
+        self.lychee_calls
+            .iter()
+            .filter(|c| !c.iter().any(|a| a == "--offline"))
+            .collect()
+    }
+}
+
+/// The values given to `flag` in one lychee invocation (`--exclude X --exclude Y` gives
+/// `[X, Y]`).
+#[cfg(unix)]
+fn flag_values<'a>(call: &'a [String], flag: &str) -> Vec<&'a str> {
+    call.windows(2)
+        .filter(|w| w[0] == flag)
+        .map(|w| w[1].as_str())
+        .collect()
+}
+
+/// Runs `scripts/check-site-links.sh` (online) on a one-page site with a fake lychee in
+/// `ROLLCALL_TOOLS_DIR` (it reports the pinned version, logs its arguments and passes) and
+/// `outage_list` as the outage-hosts file (`ROLLCALL_OUTAGE_HOSTS_FILE`).
+#[cfg(unix)]
+fn check_site_links_with_fake_lychee(outage_list: &str) -> SiteLinksRun {
+    use std::os::unix::fs::PermissionsExt;
+    let dir = tempfile::tempdir().expect("temporary directory");
+    let tools = dir.path().join("tools");
+    std::fs::create_dir(&tools).expect("tools directory");
+    let fake = tools.join("lychee");
+    std::fs::write(
+        &fake,
+        r#"#!/usr/bin/env bash
+# Fake lychee: reports the pinned version; otherwise logs its arguments (NUL-separated, one
+# invocation per line) to FAKE_LYCHEE_LOG and passes.
+if [[ "${1:-}" == "--version" ]]; then
+    echo "lychee 0.24.2"
+    exit 0
+fi
+{
+    printf '%s\0' "$@"
+    printf '\n'
+} >>"$FAKE_LYCHEE_LOG"
+"#,
+    )
+    .expect("write the fake lychee");
+    std::fs::set_permissions(&fake, std::fs::Permissions::from_mode(0o755)).expect("chmod");
+    let site = dir.path().join("site");
+    std::fs::create_dir(&site).expect("site directory");
+    std::fs::write(
+        site.join("index.html"),
+        "<!doctype html><a href=\"https://eur-lex.europa.eu/eli/reg/2024/2847/oj\">CRA</a>\n",
+    )
+    .expect("write the page");
+    let outage = dir.path().join("outage-hosts.txt");
+    std::fs::write(&outage, outage_list).expect("write the outage list");
+    let log = dir.path().join("lychee.log");
+    let out = std::process::Command::new("bash")
+        .arg(repo_root().join("scripts/check-site-links.sh"))
+        .arg(&site)
+        .env("ROLLCALL_TOOLS_DIR", &tools)
+        .env("ROLLCALL_OUTAGE_HOSTS_FILE", &outage)
+        .env("FAKE_LYCHEE_LOG", &log)
+        .env_remove("GITHUB_TOKEN")
+        .output()
+        .expect("bash runs");
+    let logged = std::fs::read_to_string(&log).unwrap_or_default();
+    SiteLinksRun {
+        code: out.status.code().expect("exited with a code"),
+        stdout: format!(
+            "{}{}",
+            String::from_utf8_lossy(&out.stdout),
+            String::from_utf8_lossy(&out.stderr)
+        ),
+        lychee_calls: logged
+            .lines()
+            .map(|l| {
+                l.split('\0')
+                    .filter(|a| !a.is_empty())
+                    .map(str::to_owned)
+                    .collect()
+            })
+            .collect(),
+    }
+}
+
+/// SHA-344 review: an outage list of comments only (its normal state once the outage is
+/// over) leaves nothing out; the online pass still runs, with no outage `--exclude` and no
+/// note, and the run passes.
+#[cfg(unix)]
+#[test]
+fn check_site_links_runs_pass_2_with_an_empty_outage_list() {
+    let run = check_site_links_with_fake_lychee(
+        "# Hosts that are down for everyone.\n#\n# One host name per line.\n\n# none now\n",
+    );
+    assert_eq!(run.code, 0, "{}", run.stdout);
+    assert!(
+        run.stdout
+            .contains("check-site-links: pass 2, outside the site (online)"),
+        "{}",
+        run.stdout
+    );
+    assert!(
+        run.stdout.contains("check-site-links: PASS"),
+        "{}",
+        run.stdout
+    );
+    assert!(!run.stdout.contains("not fetched"), "{}", run.stdout);
+    let online = run.online_calls();
+    assert!(
+        !online.is_empty(),
+        "lychee never ran online: {:?}",
+        run.lychee_calls
+    );
+    assert!(
+        online
+            .iter()
+            .any(|c| flag_values(c, "--accept") == ["200..=299,429"]),
+        "no 2xx/429 online run: {online:?}"
+    );
+    // The only excludes left: this repository's files, and the blocked hosts (the 2xx run
+    // leaves out what the 403-tolerant run includes, which itself excludes everything else).
+    let repo_files = r"^https://github\.com/smhasan94/rollcall/(blob|tree|edit)/";
+    let includes: Vec<&str> = online
+        .iter()
+        .flat_map(|c| flag_values(c, "--include"))
+        .collect();
+    for call in &online {
+        for exclude in flag_values(call, "--exclude") {
+            assert!(
+                exclude == repo_files || exclude == ".*" || includes.contains(&exclude),
+                "an --exclude with an empty outage list: {exclude:?} in {call:?}"
+            );
+        }
+    }
+}
+
+/// SHA-344 AC: check-site-links.sh does not fetch the hosts listed as having an outage and
+/// says so: every online lychee run gets the hosts' `--exclude` (any port, the host matched
+/// whole, read lowercased), and stdout names the hosts as not fetched.
+#[cfg(unix)]
+#[test]
+fn check_site_links_excludes_outage_hosts_from_every_online_run_and_says_so() {
+    let run = check_site_links_with_fake_lychee(
+        "# 2026-10-06 (SHA-344): test entry.\nEUR-LEX.europa.eu  # trailing comment\n",
+    );
+    assert_eq!(run.code, 0, "{}", run.stdout);
+    let want = r"^https?://(eur-lex\.europa\.eu)(:[0-9]+)?(/|$)";
+    let online = run.online_calls();
+    assert!(
+        !online.is_empty(),
+        "lychee never ran online: {:?}",
+        run.lychee_calls
+    );
+    for call in &online {
+        assert!(
+            flag_values(call, "--exclude").contains(&want),
+            "an online lychee run without --exclude {want}: {call:?}"
+        );
+    }
+    assert!(
+        run.stdout.lines().any(|l| l.contains("not fetched")
+            && l.contains("outage")
+            && l.ends_with(": eur-lex.europa.eu")),
+        "{}",
+        run.stdout
+    );
+    assert!(!run.stdout.contains(r"eur-lex\.europa"), "{}", run.stdout);
+
+    // The expression lychee gets matches the host on any scheme and port, and no other host.
+    let re = regex::Regex::new(want).expect("lychee's exclude is a valid regex");
+    for url in [
+        "https://eur-lex.europa.eu/eli/reg/2024/2847/oj",
+        "http://eur-lex.europa.eu",
+        "https://eur-lex.europa.eu:443/x",
+    ] {
+        assert!(re.is_match(url), "{url} is fetched");
+    }
+    for url in [
+        "https://eur-lex.europa.eu.evil/x",
+        "https://eur-lexXeuropa.eu/x",
+        "https://example.org/?u=https://eur-lex.europa.eu/",
+    ] {
+        assert!(!re.is_match(url), "{url} is left out");
+    }
+
+    // Two hosts: one alternation, raw names in the note.
+    let run = check_site_links_with_fake_lychee("eur-lex.europa.eu\nexample.net\n");
+    assert_eq!(run.code, 0, "{}", run.stdout);
+    let want = r"^https?://(eur-lex\.europa\.eu|example\.net)(:[0-9]+)?(/|$)";
+    for call in run.online_calls() {
+        assert!(
+            flag_values(call, "--exclude").contains(&want),
+            "an online lychee run without --exclude {want}: {call:?}"
+        );
+    }
+    assert!(
+        run.stdout
+            .lines()
+            .any(|l| l.contains("not fetched") && l.ends_with(": eur-lex.europa.eu example.net")),
+        "{}",
+        run.stdout
+    );
+}
+
+/// SHA-344 review: lychee's `--include` beats every `--exclude`, so a host on both the
+/// blocked-hosts list and the outage list is left out of the 403-tolerant run's `--include`
+/// (otherwise it would be fetched there).
+#[cfg(unix)]
+#[test]
+fn check_site_links_never_includes_a_host_listed_as_having_an_outage() {
+    let blocked = repo_file("scripts/link-check-blocked-hosts.txt");
+    assert!(
+        host_list_entries(&blocked)
+            .iter()
+            .any(|(h, _)| h == "www.cisa.gov"),
+        "www.cisa.gov is not in scripts/link-check-blocked-hosts.txt"
+    );
+    let run = check_site_links_with_fake_lychee("eur-lex.europa.eu\nwww.cisa.gov\n");
+    assert_eq!(run.code, 0, "{}", run.stdout);
+    let want = r"^https?://(eur-lex\.europa\.eu|www\.cisa\.gov)(:[0-9]+)?(/|$)";
+    for call in run.online_calls() {
+        assert!(
+            flag_values(call, "--exclude").contains(&want),
+            "an online lychee run without --exclude {want}: {call:?}"
+        );
+        for include in flag_values(call, "--include") {
+            assert!(
+                !include.contains("cisa"),
+                "www.cisa.gov is in an --include: {call:?}"
+            );
+        }
+    }
+    assert!(
+        !run.stdout
+            .lines()
+            .any(|l| l.contains("block CI runners") && l.contains("www.cisa.gov")),
+        "{}",
+        run.stdout
+    );
+
+    // Without the outage, the blocked host is in the 403-tolerant run's --include.
+    let run = check_site_links_with_fake_lychee("# none\n");
+    assert_eq!(run.code, 0, "{}", run.stdout);
+    assert!(
+        run.online_calls().iter().any(|c| {
+            flag_values(c, "--include")
+                .iter()
+                .any(|i| i.contains(r"www\.cisa\.gov"))
+                && flag_values(c, "--accept") == ["200..=299,403,429"]
+        }),
+        "{:?}",
+        run.lychee_calls
+    );
 }
 
 /// Runs `scripts/check-doc-links.sh --offline` on a document holding one link to each of
@@ -2740,7 +3109,7 @@ fn check_doc_links_resolves_own_repo_links_against_the_working_tree() {
 #[test]
 fn check_doc_links_never_fetches_own_repo_links() {
     let good = format!("{OWN_BLOB}docs/cli.md#exit-codes");
-    let (code, out) = check_doc_links_with_fake_curl(&[(&good, 404, 0, &good)]);
+    let (code, out) = check_doc_links_with_fake_curl(&[(&good, 404, 0, &good)], NO_OUTAGE);
     assert_eq!(code, 0, "{out}");
     assert!(
         out.lines()

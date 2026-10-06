@@ -28,6 +28,8 @@
 # - Hosts in scripts/link-check-outage-hosts.txt are down for everyone: a link to one of them
 #   is not fetched and is listed as SKIP ("host listed as having an outage"). The file says
 #   when and why each host was added; its line is removed once the host answers again.
+#   $ROLLCALL_OUTAGE_HOSTS_FILE, if set, names another list instead (relative to the
+#   repository root, as in scripts/check-site-links.sh); the tests use it.
 # - A link into this repository's own files on GitHub,
 #   `https://github.com/smhasan94/rollcall/blob/main/<path>[#anchor]` or `.../tree/main/<path>`,
 #   is never fetched: it is resolved against the local working tree (the repository this
@@ -84,13 +86,14 @@ BLOCKED_HOSTS="$(dirname "$0")/link-check-blocked-hosts.txt"
     echo "check-doc-links: $BLOCKED_HOSTS not found" >&2
     exit 2
 }
-OUTAGE_HOSTS="$(dirname "$0")/link-check-outage-hosts.txt"
+REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+
+OUTAGE_HOSTS="${ROLLCALL_OUTAGE_HOSTS_FILE:-scripts/link-check-outage-hosts.txt}"
+[[ "$OUTAGE_HOSTS" == /* ]] || OUTAGE_HOSTS="$REPO_ROOT/$OUTAGE_HOSTS"
 [[ -f "$OUTAGE_HOSTS" ]] || {
     echo "check-doc-links: $OUTAGE_HOSTS not found" >&2
     exit 2
 }
-
-REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 
 exec python3 - "$offline" "$BLOCKED_HOSTS" "$OUTAGE_HOSTS" "$REPO_ROOT" "${files[@]}" <<'PY'
 import os
