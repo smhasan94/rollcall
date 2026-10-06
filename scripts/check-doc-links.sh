@@ -25,6 +25,11 @@
 #   link is listed as SKIP ("HTTP 403 from a host that blocks CI runners"). Any other result
 #   from them (404, 5xx, a curl error, a redirect to a parent page) still fails. The file says
 #   why and when each host was added.
+# - Hosts in scripts/link-check-outage-hosts.txt are down for everyone: a link to one of them
+#   is not fetched and is listed as SKIP ("host listed as having an outage"). The file says
+#   when and why each host was added; its line is removed once the host answers again.
+#   $ROLLCALL_OUTAGE_HOSTS_FILE, if set, names another list instead (relative to the
+#   repository root, as in scripts/check-site-links.sh); the tests use it.
 # - A link into this repository's own files on GitHub,
 #   `https://github.com/smhasan94/rollcall/blob/main/<path>[#anchor]` or `.../tree/main/<path>`,
 #   is never fetched: it is resolved against the local working tree (the repository this
@@ -81,10 +86,16 @@ BLOCKED_HOSTS="$(dirname "$0")/link-check-blocked-hosts.txt"
     echo "check-doc-links: $BLOCKED_HOSTS not found" >&2
     exit 2
 }
-
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 
-exec python3 - "$offline" "$BLOCKED_HOSTS" "$REPO_ROOT" "${files[@]}" <<'PY'
+OUTAGE_HOSTS="${ROLLCALL_OUTAGE_HOSTS_FILE:-scripts/link-check-outage-hosts.txt}"
+[[ "$OUTAGE_HOSTS" == /* ]] || OUTAGE_HOSTS="$REPO_ROOT/$OUTAGE_HOSTS"
+[[ -f "$OUTAGE_HOSTS" ]] || {
+    echo "check-doc-links: $OUTAGE_HOSTS not found" >&2
+    exit 2
+}
+
+exec python3 - "$offline" "$BLOCKED_HOSTS" "$OUTAGE_HOSTS" "$REPO_ROOT" "${files[@]}" <<'PY'
 import os
 import re
 import subprocess
@@ -93,12 +104,13 @@ import urllib.parse
 
 offline = sys.argv[1] == "1"
 blocked_file = sys.argv[2]
-repo_root = sys.argv[3]
-files = sys.argv[4:]
+outage_file = sys.argv[3]
+repo_root = sys.argv[4]
+files = sys.argv[5:]
 
 
 def read_blocked(path):
-    """The host names in the blocked-hosts file: one per line, `#` comments."""
+    """The host names in a host-list file: one per line, `#` comments."""
     hosts = set()
     with open(path, encoding="utf-8") as f:
         for line in f:
@@ -110,6 +122,8 @@ def read_blocked(path):
 
 BLOCKED = read_blocked(blocked_file)
 BLOCKED_NOTE = "HTTP 403 from a host that blocks CI runners (listed in scripts/link-check-blocked-hosts.txt)"
+OUTAGE = read_blocked(outage_file)
+OUTAGE_NOTE = "not fetched: host listed as having an outage (scripts/link-check-outage-hosts.txt)"
 
 FENCE = re.compile(r"^\s*(```|~~~)")
 INLINE_CODE = re.compile(r"`+[^`]*`+")
@@ -282,6 +296,9 @@ def blocked_403(url, rc, status, effective):
 
 def check_http(url):
     if url in _http_cache:
+        return _http_cache[url]
+    if (urllib.parse.urlsplit(url).hostname or "").lower() in OUTAGE:
+        _http_cache[url] = ("SKIP", OUTAGE_NOTE)
         return _http_cache[url]
     fetch = curl_status(url, "HEAD")
     result = judge(url, *fetch)

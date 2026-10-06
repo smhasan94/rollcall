@@ -180,7 +180,10 @@ jobs:
   # or 3xx. Needs the network. Run the same locally with
   # `scripts/check-doc-links.sh docs/zephyr-gaps.md docs/outreach/*.md docs/quickstart.md docs/faq-cra-cisa.md docs/contributing-identifiers.md`
   # (`--offline` checks only the links inside the repository). Network-dependent: an external
-  # site that is down fails this job, and re-running it is the remedy.
+  # site that is down fails this job, and re-running it is the remedy. For an outage that
+  # lasts (the site is down for everyone, not just for CI), list the host in
+  # scripts/link-check-outage-hosts.txt with the date and the ticket ID: its links are then
+  # SKIP, not fetched, until the line is removed once the host answers again.
   #
   # Hosts that answer 403 to GitHub's runners only (scripts/link-check-blocked-hosts.txt,
   # each with its reason and date) give SKIP for a 403, and only for a 403.

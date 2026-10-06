@@ -1,0 +1,18 @@
+# Hosts that are down for everyone, not just for CI (scripts/check-doc-links.sh and
+# scripts/check-site-links.sh). A link to a host listed here is not fetched while the host is
+# listed: check-doc-links.sh reports it as SKIP, and check-site-links.sh leaves it out of its
+# online pass and says so. This is for an outage of a site we link to correctly; a moved or
+# deleted page is fixed in the docs instead. Give each host the date, the ticket ID and the
+# evidence, and remove the line as soon as the host answers again (a 403 to CI runners only
+# belongs in scripts/link-check-blocked-hosts.txt instead).
+#
+# One host name per line; `#` starts a comment.
+
+# An entry looks like this (commented out here, so it lists nothing):
+#
+#   # 2026-10-06 (SHA-344): example.org answered 502 to CI (run 1234567890) and timed out
+#   # from outside GitHub. The link is <what it links> in docs/<page>.md.
+#   example.org
+#
+# The list is empty when no linked site has an outage, which is its normal state.
+# (2026-10-06, SHA-344: eur-lex.europa.eu was listed, and removed once it answered again.)

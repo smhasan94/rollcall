@@ -227,3 +227,9 @@ upstream `https://git.trustedfirmware.org/TF-A/trusted-firmware-a.git` and tag
   while serving everyone else; they are listed, each with the reason and the date, in
   `scripts/link-check-blocked-hosts.txt`, and both checkers tolerate a 403 from them, and only
   a 403. Add a host there only after seeing a CI-only 403, never to hide a broken link.
+  A site that is down for everyone, not just for CI, goes in
+  `scripts/link-check-outage-hosts.txt` instead: both checkers then leave its links unfetched
+  (check-doc-links.sh reports them as SKIP, check-site-links.sh prints which hosts it left
+  out). Give each host the date, the ticket ID and the evidence, and remove its line as soon
+  as the host answers again. The list is for an outage of a site linked correctly, never to
+  hide a broken link: a moved or deleted page is fixed in the docs.
