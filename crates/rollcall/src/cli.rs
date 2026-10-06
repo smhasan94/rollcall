@@ -335,7 +335,8 @@ pub struct AssayArgs {
     /// The source tree to take the inventory of
     #[arg(long, value_name = "DIR")]
     pub source: Option<PathBuf>,
-    /// The build directory to take the inventory of
+    /// The build directory to take the inventory of: a Zephyr build directory or an ESP-IDF
+    /// project/build directory
     #[arg(long, value_name = "DIR")]
     pub build: Option<PathBuf>,
     /// The linked ELF image to take the inventory of

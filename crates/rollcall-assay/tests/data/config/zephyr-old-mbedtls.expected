@@ -1,0 +1,51 @@
+# hand-written test data, SHA-144, not generated
+# Fixture: fixtures/zephyr-old-mbedtls/old-mbedtls, assayed with --product old-mbedtls.
+# sysbuild with the legacy mbedTLS Kconfig: mbedtls (MAIN, SHA-256 only), mcuboot (BOOTLOADER, mbedTLS RSA PKCS#1 v1.5 and v2.1; its CONFIG_MBEDTLS_KEY_EXCHANGE_RSA_ENABLED=y is not reported, as TLS is off).
+# Each line was checked against the fixture's own .config / sdkconfig (symbol, value and line);
+# see README.md for the format. Do not regenerate: edit by hand, and review like code.
+
+# Assets: IMAGE / LIBRARY / ASSET [hardware] | every evidence locator, in file and line order.
+asset bootloader:mcuboot / mbedtls / RSA-OAEP | mcuboot/zephyr/.config:396 CONFIG_MBEDTLS_RSA_C, mcuboot/zephyr/.config:398 CONFIG_MBEDTLS_PKCS1_V21
+asset bootloader:mcuboot / mbedtls / RSA-PKCS1v15 | mcuboot/zephyr/.config:396 CONFIG_MBEDTLS_RSA_C, mcuboot/zephyr/.config:397 CONFIG_MBEDTLS_PKCS1_V15
+asset bootloader:mcuboot / mbedtls / RSA-PSS | mcuboot/zephyr/.config:396 CONFIG_MBEDTLS_RSA_C, mcuboot/zephyr/.config:398 CONFIG_MBEDTLS_PKCS1_V21
+asset bootloader:mcuboot / mbedtls / SHA2-256 | mcuboot/zephyr/.config:431 CONFIG_MBEDTLS_SHA256
+asset bootloader:mcuboot / mcuboot / RSA-PSS-2048 | mcuboot/zephyr/.config:16 CONFIG_BOOT_SIGNATURE_TYPE_RSA, mcuboot/zephyr/.config:17 CONFIG_BOOT_SIGNATURE_TYPE_RSA_LEN, zephyr/.config:54 SB_CONFIG_SIGNATURE_TYPE, zephyr/.config:56 SB_CONFIG_BOOT_SIGNATURE_TYPE_RSA
+asset bootloader:mcuboot / mcuboot / SHA2-256 | mcuboot/zephyr/.config:14 CONFIG_BOOT_IMG_HASH_ALG_SHA256
+asset application:old-mbedtls / mbedtls / SHA2-256 | mbedtls/zephyr/.config:338 CONFIG_MBEDTLS_SHA256
+
+# Compiled out (explicitly-off symbols), per image: IMAGE LIBRARY ALGORITHM.
+compiled-out bootloader:mcuboot mbedtls AES-CBC
+compiled-out bootloader:mcuboot mbedtls AES-CCM
+compiled-out bootloader:mcuboot mbedtls AES-CTR
+compiled-out bootloader:mcuboot mbedtls AES-ECB
+compiled-out bootloader:mcuboot mbedtls AES-GCM
+compiled-out bootloader:mcuboot mbedtls ChaCha20-Poly1305
+compiled-out bootloader:mcuboot mbedtls DH
+compiled-out bootloader:mcuboot mbedtls ECDH
+compiled-out bootloader:mcuboot mbedtls ECDSA
+compiled-out bootloader:mcuboot mbedtls HKDF
+compiled-out bootloader:mcuboot mbedtls SHA2-224
+compiled-out bootloader:mcuboot mbedtls SHA2-384
+compiled-out bootloader:mcuboot mbedtls SHA2-512
+compiled-out bootloader:mcuboot mbedtls X25519
+compiled-out application:old-mbedtls mbedtls AES-CBC
+compiled-out application:old-mbedtls mbedtls AES-CCM
+compiled-out application:old-mbedtls mbedtls AES-CTR
+compiled-out application:old-mbedtls mbedtls AES-ECB
+compiled-out application:old-mbedtls mbedtls AES-GCM
+compiled-out application:old-mbedtls mbedtls ChaCha20-Poly1305
+compiled-out application:old-mbedtls mbedtls DH
+compiled-out application:old-mbedtls mbedtls ECDH
+compiled-out application:old-mbedtls mbedtls ECDSA
+compiled-out application:old-mbedtls mbedtls HKDF
+compiled-out application:old-mbedtls mbedtls RSA-OAEP
+compiled-out application:old-mbedtls mbedtls RSA-PKCS1v15
+compiled-out application:old-mbedtls mbedtls RSA-PSS
+compiled-out application:old-mbedtls mbedtls SHA2-224
+compiled-out application:old-mbedtls mbedtls SHA2-384
+compiled-out application:old-mbedtls mbedtls SHA2-512
+compiled-out application:old-mbedtls mbedtls X25519
+
+# Notes, sorted.
+note mbedtls/zephyr/.config: uses the legacy mbedTLS crypto API (CONFIG_MBEDTLS_SHA256)
+note mcuboot/zephyr/.config: uses the legacy mbedTLS crypto API (CONFIG_MBEDTLS_RSA_C)

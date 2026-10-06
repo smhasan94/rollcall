@@ -274,8 +274,8 @@ fn assay_malformed_model_exits_65() {
     }
 }
 
-/// With no detectors in this version, a build gives a valid, empty CBOM that says no detector
-/// ran (`rollcall:assay:detectors` = `none`), one note on stderr, and exit 0.
+/// With no detector for its inputs, assay gives a valid, empty CBOM that says no detector ran
+/// (`rollcall:assay:detectors` = `none`), one note on stderr, and exit 0.
 #[test]
 fn assay_build_without_detectors_emits_empty_cbom_with_detectors_none_property_and_note() {
     let dir = tempfile::tempdir().unwrap();
@@ -283,8 +283,6 @@ fn assay_build_without_detectors_emits_empty_cbom_with_detectors_none_property_a
     std::fs::write(&elf, b"\x7fELF").unwrap();
     let out = rollcall()
         .args(["assay", "--source"])
-        .arg(dir.path())
-        .arg("--build")
         .arg(dir.path())
         .arg("--elf")
         .arg(&elf)
@@ -295,7 +293,7 @@ fn assay_build_without_detectors_emits_empty_cbom_with_detectors_none_property_a
     let stderr = String::from_utf8(out.stderr).unwrap();
     assert_eq!(
         stderr,
-        "rollcall assay: note: no cryptographic-asset detectors in this version; the \
+        "rollcall assay: note: no cryptographic-asset detector ran for these inputs; the \
          inventory is empty\n"
     );
     let doc: Value = serde_json::from_slice(&out.stdout).unwrap();
@@ -309,7 +307,7 @@ fn assay_build_without_detectors_emits_empty_cbom_with_detectors_none_property_a
     assert!(doc.get("components").is_none(), "{doc}");
     // The Markdown summary of the same says there are none.
     let out = rollcall()
-        .args(["assay", "--format", "md", "--build"])
+        .args(["assay", "--format", "md", "--source"])
         .arg(dir.path())
         .args(["--product", "sensor-node@1.0.0", "--timestamp", TIMESTAMP])
         .output()
@@ -320,4 +318,170 @@ fn assay_build_without_detectors_emits_empty_cbom_with_detectors_none_property_a
             .unwrap()
             .ends_with("\nNo cryptographic assets.\n")
     );
+}
+
+fn fixture(path: &str) -> PathBuf {
+    PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("../../fixtures")
+        .join(path)
+}
+
+/// Every `cryptographic-asset` component of a CBOM as `bom-ref name`, with its
+/// `cryptoProperties`.
+fn crypto_components(doc: &Value) -> Vec<&Value> {
+    let mut out = Vec::new();
+    let mut stack: Vec<&Value> = doc["components"].as_array().into_iter().flatten().collect();
+    while let Some(c) = stack.pop() {
+        if c["type"] == "cryptographic-asset" {
+            out.push(c);
+        }
+        stack.extend(c["components"].as_array().into_iter().flatten());
+    }
+    out
+}
+
+/// AC1 (CLI): `rollcall assay --build` on the Zephyr TLS fixture writes a schema-valid CBOM
+/// with the configuration's assets (MCUboot's RSA-PSS-2048 signature, the TLS app's
+/// AES-GCM and TLS 1.2), names the `kconfig` detector, prints its notes, exits 0, and is
+/// byte-identical across runs.
+#[test]
+fn assay_build_zephyr_tls_fixture_reports_config_assets() {
+    let run = || {
+        rollcall()
+            .args(["assay", "--build"])
+            .arg(fixture("zephyr/tls"))
+            .args(["--product", "tls@1.0.0", "--timestamp", TIMESTAMP])
+            .output()
+            .unwrap()
+    };
+    let out = run();
+    let stderr = String::from_utf8(out.stderr.clone()).unwrap();
+    assert_eq!(out.status.code(), Some(0), "{stderr}");
+    assert!(
+        stderr
+            .contains("rollcall assay: note: http_server/zephyr/.config: uses the PSA Crypto API"),
+        "{stderr}"
+    );
+    assert!(
+        !stderr.contains("no cryptographic-asset detector ran"),
+        "{stderr}"
+    );
+    let doc: Value = serde_json::from_slice(&out.stdout).unwrap();
+    assert!(rollcall_core::cyclonedx::validate_cyclonedx_1_6(&doc).is_ok());
+    assert_eq!(
+        doc["metadata"]["properties"],
+        serde_json::json!([{"name": "rollcall:assay:detectors", "value": "kconfig"}])
+    );
+    let assets = crypto_components(&doc);
+    let names: Vec<&str> = assets.iter().filter_map(|c| c["name"].as_str()).collect();
+    for name in [
+        "RSA-PSS-2048",
+        "AES-GCM",
+        "AES-GCM-128",
+        "TLS-1.2",
+        "ECDSA-secp256r1",
+    ] {
+        assert!(names.contains(&name), "{name}: {names:?}");
+    }
+    let rsa = assets.iter().find(|c| c["name"] == "RSA-PSS-2048").unwrap();
+    assert_eq!(rsa["cryptoProperties"]["assetType"], "algorithm");
+    assert_eq!(
+        rsa["cryptoProperties"]["algorithmProperties"]["parameterSetIdentifier"],
+        "2048"
+    );
+    let tls = assets.iter().find(|c| c["name"] == "TLS-1.2").unwrap();
+    assert_eq!(
+        tls["cryptoProperties"]["protocolProperties"]["version"],
+        "1.2"
+    );
+    // The CLI's own validator agrees.
+    let dir = tempfile::tempdir().unwrap();
+    let path = dir.path().join("tls.cbom.json");
+    std::fs::write(&path, &out.stdout).unwrap();
+    let validated = rollcall()
+        .args(["validate", "--schema"])
+        .arg(&path)
+        .output()
+        .unwrap();
+    assert_eq!(validated.status.code(), Some(0));
+    // Deterministic.
+    assert_eq!(run().stdout, out.stdout);
+}
+
+/// A `--build` directory that is no Zephyr or ESP-IDF build: a note saying so, the
+/// no-detector note, an empty CBOM, exit 0.
+#[test]
+fn assay_build_unrecognised_dir_notes_and_exits_0() {
+    let dir = tempfile::tempdir().unwrap();
+    std::fs::write(dir.path().join("README.txt"), b"not a build").unwrap();
+    let out = rollcall()
+        .args(["assay", "--build"])
+        .arg(dir.path())
+        .args(["--product", "x", "--timestamp", TIMESTAMP])
+        .output()
+        .unwrap();
+    let stderr = String::from_utf8(out.stderr).unwrap();
+    assert_eq!(out.status.code(), Some(0), "{stderr}");
+    let lines: Vec<&str> = stderr.lines().collect();
+    assert_eq!(lines.len(), 2, "{stderr}");
+    assert!(
+        lines[0].starts_with("rollcall assay: note: --build "),
+        "{stderr}"
+    );
+    assert!(
+        lines[0].contains("not a Zephyr or ESP-IDF build"),
+        "{stderr}"
+    );
+    assert!(
+        lines[1].contains("no cryptographic-asset detector ran"),
+        "{stderr}"
+    );
+    let doc: Value = serde_json::from_slice(&out.stdout).unwrap();
+    assert!(rollcall_core::cyclonedx::validate_cyclonedx_1_6(&doc).is_ok());
+    assert_eq!(doc["metadata"]["properties"][0]["value"], "none");
+}
+
+/// A malformed `.config` is exit 65 naming `file:line`; a recognised Zephyr build without its
+/// `.config` is exit 66; neither panics.
+#[test]
+fn assay_build_malformed_config_exits_65() {
+    let dir = tempfile::tempdir().unwrap();
+    std::fs::write(
+        dir.path().join("build_info.yml"),
+        b"cmake:\n  application:\n    source-dir: '/x/app'\n",
+    )
+    .unwrap();
+    std::fs::create_dir_all(dir.path().join("zephyr")).unwrap();
+    for (bytes, needle) in [
+        (
+            &b"CONFIG_A=y\nnot kconfig\n"[..],
+            ".config:2: unknown syntax",
+        ),
+        (b"CONFIG_A=\"open\n", ".config:1: unterminated string"),
+        (b"\xff\xfe", "not valid UTF-8"),
+    ] {
+        std::fs::write(dir.path().join("zephyr/.config"), bytes).unwrap();
+        let out = rollcall()
+            .args(["assay", "--build"])
+            .arg(dir.path())
+            .args(["--product", "x"])
+            .output()
+            .unwrap();
+        let stderr = String::from_utf8_lossy(&out.stderr);
+        assert_eq!(out.status.code(), Some(65), "{stderr}");
+        assert!(stderr.starts_with("rollcall assay: "), "{stderr}");
+        assert!(stderr.contains(needle), "{needle}: {stderr}");
+        assert!(!stderr.contains("panicked"), "{stderr}");
+        assert!(out.stdout.is_empty());
+    }
+    std::fs::remove_file(dir.path().join("zephyr/.config")).unwrap();
+    let out = rollcall()
+        .args(["assay", "--build"])
+        .arg(dir.path())
+        .args(["--product", "x"])
+        .output()
+        .unwrap();
+    let stderr = String::from_utf8_lossy(&out.stderr);
+    assert_eq!(out.status.code(), Some(66), "{stderr}");
+    assert!(stderr.contains(".config: not found"), "{stderr}");
 }

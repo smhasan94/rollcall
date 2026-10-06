@@ -1,0 +1,52 @@
+# hand-written test data, SHA-144, not generated
+# Fixture: fixtures/esp-idf/wifi-tls, assayed with --product wifi-tls.
+# ESP-IDF 5.5.1 esp32 https_request example: mbedTLS with hardware AES/SHA/MPI (MPI acceleration is a note, not hardware RSA), TLS 1.2, every curve; secure boot and flash encryption off.
+# Each line was checked against the fixture's own .config / sdkconfig (symbol, value and line);
+# see README.md for the format. Do not regenerate: edit by hand, and review like code.
+
+# Assets: IMAGE / LIBRARY / ASSET [hardware] | every evidence locator, in file and line order.
+asset application:wifi-tls / mbedtls / AES-CCM [hardware] | sdkconfig:1542 CONFIG_MBEDTLS_HARDWARE_AES, sdkconfig:1588 CONFIG_MBEDTLS_AES_C, sdkconfig:1593 CONFIG_MBEDTLS_CCM_C
+asset application:wifi-tls / mbedtls / AES-GCM [hardware] | sdkconfig:1542 CONFIG_MBEDTLS_HARDWARE_AES, sdkconfig:1588 CONFIG_MBEDTLS_AES_C, sdkconfig:1594 CONFIG_MBEDTLS_GCM_C
+asset application:wifi-tls / mbedtls / ECDH-secp256r1 | sdkconfig:1571 CONFIG_MBEDTLS_KEY_EXCHANGE_ECDHE_RSA, sdkconfig:1572 CONFIG_MBEDTLS_KEY_EXCHANGE_ECDHE_ECDSA, sdkconfig:1573 CONFIG_MBEDTLS_KEY_EXCHANGE_ECDH_ECDSA, sdkconfig:1574 CONFIG_MBEDTLS_KEY_EXCHANGE_ECDH_RSA, sdkconfig:1578 CONFIG_MBEDTLS_SSL_PROTO_TLS1_2, sdkconfig:1613 CONFIG_MBEDTLS_ECDH_C, sdkconfig:1618 CONFIG_MBEDTLS_ECP_DP_SECP256R1_ENABLED
+asset application:wifi-tls / mbedtls / ECDH-secp384r1 | sdkconfig:1571 CONFIG_MBEDTLS_KEY_EXCHANGE_ECDHE_RSA, sdkconfig:1572 CONFIG_MBEDTLS_KEY_EXCHANGE_ECDHE_ECDSA, sdkconfig:1573 CONFIG_MBEDTLS_KEY_EXCHANGE_ECDH_ECDSA, sdkconfig:1574 CONFIG_MBEDTLS_KEY_EXCHANGE_ECDH_RSA, sdkconfig:1578 CONFIG_MBEDTLS_SSL_PROTO_TLS1_2, sdkconfig:1613 CONFIG_MBEDTLS_ECDH_C, sdkconfig:1619 CONFIG_MBEDTLS_ECP_DP_SECP384R1_ENABLED
+asset application:wifi-tls / mbedtls / ECDH-secp521r1 | sdkconfig:1571 CONFIG_MBEDTLS_KEY_EXCHANGE_ECDHE_RSA, sdkconfig:1572 CONFIG_MBEDTLS_KEY_EXCHANGE_ECDHE_ECDSA, sdkconfig:1573 CONFIG_MBEDTLS_KEY_EXCHANGE_ECDH_ECDSA, sdkconfig:1574 CONFIG_MBEDTLS_KEY_EXCHANGE_ECDH_RSA, sdkconfig:1578 CONFIG_MBEDTLS_SSL_PROTO_TLS1_2, sdkconfig:1613 CONFIG_MBEDTLS_ECDH_C, sdkconfig:1620 CONFIG_MBEDTLS_ECP_DP_SECP521R1_ENABLED
+asset application:wifi-tls / mbedtls / ECDSA-secp256r1 | sdkconfig:1553 CONFIG_MBEDTLS_ECDSA_DETERMINISTIC, sdkconfig:1572 CONFIG_MBEDTLS_KEY_EXCHANGE_ECDHE_ECDSA, sdkconfig:1573 CONFIG_MBEDTLS_KEY_EXCHANGE_ECDH_ECDSA, sdkconfig:1578 CONFIG_MBEDTLS_SSL_PROTO_TLS1_2, sdkconfig:1614 CONFIG_MBEDTLS_ECDSA_C, sdkconfig:1618 CONFIG_MBEDTLS_ECP_DP_SECP256R1_ENABLED
+asset application:wifi-tls / mbedtls / ECDSA-secp384r1 | sdkconfig:1553 CONFIG_MBEDTLS_ECDSA_DETERMINISTIC, sdkconfig:1572 CONFIG_MBEDTLS_KEY_EXCHANGE_ECDHE_ECDSA, sdkconfig:1573 CONFIG_MBEDTLS_KEY_EXCHANGE_ECDH_ECDSA, sdkconfig:1578 CONFIG_MBEDTLS_SSL_PROTO_TLS1_2, sdkconfig:1614 CONFIG_MBEDTLS_ECDSA_C, sdkconfig:1619 CONFIG_MBEDTLS_ECP_DP_SECP384R1_ENABLED
+asset application:wifi-tls / mbedtls / ECDSA-secp521r1 | sdkconfig:1553 CONFIG_MBEDTLS_ECDSA_DETERMINISTIC, sdkconfig:1572 CONFIG_MBEDTLS_KEY_EXCHANGE_ECDHE_ECDSA, sdkconfig:1573 CONFIG_MBEDTLS_KEY_EXCHANGE_ECDH_ECDSA, sdkconfig:1578 CONFIG_MBEDTLS_SSL_PROTO_TLS1_2, sdkconfig:1614 CONFIG_MBEDTLS_ECDSA_C, sdkconfig:1620 CONFIG_MBEDTLS_ECP_DP_SECP521R1_ENABLED
+asset application:wifi-tls / mbedtls / RSA-PKCS1v15 | sdkconfig:1569 CONFIG_MBEDTLS_KEY_EXCHANGE_RSA, sdkconfig:1571 CONFIG_MBEDTLS_KEY_EXCHANGE_ECDHE_RSA, sdkconfig:1574 CONFIG_MBEDTLS_KEY_EXCHANGE_ECDH_RSA, sdkconfig:1578 CONFIG_MBEDTLS_SSL_PROTO_TLS1_2
+asset application:wifi-tls / mbedtls / SHA2-256 [hardware] | sdkconfig:1546 CONFIG_MBEDTLS_HARDWARE_SHA
+asset application:wifi-tls / mbedtls / SHA2-384 [hardware] | sdkconfig:205 CONFIG_SOC_SHA_SUPPORT_SHA384, sdkconfig:1546 CONFIG_MBEDTLS_HARDWARE_SHA, sdkconfig:1555 CONFIG_MBEDTLS_SHA512_C
+asset application:wifi-tls / mbedtls / SHA2-512 [hardware] | sdkconfig:206 CONFIG_SOC_SHA_SUPPORT_SHA512, sdkconfig:1546 CONFIG_MBEDTLS_HARDWARE_SHA, sdkconfig:1555 CONFIG_MBEDTLS_SHA512_C
+asset application:wifi-tls / mbedtls / TLS-1.2 | sdkconfig:1578 CONFIG_MBEDTLS_SSL_PROTO_TLS1_2
+asset application:wifi-tls / mbedtls / X25519 | sdkconfig:1571 CONFIG_MBEDTLS_KEY_EXCHANGE_ECDHE_RSA, sdkconfig:1572 CONFIG_MBEDTLS_KEY_EXCHANGE_ECDHE_ECDSA, sdkconfig:1573 CONFIG_MBEDTLS_KEY_EXCHANGE_ECDH_ECDSA, sdkconfig:1574 CONFIG_MBEDTLS_KEY_EXCHANGE_ECDH_RSA, sdkconfig:1578 CONFIG_MBEDTLS_SSL_PROTO_TLS1_2, sdkconfig:1613 CONFIG_MBEDTLS_ECDH_C, sdkconfig:1627 CONFIG_MBEDTLS_ECP_DP_CURVE25519_ENABLED
+
+# Compiled out (explicitly-off symbols), per image: IMAGE LIBRARY ALGORITHM.
+compiled-out application:wifi-tls mbedtls ChaCha20-Poly1305
+compiled-out application:wifi-tls mbedtls DH
+compiled-out application:wifi-tls mbedtls HKDF
+compiled-out application:wifi-tls mbedtls SHA3
+
+# Notes, sorted.
+note sdkconfig: uses the legacy mbedTLS crypto API (CONFIG_MBEDTLS_AES_C)
+note sdkconfig:1541: CONFIG_MBEDTLS_CMAC_C enables CMAC, which the algorithm catalogue does not list yet; not reported
+note sdkconfig:1544: mbedTLS uses the MPI accelerator for big-number arithmetic (CONFIG_MBEDTLS_HARDWARE_MPI); RSA, DH and ECC still run in software around it, so none is marked as hardware
+note sdkconfig:1547: CONFIG_MBEDTLS_ROM_MD5 enables MD5, which the algorithm catalogue does not list yet; not reported
+note sdkconfig:1554: CONFIG_MBEDTLS_SHA1_C enables SHA-1, which the algorithm catalogue does not list yet; not reported
+note sdkconfig:1616: CONFIG_MBEDTLS_ECP_DP_SECP192R1_ENABLED enables ECDH on secp192r1, which the algorithm catalogue does not list yet; not reported
+note sdkconfig:1616: CONFIG_MBEDTLS_ECP_DP_SECP192R1_ENABLED enables ECDSA on secp192r1, which the algorithm catalogue does not list yet; not reported
+note sdkconfig:1617: CONFIG_MBEDTLS_ECP_DP_SECP224R1_ENABLED enables ECDH on secp224r1, which the algorithm catalogue does not list yet; not reported
+note sdkconfig:1617: CONFIG_MBEDTLS_ECP_DP_SECP224R1_ENABLED enables ECDSA on secp224r1, which the algorithm catalogue does not list yet; not reported
+note sdkconfig:1621: CONFIG_MBEDTLS_ECP_DP_SECP192K1_ENABLED enables ECDH on secp192k1, which the algorithm catalogue does not list yet; not reported
+note sdkconfig:1621: CONFIG_MBEDTLS_ECP_DP_SECP192K1_ENABLED enables ECDSA on secp192k1, which the algorithm catalogue does not list yet; not reported
+note sdkconfig:1622: CONFIG_MBEDTLS_ECP_DP_SECP224K1_ENABLED enables ECDH on secp224k1, which the algorithm catalogue does not list yet; not reported
+note sdkconfig:1622: CONFIG_MBEDTLS_ECP_DP_SECP224K1_ENABLED enables ECDSA on secp224k1, which the algorithm catalogue does not list yet; not reported
+note sdkconfig:1623: CONFIG_MBEDTLS_ECP_DP_SECP256K1_ENABLED enables ECDH on secp256k1, which the algorithm catalogue does not list yet; not reported
+note sdkconfig:1623: CONFIG_MBEDTLS_ECP_DP_SECP256K1_ENABLED enables ECDSA on secp256k1, which the algorithm catalogue does not list yet; not reported
+note sdkconfig:1624: CONFIG_MBEDTLS_ECP_DP_BP256R1_ENABLED enables ECDH on brainpoolP256r1, which the algorithm catalogue does not list yet; not reported
+note sdkconfig:1624: CONFIG_MBEDTLS_ECP_DP_BP256R1_ENABLED enables ECDSA on brainpoolP256r1, which the algorithm catalogue does not list yet; not reported
+note sdkconfig:1625: CONFIG_MBEDTLS_ECP_DP_BP384R1_ENABLED enables ECDH on brainpoolP384r1, which the algorithm catalogue does not list yet; not reported
+note sdkconfig:1625: CONFIG_MBEDTLS_ECP_DP_BP384R1_ENABLED enables ECDSA on brainpoolP384r1, which the algorithm catalogue does not list yet; not reported
+note sdkconfig:1626: CONFIG_MBEDTLS_ECP_DP_BP512R1_ENABLED enables ECDH on brainpoolP512r1, which the algorithm catalogue does not list yet; not reported
+note sdkconfig:1626: CONFIG_MBEDTLS_ECP_DP_BP512R1_ENABLED enables ECDSA on brainpoolP512r1, which the algorithm catalogue does not list yet; not reported
+note sdkconfig:358: secure boot not enabled (CONFIG_SECURE_BOOT is not set)
+note sdkconfig:359: flash encryption not enabled (CONFIG_SECURE_FLASH_ENC_ENABLED is not set)
