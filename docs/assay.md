@@ -15,6 +15,10 @@ writes a valid but empty CBOM (see [Inputs](#inputs)). What is in place is the m
 CycloneDX writer and reader, and the Markdown summary, which a model written by hand (or by
 another tool, in the `rollcall-model/1` JSON form) can already use through `--model`.
 
+The facts about each algorithm (its primitive, parameter sets, classical and NIST post-quantum
+security levels and quantum-risk class) come from the [algorithm catalogue](catalogue.md), which
+also explains where every number comes from.
+
 ## Flags
 
 | Flag | Meaning |

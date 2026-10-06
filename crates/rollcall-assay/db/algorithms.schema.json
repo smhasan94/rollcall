@@ -1,0 +1,118 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:rollcall:schema:algorithms:1",
+  "title": "rollcall algorithm catalogue (rollcall-algorithms/1)",
+  "description": "The export contract of crates/rollcall-assay/db/algorithms.yaml: the file rollcall loads and cbom-infra copies. Validate the YAML parsed as JSON. Structural rules a schema cannot express (names in order and unique ignoring case, the risk class agreeing with the NIST levels, padding only on signature or pke primitives, crypto_functions in order) are rollcall's lint; see docs/catalogue.md.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["format", "algorithms"],
+  "properties": {
+    "format": {
+      "const": "rollcall-algorithms/1"
+    },
+    "algorithms": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/algorithm" }
+    }
+  },
+  "$defs": {
+    "algorithm": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "family", "primitive", "quantum_risk", "standards", "parameter_sets"],
+      "properties": {
+        "name": {
+          "description": "The lookup key, unique ignoring ASCII case. One entry per family, primitive and mode or padding, e.g. AES-GCM.",
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9+/.-]*$"
+        },
+        "family": {
+          "description": "The algorithm family, e.g. AES, RSA, SHA2.",
+          "type": "string",
+          "minLength": 1
+        },
+        "primitive": {
+          "description": "CycloneDX 1.6 algorithmProperties.primitive.",
+          "enum": [
+            "drbg", "mac", "block-cipher", "stream-cipher", "signature", "hash", "pke", "xof",
+            "kdf", "key-agree", "kem", "ae", "combiner", "other", "unknown"
+          ]
+        },
+        "mode": {
+          "description": "CycloneDX 1.6 algorithmProperties.mode.",
+          "enum": ["cbc", "ecb", "ccm", "gcm", "cfb", "ofb", "ctr", "other", "unknown", null]
+        },
+        "padding": {
+          "description": "The padding scheme. pkcs1v15 and oaep are CycloneDX 1.6 words; pss is written to CycloneDX as other.",
+          "enum": ["oaep", "pss", "pkcs1v15", null]
+        },
+        "crypto_functions": {
+          "description": "CycloneDX 1.6 algorithmProperties.cryptoFunctions, in ASCII order, without duplicates.",
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "generate", "keygen", "encrypt", "decrypt", "digest", "tag", "keyderive", "sign",
+              "verify", "encapsulate", "decapsulate", "other", "unknown"
+            ]
+          }
+        },
+        "quantum_risk": {
+          "description": "shor-broken: a quantum computer running Shor's algorithm breaks it. grover-weakened: Grover's (or a collision) search weakens it, a larger key or digest restores it. pq-safe: designed to resist a quantum computer.",
+          "enum": ["shor-broken", "grover-weakened", "pq-safe"]
+        },
+        "standards": {
+          "description": "The documents that specify the algorithm, e.g. FIPS 197.",
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "parameter_sets": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/parameter_set" }
+        }
+      }
+    },
+    "parameter_set": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "classical_security_level", "nist_quantum_security_level", "source"],
+      "properties": {
+        "id": {
+          "description": "CycloneDX 1.6 algorithmProperties.parameterSetIdentifier, unique within the entry. Always a string.",
+          "type": "string",
+          "minLength": 1
+        },
+        "classical_security_level": {
+          "description": "CycloneDX 1.6 algorithmProperties.classicalSecurityLevel, in bits.",
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "nist_quantum_security_level": {
+          "description": "CycloneDX 1.6 algorithmProperties.nistQuantumSecurityLevel: the NIST post-quantum security category, 0 for none.",
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 6
+        },
+        "curve": {
+          "description": "The elliptic curve, named as https://neuromancer.sk/std/ names it.",
+          "type": ["string", "null"],
+          "minLength": 1
+        },
+        "oid": {
+          "description": "The object identifier, dotted decimal.",
+          "type": ["string", "null"],
+          "pattern": "^[0-2](\\.(0|[1-9][0-9]*))+$"
+        },
+        "source": {
+          "description": "Where the two levels come from, in words. Not normative: the sync check ignores it.",
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  }
+}

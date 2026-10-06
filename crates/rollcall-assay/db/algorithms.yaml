@@ -1,0 +1,1020 @@
+# The algorithm catalogue (SHA-139): rollcall's single source of truth for the classical and
+# post-quantum security of the algorithms `rollcall assay` reports. Data, not code: see
+# docs/catalogue.md for the schema, the risk classes, where every number comes from and how
+# cbom-infra keeps its copy in sync. The JSON Schema is algorithms.schema.json beside it.
+#
+# Entries are in name order (ASCII, ignoring case); a parameter-set `id` is the CycloneDX
+# parameterSetIdentifier and is always quoted.
+format: rollcall-algorithms/1
+algorithms:
+  - name: AES-CBC
+    family: AES
+    primitive: block-cipher
+    mode: cbc
+    crypto_functions: [decrypt, encrypt]
+    quantum_risk: grover-weakened
+    standards: [FIPS 197, SP 800-38A]
+    parameter_sets:
+      - id: "128"
+        classical_security_level: 128
+        nist_quantum_security_level: 1
+        oid: 2.16.840.1.101.3.4.1.2
+        source: "SP 800-57 Pt 1 Rev 5 Table 2: AES-128 → 128 bits; NIST PQC CfP §4.A.5: category 1 is key search on AES-128"
+      - id: "192"
+        classical_security_level: 192
+        nist_quantum_security_level: 3
+        oid: 2.16.840.1.101.3.4.1.22
+        source: "SP 800-57 Pt 1 Rev 5 Table 2: AES-192 → 192 bits; NIST PQC CfP §4.A.5: category 3 is key search on AES-192"
+      - id: "256"
+        classical_security_level: 256
+        nist_quantum_security_level: 5
+        oid: 2.16.840.1.101.3.4.1.42
+        source: "SP 800-57 Pt 1 Rev 5 Table 2: AES-256 → 256 bits; NIST PQC CfP §4.A.5: category 5 is key search on AES-256"
+  - name: AES-CCM
+    family: AES
+    primitive: ae
+    mode: ccm
+    crypto_functions: [decrypt, encrypt, tag]
+    quantum_risk: grover-weakened
+    standards: [FIPS 197, SP 800-38C]
+    parameter_sets:
+      - id: "128"
+        classical_security_level: 128
+        nist_quantum_security_level: 1
+        oid: 2.16.840.1.101.3.4.1.7
+        source: "SP 800-57 Pt 1 Rev 5 Table 2: AES-128 → 128 bits; NIST PQC CfP §4.A.5: category 1 is key search on AES-128"
+      - id: "192"
+        classical_security_level: 192
+        nist_quantum_security_level: 3
+        oid: 2.16.840.1.101.3.4.1.27
+        source: "SP 800-57 Pt 1 Rev 5 Table 2: AES-192 → 192 bits; NIST PQC CfP §4.A.5: category 3 is key search on AES-192"
+      - id: "256"
+        classical_security_level: 256
+        nist_quantum_security_level: 5
+        oid: 2.16.840.1.101.3.4.1.47
+        source: "SP 800-57 Pt 1 Rev 5 Table 2: AES-256 → 256 bits; NIST PQC CfP §4.A.5: category 5 is key search on AES-256"
+  - name: AES-CTR
+    family: AES
+    primitive: block-cipher
+    mode: ctr
+    crypto_functions: [decrypt, encrypt]
+    quantum_risk: grover-weakened
+    standards: [FIPS 197, SP 800-38A]
+    parameter_sets:
+      - id: "128"
+        classical_security_level: 128
+        nist_quantum_security_level: 1
+        source: "SP 800-57 Pt 1 Rev 5 Table 2: AES-128 → 128 bits; NIST PQC CfP §4.A.5: category 1 is key search on AES-128"
+      - id: "192"
+        classical_security_level: 192
+        nist_quantum_security_level: 3
+        source: "SP 800-57 Pt 1 Rev 5 Table 2: AES-192 → 192 bits; NIST PQC CfP §4.A.5: category 3 is key search on AES-192"
+      - id: "256"
+        classical_security_level: 256
+        nist_quantum_security_level: 5
+        source: "SP 800-57 Pt 1 Rev 5 Table 2: AES-256 → 256 bits; NIST PQC CfP §4.A.5: category 5 is key search on AES-256"
+  - name: AES-ECB
+    family: AES
+    primitive: block-cipher
+    mode: ecb
+    crypto_functions: [decrypt, encrypt]
+    quantum_risk: grover-weakened
+    standards: [FIPS 197, SP 800-38A]
+    parameter_sets:
+      - id: "128"
+        classical_security_level: 128
+        nist_quantum_security_level: 1
+        oid: 2.16.840.1.101.3.4.1.1
+        source: "SP 800-57 Pt 1 Rev 5 Table 2: AES-128 → 128 bits; NIST PQC CfP §4.A.5: category 1 is key search on AES-128"
+      - id: "192"
+        classical_security_level: 192
+        nist_quantum_security_level: 3
+        oid: 2.16.840.1.101.3.4.1.21
+        source: "SP 800-57 Pt 1 Rev 5 Table 2: AES-192 → 192 bits; NIST PQC CfP §4.A.5: category 3 is key search on AES-192"
+      - id: "256"
+        classical_security_level: 256
+        nist_quantum_security_level: 5
+        oid: 2.16.840.1.101.3.4.1.41
+        source: "SP 800-57 Pt 1 Rev 5 Table 2: AES-256 → 256 bits; NIST PQC CfP §4.A.5: category 5 is key search on AES-256"
+  - name: AES-GCM
+    family: AES
+    primitive: ae
+    mode: gcm
+    crypto_functions: [decrypt, encrypt, tag]
+    quantum_risk: grover-weakened
+    standards: [FIPS 197, SP 800-38D]
+    parameter_sets:
+      - id: "128"
+        classical_security_level: 128
+        nist_quantum_security_level: 1
+        oid: 2.16.840.1.101.3.4.1.6
+        source: "SP 800-57 Pt 1 Rev 5 Table 2: AES-128 → 128 bits; NIST PQC CfP §4.A.5: category 1 is key search on AES-128"
+      - id: "192"
+        classical_security_level: 192
+        nist_quantum_security_level: 3
+        oid: 2.16.840.1.101.3.4.1.26
+        source: "SP 800-57 Pt 1 Rev 5 Table 2: AES-192 → 192 bits; NIST PQC CfP §4.A.5: category 3 is key search on AES-192"
+      - id: "256"
+        classical_security_level: 256
+        nist_quantum_security_level: 5
+        oid: 2.16.840.1.101.3.4.1.46
+        source: "SP 800-57 Pt 1 Rev 5 Table 2: AES-256 → 256 bits; NIST PQC CfP §4.A.5: category 5 is key search on AES-256"
+  - name: ChaCha20-Poly1305
+    family: ChaCha20-Poly1305
+    primitive: ae
+    crypto_functions: [decrypt, encrypt, tag]
+    quantum_risk: grover-weakened
+    standards: [RFC 8439]
+    parameter_sets:
+      - id: "256"
+        classical_security_level: 256
+        nist_quantum_security_level: 5
+        oid: 1.2.840.113549.1.9.16.3.18
+        source: "256-bit key, rated by key size as SP 800-57 Pt 1 Rev 5 Table 2 rates AES-256 → 256 bits; NIST PQC CfP §4.A.5: category 5 is key search on AES-256"
+  - name: DH
+    family: DH
+    primitive: key-agree
+    quantum_risk: shor-broken
+    standards: [RFC 7919, SP 800-56A Rev. 3]
+    parameter_sets:
+      - id: "ffdhe2048"
+        classical_security_level: 112
+        nist_quantum_security_level: 0
+        source: "SP 800-57 Pt 1 Rev 5 Table 2: FFC L = 2048 → 112 bits (RFC 7919 group ffdhe2048); Shor's algorithm breaks it, so NIST category 0"
+      - id: "ffdhe3072"
+        classical_security_level: 128
+        nist_quantum_security_level: 0
+        source: "SP 800-57 Pt 1 Rev 5 Table 2: FFC L = 3072 → 128 bits (RFC 7919 group ffdhe3072); Shor's algorithm breaks it, so NIST category 0"
+      - id: "ffdhe4096"
+        classical_security_level: 128
+        nist_quantum_security_level: 0
+        source: "SP 800-57 Pt 1 Rev 5 Table 2: FFC L = 4096 lies between the L = 3072 (128) and L = 7680 (192) rows, so the lower, 128 bits (RFC 7919 group ffdhe4096); Shor's algorithm breaks it, so NIST category 0"
+      - id: "ffdhe6144"
+        classical_security_level: 128
+        nist_quantum_security_level: 0
+        source: "SP 800-57 Pt 1 Rev 5 Table 2: FFC L = 6144 lies between the L = 3072 (128) and L = 7680 (192) rows, so the lower, 128 bits (RFC 7919 group ffdhe6144); Shor's algorithm breaks it, so NIST category 0"
+      - id: "ffdhe8192"
+        classical_security_level: 192
+        nist_quantum_security_level: 0
+        source: "SP 800-57 Pt 1 Rev 5 Table 2: FFC L = 8192 lies between the L = 7680 (192) and L = 15360 (256) rows, so the lower, 192 bits (RFC 7919 group ffdhe8192); Shor's algorithm breaks it, so NIST category 0"
+  - name: DSA
+    family: DSA
+    primitive: signature
+    crypto_functions: [sign, verify]
+    quantum_risk: shor-broken
+    standards: [FIPS 186-4]
+    parameter_sets:
+      - id: "2048-224"
+        classical_security_level: 112
+        nist_quantum_security_level: 0
+        oid: 1.2.840.10040.4.1
+        source: "SP 800-57 Pt 1 Rev 5 Table 2: FFC L = 2048, N = 224 → 112 bits; Shor's algorithm breaks it, so NIST category 0"
+      - id: "2048-256"
+        classical_security_level: 112
+        nist_quantum_security_level: 0
+        oid: 1.2.840.10040.4.1
+        source: "SP 800-57 Pt 1 Rev 5 Table 2: FFC L = 2048 → 112 bits (N = 256 does not raise it); Shor's algorithm breaks it, so NIST category 0"
+      - id: "3072-256"
+        classical_security_level: 128
+        nist_quantum_security_level: 0
+        oid: 1.2.840.10040.4.1
+        source: "SP 800-57 Pt 1 Rev 5 Table 2: FFC L = 3072, N = 256 → 128 bits; Shor's algorithm breaks it, so NIST category 0"
+  - name: ECDH
+    family: ECDH
+    primitive: key-agree
+    quantum_risk: shor-broken
+    standards: [SP 800-186, SP 800-56A Rev. 3]
+    parameter_sets:
+      - id: "secp256r1"
+        classical_security_level: 128
+        nist_quantum_security_level: 0
+        curve: secp256r1
+        source: "SP 800-57 Pt 1 Rev 5 Table 2: ECC f = 256 (P-256 order) → 128 bits; Shor's algorithm breaks it, so NIST category 0"
+      - id: "secp384r1"
+        classical_security_level: 192
+        nist_quantum_security_level: 0
+        curve: secp384r1
+        source: "SP 800-57 Pt 1 Rev 5 Table 2: ECC f = 384 (P-384 order) → 192 bits; Shor's algorithm breaks it, so NIST category 0"
+      - id: "secp521r1"
+        classical_security_level: 256
+        nist_quantum_security_level: 0
+        curve: secp521r1
+        source: "SP 800-57 Pt 1 Rev 5 Table 2: ECC f = 521 (P-521 order) is in the f ≥ 512 row → 256 bits; Shor's algorithm breaks it, so NIST category 0"
+  - name: ECDSA
+    family: ECDSA
+    primitive: signature
+    crypto_functions: [sign, verify]
+    quantum_risk: shor-broken
+    standards: [FIPS 186-5, SP 800-186]
+    parameter_sets:
+      - id: "secp256r1"
+        classical_security_level: 128
+        nist_quantum_security_level: 0
+        curve: secp256r1
+        source: "SP 800-57 Pt 1 Rev 5 Table 2: ECC f = 256 (P-256 order) → 128 bits; Shor's algorithm breaks it, so NIST category 0"
+      - id: "secp384r1"
+        classical_security_level: 192
+        nist_quantum_security_level: 0
+        curve: secp384r1
+        source: "SP 800-57 Pt 1 Rev 5 Table 2: ECC f = 384 (P-384 order) → 192 bits; Shor's algorithm breaks it, so NIST category 0"
+      - id: "secp521r1"
+        classical_security_level: 256
+        nist_quantum_security_level: 0
+        curve: secp521r1
+        source: "SP 800-57 Pt 1 Rev 5 Table 2: ECC f = 521 (P-521 order) is in the f ≥ 512 row → 256 bits; Shor's algorithm breaks it, so NIST category 0"
+  - name: Ed25519
+    family: Ed25519
+    primitive: signature
+    crypto_functions: [sign, verify]
+    quantum_risk: shor-broken
+    standards: [FIPS 186-5, RFC 8032]
+    parameter_sets:
+      - id: "Ed25519"
+        classical_security_level: 128
+        nist_quantum_security_level: 0
+        curve: Ed25519
+        oid: 1.3.101.112
+        source: "SP 800-186 and RFC 7748 rate Edwards25519 at 128 bits (subgroup order ≈ 2^252); Shor's algorithm breaks it, so NIST category 0"
+  - name: HKDF
+    family: HKDF
+    primitive: kdf
+    crypto_functions: [keyderive]
+    quantum_risk: grover-weakened
+    standards: [RFC 5869, SP 800-56C Rev. 2]
+    parameter_sets:
+      - id: "SHA-256"
+        classical_security_level: 256
+        nist_quantum_security_level: 2
+        oid: 1.2.840.113549.1.9.16.3.28
+        source: "SP 800-57 Pt 1 Rev 5 Table 3 (key-derivation column): SHA-256 → ≥ 256 bits, recorded as 256; category inherited from SHA-256 (2)"
+      - id: "SHA-384"
+        classical_security_level: 256
+        nist_quantum_security_level: 4
+        oid: 1.2.840.113549.1.9.16.3.29
+        source: "SP 800-57 Pt 1 Rev 5 Table 3 (key-derivation column): SHA-384 → ≥ 256 bits, recorded as 256; category inherited from SHA-384 (4)"
+      - id: "SHA-512"
+        classical_security_level: 256
+        nist_quantum_security_level: 5
+        oid: 1.2.840.113549.1.9.16.3.30
+        source: "SP 800-57 Pt 1 Rev 5 Table 3 (key-derivation column): SHA-512 → ≥ 256 bits, recorded as 256; category inherited from SHA-512 (5)"
+  - name: HMAC
+    family: HMAC
+    primitive: mac
+    crypto_functions: [tag]
+    quantum_risk: grover-weakened
+    standards: [FIPS 198-1, RFC 2104]
+    parameter_sets:
+      - id: "SHA-224"
+        classical_security_level: 192
+        nist_quantum_security_level: 0
+        oid: 1.2.840.113549.2.8
+        source: "SP 800-57 Pt 1 Rev 5 Table 3 (HMAC column): SHA-224 → 192 bits, with a key at least that long; category inherited from SHA-224 (0): below category 1 under the collision-based hash rule, not broken; for a MAC the classical level is the better indicator"
+      - id: "SHA-256"
+        classical_security_level: 256
+        nist_quantum_security_level: 2
+        oid: 1.2.840.113549.2.9
+        source: "SP 800-57 Pt 1 Rev 5 Table 3 (HMAC column): SHA-256 → ≥ 256 bits, recorded as 256, with a key at least that long; category inherited from SHA-256 (2)"
+      - id: "SHA-384"
+        classical_security_level: 256
+        nist_quantum_security_level: 4
+        oid: 1.2.840.113549.2.10
+        source: "SP 800-57 Pt 1 Rev 5 Table 3 (HMAC column): SHA-384 → ≥ 256 bits, recorded as 256, with a key at least that long; category inherited from SHA-384 (4)"
+      - id: "SHA-512"
+        classical_security_level: 256
+        nist_quantum_security_level: 5
+        oid: 1.2.840.113549.2.11
+        source: "SP 800-57 Pt 1 Rev 5 Table 3 (HMAC column): SHA-512 → ≥ 256 bits, recorded as 256, with a key at least that long; category inherited from SHA-512 (5)"
+      - id: "SHA-512/224"
+        classical_security_level: 192
+        nist_quantum_security_level: 0
+        oid: 1.2.840.113549.2.12
+        source: "SP 800-57 Pt 1 Rev 5 Table 3 (HMAC column): SHA-512/224 → 192 bits, with a key at least that long; category inherited from SHA-512/224 (0): below category 1 under the collision-based hash rule, not broken; for a MAC the classical level is the better indicator"
+      - id: "SHA-512/256"
+        classical_security_level: 256
+        nist_quantum_security_level: 2
+        oid: 1.2.840.113549.2.13
+        source: "SP 800-57 Pt 1 Rev 5 Table 3 (HMAC column): SHA-512/256 → ≥ 256 bits, recorded as 256, with a key at least that long; category inherited from SHA-512/256 (2)"
+      - id: "SHA3-224"
+        classical_security_level: 192
+        nist_quantum_security_level: 0
+        oid: 2.16.840.1.101.3.4.2.13
+        source: "SP 800-57 Pt 1 Rev 5 Table 3 (HMAC column): SHA3-224 → 192 bits, with a key at least that long; category inherited from SHA3-224 (0): below category 1 under the collision-based hash rule, not broken; for a MAC the classical level is the better indicator"
+      - id: "SHA3-256"
+        classical_security_level: 256
+        nist_quantum_security_level: 2
+        oid: 2.16.840.1.101.3.4.2.14
+        source: "SP 800-57 Pt 1 Rev 5 Table 3 (HMAC column): SHA3-256 → ≥ 256 bits, recorded as 256, with a key at least that long; category inherited from SHA3-256 (2)"
+      - id: "SHA3-384"
+        classical_security_level: 256
+        nist_quantum_security_level: 4
+        oid: 2.16.840.1.101.3.4.2.15
+        source: "SP 800-57 Pt 1 Rev 5 Table 3 (HMAC column): SHA3-384 → ≥ 256 bits, recorded as 256, with a key at least that long; category inherited from SHA3-384 (4)"
+      - id: "SHA3-512"
+        classical_security_level: 256
+        nist_quantum_security_level: 5
+        oid: 2.16.840.1.101.3.4.2.16
+        source: "SP 800-57 Pt 1 Rev 5 Table 3 (HMAC column): SHA3-512 → ≥ 256 bits, recorded as 256, with a key at least that long; category inherited from SHA3-512 (5)"
+  - name: HSS
+    family: LMS
+    primitive: signature
+    crypto_functions: [sign, verify]
+    quantum_risk: pq-safe
+    standards: [RFC 8554, SP 800-208]
+    parameter_sets:
+      - id: "LMS_SHA256_M32_H5"
+        classical_security_level: 256
+        nist_quantum_security_level: 5
+        oid: 1.2.840.113549.1.9.16.3.17
+        source: "SP 800-208 §4: HSS with LMS parameter set LMS_SHA256_M32_H5 at every level (n = 32); classical 256 bits and category 5 by n, as FIPS 205 Table 2 rates SLH-DSA with n = 32"
+      - id: "LMS_SHA256_M32_H10"
+        classical_security_level: 256
+        nist_quantum_security_level: 5
+        oid: 1.2.840.113549.1.9.16.3.17
+        source: "SP 800-208 §4: HSS with LMS parameter set LMS_SHA256_M32_H10 at every level (n = 32); classical 256 bits and category 5 by n, as FIPS 205 Table 2 rates SLH-DSA with n = 32"
+      - id: "LMS_SHA256_M32_H15"
+        classical_security_level: 256
+        nist_quantum_security_level: 5
+        oid: 1.2.840.113549.1.9.16.3.17
+        source: "SP 800-208 §4: HSS with LMS parameter set LMS_SHA256_M32_H15 at every level (n = 32); classical 256 bits and category 5 by n, as FIPS 205 Table 2 rates SLH-DSA with n = 32"
+      - id: "LMS_SHA256_M32_H20"
+        classical_security_level: 256
+        nist_quantum_security_level: 5
+        oid: 1.2.840.113549.1.9.16.3.17
+        source: "SP 800-208 §4: HSS with LMS parameter set LMS_SHA256_M32_H20 at every level (n = 32); classical 256 bits and category 5 by n, as FIPS 205 Table 2 rates SLH-DSA with n = 32"
+      - id: "LMS_SHA256_M32_H25"
+        classical_security_level: 256
+        nist_quantum_security_level: 5
+        oid: 1.2.840.113549.1.9.16.3.17
+        source: "SP 800-208 §4: HSS with LMS parameter set LMS_SHA256_M32_H25 at every level (n = 32); classical 256 bits and category 5 by n, as FIPS 205 Table 2 rates SLH-DSA with n = 32"
+      - id: "LMS_SHA256_M24_H5"
+        classical_security_level: 192
+        nist_quantum_security_level: 3
+        oid: 1.2.840.113549.1.9.16.3.17
+        source: "SP 800-208 §4: HSS with LMS parameter set LMS_SHA256_M24_H5 at every level (n = 24); classical 192 bits and category 3 by n, as FIPS 205 Table 2 rates SLH-DSA with n = 24"
+      - id: "LMS_SHA256_M24_H10"
+        classical_security_level: 192
+        nist_quantum_security_level: 3
+        oid: 1.2.840.113549.1.9.16.3.17
+        source: "SP 800-208 §4: HSS with LMS parameter set LMS_SHA256_M24_H10 at every level (n = 24); classical 192 bits and category 3 by n, as FIPS 205 Table 2 rates SLH-DSA with n = 24"
+      - id: "LMS_SHA256_M24_H15"
+        classical_security_level: 192
+        nist_quantum_security_level: 3
+        oid: 1.2.840.113549.1.9.16.3.17
+        source: "SP 800-208 §4: HSS with LMS parameter set LMS_SHA256_M24_H15 at every level (n = 24); classical 192 bits and category 3 by n, as FIPS 205 Table 2 rates SLH-DSA with n = 24"
+      - id: "LMS_SHA256_M24_H20"
+        classical_security_level: 192
+        nist_quantum_security_level: 3
+        oid: 1.2.840.113549.1.9.16.3.17
+        source: "SP 800-208 §4: HSS with LMS parameter set LMS_SHA256_M24_H20 at every level (n = 24); classical 192 bits and category 3 by n, as FIPS 205 Table 2 rates SLH-DSA with n = 24"
+      - id: "LMS_SHA256_M24_H25"
+        classical_security_level: 192
+        nist_quantum_security_level: 3
+        oid: 1.2.840.113549.1.9.16.3.17
+        source: "SP 800-208 §4: HSS with LMS parameter set LMS_SHA256_M24_H25 at every level (n = 24); classical 192 bits and category 3 by n, as FIPS 205 Table 2 rates SLH-DSA with n = 24"
+      - id: "LMS_SHAKE_M32_H5"
+        classical_security_level: 256
+        nist_quantum_security_level: 5
+        oid: 1.2.840.113549.1.9.16.3.17
+        source: "SP 800-208 §4: HSS with LMS parameter set LMS_SHAKE_M32_H5 at every level (n = 32); classical 256 bits and category 5 by n, as FIPS 205 Table 2 rates SLH-DSA with n = 32"
+      - id: "LMS_SHAKE_M32_H10"
+        classical_security_level: 256
+        nist_quantum_security_level: 5
+        oid: 1.2.840.113549.1.9.16.3.17
+        source: "SP 800-208 §4: HSS with LMS parameter set LMS_SHAKE_M32_H10 at every level (n = 32); classical 256 bits and category 5 by n, as FIPS 205 Table 2 rates SLH-DSA with n = 32"
+      - id: "LMS_SHAKE_M32_H15"
+        classical_security_level: 256
+        nist_quantum_security_level: 5
+        oid: 1.2.840.113549.1.9.16.3.17
+        source: "SP 800-208 §4: HSS with LMS parameter set LMS_SHAKE_M32_H15 at every level (n = 32); classical 256 bits and category 5 by n, as FIPS 205 Table 2 rates SLH-DSA with n = 32"
+      - id: "LMS_SHAKE_M32_H20"
+        classical_security_level: 256
+        nist_quantum_security_level: 5
+        oid: 1.2.840.113549.1.9.16.3.17
+        source: "SP 800-208 §4: HSS with LMS parameter set LMS_SHAKE_M32_H20 at every level (n = 32); classical 256 bits and category 5 by n, as FIPS 205 Table 2 rates SLH-DSA with n = 32"
+      - id: "LMS_SHAKE_M32_H25"
+        classical_security_level: 256
+        nist_quantum_security_level: 5
+        oid: 1.2.840.113549.1.9.16.3.17
+        source: "SP 800-208 §4: HSS with LMS parameter set LMS_SHAKE_M32_H25 at every level (n = 32); classical 256 bits and category 5 by n, as FIPS 205 Table 2 rates SLH-DSA with n = 32"
+      - id: "LMS_SHAKE_M24_H5"
+        classical_security_level: 192
+        nist_quantum_security_level: 3
+        oid: 1.2.840.113549.1.9.16.3.17
+        source: "SP 800-208 §4: HSS with LMS parameter set LMS_SHAKE_M24_H5 at every level (n = 24); classical 192 bits and category 3 by n, as FIPS 205 Table 2 rates SLH-DSA with n = 24"
+      - id: "LMS_SHAKE_M24_H10"
+        classical_security_level: 192
+        nist_quantum_security_level: 3
+        oid: 1.2.840.113549.1.9.16.3.17
+        source: "SP 800-208 §4: HSS with LMS parameter set LMS_SHAKE_M24_H10 at every level (n = 24); classical 192 bits and category 3 by n, as FIPS 205 Table 2 rates SLH-DSA with n = 24"
+      - id: "LMS_SHAKE_M24_H15"
+        classical_security_level: 192
+        nist_quantum_security_level: 3
+        oid: 1.2.840.113549.1.9.16.3.17
+        source: "SP 800-208 §4: HSS with LMS parameter set LMS_SHAKE_M24_H15 at every level (n = 24); classical 192 bits and category 3 by n, as FIPS 205 Table 2 rates SLH-DSA with n = 24"
+      - id: "LMS_SHAKE_M24_H20"
+        classical_security_level: 192
+        nist_quantum_security_level: 3
+        oid: 1.2.840.113549.1.9.16.3.17
+        source: "SP 800-208 §4: HSS with LMS parameter set LMS_SHAKE_M24_H20 at every level (n = 24); classical 192 bits and category 3 by n, as FIPS 205 Table 2 rates SLH-DSA with n = 24"
+      - id: "LMS_SHAKE_M24_H25"
+        classical_security_level: 192
+        nist_quantum_security_level: 3
+        oid: 1.2.840.113549.1.9.16.3.17
+        source: "SP 800-208 §4: HSS with LMS parameter set LMS_SHAKE_M24_H25 at every level (n = 24); classical 192 bits and category 3 by n, as FIPS 205 Table 2 rates SLH-DSA with n = 24"
+  - name: LMS
+    family: LMS
+    primitive: signature
+    crypto_functions: [sign, verify]
+    quantum_risk: pq-safe
+    standards: [RFC 8554, SP 800-208]
+    parameter_sets:
+      - id: "LMS_SHA256_M32_H5"
+        classical_security_level: 256
+        nist_quantum_security_level: 5
+        source: "SP 800-208 §4: LMS parameter set LMS_SHA256_M32_H5 (n = 32); classical 256 bits and category 5 by n, as FIPS 205 Table 2 rates SLH-DSA with n = 32"
+      - id: "LMS_SHA256_M32_H10"
+        classical_security_level: 256
+        nist_quantum_security_level: 5
+        source: "SP 800-208 §4: LMS parameter set LMS_SHA256_M32_H10 (n = 32); classical 256 bits and category 5 by n, as FIPS 205 Table 2 rates SLH-DSA with n = 32"
+      - id: "LMS_SHA256_M32_H15"
+        classical_security_level: 256
+        nist_quantum_security_level: 5
+        source: "SP 800-208 §4: LMS parameter set LMS_SHA256_M32_H15 (n = 32); classical 256 bits and category 5 by n, as FIPS 205 Table 2 rates SLH-DSA with n = 32"
+      - id: "LMS_SHA256_M32_H20"
+        classical_security_level: 256
+        nist_quantum_security_level: 5
+        source: "SP 800-208 §4: LMS parameter set LMS_SHA256_M32_H20 (n = 32); classical 256 bits and category 5 by n, as FIPS 205 Table 2 rates SLH-DSA with n = 32"
+      - id: "LMS_SHA256_M32_H25"
+        classical_security_level: 256
+        nist_quantum_security_level: 5
+        source: "SP 800-208 §4: LMS parameter set LMS_SHA256_M32_H25 (n = 32); classical 256 bits and category 5 by n, as FIPS 205 Table 2 rates SLH-DSA with n = 32"
+      - id: "LMS_SHA256_M24_H5"
+        classical_security_level: 192
+        nist_quantum_security_level: 3
+        source: "SP 800-208 §4: LMS parameter set LMS_SHA256_M24_H5 (n = 24); classical 192 bits and category 3 by n, as FIPS 205 Table 2 rates SLH-DSA with n = 24"
+      - id: "LMS_SHA256_M24_H10"
+        classical_security_level: 192
+        nist_quantum_security_level: 3
+        source: "SP 800-208 §4: LMS parameter set LMS_SHA256_M24_H10 (n = 24); classical 192 bits and category 3 by n, as FIPS 205 Table 2 rates SLH-DSA with n = 24"
+      - id: "LMS_SHA256_M24_H15"
+        classical_security_level: 192
+        nist_quantum_security_level: 3
+        source: "SP 800-208 §4: LMS parameter set LMS_SHA256_M24_H15 (n = 24); classical 192 bits and category 3 by n, as FIPS 205 Table 2 rates SLH-DSA with n = 24"
+      - id: "LMS_SHA256_M24_H20"
+        classical_security_level: 192
+        nist_quantum_security_level: 3
+        source: "SP 800-208 §4: LMS parameter set LMS_SHA256_M24_H20 (n = 24); classical 192 bits and category 3 by n, as FIPS 205 Table 2 rates SLH-DSA with n = 24"
+      - id: "LMS_SHA256_M24_H25"
+        classical_security_level: 192
+        nist_quantum_security_level: 3
+        source: "SP 800-208 §4: LMS parameter set LMS_SHA256_M24_H25 (n = 24); classical 192 bits and category 3 by n, as FIPS 205 Table 2 rates SLH-DSA with n = 24"
+      - id: "LMS_SHAKE_M32_H5"
+        classical_security_level: 256
+        nist_quantum_security_level: 5
+        source: "SP 800-208 §4: LMS parameter set LMS_SHAKE_M32_H5 (n = 32); classical 256 bits and category 5 by n, as FIPS 205 Table 2 rates SLH-DSA with n = 32"
+      - id: "LMS_SHAKE_M32_H10"
+        classical_security_level: 256
+        nist_quantum_security_level: 5
+        source: "SP 800-208 §4: LMS parameter set LMS_SHAKE_M32_H10 (n = 32); classical 256 bits and category 5 by n, as FIPS 205 Table 2 rates SLH-DSA with n = 32"
+      - id: "LMS_SHAKE_M32_H15"
+        classical_security_level: 256
+        nist_quantum_security_level: 5
+        source: "SP 800-208 §4: LMS parameter set LMS_SHAKE_M32_H15 (n = 32); classical 256 bits and category 5 by n, as FIPS 205 Table 2 rates SLH-DSA with n = 32"
+      - id: "LMS_SHAKE_M32_H20"
+        classical_security_level: 256
+        nist_quantum_security_level: 5
+        source: "SP 800-208 §4: LMS parameter set LMS_SHAKE_M32_H20 (n = 32); classical 256 bits and category 5 by n, as FIPS 205 Table 2 rates SLH-DSA with n = 32"
+      - id: "LMS_SHAKE_M32_H25"
+        classical_security_level: 256
+        nist_quantum_security_level: 5
+        source: "SP 800-208 §4: LMS parameter set LMS_SHAKE_M32_H25 (n = 32); classical 256 bits and category 5 by n, as FIPS 205 Table 2 rates SLH-DSA with n = 32"
+      - id: "LMS_SHAKE_M24_H5"
+        classical_security_level: 192
+        nist_quantum_security_level: 3
+        source: "SP 800-208 §4: LMS parameter set LMS_SHAKE_M24_H5 (n = 24); classical 192 bits and category 3 by n, as FIPS 205 Table 2 rates SLH-DSA with n = 24"
+      - id: "LMS_SHAKE_M24_H10"
+        classical_security_level: 192
+        nist_quantum_security_level: 3
+        source: "SP 800-208 §4: LMS parameter set LMS_SHAKE_M24_H10 (n = 24); classical 192 bits and category 3 by n, as FIPS 205 Table 2 rates SLH-DSA with n = 24"
+      - id: "LMS_SHAKE_M24_H15"
+        classical_security_level: 192
+        nist_quantum_security_level: 3
+        source: "SP 800-208 §4: LMS parameter set LMS_SHAKE_M24_H15 (n = 24); classical 192 bits and category 3 by n, as FIPS 205 Table 2 rates SLH-DSA with n = 24"
+      - id: "LMS_SHAKE_M24_H20"
+        classical_security_level: 192
+        nist_quantum_security_level: 3
+        source: "SP 800-208 §4: LMS parameter set LMS_SHAKE_M24_H20 (n = 24); classical 192 bits and category 3 by n, as FIPS 205 Table 2 rates SLH-DSA with n = 24"
+      - id: "LMS_SHAKE_M24_H25"
+        classical_security_level: 192
+        nist_quantum_security_level: 3
+        source: "SP 800-208 §4: LMS parameter set LMS_SHAKE_M24_H25 (n = 24); classical 192 bits and category 3 by n, as FIPS 205 Table 2 rates SLH-DSA with n = 24"
+  - name: ML-DSA
+    family: ML-DSA
+    primitive: signature
+    crypto_functions: [sign, verify]
+    quantum_risk: pq-safe
+    standards: [FIPS 204]
+    parameter_sets:
+      - id: "44"
+        classical_security_level: 128
+        nist_quantum_security_level: 2
+        oid: 2.16.840.1.101.3.4.3.17
+        source: "FIPS 204 Table 1: ML-DSA-44 is claimed in security category 2; classical 128 bits, the category's reference (collision search on SHA-256)"
+      - id: "65"
+        classical_security_level: 192
+        nist_quantum_security_level: 3
+        oid: 2.16.840.1.101.3.4.3.18
+        source: "FIPS 204 Table 1: ML-DSA-65 is claimed in security category 3; classical 192 bits, the category's reference (key search on AES-192)"
+      - id: "87"
+        classical_security_level: 256
+        nist_quantum_security_level: 5
+        oid: 2.16.840.1.101.3.4.3.19
+        source: "FIPS 204 Table 1: ML-DSA-87 is claimed in security category 5; classical 256 bits, the category's reference (key search on AES-256)"
+  - name: ML-KEM
+    family: ML-KEM
+    primitive: kem
+    crypto_functions: [decapsulate, encapsulate]
+    quantum_risk: pq-safe
+    standards: [FIPS 203]
+    parameter_sets:
+      - id: "512"
+        classical_security_level: 128
+        nist_quantum_security_level: 1
+        oid: 2.16.840.1.101.3.4.4.1
+        source: "FIPS 203 §8: ML-KEM-512 is claimed in security category 1; classical 128 bits, the category's reference (key search on AES-128)"
+      - id: "768"
+        classical_security_level: 192
+        nist_quantum_security_level: 3
+        oid: 2.16.840.1.101.3.4.4.2
+        source: "FIPS 203 §8: ML-KEM-768 is claimed in security category 3; classical 192 bits, the category's reference (key search on AES-192)"
+      - id: "1024"
+        classical_security_level: 256
+        nist_quantum_security_level: 5
+        oid: 2.16.840.1.101.3.4.4.3
+        source: "FIPS 203 §8: ML-KEM-1024 is claimed in security category 5; classical 256 bits, the category's reference (key search on AES-256)"
+  - name: PBKDF2
+    family: PBKDF2
+    primitive: kdf
+    crypto_functions: [keyderive]
+    quantum_risk: grover-weakened
+    standards: [RFC 8018, SP 800-132]
+    parameter_sets:
+      - id: "HMAC-SHA-256"
+        classical_security_level: 256
+        nist_quantum_security_level: 2
+        oid: 1.2.840.113549.1.5.12
+        source: "SP 800-57 Pt 1 Rev 5 Table 3 (key-derivation column): SHA-256 → ≥ 256 bits, recorded as 256, an upper bound: the real strength is the password's (SP 800-132); category inherited from SHA-256 (2)"
+      - id: "HMAC-SHA-384"
+        classical_security_level: 256
+        nist_quantum_security_level: 4
+        oid: 1.2.840.113549.1.5.12
+        source: "SP 800-57 Pt 1 Rev 5 Table 3 (key-derivation column): SHA-384 → ≥ 256 bits, recorded as 256, an upper bound: the real strength is the password's (SP 800-132); category inherited from SHA-384 (4)"
+      - id: "HMAC-SHA-512"
+        classical_security_level: 256
+        nist_quantum_security_level: 5
+        oid: 1.2.840.113549.1.5.12
+        source: "SP 800-57 Pt 1 Rev 5 Table 3 (key-derivation column): SHA-512 → ≥ 256 bits, recorded as 256, an upper bound: the real strength is the password's (SP 800-132); category inherited from SHA-512 (5)"
+  - name: RSA-OAEP
+    family: RSA
+    primitive: pke
+    padding: oaep
+    crypto_functions: [decrypt, encrypt]
+    quantum_risk: shor-broken
+    standards: [RFC 8017, SP 800-56B Rev. 2]
+    parameter_sets:
+      - id: "2048"
+        classical_security_level: 112
+        nist_quantum_security_level: 0
+        oid: 1.2.840.113549.1.1.7
+        source: "SP 800-57 Pt 1 Rev 5 Table 2: IFC k = 2048 → 112 bits; Shor's algorithm breaks it, so NIST category 0"
+      - id: "3072"
+        classical_security_level: 128
+        nist_quantum_security_level: 0
+        oid: 1.2.840.113549.1.1.7
+        source: "SP 800-57 Pt 1 Rev 5 Table 2: IFC k = 3072 → 128 bits; Shor's algorithm breaks it, so NIST category 0"
+      - id: "4096"
+        classical_security_level: 128
+        nist_quantum_security_level: 0
+        oid: 1.2.840.113549.1.1.7
+        source: "SP 800-57 Pt 1 Rev 5 Table 2: IFC k = 4096 lies between the k = 3072 (128) and k = 7680 (192) rows, so the lower, 128 bits; Shor's algorithm breaks it, so NIST category 0"
+      - id: "7680"
+        classical_security_level: 192
+        nist_quantum_security_level: 0
+        oid: 1.2.840.113549.1.1.7
+        source: "SP 800-57 Pt 1 Rev 5 Table 2: IFC k = 7680 → 192 bits; Shor's algorithm breaks it, so NIST category 0"
+      - id: "15360"
+        classical_security_level: 256
+        nist_quantum_security_level: 0
+        oid: 1.2.840.113549.1.1.7
+        source: "SP 800-57 Pt 1 Rev 5 Table 2: IFC k = 15360 → 256 bits; Shor's algorithm breaks it, so NIST category 0"
+  - name: RSA-PKCS1v15
+    family: RSA
+    primitive: signature
+    padding: pkcs1v15
+    crypto_functions: [sign, verify]
+    quantum_risk: shor-broken
+    standards: [FIPS 186-5, RFC 8017]
+    parameter_sets:
+      - id: "2048"
+        classical_security_level: 112
+        nist_quantum_security_level: 0
+        source: "SP 800-57 Pt 1 Rev 5 Table 2: IFC k = 2048 → 112 bits; Shor's algorithm breaks it, so NIST category 0"
+      - id: "3072"
+        classical_security_level: 128
+        nist_quantum_security_level: 0
+        source: "SP 800-57 Pt 1 Rev 5 Table 2: IFC k = 3072 → 128 bits; Shor's algorithm breaks it, so NIST category 0"
+      - id: "4096"
+        classical_security_level: 128
+        nist_quantum_security_level: 0
+        source: "SP 800-57 Pt 1 Rev 5 Table 2: IFC k = 4096 lies between the k = 3072 (128) and k = 7680 (192) rows, so the lower, 128 bits; Shor's algorithm breaks it, so NIST category 0"
+      - id: "7680"
+        classical_security_level: 192
+        nist_quantum_security_level: 0
+        source: "SP 800-57 Pt 1 Rev 5 Table 2: IFC k = 7680 → 192 bits; Shor's algorithm breaks it, so NIST category 0"
+      - id: "15360"
+        classical_security_level: 256
+        nist_quantum_security_level: 0
+        source: "SP 800-57 Pt 1 Rev 5 Table 2: IFC k = 15360 → 256 bits; Shor's algorithm breaks it, so NIST category 0"
+  - name: RSA-PSS
+    family: RSA
+    primitive: signature
+    padding: pss
+    crypto_functions: [sign, verify]
+    quantum_risk: shor-broken
+    standards: [FIPS 186-5, RFC 8017]
+    parameter_sets:
+      - id: "2048"
+        classical_security_level: 112
+        nist_quantum_security_level: 0
+        oid: 1.2.840.113549.1.1.10
+        source: "SP 800-57 Pt 1 Rev 5 Table 2: IFC k = 2048 → 112 bits; Shor's algorithm breaks it, so NIST category 0"
+      - id: "3072"
+        classical_security_level: 128
+        nist_quantum_security_level: 0
+        oid: 1.2.840.113549.1.1.10
+        source: "SP 800-57 Pt 1 Rev 5 Table 2: IFC k = 3072 → 128 bits; Shor's algorithm breaks it, so NIST category 0"
+      - id: "4096"
+        classical_security_level: 128
+        nist_quantum_security_level: 0
+        oid: 1.2.840.113549.1.1.10
+        source: "SP 800-57 Pt 1 Rev 5 Table 2: IFC k = 4096 lies between the k = 3072 (128) and k = 7680 (192) rows, so the lower, 128 bits; Shor's algorithm breaks it, so NIST category 0"
+      - id: "7680"
+        classical_security_level: 192
+        nist_quantum_security_level: 0
+        oid: 1.2.840.113549.1.1.10
+        source: "SP 800-57 Pt 1 Rev 5 Table 2: IFC k = 7680 → 192 bits; Shor's algorithm breaks it, so NIST category 0"
+      - id: "15360"
+        classical_security_level: 256
+        nist_quantum_security_level: 0
+        oid: 1.2.840.113549.1.1.10
+        source: "SP 800-57 Pt 1 Rev 5 Table 2: IFC k = 15360 → 256 bits; Shor's algorithm breaks it, so NIST category 0"
+  - name: SHA2
+    family: SHA2
+    primitive: hash
+    crypto_functions: [digest]
+    quantum_risk: grover-weakened
+    standards: [FIPS 180-4]
+    parameter_sets:
+      - id: "224"
+        classical_security_level: 112
+        nist_quantum_security_level: 0
+        oid: 2.16.840.1.101.3.4.2.4
+        source: "SP 800-57 Pt 1 Rev 5 Table 3 (collision resistance): SHA-224 → 112 bits; collision strength 112 < 128 bits is below category 1 (key search on AES-128), so 0"
+      - id: "256"
+        classical_security_level: 128
+        nist_quantum_security_level: 2
+        oid: 2.16.840.1.101.3.4.2.1
+        source: "SP 800-57 Pt 1 Rev 5 Table 3 (collision resistance): SHA-256 → 128 bits; NIST PQC CfP §4.A.5: category 2 is collision search on SHA-256 (128 bits)"
+      - id: "384"
+        classical_security_level: 192
+        nist_quantum_security_level: 4
+        oid: 2.16.840.1.101.3.4.2.2
+        source: "SP 800-57 Pt 1 Rev 5 Table 3 (collision resistance): SHA-384 → 192 bits; NIST PQC CfP §4.A.5: category 4 is collision search on SHA-384 (192 bits)"
+      - id: "512"
+        classical_security_level: 256
+        nist_quantum_security_level: 5
+        oid: 2.16.840.1.101.3.4.2.3
+        source: "SP 800-57 Pt 1 Rev 5 Table 3 (collision resistance): SHA-512 → 256 bits; collision strength 256 ≥ 256 (key search on AES-256), capped at category 5"
+      - id: "512/224"
+        classical_security_level: 112
+        nist_quantum_security_level: 0
+        oid: 2.16.840.1.101.3.4.2.5
+        source: "SP 800-57 Pt 1 Rev 5 Table 3 (collision resistance): SHA-512/224 → 112 bits; collision strength 112 < 128 bits is below category 1 (key search on AES-128), so 0"
+      - id: "512/256"
+        classical_security_level: 128
+        nist_quantum_security_level: 2
+        oid: 2.16.840.1.101.3.4.2.6
+        source: "SP 800-57 Pt 1 Rev 5 Table 3 (collision resistance): SHA-512/256 → 128 bits; NIST PQC CfP §4.A.5: category 2 is collision search on SHA-256 (128 bits)"
+  - name: SHA3
+    family: SHA3
+    primitive: hash
+    crypto_functions: [digest]
+    quantum_risk: grover-weakened
+    standards: [FIPS 202]
+    parameter_sets:
+      - id: "224"
+        classical_security_level: 112
+        nist_quantum_security_level: 0
+        oid: 2.16.840.1.101.3.4.2.7
+        source: "SP 800-57 Pt 1 Rev 5 Table 3 (collision resistance): SHA3-224 → 112 bits; collision strength 112 < 128 bits is below category 1 (key search on AES-128), so 0"
+      - id: "256"
+        classical_security_level: 128
+        nist_quantum_security_level: 2
+        oid: 2.16.840.1.101.3.4.2.8
+        source: "SP 800-57 Pt 1 Rev 5 Table 3 (collision resistance): SHA3-256 → 128 bits; NIST PQC CfP §4.A.5: category 2 is collision search on SHA-256 (128 bits)"
+      - id: "384"
+        classical_security_level: 192
+        nist_quantum_security_level: 4
+        oid: 2.16.840.1.101.3.4.2.9
+        source: "SP 800-57 Pt 1 Rev 5 Table 3 (collision resistance): SHA3-384 → 192 bits; NIST PQC CfP §4.A.5: category 4 is collision search on SHA-384 (192 bits)"
+      - id: "512"
+        classical_security_level: 256
+        nist_quantum_security_level: 5
+        oid: 2.16.840.1.101.3.4.2.10
+        source: "SP 800-57 Pt 1 Rev 5 Table 3 (collision resistance): SHA3-512 → 256 bits; collision strength 256 ≥ 256 (key search on AES-256), capped at category 5"
+  - name: SHAKE
+    family: SHA3
+    primitive: xof
+    crypto_functions: [digest]
+    quantum_risk: grover-weakened
+    standards: [FIPS 202]
+    parameter_sets:
+      - id: "128"
+        classical_security_level: 128
+        nist_quantum_security_level: 2
+        oid: 2.16.840.1.101.3.4.2.11
+        source: "FIPS 202 Table 4: SHAKE128 collision strength min(d/2, 128) = 128 bits for d ≥ 256; rated as a 256-bit digest: NIST PQC CfP §4.A.5: category 2 is collision search on SHA-256 (128 bits)"
+      - id: "256"
+        classical_security_level: 256
+        nist_quantum_security_level: 5
+        oid: 2.16.840.1.101.3.4.2.12
+        source: "FIPS 202 Table 4: SHAKE256 collision strength min(d/2, 256) = 256 bits for d ≥ 512; rated as a 512-bit digest: collision strength 256 ≥ 256 (key search on AES-256), capped at category 5"
+  - name: SLH-DSA
+    family: SLH-DSA
+    primitive: signature
+    crypto_functions: [sign, verify]
+    quantum_risk: pq-safe
+    standards: [FIPS 205]
+    parameter_sets:
+      - id: "SHA2-128s"
+        classical_security_level: 128
+        nist_quantum_security_level: 1
+        oid: 2.16.840.1.101.3.4.3.20
+        source: "FIPS 205 Table 2: SLH-DSA-SHA2-128s (n = 16) is in security category 1; classical 128 bits"
+      - id: "SHA2-128f"
+        classical_security_level: 128
+        nist_quantum_security_level: 1
+        oid: 2.16.840.1.101.3.4.3.21
+        source: "FIPS 205 Table 2: SLH-DSA-SHA2-128f (n = 16) is in security category 1; classical 128 bits"
+      - id: "SHA2-192s"
+        classical_security_level: 192
+        nist_quantum_security_level: 3
+        oid: 2.16.840.1.101.3.4.3.22
+        source: "FIPS 205 Table 2: SLH-DSA-SHA2-192s (n = 24) is in security category 3; classical 192 bits"
+      - id: "SHA2-192f"
+        classical_security_level: 192
+        nist_quantum_security_level: 3
+        oid: 2.16.840.1.101.3.4.3.23
+        source: "FIPS 205 Table 2: SLH-DSA-SHA2-192f (n = 24) is in security category 3; classical 192 bits"
+      - id: "SHA2-256s"
+        classical_security_level: 256
+        nist_quantum_security_level: 5
+        oid: 2.16.840.1.101.3.4.3.24
+        source: "FIPS 205 Table 2: SLH-DSA-SHA2-256s (n = 32) is in security category 5; classical 256 bits"
+      - id: "SHA2-256f"
+        classical_security_level: 256
+        nist_quantum_security_level: 5
+        oid: 2.16.840.1.101.3.4.3.25
+        source: "FIPS 205 Table 2: SLH-DSA-SHA2-256f (n = 32) is in security category 5; classical 256 bits"
+      - id: "SHAKE-128s"
+        classical_security_level: 128
+        nist_quantum_security_level: 1
+        oid: 2.16.840.1.101.3.4.3.26
+        source: "FIPS 205 Table 2: SLH-DSA-SHAKE-128s (n = 16) is in security category 1; classical 128 bits"
+      - id: "SHAKE-128f"
+        classical_security_level: 128
+        nist_quantum_security_level: 1
+        oid: 2.16.840.1.101.3.4.3.27
+        source: "FIPS 205 Table 2: SLH-DSA-SHAKE-128f (n = 16) is in security category 1; classical 128 bits"
+      - id: "SHAKE-192s"
+        classical_security_level: 192
+        nist_quantum_security_level: 3
+        oid: 2.16.840.1.101.3.4.3.28
+        source: "FIPS 205 Table 2: SLH-DSA-SHAKE-192s (n = 24) is in security category 3; classical 192 bits"
+      - id: "SHAKE-192f"
+        classical_security_level: 192
+        nist_quantum_security_level: 3
+        oid: 2.16.840.1.101.3.4.3.29
+        source: "FIPS 205 Table 2: SLH-DSA-SHAKE-192f (n = 24) is in security category 3; classical 192 bits"
+      - id: "SHAKE-256s"
+        classical_security_level: 256
+        nist_quantum_security_level: 5
+        oid: 2.16.840.1.101.3.4.3.30
+        source: "FIPS 205 Table 2: SLH-DSA-SHAKE-256s (n = 32) is in security category 5; classical 256 bits"
+      - id: "SHAKE-256f"
+        classical_security_level: 256
+        nist_quantum_security_level: 5
+        oid: 2.16.840.1.101.3.4.3.31
+        source: "FIPS 205 Table 2: SLH-DSA-SHAKE-256f (n = 32) is in security category 5; classical 256 bits"
+  - name: X25519
+    family: X25519
+    primitive: key-agree
+    quantum_risk: shor-broken
+    standards: [RFC 7748, SP 800-186]
+    parameter_sets:
+      - id: "X25519"
+        classical_security_level: 128
+        nist_quantum_security_level: 0
+        curve: Curve25519
+        oid: 1.3.101.110
+        source: "SP 800-186 and RFC 7748 rate Curve25519 at 128 bits (subgroup order ≈ 2^252); Shor's algorithm breaks it, so NIST category 0"
+  - name: XMSS
+    family: XMSS
+    primitive: signature
+    crypto_functions: [sign, verify]
+    quantum_risk: pq-safe
+    standards: [RFC 8391, SP 800-208]
+    parameter_sets:
+      - id: "XMSS-SHA2_10_256"
+        classical_security_level: 256
+        nist_quantum_security_level: 5
+        source: "SP 800-208 §5: XMSS parameter set XMSS-SHA2_10_256 (n = 32); classical 256 bits and category 5 by n, as FIPS 205 Table 2 rates SLH-DSA with n = 32"
+      - id: "XMSS-SHA2_16_256"
+        classical_security_level: 256
+        nist_quantum_security_level: 5
+        source: "SP 800-208 §5: XMSS parameter set XMSS-SHA2_16_256 (n = 32); classical 256 bits and category 5 by n, as FIPS 205 Table 2 rates SLH-DSA with n = 32"
+      - id: "XMSS-SHA2_20_256"
+        classical_security_level: 256
+        nist_quantum_security_level: 5
+        source: "SP 800-208 §5: XMSS parameter set XMSS-SHA2_20_256 (n = 32); classical 256 bits and category 5 by n, as FIPS 205 Table 2 rates SLH-DSA with n = 32"
+      - id: "XMSS-SHA2_10_192"
+        classical_security_level: 192
+        nist_quantum_security_level: 3
+        source: "SP 800-208 §5: XMSS parameter set XMSS-SHA2_10_192 (n = 24); classical 192 bits and category 3 by n, as FIPS 205 Table 2 rates SLH-DSA with n = 24"
+      - id: "XMSS-SHA2_16_192"
+        classical_security_level: 192
+        nist_quantum_security_level: 3
+        source: "SP 800-208 §5: XMSS parameter set XMSS-SHA2_16_192 (n = 24); classical 192 bits and category 3 by n, as FIPS 205 Table 2 rates SLH-DSA with n = 24"
+      - id: "XMSS-SHA2_20_192"
+        classical_security_level: 192
+        nist_quantum_security_level: 3
+        source: "SP 800-208 §5: XMSS parameter set XMSS-SHA2_20_192 (n = 24); classical 192 bits and category 3 by n, as FIPS 205 Table 2 rates SLH-DSA with n = 24"
+      - id: "XMSS-SHAKE256_10_256"
+        classical_security_level: 256
+        nist_quantum_security_level: 5
+        source: "SP 800-208 §5: XMSS parameter set XMSS-SHAKE256_10_256 (n = 32); classical 256 bits and category 5 by n, as FIPS 205 Table 2 rates SLH-DSA with n = 32"
+      - id: "XMSS-SHAKE256_16_256"
+        classical_security_level: 256
+        nist_quantum_security_level: 5
+        source: "SP 800-208 §5: XMSS parameter set XMSS-SHAKE256_16_256 (n = 32); classical 256 bits and category 5 by n, as FIPS 205 Table 2 rates SLH-DSA with n = 32"
+      - id: "XMSS-SHAKE256_20_256"
+        classical_security_level: 256
+        nist_quantum_security_level: 5
+        source: "SP 800-208 §5: XMSS parameter set XMSS-SHAKE256_20_256 (n = 32); classical 256 bits and category 5 by n, as FIPS 205 Table 2 rates SLH-DSA with n = 32"
+      - id: "XMSS-SHAKE256_10_192"
+        classical_security_level: 192
+        nist_quantum_security_level: 3
+        source: "SP 800-208 §5: XMSS parameter set XMSS-SHAKE256_10_192 (n = 24); classical 192 bits and category 3 by n, as FIPS 205 Table 2 rates SLH-DSA with n = 24"
+      - id: "XMSS-SHAKE256_16_192"
+        classical_security_level: 192
+        nist_quantum_security_level: 3
+        source: "SP 800-208 §5: XMSS parameter set XMSS-SHAKE256_16_192 (n = 24); classical 192 bits and category 3 by n, as FIPS 205 Table 2 rates SLH-DSA with n = 24"
+      - id: "XMSS-SHAKE256_20_192"
+        classical_security_level: 192
+        nist_quantum_security_level: 3
+        source: "SP 800-208 §5: XMSS parameter set XMSS-SHAKE256_20_192 (n = 24); classical 192 bits and category 3 by n, as FIPS 205 Table 2 rates SLH-DSA with n = 24"
+  - name: XMSS-MT
+    family: XMSS
+    primitive: signature
+    crypto_functions: [sign, verify]
+    quantum_risk: pq-safe
+    standards: [RFC 8391, SP 800-208]
+    parameter_sets:
+      - id: "XMSSMT-SHA2_20/2_256"
+        classical_security_level: 256
+        nist_quantum_security_level: 5
+        source: "SP 800-208 §5: XMSS^MT parameter set XMSSMT-SHA2_20/2_256 (n = 32); classical 256 bits and category 5 by n, as FIPS 205 Table 2 rates SLH-DSA with n = 32"
+      - id: "XMSSMT-SHA2_20/4_256"
+        classical_security_level: 256
+        nist_quantum_security_level: 5
+        source: "SP 800-208 §5: XMSS^MT parameter set XMSSMT-SHA2_20/4_256 (n = 32); classical 256 bits and category 5 by n, as FIPS 205 Table 2 rates SLH-DSA with n = 32"
+      - id: "XMSSMT-SHA2_40/2_256"
+        classical_security_level: 256
+        nist_quantum_security_level: 5
+        source: "SP 800-208 §5: XMSS^MT parameter set XMSSMT-SHA2_40/2_256 (n = 32); classical 256 bits and category 5 by n, as FIPS 205 Table 2 rates SLH-DSA with n = 32"
+      - id: "XMSSMT-SHA2_40/4_256"
+        classical_security_level: 256
+        nist_quantum_security_level: 5
+        source: "SP 800-208 §5: XMSS^MT parameter set XMSSMT-SHA2_40/4_256 (n = 32); classical 256 bits and category 5 by n, as FIPS 205 Table 2 rates SLH-DSA with n = 32"
+      - id: "XMSSMT-SHA2_40/8_256"
+        classical_security_level: 256
+        nist_quantum_security_level: 5
+        source: "SP 800-208 §5: XMSS^MT parameter set XMSSMT-SHA2_40/8_256 (n = 32); classical 256 bits and category 5 by n, as FIPS 205 Table 2 rates SLH-DSA with n = 32"
+      - id: "XMSSMT-SHA2_60/3_256"
+        classical_security_level: 256
+        nist_quantum_security_level: 5
+        source: "SP 800-208 §5: XMSS^MT parameter set XMSSMT-SHA2_60/3_256 (n = 32); classical 256 bits and category 5 by n, as FIPS 205 Table 2 rates SLH-DSA with n = 32"
+      - id: "XMSSMT-SHA2_60/6_256"
+        classical_security_level: 256
+        nist_quantum_security_level: 5
+        source: "SP 800-208 §5: XMSS^MT parameter set XMSSMT-SHA2_60/6_256 (n = 32); classical 256 bits and category 5 by n, as FIPS 205 Table 2 rates SLH-DSA with n = 32"
+      - id: "XMSSMT-SHA2_60/12_256"
+        classical_security_level: 256
+        nist_quantum_security_level: 5
+        source: "SP 800-208 §5: XMSS^MT parameter set XMSSMT-SHA2_60/12_256 (n = 32); classical 256 bits and category 5 by n, as FIPS 205 Table 2 rates SLH-DSA with n = 32"
+      - id: "XMSSMT-SHA2_20/2_192"
+        classical_security_level: 192
+        nist_quantum_security_level: 3
+        source: "SP 800-208 §5: XMSS^MT parameter set XMSSMT-SHA2_20/2_192 (n = 24); classical 192 bits and category 3 by n, as FIPS 205 Table 2 rates SLH-DSA with n = 24"
+      - id: "XMSSMT-SHA2_20/4_192"
+        classical_security_level: 192
+        nist_quantum_security_level: 3
+        source: "SP 800-208 §5: XMSS^MT parameter set XMSSMT-SHA2_20/4_192 (n = 24); classical 192 bits and category 3 by n, as FIPS 205 Table 2 rates SLH-DSA with n = 24"
+      - id: "XMSSMT-SHA2_40/2_192"
+        classical_security_level: 192
+        nist_quantum_security_level: 3
+        source: "SP 800-208 §5: XMSS^MT parameter set XMSSMT-SHA2_40/2_192 (n = 24); classical 192 bits and category 3 by n, as FIPS 205 Table 2 rates SLH-DSA with n = 24"
+      - id: "XMSSMT-SHA2_40/4_192"
+        classical_security_level: 192
+        nist_quantum_security_level: 3
+        source: "SP 800-208 §5: XMSS^MT parameter set XMSSMT-SHA2_40/4_192 (n = 24); classical 192 bits and category 3 by n, as FIPS 205 Table 2 rates SLH-DSA with n = 24"
+      - id: "XMSSMT-SHA2_40/8_192"
+        classical_security_level: 192
+        nist_quantum_security_level: 3
+        source: "SP 800-208 §5: XMSS^MT parameter set XMSSMT-SHA2_40/8_192 (n = 24); classical 192 bits and category 3 by n, as FIPS 205 Table 2 rates SLH-DSA with n = 24"
+      - id: "XMSSMT-SHA2_60/3_192"
+        classical_security_level: 192
+        nist_quantum_security_level: 3
+        source: "SP 800-208 §5: XMSS^MT parameter set XMSSMT-SHA2_60/3_192 (n = 24); classical 192 bits and category 3 by n, as FIPS 205 Table 2 rates SLH-DSA with n = 24"
+      - id: "XMSSMT-SHA2_60/6_192"
+        classical_security_level: 192
+        nist_quantum_security_level: 3
+        source: "SP 800-208 §5: XMSS^MT parameter set XMSSMT-SHA2_60/6_192 (n = 24); classical 192 bits and category 3 by n, as FIPS 205 Table 2 rates SLH-DSA with n = 24"
+      - id: "XMSSMT-SHA2_60/12_192"
+        classical_security_level: 192
+        nist_quantum_security_level: 3
+        source: "SP 800-208 §5: XMSS^MT parameter set XMSSMT-SHA2_60/12_192 (n = 24); classical 192 bits and category 3 by n, as FIPS 205 Table 2 rates SLH-DSA with n = 24"
+      - id: "XMSSMT-SHAKE256_20/2_256"
+        classical_security_level: 256
+        nist_quantum_security_level: 5
+        source: "SP 800-208 §5: XMSS^MT parameter set XMSSMT-SHAKE256_20/2_256 (n = 32); classical 256 bits and category 5 by n, as FIPS 205 Table 2 rates SLH-DSA with n = 32"
+      - id: "XMSSMT-SHAKE256_20/4_256"
+        classical_security_level: 256
+        nist_quantum_security_level: 5
+        source: "SP 800-208 §5: XMSS^MT parameter set XMSSMT-SHAKE256_20/4_256 (n = 32); classical 256 bits and category 5 by n, as FIPS 205 Table 2 rates SLH-DSA with n = 32"
+      - id: "XMSSMT-SHAKE256_40/2_256"
+        classical_security_level: 256
+        nist_quantum_security_level: 5
+        source: "SP 800-208 §5: XMSS^MT parameter set XMSSMT-SHAKE256_40/2_256 (n = 32); classical 256 bits and category 5 by n, as FIPS 205 Table 2 rates SLH-DSA with n = 32"
+      - id: "XMSSMT-SHAKE256_40/4_256"
+        classical_security_level: 256
+        nist_quantum_security_level: 5
+        source: "SP 800-208 §5: XMSS^MT parameter set XMSSMT-SHAKE256_40/4_256 (n = 32); classical 256 bits and category 5 by n, as FIPS 205 Table 2 rates SLH-DSA with n = 32"
+      - id: "XMSSMT-SHAKE256_40/8_256"
+        classical_security_level: 256
+        nist_quantum_security_level: 5
+        source: "SP 800-208 §5: XMSS^MT parameter set XMSSMT-SHAKE256_40/8_256 (n = 32); classical 256 bits and category 5 by n, as FIPS 205 Table 2 rates SLH-DSA with n = 32"
+      - id: "XMSSMT-SHAKE256_60/3_256"
+        classical_security_level: 256
+        nist_quantum_security_level: 5
+        source: "SP 800-208 §5: XMSS^MT parameter set XMSSMT-SHAKE256_60/3_256 (n = 32); classical 256 bits and category 5 by n, as FIPS 205 Table 2 rates SLH-DSA with n = 32"
+      - id: "XMSSMT-SHAKE256_60/6_256"
+        classical_security_level: 256
+        nist_quantum_security_level: 5
+        source: "SP 800-208 §5: XMSS^MT parameter set XMSSMT-SHAKE256_60/6_256 (n = 32); classical 256 bits and category 5 by n, as FIPS 205 Table 2 rates SLH-DSA with n = 32"
+      - id: "XMSSMT-SHAKE256_60/12_256"
+        classical_security_level: 256
+        nist_quantum_security_level: 5
+        source: "SP 800-208 §5: XMSS^MT parameter set XMSSMT-SHAKE256_60/12_256 (n = 32); classical 256 bits and category 5 by n, as FIPS 205 Table 2 rates SLH-DSA with n = 32"
+      - id: "XMSSMT-SHAKE256_20/2_192"
+        classical_security_level: 192
+        nist_quantum_security_level: 3
+        source: "SP 800-208 §5: XMSS^MT parameter set XMSSMT-SHAKE256_20/2_192 (n = 24); classical 192 bits and category 3 by n, as FIPS 205 Table 2 rates SLH-DSA with n = 24"
+      - id: "XMSSMT-SHAKE256_20/4_192"
+        classical_security_level: 192
+        nist_quantum_security_level: 3
+        source: "SP 800-208 §5: XMSS^MT parameter set XMSSMT-SHAKE256_20/4_192 (n = 24); classical 192 bits and category 3 by n, as FIPS 205 Table 2 rates SLH-DSA with n = 24"
+      - id: "XMSSMT-SHAKE256_40/2_192"
+        classical_security_level: 192
+        nist_quantum_security_level: 3
+        source: "SP 800-208 §5: XMSS^MT parameter set XMSSMT-SHAKE256_40/2_192 (n = 24); classical 192 bits and category 3 by n, as FIPS 205 Table 2 rates SLH-DSA with n = 24"
+      - id: "XMSSMT-SHAKE256_40/4_192"
+        classical_security_level: 192
+        nist_quantum_security_level: 3
+        source: "SP 800-208 §5: XMSS^MT parameter set XMSSMT-SHAKE256_40/4_192 (n = 24); classical 192 bits and category 3 by n, as FIPS 205 Table 2 rates SLH-DSA with n = 24"
+      - id: "XMSSMT-SHAKE256_40/8_192"
+        classical_security_level: 192
+        nist_quantum_security_level: 3
+        source: "SP 800-208 §5: XMSS^MT parameter set XMSSMT-SHAKE256_40/8_192 (n = 24); classical 192 bits and category 3 by n, as FIPS 205 Table 2 rates SLH-DSA with n = 24"
+      - id: "XMSSMT-SHAKE256_60/3_192"
+        classical_security_level: 192
+        nist_quantum_security_level: 3
+        source: "SP 800-208 §5: XMSS^MT parameter set XMSSMT-SHAKE256_60/3_192 (n = 24); classical 192 bits and category 3 by n, as FIPS 205 Table 2 rates SLH-DSA with n = 24"
+      - id: "XMSSMT-SHAKE256_60/6_192"
+        classical_security_level: 192
+        nist_quantum_security_level: 3
+        source: "SP 800-208 §5: XMSS^MT parameter set XMSSMT-SHAKE256_60/6_192 (n = 24); classical 192 bits and category 3 by n, as FIPS 205 Table 2 rates SLH-DSA with n = 24"
+      - id: "XMSSMT-SHAKE256_60/12_192"
+        classical_security_level: 192
+        nist_quantum_security_level: 3
+        source: "SP 800-208 §5: XMSS^MT parameter set XMSSMT-SHAKE256_60/12_192 (n = 24); classical 192 bits and category 3 by n, as FIPS 205 Table 2 rates SLH-DSA with n = 24"

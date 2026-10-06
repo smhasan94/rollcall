@@ -11,15 +11,24 @@ authors.workspace = true
 keywords.workspace = true
 # Categories are permanent once published; library crates are not command-line utilities.
 categories = ["development-tools"]
+# What the library needs to build: its sources and the algorithm catalogue (and its JSON
+# Schema) they include_str!, plus the catalogue-sync example scripts/check-catalogue-sync.sh
+# runs. The integration tests read rollcall-core's test data and the repository's docs, so they
+# are not shipped.
+include = ["src/**", "db/**", "examples/**"]
 
 [dependencies]
 rollcall-core.workspace = true
+serde.workspace = true
 thiserror.workspace = true
+yaml_serde.workspace = true
 
 [dev-dependencies]
 serde_json.workspace = true
 tempfile.workspace = true
 pulldown-cmark.workspace = true
+jsonschema.workspace = true
+proptest.workspace = true
 
 [lints]
 workspace = true
