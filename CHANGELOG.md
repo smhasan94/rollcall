@@ -18,6 +18,15 @@ policy. The identifier database (`rollcall-identifiers`) is versioned on its own
   losslessly. `rollcall assay --model|--source|--build|--elf --format cyclonedx|md` writes a
   CBOM or a Markdown summary table; it has no detectors yet, so a build gives an empty CBOM
   marked `rollcall:assay:detectors` = `none`. See [docs/assay.md](docs/assay.md).
+- **Algorithm catalogue (SHA-139).** `crates/rollcall-assay/db/algorithms.yaml`, the single
+  source of truth for the algorithms `rollcall assay` reports (RSA, DSA, DH, ECDSA, ECDH,
+  Ed25519, X25519, AES modes, ChaCha20-Poly1305, SHA-2, SHA-3, SHAKE, HMAC, HKDF, PBKDF2, ML-KEM,
+  ML-DSA, SLH-DSA, LMS, HSS, XMSS, XMSS^MT): each parameter set's classical and NIST quantum
+  security level with its source, a quantum-risk class (shor-broken, grover-weakened, pq-safe)
+  and the CycloneDX words. A loader, lint and `(algorithm, parameter set)` lookup in
+  `rollcall-assay` that returns the CycloneDX `algorithmProperties` (unknown entries are an
+  error), a JSON Schema as the export contract, and `scripts/check-catalogue-sync.sh` for
+  cbom-infra's copy. See [docs/catalogue.md](docs/catalogue.md).
 
 ## [0.1.0] - 2026-10-05
 

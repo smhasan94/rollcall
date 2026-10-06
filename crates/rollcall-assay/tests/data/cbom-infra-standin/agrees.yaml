@@ -1,0 +1,93 @@
+# A hand-written stand-in for cbom-infra's copy of the algorithm catalogue (SHA-139); see
+# README.md. It agrees with rollcall's catalogue on every shared entry (its `source` texts
+# differ, which the sync check ignores), holds a subset of rollcall's entries and parameter
+# sets, and has one entry of its own (Camellia-CBC).
+format: rollcall-algorithms/1
+algorithms:
+  - name: AES-GCM
+    family: AES
+    primitive: ae
+    mode: gcm
+    crypto_functions: [decrypt, encrypt, tag]
+    quantum_risk: grover-weakened
+    standards: [FIPS 197, SP 800-38D]
+    parameter_sets:
+      - id: "128"
+        classical_security_level: 128
+        nist_quantum_security_level: 1
+        oid: 2.16.840.1.101.3.4.1.6
+        source: "cbom-infra: AES-128 key search"
+      - id: "192"
+        classical_security_level: 192
+        nist_quantum_security_level: 3
+        oid: 2.16.840.1.101.3.4.1.26
+        source: "cbom-infra: AES-192 key search"
+      - id: "256"
+        classical_security_level: 256
+        nist_quantum_security_level: 5
+        oid: 2.16.840.1.101.3.4.1.46
+        source: "cbom-infra: AES-256 key search"
+  - name: Camellia-CBC
+    family: Camellia
+    primitive: block-cipher
+    mode: cbc
+    crypto_functions: [decrypt, encrypt]
+    quantum_risk: grover-weakened
+    standards: [RFC 3713]
+    parameter_sets:
+      - id: "128"
+        classical_security_level: 128
+        nist_quantum_security_level: 1
+        source: "cbom-infra only: 128-bit key, rated as AES-128"
+  - name: Ed25519
+    family: Ed25519
+    primitive: signature
+    crypto_functions: [sign, verify]
+    quantum_risk: shor-broken
+    standards: [FIPS 186-5, RFC 8032]
+    parameter_sets:
+      - id: "Ed25519"
+        classical_security_level: 128
+        nist_quantum_security_level: 0
+        curve: Ed25519
+        oid: 1.3.101.112
+        source: "cbom-infra: SP 800-186"
+  - name: ML-KEM
+    family: ML-KEM
+    primitive: kem
+    crypto_functions: [decapsulate, encapsulate]
+    quantum_risk: pq-safe
+    standards: [FIPS 203]
+    parameter_sets:
+      - id: "512"
+        classical_security_level: 128
+        nist_quantum_security_level: 1
+        oid: 2.16.840.1.101.3.4.4.1
+        source: "cbom-infra: FIPS 203"
+      - id: "768"
+        classical_security_level: 192
+        nist_quantum_security_level: 3
+        oid: 2.16.840.1.101.3.4.4.2
+        source: "cbom-infra: FIPS 203"
+      - id: "1024"
+        classical_security_level: 256
+        nist_quantum_security_level: 5
+        oid: 2.16.840.1.101.3.4.4.3
+        source: "cbom-infra: FIPS 203"
+  - name: SHA2
+    family: SHA2
+    primitive: hash
+    crypto_functions: [digest]
+    quantum_risk: grover-weakened
+    standards: [FIPS 180-4]
+    parameter_sets:
+      - id: "256"
+        classical_security_level: 128
+        nist_quantum_security_level: 2
+        oid: 2.16.840.1.101.3.4.2.1
+        source: "cbom-infra: SP 800-57 Table 3"
+      - id: "384"
+        classical_security_level: 192
+        nist_quantum_security_level: 4
+        oid: 2.16.840.1.101.3.4.2.2
+        source: "cbom-infra: SP 800-57 Table 3"

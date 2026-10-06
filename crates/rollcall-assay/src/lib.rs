@@ -9,6 +9,13 @@
 //! inventory, with [`Inventory::detectors`] empty and a note saying so. A CBOM written for it
 //! carries the document property [`DETECTORS_PROPERTY`] = [`NO_DETECTORS`], so an empty
 //! inventory is never mistaken for a build without cryptography.
+//!
+//! [`catalogue`] is the algorithm catalogue (`db/algorithms.yaml`): for each algorithm and
+//! parameter set, its CycloneDX primitive, mode and functions, its classical and NIST
+//! post-quantum security levels and its quantum-risk class. [`catalogue::Catalogue::lookup`]
+//! turns an (algorithm, parameter set) into the
+//! [`AlgorithmProperties`](rollcall_core::model::AlgorithmProperties) a detector puts on an
+//! asset; an unknown one is an error, never a default.
 
 #![deny(missing_docs)]
 #![deny(
@@ -27,6 +34,7 @@
     )
 )]
 
+pub mod catalogue;
 pub mod summary;
 
 use std::io;

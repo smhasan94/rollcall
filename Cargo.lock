@@ -1018,11 +1018,15 @@ dependencies = [
 name = "rollcall-assay"
 version = "0.1.0"
 dependencies = [
+ "jsonschema",
+ "proptest",
  "pulldown-cmark",
  "rollcall-core",
+ "serde",
  "serde_json",
  "tempfile",
  "thiserror",
+ "yaml_serde",
 ]
 
 [[package]]

@@ -41,6 +41,7 @@ checks it. -->
 # Crypto inventory
 
 - [Cryptographic inventory (CBOM)](assay.md)
+  - [Algorithm catalogue](catalogue.md)
 
 # Project
 
